@@ -1,0 +1,224 @@
+﻿### ArrayProperty /Script/Sparta.DialogueSubsystem:ActiveDialogues  [000001F4ACD5A780]
+    1 members:
+      PRP ActiveDialogues : StructProperty of /Script/Sparta.ActiveDialogue [o:0x0]
+
+### ArrayProperty /Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues  [000001F4ACD5B280]
+    1 members:
+      PRP Dialogues : StructProperty of /Script/Sparta.ActiveDialogue [o:0x0]
+
+### ArrayProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants  [000001F4ACD5AA80]
+    1 members:
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### ArrayProperty /Script/Sparta.DialogueSubsystem:SpawnedParticipants  [000001F4ACD5C580]
+    1 members:
+      PRP SpawnedParticipants : ObjectProperty of /Script/Engine.Actor [o:0x0]
+
+### BoolProperty /Script/Sparta.DialogueSubsystem:CheckTagConditions:ReturnValue  [000001F4ACD59600]
+
+### BoolProperty /Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:ReturnValue  [000001F4ACD5B380]
+
+### BoolProperty /Script/Sparta.DialogueSubsystem:IsDialogueCurrentlyActive:ReturnValue  [000001F4ACD5B000]
+
+### BoolProperty /Script/Sparta.DialogueSubsystem:IsDialogueWithTagActive:ReturnValue  [000001F4ACD5AF00]
+
+### BoolProperty /Script/Sparta.DialogueSubsystem:StopDialogue:bStopAudioImmediately  [000001F4ACD5A880]
+
+### Class /Script/Sparta.DialogueSubsystem  [00007FF46F032338]
+    super: /Script/Engine.WorldSubsystem
+    22 members:
+      PRP OnDlgStarted : MulticastInlineDelegateProperty [o:0x30]
+      PRP OnDlgEnded : MulticastInlineDelegateProperty [o:0x40]
+      PRP SpawnedParticipants : ArrayProperty of SpawnedParticipants./Script/Sparta.DialogueSubsystem:SpawnedParticipants [o:0x50]
+      PRP OnDlgNodeEnterEvent : MulticastInlineDelegateProperty [o:0x60]
+      PRP OnDlgNodeExitEvent : MulticastInlineDelegateProperty [o:0x70]
+      PRP OnAudioEventFinished : MulticastInlineDelegateProperty [o:0x80]
+      PRP OnDlgAudioStarted : MulticastInlineDelegateProperty [o:0x90]
+      PRP ActiveDialogues : ArrayProperty of ActiveDialogues./Script/Sparta.DialogueSubsystem:ActiveDialogues [o:0xa0]
+      FUN StopDialogue 
+          param Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+          param bStopAudioImmediately : BoolProperty [o:0x8]
+      FUN StopActiveAudioOfContext 
+          param Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+      FUN SpartaStartDialogue 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participants : ArrayProperty of Participants./Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants [o:0x8]
+          param Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x18]
+          param AdditionalInterruptTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x20]
+          param AdditionalTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x40]
+          param AdditionalBlockingTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x60]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x80]
+      FUN OnWaveWeaverAudioEventFinished 
+          param EventInstance : ObjectProperty of /Script/WaveWeaver.AudioEventInstance [o:0x0]
+      FUN OnSoundCompFinished 
+          param AudioComp : ObjectProperty of /Script/Engine.AudioComponent [o:0x0]
+      FUN IsDialogueWithTagActive 
+          param DlgTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN IsDialogueCurrentlyActive 
+          param InDialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN InterruptDialogues 
+          param Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+          param Asset : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+          param AdditionalInterruptTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x10]
+      FUN GetAllActiveDialoguesWithTag 
+          param Dialogues : ArrayProperty of Dialogues./Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues [o:0x0]
+          param InTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+          param ReturnValue : BoolProperty [o:0x18]
+      FUN FindActiveDialogueForInstigator 
+          param Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+          param ReturnValue : IntProperty [o:0x8]
+      FUN EndAllDialoguesWithTags 
+          param Tags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      FUN DialogueStarted 
+          param ActiveDlgIndex : IntProperty [o:0x0]
+      FUN DialogueEnded 
+          param Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+      FUN CheckTagConditions 
+          param Component : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+          param Asset : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+          param AdditionalTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x10]
+          param ReturnValue : BoolProperty [o:0x30]
+
+### Function /Script/Sparta.DialogueSubsystem:CheckTagConditions  [00007FF46F6E3FF8]
+    4 members:
+      PRP Component : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+      PRP Asset : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+      PRP AdditionalTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x10]
+      PRP ReturnValue : BoolProperty [o:0x30]
+
+### Function /Script/Sparta.DialogueSubsystem:DialogueEnded  [00007FF46F6E40D8]
+    1 members:
+      PRP Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:DialogueStarted  [00007FF46F6E41B8]
+    1 members:
+      PRP ActiveDlgIndex : IntProperty [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:EndAllDialoguesWithTags  [00007FF46F6E4298]
+    1 members:
+      PRP Tags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:FindActiveDialogueForInstigator  [00007FF46F6E4378]
+    2 members:
+      PRP Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x8]
+
+### Function /Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag  [00007FF46F6E4458]
+    3 members:
+      PRP Dialogues : ArrayProperty of Dialogues./Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues [o:0x0]
+      PRP InTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+      PRP ReturnValue : BoolProperty [o:0x18]
+
+### Function /Script/Sparta.DialogueSubsystem:InterruptDialogues  [00007FF46F6E4538]
+    3 members:
+      PRP Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+      PRP Asset : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+      PRP AdditionalInterruptTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x10]
+
+### Function /Script/Sparta.DialogueSubsystem:IsDialogueCurrentlyActive  [00007FF46F6E4618]
+    2 members:
+      PRP InDialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/Sparta.DialogueSubsystem:IsDialogueWithTagActive  [00007FF46F6E46F8]
+    2 members:
+      PRP DlgTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/Sparta.DialogueSubsystem:OnSoundCompFinished  [00007FF46F6E47D8]
+    1 members:
+      PRP AudioComp : ObjectProperty of /Script/Engine.AudioComponent [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:OnWaveWeaverAudioEventFinished  [00007FF46F6E48B8]
+    1 members:
+      PRP EventInstance : ObjectProperty of /Script/WaveWeaver.AudioEventInstance [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:SpartaStartDialogue  [00007FF46F6E4998]
+    7 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participants : ArrayProperty of Participants./Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants [o:0x8]
+      PRP Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x18]
+      PRP AdditionalInterruptTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x20]
+      PRP AdditionalTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x40]
+      PRP AdditionalBlockingTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x60]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x80]
+
+### Function /Script/Sparta.DialogueSubsystem:StopActiveAudioOfContext  [00007FF46F6E4A78]
+    1 members:
+      PRP Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+
+### Function /Script/Sparta.DialogueSubsystem:StopDialogue  [00007FF46F6E4B58]
+    2 members:
+      PRP Instigator : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+      PRP bStopAudioImmediately : BoolProperty [o:0x8]
+
+### IntProperty /Script/Sparta.DialogueSubsystem:DialogueStarted:ActiveDlgIndex  [000001F4ACD0FF90]
+
+### IntProperty /Script/Sparta.DialogueSubsystem:FindActiveDialogueForInstigator:ReturnValue  [000001F4ACD0FF20]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnAudioEventFinished  [000001F4ACD5A600]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnDlgAudioStarted  [000001F4ACD5A680]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnDlgEnded  [000001F4ACD5C480]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnDlgNodeEnterEvent  [000001F4ACD5C600]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnDlgNodeExitEvent  [000001F4ACD5A580]
+
+### MulticastInlineDelegateProperty /Script/Sparta.DialogueSubsystem:OnDlgStarted  [000001F4ACD5C400]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:CheckTagConditions:Asset  [000001F4ACD59500]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:CheckTagConditions:Component  [000001F4ACD5B580]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:DialogueEnded:Context  [000001F4ACD5B500]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:FindActiveDialogueForInstigator:Instigator  [000001F4ACD5B400]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:InterruptDialogues:Asset  [000001F4ACD5B100]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:InterruptDialogues:Instigator  [000001F4ACD5B080]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:IsDialogueCurrentlyActive:InDialogue  [000001F4ACD5AF80]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:OnSoundCompFinished:AudioComp  [000001F4ACD5AE00]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:OnWaveWeaverAudioEventFinished:EventInstance  [000001F4ACD5AD80]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Dialogue  [000001F4ACD5A980]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Instigator  [000001F4ACD5AB00]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:ReturnValue  [000001F4ACD5AD00]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:StopActiveAudioOfContext:Context  [000001F4ACD5A900]
+
+### ObjectProperty /Script/Sparta.DialogueSubsystem:StopDialogue:Instigator  [000001F4ACD5A800]
+
+### ObjectProperty Participants./Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants  [000001F4ACD5AA00]
+
+### ObjectProperty SpawnedParticipants./Script/Sparta.DialogueSubsystem:SpawnedParticipants  [000001F4ACD5C500]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:CheckTagConditions:AdditionalTags  [000001F4ACD59580]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:EndAllDialoguesWithTags:Tags  [000001F4ACD5B480]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:InTag  [000001F4ACD5B300]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:InterruptDialogues:AdditionalInterruptTags  [000001F4ACD5B180]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:IsDialogueWithTagActive:DlgTag  [000001F4ACD5AE80]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:AdditionalBlockingTags  [000001F4ACD5AC80]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:AdditionalInterruptTags  [000001F4ACD5AB80]
+
+### StructProperty /Script/Sparta.DialogueSubsystem:SpartaStartDialogue:AdditionalTags  [000001F4ACD5AC00]
+
+### StructProperty ActiveDialogues./Script/Sparta.DialogueSubsystem:ActiveDialogues  [000001F4ACD5A700]
+
+### StructProperty Dialogues./Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues  [000001F4ACD5B200]
+

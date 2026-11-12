@@ -1,0 +1,11 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CoreUObject	FRotator	0x0000	0x0008	double	Pitch	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FRotator	0x0008	0x0008	double	Yaw	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FRotator	0x0010	0x0008	double	Roll	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0000	0x0008	double	X	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0008	0x0008	double	Y	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0010	0x0008	double	Z	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+Engine	FTimerHandle	0x0000	0x0008	uint64	Handle	(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+GameplayTags	FGameplayTag	0x0000	0x0008	class FName	TagName	(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+Sparta	FPickupTemplate	0x0000	0x0004	int32	StackCount	(Edit, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+Sparta	FPickupTemplate	0x0008	0x0008	TSubclassOf<class USpartaItemDefinition>	ItemDef	(Edit, ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)

@@ -1,0 +1,617 @@
+﻿### ArrayProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:QuestObjectives  [000001F62179D900]
+    1 members:
+      PRP QuestObjectives : ObjectProperty of /Script/Sparta.QuestObjective [o:0x0]
+
+### BP_QuestObject_C /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.Default__BP_QuestObject_C  [000001F618EDCE00]
+
+### BP_QuestObjective_Interact_C /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.Default__BP_QuestObjective_Interact_C  [000001F4C01D21D0]
+
+### BP_QuestObjective_KillBrigands_C /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.Default__BP_QuestObjective_KillBrigands_C  [000001F62179A600]
+
+### BlueprintGeneratedClass /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C  [000001F61C358A70]
+    super: /Script/Sparta.QuestObject
+    13 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0x1d8]
+      PRP IsComplete : BoolProperty [o:0x1e0]
+      PRP IsTurnedIn : BoolProperty [o:0x1e1]
+      PRP QuestObjectives : ArrayProperty of QuestObjectives./Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:QuestObjectives [o:0x1e8]
+      FUN GetQuestDetails 
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x0]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x4]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x8]
+          param Temp_int_Variable : IntProperty [o:0xc]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x48]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x4c]
+          param CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x50]
+          param CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0xa8]
+      FUN GetStageDataByID 
+          param StageName : TextProperty [o:0x0]
+          param Array : StructProperty of /Script/Sparta.QuestStage [o:0x10]
+          param StageQuantity : StructProperty of /Script/Sparta.QuestDetails [o:0x108]
+          param Temp_bool_True_if_break_was_hit_Variable : BoolProperty [o:0x160]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x164]
+          param CallFunc_Not_PreBool_ReturnValue : BoolProperty [o:0x168]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x16c]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x170]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestStage [o:0x178]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x270]
+          param CallFunc_EqualEqual_TextText_ReturnValue : BoolProperty [o:0x274]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x275]
+          param CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0x276]
+      FUN AreAllStagesComplete 
+          param QuestStage : IntProperty [o:0x0]
+          param QuestDetails : StructProperty of /Script/Sparta.QuestDetails [o:0x8]
+          param Return : BoolProperty [o:0x60]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x64]
+          param CallFunc_EqualEqual_IntInt_ReturnValue : BoolProperty [o:0x68]
+      FUN OnObjectiveIDHeard 
+          param ObjectiveID : NameProperty [o:0x0]
+          param CallFunc_GetObjectiveDataByID_Array_Element : StructProperty of /Script/Sparta.QuestObjectives [o:0x8]
+          param CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x40]
+          param CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x48]
+          param CallFunc_Create_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/WBP_QuestObjectiveNotification.WBP_QuestObjectiveNotification_C [o:0x50]
+          param CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x58]
+          param CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0xb0]
+          param Temp_struct_Variable : StructProperty of /Script/Engine.DataTableRowHandle [o:0xb8]
+          param CallFunc_GetObjectiveDataByID_Array_Element_1 : StructProperty of /Script/Sparta.QuestObjectives [o:0xc8]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x100]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x104]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x105]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x108]
+      FUN Is 
+          param Is : NameProperty [o:0x0]
+          param Is : IntProperty [o:0x8]
+          param Is : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+          param Is : IntProperty [o:0x48]
+          param Is : ObjectProperty of /Script/Engine.PlayerController [o:0x50]
+          param Is : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x58]
+          param Is : ObjectProperty of /Script/Engine.PlayerController [o:0x60]
+          param Is : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x68]
+          param Is : StructProperty of /Script/Sparta.QuestDetails [o:0x70]
+          param Is : BoolProperty [o:0xc8]
+          param Is : IntProperty [o:0xcc]
+          param Is : BoolProperty [o:0xd0]
+          param Is : BoolProperty [o:0xd1]
+          param Is : IntProperty [o:0xd4]
+          param Is : BoolProperty [o:0xd8]
+          param Is : BoolProperty [o:0xd9]
+      FUN GetObjectiveDataByID 
+          param ObjectiveID : NameProperty [o:0x0]
+          param Array : StructProperty of /Script/Sparta.QuestObjectives [o:0x8]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x40]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x44]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x48]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x4c]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x50]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x88]
+          param CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x89]
+      FUN AreAllObjectivesComplete 
+          param Return : BoolProperty [o:0x0]
+          param Local_AllComplete : BoolProperty [o:0x1]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x48]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x4c]
+          param CallFunc_GetObjectiveDataByID_Array_Element : StructProperty of /Script/Sparta.QuestObjectives [o:0x50]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x88]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x8c]
+          param CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x8d]
+      FUN InitializeQuest 
+      FUN ExecuteUbergraph_BP_QuestObject 
+          param EntryPoint : IntProperty [o:0x0]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+          param CallFunc_AreAllObjectivesComplete_Return : BoolProperty [o:0x10]
+          param CallFunc_GetInstanceUnchecked_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSingleton [o:0x18]
+          param CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x20]
+          param CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0x78]
+          param Temp_int_Variable : IntProperty [o:0x7c]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x80]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x88]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0xc0]
+          param CallFunc_SpawnObject_ReturnValue : ObjectProperty of /Script/Sparta.QuestObjective [o:0xc8]
+          param CallFunc_IsValidClass_ReturnValue : BoolProperty [o:0xd0]
+          param CallFunc_Array_Add_ReturnValue : IntProperty [o:0xd4]
+
+### BlueprintGeneratedClass /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C  [000001F620EEC370]
+    super: /Script/Sparta.QuestObjective
+    5 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0x78]
+      PRP IsInitialized : BoolProperty [o:0x80]
+      FUN InitializeObjective 
+          param InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+          param InQuestID : NameProperty [o:0x38]
+      FUN OnQuestObjectiveInteract 
+          param Actor : ObjectProperty of /Script/Engine.Actor [o:0x0]
+      FUN ExecuteUbergraph_BP_QuestObjective_Interact 
+          param EntryPoint : IntProperty [o:0x0]
+          param CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x8]
+          param K2Node_CustomEvent_Actor : ObjectProperty of /Script/Engine.Actor [o:0x10]
+          param CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x18]
+          param K2Node_DynamicCast_AsBPI_Objective_Target : InterfaceProperty [o:0x20]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+          param K2Node_Event_InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x38]
+          param K2Node_Event_InQuestID : NameProperty [o:0x70]
+          param CallFunc_GetQuestID_QuestID : NameProperty [o:0x78]
+          param CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x80]
+          param CallFunc_GetObjectiveID_ObjectiveID : NameProperty [o:0x88]
+          param CallFunc_IsValid_ReturnValue : BoolProperty [o:0x90]
+          param CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x91]
+          param CallFunc_EqualEqual_NameName_ReturnValue_1 : BoolProperty [o:0x92]
+          param CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0x93]
+
+### BlueprintGeneratedClass /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C  [000001F620EEBC50]
+    super: /Script/Sparta.QuestObjective
+    4 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0x78]
+      FUN InitializeObjective 
+          param InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+          param InQuestID : NameProperty [o:0x38]
+      FUN CharacterDeath 
+          param Character : ObjectProperty of /Script/Sparta.SpartaCharacter [o:0x0]
+      FUN ExecuteUbergraph_BP_QuestObjective_KillBrigands 
+          param EntryPoint : IntProperty [o:0x0]
+          param K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x4]
+          param K2Node_Event_InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x18]
+          param K2Node_Event_InQuestID : NameProperty [o:0x50]
+          param CallFunc_GetWorldSubsystem_ReturnValue : ObjectProperty of /Game/Sparta/Core/GameInstance/BP_SpartaEnemySubsystem.BP_SpartaEnemySubsystem_C [o:0x58]
+          param K2Node_CustomEvent_Character : ObjectProperty of /Script/Sparta.SpartaCharacter [o:0x60]
+          param CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x68]
+          param CallFunc_HasMatchingGameplayTag_self_CastInput : InterfaceProperty [o:0x70]
+          param CallFunc_HasMatchingGameplayTag_ReturnValue : BoolProperty [o:0x80]
+          param CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x88]
+          param CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x90]
+          param CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x98]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_GreaterEqual_IntInt_ReturnValue  [000001F62179E080]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Less_IntInt_ReturnValue  [000001F62179E200]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Map_Find_ReturnValue  [000001F62179E100]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:Local_AllComplete  [000001F62179C900]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:Return  [000001F4C05C3900]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete:CallFunc_EqualEqual_IntInt_ReturnValue  [000001F62179DF00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete:Return  [000001F62179DF80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_AreAllObjectivesComplete_Return  [000001F62179DE00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_GetDataTableRowFromName_ReturnValue  [000001F62179DC80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_IsValidClass_ReturnValue  [000001F62179DA80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_Less_IntInt_ReturnValue  [000001F62179DB80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:CallFunc_EqualEqual_NameName_ReturnValue  [000001F62179F780]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:CallFunc_Less_IntInt_ReturnValue  [000001F62179D700]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_GetDataTableRowFromName_ReturnValue  [000001F62179F580]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_Less_IntInt_ReturnValue  [000001F62179F680]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_BooleanAND_ReturnValue  [000001F62179F180]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_EqualEqual_TextText_ReturnValue  [000001F62179F280]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_Less_IntInt_ReturnValue  [000001F62179F200]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_Not_PreBool_ReturnValue  [000001F62179F380]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:Temp_bool_True_if_break_was_hit_Variable  [000001F62179F400]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179ED80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179ED00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EC80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EC00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EB80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:IsComplete  [000001F62179DA00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:IsTurnedIn  [000001F62179D980]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetDataTableRowFromName_ReturnValue  [000001F62179E900]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_Less_IntInt_ReturnValue  [000001F62179FF80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_Map_Find_ReturnValue  [000001F62179E780]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_BooleanAND_ReturnValue  [000001F621796C80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_EqualEqual_NameName_ReturnValue  [000001F621796D80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_EqualEqual_NameName_ReturnValue_1  [000001F621796D00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_IsValid_ReturnValue  [000001F621796E00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:K2Node_DynamicCast_bSuccess  [000001F621796F80]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:IsInitialized  [000001F621796C00]
+
+### BoolProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_HasMatchingGameplayTag_ReturnValue  [000001F62179A880]
+
+### DelegateProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:K2Node_CreateDelegate_OutputDelegate  [000001F62179AB80]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete  [000001F6216E6F00]
+    12 members:
+      PRP Return : BoolProperty [o:0x0]
+      PRP Local_AllComplete : BoolProperty [o:0x1]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x48]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x4c]
+      PRP CallFunc_GetObjectiveDataByID_Array_Element : StructProperty of /Script/Sparta.QuestObjectives [o:0x50]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x88]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x8c]
+      PRP CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x8d]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete  [000001F6216E6E00]
+    5 members:
+      PRP QuestStage : IntProperty [o:0x0]
+      PRP QuestDetails : StructProperty of /Script/Sparta.QuestDetails [o:0x8]
+      PRP Return : BoolProperty [o:0x60]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x64]
+      PRP CallFunc_EqualEqual_IntInt_ReturnValue : BoolProperty [o:0x68]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject  [000001F6216E6D00]
+    15 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_AreAllObjectivesComplete_Return : BoolProperty [o:0x10]
+      PRP CallFunc_GetInstanceUnchecked_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSingleton [o:0x18]
+      PRP CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x20]
+      PRP CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0x78]
+      PRP Temp_int_Variable : IntProperty [o:0x7c]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x80]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x88]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0xc0]
+      PRP CallFunc_SpawnObject_ReturnValue : ObjectProperty of /Script/Sparta.QuestObjective [o:0xc8]
+      PRP CallFunc_IsValidClass_ReturnValue : BoolProperty [o:0xd0]
+      PRP CallFunc_Array_Add_ReturnValue : IntProperty [o:0xd4]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID  [000001F6216E6C00]
+    9 members:
+      PRP ObjectiveID : NameProperty [o:0x0]
+      PRP Array : StructProperty of /Script/Sparta.QuestObjectives [o:0x8]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x40]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x44]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x48]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x4c]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x50]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x88]
+      PRP CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x89]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails  [000001F6216E6B00]
+    9 members:
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x0]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x4]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x8]
+      PRP Temp_int_Variable : IntProperty [o:0xc]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x48]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x4c]
+      PRP CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x50]
+      PRP CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0xa8]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID  [000001F6216E6A00]
+    13 members:
+      PRP StageName : TextProperty [o:0x0]
+      PRP Array : StructProperty of /Script/Sparta.QuestStage [o:0x10]
+      PRP StageQuantity : StructProperty of /Script/Sparta.QuestDetails [o:0x108]
+      PRP Temp_bool_True_if_break_was_hit_Variable : BoolProperty [o:0x160]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x164]
+      PRP CallFunc_Not_PreBool_ReturnValue : BoolProperty [o:0x168]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x16c]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x170]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/Sparta.QuestStage [o:0x178]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x270]
+      PRP CallFunc_EqualEqual_TextText_ReturnValue : BoolProperty [o:0x274]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x275]
+      PRP CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0x276]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:InitializeQuest  [000001F6216E6900]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F6216E6800]
+    16 members:
+      PRP Is : NameProperty [o:0x0]
+      PRP Is : IntProperty [o:0x8]
+      PRP Is : StructProperty of /Script/Sparta.QuestObjectives [o:0x10]
+      PRP Is : IntProperty [o:0x48]
+      PRP Is : ObjectProperty of /Script/Engine.PlayerController [o:0x50]
+      PRP Is : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x58]
+      PRP Is : ObjectProperty of /Script/Engine.PlayerController [o:0x60]
+      PRP Is : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x68]
+      PRP Is : StructProperty of /Script/Sparta.QuestDetails [o:0x70]
+      PRP Is : BoolProperty [o:0xc8]
+      PRP Is : IntProperty [o:0xcc]
+      PRP Is : BoolProperty [o:0xd0]
+      PRP Is : BoolProperty [o:0xd1]
+      PRP Is : IntProperty [o:0xd4]
+      PRP Is : BoolProperty [o:0xd8]
+      PRP Is : BoolProperty [o:0xd9]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard  [000001F6216E6700]
+    13 members:
+      PRP ObjectiveID : NameProperty [o:0x0]
+      PRP CallFunc_GetObjectiveDataByID_Array_Element : StructProperty of /Script/Sparta.QuestObjectives [o:0x8]
+      PRP CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x40]
+      PRP CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x48]
+      PRP CallFunc_Create_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/WBP_QuestObjectiveNotification.WBP_QuestObjectiveNotification_C [o:0x50]
+      PRP CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Script/Sparta.QuestDetails [o:0x58]
+      PRP CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0xb0]
+      PRP Temp_struct_Variable : StructProperty of /Script/Engine.DataTableRowHandle [o:0xb8]
+      PRP CallFunc_GetObjectiveDataByID_Array_Element_1 : StructProperty of /Script/Sparta.QuestObjectives [o:0xc8]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x100]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x104]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x105]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x108]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact  [000001F6216E4700]
+    15 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x8]
+      PRP K2Node_CustomEvent_Actor : ObjectProperty of /Script/Engine.Actor [o:0x10]
+      PRP CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x18]
+      PRP K2Node_DynamicCast_AsBPI_Objective_Target : InterfaceProperty [o:0x20]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+      PRP K2Node_Event_InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x38]
+      PRP K2Node_Event_InQuestID : NameProperty [o:0x70]
+      PRP CallFunc_GetQuestID_QuestID : NameProperty [o:0x78]
+      PRP CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x80]
+      PRP CallFunc_GetObjectiveID_ObjectiveID : NameProperty [o:0x88]
+      PRP CallFunc_IsValid_ReturnValue : BoolProperty [o:0x90]
+      PRP CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x91]
+      PRP CallFunc_EqualEqual_NameName_ReturnValue_1 : BoolProperty [o:0x92]
+      PRP CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0x93]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:InitializeObjective  [000001F6216E4600]
+    2 members:
+      PRP InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+      PRP InQuestID : NameProperty [o:0x38]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:OnQuestObjectiveInteract  [000001F6216E4500]
+    1 members:
+      PRP Actor : ObjectProperty of /Script/Engine.Actor [o:0x0]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:CharacterDeath  [000001F6216E7E00]
+    1 members:
+      PRP Character : ObjectProperty of /Script/Sparta.SpartaCharacter [o:0x0]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands  [000001F6216E7D00]
+    12 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x4]
+      PRP K2Node_Event_InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x18]
+      PRP K2Node_Event_InQuestID : NameProperty [o:0x50]
+      PRP CallFunc_GetWorldSubsystem_ReturnValue : ObjectProperty of /Game/Sparta/Core/GameInstance/BP_SpartaEnemySubsystem.BP_SpartaEnemySubsystem_C [o:0x58]
+      PRP K2Node_CustomEvent_Character : ObjectProperty of /Script/Sparta.SpartaCharacter [o:0x60]
+      PRP CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x68]
+      PRP CallFunc_HasMatchingGameplayTag_self_CastInput : InterfaceProperty [o:0x70]
+      PRP CallFunc_HasMatchingGameplayTag_ReturnValue : BoolProperty [o:0x80]
+      PRP CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x88]
+      PRP CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x90]
+      PRP CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x98]
+
+### Function /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:InitializeObjective  [000001F6216E7C00]
+    2 members:
+      PRP InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+      PRP InQuestID : NameProperty [o:0x38]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Add_IntInt_ReturnValue  [000001F621787E10]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Array_Length_ReturnValue  [000001F621787DA0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Map_Find_Value  [000001F621787D30]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:Temp_int_Array_Index_Variable  [000001F621787EF0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:Temp_int_Loop_Counter_Variable  [000001F621787E80]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete:CallFunc_Array_Length_ReturnValue  [000001F621787C50]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete:QuestStage  [000001F621787CC0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_Add_IntInt_ReturnValue  [000001F621787A90]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_Array_Add_ReturnValue  [000001F621787940]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_Array_Length_ReturnValue  [000001F6217879B0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:EntryPoint  [000001F621787BE0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:Temp_int_Array_Index_Variable  [000001F621787B70]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:Temp_int_Loop_Counter_Variable  [000001F621787B00]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:Temp_int_Variable  [000001F621787A20]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:CallFunc_Add_IntInt_ReturnValue  [000001F621787780]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:CallFunc_Array_Length_ReturnValue  [000001F621787710]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:Temp_int_Array_Index_Variable  [000001F621787860]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:Temp_int_Loop_Counter_Variable  [000001F6217877F0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_Add_IntInt_ReturnValue  [000001F6217875C0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_Array_Length_ReturnValue  [000001F6217874E0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:Temp_int_Array_Index_Variable  [000001F6217876A0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:Temp_int_Loop_Counter_Variable  [000001F621787630]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:Temp_int_Variable  [000001F621787550]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_Add_IntInt_ReturnValue  [000001F621788F90]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_Array_Length_ReturnValue  [000001F621788F20]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:Temp_int_Array_Index_Variable  [000001F621787390]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:Temp_int_Loop_Counter_Variable  [000001F621789000]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F621788EB0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F621788E40]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F621788DD0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F621788D60]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_Add_IntInt_ReturnValue  [000001F621788BA0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_Map_Find_Value  [000001F621788C10]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:EntryPoint  [000001F621784AE0]
+
+### IntProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:EntryPoint  [000001F621786EC0]
+
+### InterfaceProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:K2Node_DynamicCast_AsBPI_Objective_Target  [000001F621797000]
+
+### InterfaceProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_HasMatchingGameplayTag_self_CastInput  [000001F62179A900]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:ObjectiveID  [000001F6217878D0]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F621787470]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:ObjectiveID  [000001F621788C80]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_GetObjectiveID_ObjectiveID  [000001F621784990]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_GetQuestID_QuestID  [000001F621784A00]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:K2Node_Event_InQuestID  [000001F621784A70]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:InitializeObjective:InQuestID  [000001F621784920]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:K2Node_Event_InQuestID  [000001F621786E50]
+
+### NameProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:InitializeObjective:InQuestID  [000001F621786DE0]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_GetInstanceUnchecked_ReturnValue  [000001F62179DD80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_SpawnObject_ReturnValue  [000001F62179DB00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179F000]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EF80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EF00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EE80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_Create_ReturnValue  [000001F62179EA00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetComponentByClass_ReturnValue  [000001F62179EA80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetPlayerController_ReturnValue  [000001F62179EB00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_GetComponentByClass_ReturnValue  [000001F621797080]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_GetPlayerController_ReturnValue  [000001F621797180]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:CallFunc_GetQuestObject_Array_Element  [000001F621796E80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:K2Node_CustomEvent_Actor  [000001F621797100]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:OnQuestObjectiveInteract:Actor  [000001F621796B00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:CharacterDeath:Character  [000001F62179AC00]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_GetAbilitySystemComponent_ReturnValue  [000001F62179A980]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_GetComponentByClass_ReturnValue  [000001F62179A780]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_GetPlayerController_ReturnValue  [000001F62179A800]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_GetQuestObject_Array_Element  [000001F62179A700]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:CallFunc_GetWorldSubsystem_ReturnValue  [000001F62179AA80]
+
+### ObjectProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:K2Node_CustomEvent_Character  [000001F62179AA00]
+
+### ObjectProperty QuestObjectives./Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:QuestObjectives  [000001F62179D880]
+
+### Package /Game/Sparta/Dialogue/Blueprints/BP_QuestObject  [000001F4C586B410]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BP_QuestObject_C 
+
+### Package /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact  [000001F4C586B500]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BP_QuestObjective_Interact_C 
+
+### Package /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands  [000001F4C586B460]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BP_QuestObjective_KillBrigands_C 
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_Array_Get_Item  [000001F62179E280]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllObjectivesComplete:CallFunc_GetObjectiveDataByID_Array_Element  [000001F62179E180]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:AreAllStagesComplete:QuestDetails  [000001F62179E000]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_Array_Get_Item  [000001F62179DC00]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:ExecuteUbergraph_BP_QuestObject:CallFunc_GetDataTableRowFromName_OutRow  [000001F62179DD00]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:Array  [000001F62179D800]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetObjectiveDataByID:CallFunc_Array_Get_Item  [000001F62179D780]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_Array_Get_Item  [000001F62179F700]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetQuestDetails:CallFunc_GetDataTableRowFromName_OutRow  [000001F62179F600]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:Array  [000001F62179F500]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:CallFunc_Array_Get_Item  [000001F62179F300]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:StageQuantity  [000001F62179F480]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179F080]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:Is  [000001F62179EE00]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetDataTableRowFromName_OutRow  [000001F62179E980]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetObjectiveDataByID_Array_Element  [000001F62179F100]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:CallFunc_GetObjectiveDataByID_Array_Element_1  [000001F62179E800]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:OnObjectiveIDHeard:Temp_struct_Variable  [000001F62179E880]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:UberGraphFrame  [000001F62179DE80]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:ExecuteUbergraph_BP_QuestObjective_Interact:K2Node_Event_InObjectiveData  [000001F621796F00]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:InitializeObjective:InObjectiveData  [000001F621796B80]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_Interact.BP_QuestObjective_Interact_C:UberGraphFrame  [000001F621797200]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:ExecuteUbergraph_BP_QuestObjective_KillBrigands:K2Node_Event_InObjectiveData  [000001F62179AB00]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:InitializeObjective:InObjectiveData  [000001F62179A580]
+
+### StructProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObjective_KillBrigands.BP_QuestObjective_KillBrigands_C:UberGraphFrame  [000001F62179A680]
+
+### TextProperty /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C:GetStageDataByID:StageName  [000001F621787400]
+

@@ -1,0 +1,57 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveShellRevive		0	Public, BlueprintCallable, BlueprintEvent	140821
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveIsDarkForm		0	Public, BlueprintCallable, BlueprintEvent	140832
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveHealingCharges		0	Public, BlueprintCallable, BlueprintEvent	140835
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveShellHealth		0	Public, BlueprintCallable, BlueprintEvent	140842
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveHealth		0	Public, BlueprintCallable, BlueprintEvent	140849
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveResolve		0	Public, BlueprintCallable, BlueprintEvent	140856
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetSessionStartTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1	Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent, Const	140863
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	140865
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	140867
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	CheckForValidTransform		0	BlueprintCallable, BlueprintEvent	140868
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ExecuteUbergraph_BPSO_PlayerSession	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	140869
+/Script/Sparta.SpartaSessionSaveObjectBase	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetSessionStartTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1	Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent, Const	57988
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	Get	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveGlobalSettings	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	57832
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSaveGlobalSettings	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	RequestPromoItem	ItemDefId IntProperty	1	Final, Native, Public, BlueprintCallable	58149
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	RefreshSteamInventory		0	Final, Native, Public, BlueprintCallable	58151
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	IsSteamInventoryAvailable	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	58152
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	HasInventoryItem	ItemDefId IntProperty; ReturnValue BoolProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	58154
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	DebugSetLocalInventoryItemOverride	ItemDefId IntProperty; bOwned BoolProperty	2	Final, Native, Public, BlueprintCallable	58157
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	DebugRequestPromoItem	ItemDefId IntProperty	1	Final, Native, Public, BlueprintCallable	58160
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	DebugRefreshSteamInventory		0	Final, Native, Public, BlueprintCallable	58162
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	DebugPrintInventoryState		0	Final, Native, Public, BlueprintCallable, Const	58163
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	DebugClearLocalInventoryOverrides		0	Final, Native, Public, BlueprintCallable	58164
+/Script/Sparta.SpartaSteamInventorySubsystem	/Script/Sparta.SpartaSteamInventorySubsystem	AreItemDefinitionsLoaded	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	58165
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSteamInventorySubsystem	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	SetSteamRichPresenceState	DisplayToken StrProperty; PresenceKeys MapProperty; ReturnValue BoolProperty	3	Final, Native, Static, Public, HasOutParams, BlueprintCallable	58168
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	SetSteamRichPresenceDisplay	DisplayToken StrProperty; ReturnValue BoolProperty	2	Final, Native, Static, Public, BlueprintCallable	58174
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	SetSteamRichPresence	Key StrProperty; Value StrProperty; ReturnValue BoolProperty	3	Final, Native, Static, Public, BlueprintCallable	58177
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	IsSteamPresenceAvailable	ReturnValue BoolProperty	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	58181
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	GetSteamRichPresence	Key StrProperty; ReturnValue StrProperty	2	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	58183
+/Script/Sparta.SpartaSteamPresenceLibrary	/Script/Sparta.SpartaSteamPresenceLibrary	ClearSteamRichPresence		0	Final, Native, Static, Public, BlueprintCallable	58186
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSteamPresenceLibrary	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SteamStatusBlueprintLibrary	/Script/Sparta.SteamStatusBlueprintLibrary	IsSteamReady	ReturnValue BoolProperty	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	59101
+/Script/Sparta.SteamStatusBlueprintLibrary	/Script/Sparta.SteamStatusBlueprintLibrary	GetSteamReadyStatus	ReturnValue EnumProperty of /Script/Sparta.ESteamReadyStatus	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	59103
+/Script/Sparta.SteamStatusBlueprintLibrary	/Script/Sparta.SteamStatusBlueprintLibrary	GetSteamPersonaName	ReturnValue StrProperty	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	59105
+/Script/Sparta.SteamStatusBlueprintLibrary	/Script/Sparta.SteamStatusBlueprintLibrary	GetSteamId64	ReturnValue StrProperty	1	Final, Native, Static, Public, BlueprintCallable, BlueprintPure	59107
+/Script/CoreUObject.Object	/Script/Sparta.SteamStatusBlueprintLibrary	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaAchievementsSubsystem	/Script/Sparta.SpartaAchievementsSubsystem	SubscribeToAchievementEvents		0	Final, Native, Private, BlueprintCallable	54573
+/Script/Sparta.SpartaAchievementsSubsystem	/Script/Sparta.SpartaAchievementsSubsystem	SetAchievementProgress	EventData ObjectProperty of /Script/CoreUObject.Object	1	Final, Native, Private, BlueprintCallable	54574
+/Script/Sparta.SpartaAchievementsSubsystem	/Script/Sparta.SpartaAchievementsSubsystem	QueryAchievements		0	Final, Native, Private, BlueprintCallable	54576
+/Script/CoreUObject.Object	/Script/Sparta.SpartaAchievementsSubsystem	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaTelemetrySubsystem	/Script/Sparta.SpartaTelemetrySubsystem	OnDamageReceived	EventData ObjectProperty of /Script/CoreUObject.Object	1	Final, Native, Private	58295
+/Script/CoreUObject.Object	/Script/Sparta.SpartaTelemetrySubsystem	ExecuteUbergraph	EntryPoint IntProperty	1		3

@@ -1,0 +1,17 @@
+﻿### Class /Script/Sparta.SpartaMetaSave  [00007FF46F050138]
+    super: /Script/Engine.SaveGame
+    2 members:
+      PRP ActiveSaveProfileSlot : IntProperty [o:0x28]
+      PRP ActiveSaveRecoverySlot : MapProperty [o:0x30]
+
+### IntProperty /Script/Sparta.SpartaMetaSave:ActiveSaveProfileSlot  [000001F4ACD6D980]
+
+### IntProperty ActiveSaveRecoverySlot./Script/Sparta.SpartaMetaSave:ActiveSaveRecoverySlot  [000001F4ACD6D9F0]
+
+### IntProperty ActiveSaveRecoverySlot./Script/Sparta.SpartaMetaSave:ActiveSaveRecoverySlot_Key  [000001F4ACD6DA60]
+
+### MapProperty /Script/Sparta.SpartaMetaSave:ActiveSaveRecoverySlot  [000001F49CD2FC40]
+    2 members:
+      PRP ActiveSaveRecoverySlot_Key : IntProperty [o:0x0]
+      PRP ActiveSaveRecoverySlot : IntProperty [o:0x4]
+

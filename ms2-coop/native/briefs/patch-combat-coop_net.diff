@@ -1,0 +1,142 @@
+--- a/native/src/coop_net.cpp
++++ b/native/src/coop_net.cpp
+@@ -619,28 +619,88 @@
+ // --- clock ---------------------------------------------------------------
+ 
+ bool g_clockWarned = false;
++bool g_clockWidthWarned = false;
++bool g_clockJumpWarned = false;
+ 
+ // GetRealTimeSeconds(World) through the GameplayStatics CDO -- main.lua:221.
++//
++// WIDTH: this node's "ReturnValue" is a DOUBLE in this UE5.6 build, so reading it
++// as a float takes the low 4 bytes of the 8-byte value -- the mantissa tail, i.e. a
++// bit pattern with nothing to do with the time, different on EVERY call.  That is
++// not a theory, it is measurable in the 2026-10-25 (slotfix4) run:
++//   * every diagnostic throttle in the mod (5 s / 10 s) fired ~11 times a second
++//     instead of once every 5 s -- `collect:` spent its whole 30-line budget in
++//     5 s on A, `npcrcv:` its whole budget in 3 s on B -- which happens only when
++//     the value DECREASES between calls (Diag::Due re-arms on a rewind);
++//   * the stamps coop_combat's guard printed are impossible for a clock:
++//     A "stamp 0.0 -> now -0.6", "stamp -0.6 -> now -160.0";
++//     B "stamp 243388915243820045087367015432192.0 -> now 0.0";
++//   * coop_puppet measured 3.7e35 / 2.9e38 on the same build.
++// Reading the value at its own width fixes the clock for every consumer at once
++// (coop_local's health-cache stamp, coop_world, the puppet's peer stamps and all
++// the throttling) instead of every module growing its own steady clock.
+ bool GameRealSeconds(double* out) {
+     if (!out) return false;
+     EnsureWorld();
+     if (!WorldOk()) return false;
+     ue::UObject* gs = GameplayStatics();
+     if (!gs) return false;
+     ue::UFunction* fn = uecall::Func(gs, "GetRealTimeSeconds");
+     if (!fn) return false;
+     static const char* kWorldParams[] = {"WorldContextObject", "WorldContext"};
+     const char* wp = uecall::PickParam(fn, kWorldParams, 2);
+     if (!wp) return false;
+     ue::Params p(fn);
+     p.Set<ue::UObject*>(wp, g_world);
+     if (!ue::Call(gs, fn, p.data())) return false;
+-    *out = (double)p.Get<float>("ReturnValue");
++
++    // Decide the width from the value itself, not from ParmsSize: UE pads the
++    // parameter block, so a 4-byte float and an 8-byte double can both report 16.
++    // The tell is exact -- a float read through an 8-byte view can only produce a
++    // DENORMAL double (|v| < 2.3e-308), while this accessor's value is either
++    // exactly 0 or a real time far above 1e-300.
++    double v = 0.0;
++    bool   got = false;
++    if (p.size() >= 16) {
++        const double d = p.Get<double>("ReturnValue");
++        if (std::isfinite(d) && (d == 0.0 || std::fabs(d) > 1.0e-300)) {
++            v = d;
++            got = true;
++        }
++    }
++    if (!got) {
++        v = static_cast<double>(p.Get<float>("ReturnValue"));
++        if (!g_clockWidthWarned) {
++            g_clockWidthWarned = true;
++            Log("clock: GetRealTimeSeconds read as float (params=%d B, raw=%.6f) -- if the "
++                "module intervals behave like the 2026-10-25 run, this is a double here",
++                (int)p.size(), v);
++        }
++    }
++    if (!std::isfinite(v)) return false;
++    // A time cannot be astronomically large; one that is means the read is still
++    // wrong (or the world is a light-preset sub-level).  Refuse it, so Now() falls
++    // back to the steady clock instead of poisoning every timer in the mod.
++    if (v < -1.0e7 || v > 1.0e7) {
++        if (!g_clockJumpWarned) {
++            g_clockJumpWarned = true;
++            Log("clock: GetRealTimeSeconds gave %.1f -- rejecting it (sane -1e7..1e7)", v);
++        }
++        return false;
++    }
++    *out = v;
+     return true;
+ }
+ 
+ double SteadySeconds() {
+     using namespace std::chrono;
+     static const steady_clock::time_point t0 = steady_clock::now();
+     return duration_cast<duration<double>>(steady_clock::now() - t0).count();
+ }
++
++// Monotonic Now(): the game clock while it is advancing, the steady clock when it
++// is unavailable or goes backwards.  Every consumer of Now() is an interval
++// (`now - stamp < X`), so a rewind either latches a gate shut forever or -- with a
++// forward jump -- releases a mirror / fires a spawn replay on the wrong tick.
++// Making this ONE function monotonic fixes all of them at once.
++double Now() {
++    static double last = -1.0e18;   // last value handed out
++    static double steadyBase = 0.0; // Now() value the steady clock counts from
++    static double steadyAt = 0.0;   // SteadySeconds() at that moment
++
++    const double s = SteadySeconds();
++    double t = 0.0;
++    if (GameRealSeconds(&t) && t >= last) {   // sane width, and never backwards
++        last = t;
++        steadyBase = t;
++        steadyAt = s;
++        return t;
++    }
++    double v = steadyBase + (s - steadyAt);
++    if (v < last) v = last;
++    last = v;
++    return v;
++}
+ 
+ // --- misc shared state ----------------------------------------------------
+*** END OF DIFF -- the "Now()" hunk REPLACES the existing definition further down
+(file line ~845). Apply the GameRealSeconds hunk in place, then replace the old
+Now() body with the monotonic one above. ***
+
+WHY THIS FILE AND NOT MINE
+  coop_combat.cpp now runs every interval off its own steady clock (Mono()), so
+  MIRROR/SPAWN behave correctly even without this patch.  But Now() is also the
+  clock of coop_local (health-cache stamp), coop_world, the puppet's peer stamps and
+  the whole diagnostic throttling -- the width fix above is what makes the LOGS and
+  those modules trustworthy again in the next run.  coop_puppet and coop_world have
+  already switched their own timers to steady clocks; they keep working either way.
+
+HOW TO CONFIRM IT WORKED (next run-two)
+  * probe.log must never print another "spawnscan: clock rewound" line, and the 10 s
+    lines ("enemytick:", "spawnscan:", "npcsend:", "npcrcv:") must appear at 10 s /
+    5 s intervals instead of many per second.  A "clock: ... read as float" line
+    means the width decision went the other way -- report it, do not ship.
+  * coop_combat's "enemytick: ... mono=NNN.N clock=MMM.M" prints both clocks; with
+    this patch `clock` and `mono` advance together instead of jumping around.
+  * MIRROR: B's `taken:`/`released:` must stop climbing by one per second
+    (the Lua baseline for a whole run was taken:33 released:28).
+
+OPEN, NOT IN THIS DIFF
+  * PARAMETER width (writing, not reading) cannot be decided this way: UE pads the
+    parameter block, so ParmsSize does not separate a 4-byte float from an 8-byte
+    double.  coop_combat's SetTargetOverride("OverrideTime", 3.0f) therefore keeps
+    its float write; if that parameter is also promoted, the AI override expires on
+    the next tick and the real fix is one helper in ms2_ue.h:
+        int32_t PropSizeStruct(UStruct* st, const char* name);  // FProperty ElementSize
+    then write 4 or 8 bytes according to it.  Worth doing for every
+    obj:CallFunction(param = number) call in the port.

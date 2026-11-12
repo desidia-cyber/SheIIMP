@@ -1,0 +1,45 @@
+# Build the friend-installable co-op package.
+#   .\build-package.ps1                 -> dist\ms2-coop-<date>.zip
+# Assembling: UE4SS + MortalShell2 config, our mods, the relay, install/play scripts.
+
+param(
+    [string]$OutDir = (Join-Path $PSScriptRoot 'dist')
+)
+
+$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+$srcRoot = Split-Path $root -Parent      # ms2-coop
+$ue4ssDist = Join-Path (Split-Path $srcRoot -Parent) 'tools\ue4ss\dist'
+
+if (-not (Test-Path $ue4ssDist)) { throw "UE4SS dist not found: $ue4ssDist" }
+
+$stage = Join-Path $env:TEMP ("ms2coop_stage_" + (Get-Date -Format 'HHmmss'))
+$files = Join-Path $stage 'files'
+New-Item -ItemType Directory -Force -Path $files | Out-Null
+
+# UE4SS + MS2 custom config
+Copy-Item (Join-Path $ue4ssDist 'dwmapi.dll') $files
+Copy-Item (Join-Path $ue4ssDist 'ue4ss') $files -Recurse
+Copy-Item (Join-Path $ue4ssDist 'MortalShell2') (Join-Path $files 'ue4ss') -Recurse
+
+# our mods
+Copy-Item (Join-Path $srcRoot 'mod') (Join-Path $files 'mods') -Recurse
+Remove-Item (Join-Path $files 'mods\CoopProbe') -Recurse -Force -ErrorAction SilentlyContinue  # dev-only probe
+
+# relay
+Copy-Item (Join-Path $srcRoot 'relay') (Join-Path $files 'relay') -Recurse
+
+# scripts + readme
+Copy-Item (Join-Path $root 'Install.ps1') $stage
+Copy-Item (Join-Path $root 'MSCoop.ps1') $stage
+if (Test-Path (Join-Path $root 'README.md')) { Copy-Item (Join-Path $root 'README.md') $stage }
+
+New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+$zip = Join-Path $OutDir ("ms2-coop-" + (Get-Date -Format 'yyyyMMdd-HHmm') + ".zip")
+if (Test-Path $zip) { Remove-Item $zip -Force }
+Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
+Remove-Item $stage -Recurse -Force
+
+$size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
+Write-Host "package: $zip ($size MB)"
+Write-Host "  sha256: $((Get-FileHash $zip -Algorithm SHA256).Hash)"

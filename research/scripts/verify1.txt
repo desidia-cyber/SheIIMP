@@ -1,0 +1,10 @@
+# verify1 — read-only baseline scans (research/90-verified.md)
+# one command per line; "@N" = seconds to wait after sending it
+scan BP_HubDoubleDoor_C props=DoorIsOpen,DoorIsOpenName max=4@6
+scan BP_HubLiftLever_C props=TargetFloor,LoadedLift max=4@6
+scan BP_Interactable_Chest_Skin_C props=SkinID,EquipmentID,RequiredAmount max=4@6
+scan BP_CurrencyBag_Pickup_C props=CurrencyID max=4@6
+scan BP_PrologueCheckpoint_C props=AreaName max=4@6
+scan SpartaSaveComponent props=bSaveLoaded,Guid,SaveObjectClass max=6@6
+scan BP_SO_SimpleBool_C props=MyBool max=4@6
+info@4

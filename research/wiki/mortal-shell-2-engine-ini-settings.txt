@@ -1,0 +1,13 @@
+Mortal Shell 2 Engine.ini Settings — Safe PC Troubleshooting 
+Skip to content
+ Mortal Shell 2 Engine.ini Settings: What to Know Before Editing
+ Mortal Shell 2 engine.ini edits are mentioned in player feedback for stutter and image settings; use backups and reversible checks first.
+Last verified 2026-08-20 
+ The Mortal Shell 2 engine.ini settings search comes from public launch feedback, where one PC player says an engine configuration file was used to change Reflex and presentation behavior. This page explains the safety boundary: configuration edits can be useful diagnostic experiments, but copying unknown commands can create new problems and may be invalidated by updates.
+ Official Steam image used for the Mortal Shell 2 engine.ini troubleshooting guide. 
+ Before changing Engine.ini
+ Use the in-game graphics menu first. Record the current settings and close the game. Back up the relevant configuration file to a separate folder, make one change, and test the same scene. If the result is worse, restore the backup instead of layering a second tweak on top.
+ Do not download an executable “optimization pack,” replace game files from an unknown site, or paste a command you cannot explain. A safe troubleshooting page should reduce variables, not add a bundle of unverified changes.
+ What the player report actually supports
+ The public report supports the existence of an engine.ini experiment and describes a trade-off: lower stutter was associated with additional input latency. It does not establish a developer-recommended key, a guaranteed path on every Windows install, or a permanent fix after patches. Those details are intentionally not fabricated here.
+ Check the Mortal Shell 2 Reflex stutter guide and Mortal Shell 2 frame-generation guide before editing anything. The Mortal Shell 2 PC requirements page remains the official baseline.

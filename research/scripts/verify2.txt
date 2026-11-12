@@ -1,0 +1,21 @@
+# verify2 — perform the actions, then re-read the same properties
+# (saves are snapshotted + restored by lab.ps1 around this run)
+scan BP_HubDoubleDoor_C props=DoorIsOpen max=2@5
+scan BP_CurrencyBag_Pickup_C props=CurrencyID max=2@5
+scan BP_SO_SimpleBool_C props=MyBool max=3@5
+scan SpartaItemInstance max=2@5
+scan BP_HubLiftLever_C props=TargetFloor max=2@5
+callf BP_HubDoubleDoor_C OpenDoor@8
+scan BP_HubDoubleDoor_C props=DoorIsOpen max=2@5
+callf BP_CurrencyBag_Pickup_C PickUp@8
+scan BP_CurrencyBag_Pickup_C props=CurrencyID max=2@5
+scan BP_SO_SimpleBool_C props=MyBool max=3@5
+scan SpartaItemInstance max=2@5
+callf BP_HubLiftLever_C ActivateLever@8
+scan BP_HubLiftLever_C props=TargetFloor max=2@5
+callf BP_Interactable_Chest_Skin_C OnChestOpen@8
+scan BP_Interactable_Chest_Skin_C props=RequiredAmount max=2@5
+enemies@4
+hcinfo@4
+hurt 0.5@4
+hcinfo@4

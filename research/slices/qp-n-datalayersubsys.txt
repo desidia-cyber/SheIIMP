@@ -1,0 +1,27 @@
+﻿### Class /Script/Sparta.SpartaDataLayerSubsystem  [00007FF46F045538]
+    super: /Script/Engine.WorldSubsystem
+    3 members:
+      PRP RuntimeData : ObjectProperty of /Script/Sparta.DataLayersSave [o:0x38]
+      FUN SaveDataLayerState 
+          param DataLayer : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x0]
+          param TargetState : EnumProperty of /Script/Engine.EDataLayerRuntimeState [o:0x8]
+      FUN RemoveDataLayerState 
+          param DataLayer : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x0]
+
+### EnumProperty /Script/Sparta.SpartaDataLayerSubsystem:SaveDataLayerState:TargetState  [000001F4ACDA5280]
+
+### Function /Script/Sparta.SpartaDataLayerSubsystem:RemoveDataLayerState  [00007FF46F6FB138]
+    1 members:
+      PRP DataLayer : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x0]
+
+### Function /Script/Sparta.SpartaDataLayerSubsystem:SaveDataLayerState  [00007FF46F6FB218]
+    2 members:
+      PRP DataLayer : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x0]
+      PRP TargetState : EnumProperty of /Script/Engine.EDataLayerRuntimeState [o:0x8]
+
+### ObjectProperty /Script/Sparta.SpartaDataLayerSubsystem:RemoveDataLayerState:DataLayer  [000001F4ACDA3200]
+
+### ObjectProperty /Script/Sparta.SpartaDataLayerSubsystem:RuntimeData  [000001F4ACDA5100]
+
+### ObjectProperty /Script/Sparta.SpartaDataLayerSubsystem:SaveDataLayerState:DataLayer  [000001F4ACDA5180]
+

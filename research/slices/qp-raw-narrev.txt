@@ -1,0 +1,2 @@
+﻿[000001F61C38FAC0] StrProperty NarrativeEvents./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeEvents[o: 0] [n: 628046] [c: 00007FF721DFAB30] [owr: 000001F614CE81C0]
+[000001F61C38FA50] IntProperty NarrativeEvents./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeEvents_Value[o: 10] [n: 62804F] [c: 00007FF721DE91F0] [owr: 000001F614CE81C0]

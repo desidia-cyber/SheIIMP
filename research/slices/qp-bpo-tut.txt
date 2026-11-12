@@ -1,0 +1,159 @@
+﻿### ArrayProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:TutorialList  [000001F4C05C3580]
+    1 members:
+      PRP TutorialList : SoftClassProperty [o:0x0]
+
+### BPO_TutorialHandler_C /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.Default__BPO_TutorialHandler_C  [000001F4C05C3200]
+
+### BlueprintGeneratedClass /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C  [000001F4EB407180]
+    super: /Script/Sparta.SpartaWorldObject
+    15 members:
+      PRP MyCharacter : ObjectProperty of /Script/Engine.Character [o:0x28]
+      PRP TutorialList : ArrayProperty of TutorialList./Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:TutorialList [o:0x30]
+      PRP bShouldActivate : BoolProperty [o:0x40]
+      PRP MyTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x44]
+      PRP OnComplete : MulticastInlineDelegateProperty [o:0x50]
+      PRP OnTriggerFail : MulticastInlineDelegateProperty [o:0x60]
+      PRP CanTrigger : BoolProperty [o:0x70]
+      FUN UnbindFromEvent 
+      FUN BindToEvent 
+      FUN RefreshState 
+          param Complete : BoolProperty [o:0x0]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+          param CallFunc_Array_Get_Item : SoftClassProperty [o:0x10]
+          param CallFunc_Array_IsNotEmpty_ReturnValue : BoolProperty [o:0x38]
+          param CallFunc_ShouldShowTutorial_ReturnValue : BoolProperty [o:0x39]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x3c]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x40]
+      FUN ShouldShowTutorial 
+          param Tutorial : SoftClassProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+          param TutorialClass : ClassProperty [o:0x30]
+          param CallFunc_LoadClassAsset_Blocking_ReturnValue : ClassProperty [o:0x38]
+          param K2Node_ClassDynamicCast_AsWBP_Large_Tutorial_Base : ClassProperty [o:0x40]
+          param K2Node_ClassDynamicCast_bSuccess : BoolProperty [o:0x48]
+          param CallFunc_GetClassDisplayName_ReturnValue : StrProperty [o:0x50]
+          param CallFunc_GetClassDisplayName_ReturnValue_1 : StrProperty [o:0x60]
+          param CallFunc_Conv_StringToName_ReturnValue : NameProperty [o:0x70]
+          param CallFunc_Conv_StringToName_ReturnValue_1 : NameProperty [o:0x78]
+          param CallFunc_CheckMetaTutorialSaveState_ReturnValue : BoolProperty [o:0x80]
+          param CallFunc_CheckTutorialSaveState_ReturnValue : BoolProperty [o:0x81]
+          param CallFunc_Not_PreBool_ReturnValue : BoolProperty [o:0x82]
+          param CallFunc_Not_PreBool_ReturnValue_1 : BoolProperty [o:0x83]
+      FUN Trigger 
+      FUN Init 
+          param CallFunc_RefreshState_Complete : BoolProperty [o:0x0]
+      FUN OnTriggerFail__DelegateSignature 
+      FUN OnComplete__DelegateSignature 
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:CanTrigger  [000001F4C05C3280]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:Init:CallFunc_RefreshState_Complete  [000001F4C05C5200]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_Array_IsNotEmpty_ReturnValue  [000001F4C05C5080]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_Less_IntInt_ReturnValue  [000001F4C05C4F80]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_ShouldShowTutorial_ReturnValue  [000001F4C05C5000]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:Complete  [000001F4C05C5180]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_CheckMetaTutorialSaveState_ReturnValue  [000001F4C05C4C00]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_CheckTutorialSaveState_ReturnValue  [000001F4C05C4B80]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_Not_PreBool_ReturnValue  [000001F4C05C4B00]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_Not_PreBool_ReturnValue_1  [000001F4C05C4A80]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:K2Node_ClassDynamicCast_bSuccess  [000001F4C05C4C80]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:ReturnValue  [000001F4C05C4E80]
+
+### BoolProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:bShouldActivate  [000001F4C05C3480]
+
+### ClassProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_LoadClassAsset_Blocking_ReturnValue  [000001F4C05C4D80]
+
+### ClassProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:K2Node_ClassDynamicCast_AsWBP_Large_Tutorial_Base  [000001F4C05C4D00]
+
+### ClassProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:TutorialClass  [000001F4C05C4E00]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:BindToEvent  [000001F615F66900]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:Init  [000001F615F66800]
+    1 members:
+      PRP CallFunc_RefreshState_Complete : BoolProperty [o:0x0]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:OnComplete__DelegateSignature  [000001F615F66700]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:OnTriggerFail__DelegateSignature  [000001F615F66600]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState  [000001F615F66500]
+    9 members:
+      PRP Complete : BoolProperty [o:0x0]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x4]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x8]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_Array_Get_Item : SoftClassProperty [o:0x10]
+      PRP CallFunc_Array_IsNotEmpty_ReturnValue : BoolProperty [o:0x38]
+      PRP CallFunc_ShouldShowTutorial_ReturnValue : BoolProperty [o:0x39]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x3c]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x40]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial  [000001F615F66400]
+    14 members:
+      PRP Tutorial : SoftClassProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+      PRP TutorialClass : ClassProperty [o:0x30]
+      PRP CallFunc_LoadClassAsset_Blocking_ReturnValue : ClassProperty [o:0x38]
+      PRP K2Node_ClassDynamicCast_AsWBP_Large_Tutorial_Base : ClassProperty [o:0x40]
+      PRP K2Node_ClassDynamicCast_bSuccess : BoolProperty [o:0x48]
+      PRP CallFunc_GetClassDisplayName_ReturnValue : StrProperty [o:0x50]
+      PRP CallFunc_GetClassDisplayName_ReturnValue_1 : StrProperty [o:0x60]
+      PRP CallFunc_Conv_StringToName_ReturnValue : NameProperty [o:0x70]
+      PRP CallFunc_Conv_StringToName_ReturnValue_1 : NameProperty [o:0x78]
+      PRP CallFunc_CheckMetaTutorialSaveState_ReturnValue : BoolProperty [o:0x80]
+      PRP CallFunc_CheckTutorialSaveState_ReturnValue : BoolProperty [o:0x81]
+      PRP CallFunc_Not_PreBool_ReturnValue : BoolProperty [o:0x82]
+      PRP CallFunc_Not_PreBool_ReturnValue_1 : BoolProperty [o:0x83]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:Trigger  [000001F615F6A500]
+
+### Function /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:UnbindFromEvent  [000001F615F6A400]
+
+### IntProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_Add_IntInt_ReturnValue  [000001F4C06AD7C0]
+
+### IntProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_Array_Length_ReturnValue  [000001F4C06AD750]
+
+### IntProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:Temp_int_Array_Index_Variable  [000001F4C06ABBC0]
+
+### IntProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:Temp_int_Loop_Counter_Variable  [000001F4C06AD830]
+
+### MulticastInlineDelegateProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:OnComplete  [000001F4C05C3380]
+
+### MulticastInlineDelegateProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:OnTriggerFail  [000001F4C05C3300]
+
+### NameProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_Conv_StringToName_ReturnValue  [000001F4C06AD590]
+
+### NameProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_Conv_StringToName_ReturnValue_1  [000001F4C06AD520]
+
+### ObjectProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:MyCharacter  [000001F4C05C3600]
+
+### Package /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler  [000001F4C7050F60]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BPO_TutorialHandler_C 
+
+### SoftClassProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:RefreshState:CallFunc_Array_Get_Item  [000001F4C05C5100]
+
+### SoftClassProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:Tutorial  [000001F4C05C4F00]
+
+### SoftClassProperty TutorialList./Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:TutorialList  [000001F4C05C3500]
+
+### StrProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_GetClassDisplayName_ReturnValue  [000001F4C06AD670]
+
+### StrProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:ShouldShowTutorial:CallFunc_GetClassDisplayName_ReturnValue_1  [000001F4C06AD600]
+
+### StructProperty /Game/Sparta/UI/Tutorials/Blueprints/BPO_TutorialHandler.BPO_TutorialHandler_C:MyTag  [000001F4C05C3400]
+

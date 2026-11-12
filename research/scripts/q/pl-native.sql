@@ -1,0 +1,1 @@
+SELECT type, path, super FROM cls WHERE path LIKE '/Script/Sparta.%' AND (path LIKE '%Shell%' OR path LIKE '%Character%' OR path LIKE '%Mesh%' OR path LIKE '%Weapon%' OR path LIKE '%Armor%' OR path LIKE '%Cosmetic%' OR path LIKE '%VFX%' OR path LIKE '%Skin%') ORDER BY path

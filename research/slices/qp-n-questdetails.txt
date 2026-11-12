@@ -1,0 +1,26 @@
+﻿### ArrayProperty /Script/Sparta.QuestDetails:Stages  [000001F4A8870F00]
+    1 members:
+      PRP Stages : StructProperty of /Script/Sparta.QuestStage [o:0x0]
+
+### BoolProperty /Script/Sparta.QuestDetails:bAutoAccept  [000001F4A8870F80]
+
+### BoolProperty /Script/Sparta.QuestDetails:bIsMainQuest  [000001F4A8870E00]
+
+### ScriptStruct /Script/Sparta.QuestDetails  [00007FF46F4873B8]
+    super: /Script/Engine.TableRowBase
+    6 members:
+      PRP QuestName : TextProperty [o:0x8]
+      PRP LogDescription : TextProperty [o:0x18]
+      PRP TrackingDescription : TextProperty [o:0x28]
+      PRP bIsMainQuest : BoolProperty [o:0x38]
+      PRP Stages : ArrayProperty of Stages./Script/Sparta.QuestDetails:Stages [o:0x40]
+      PRP bAutoAccept : BoolProperty [o:0x50]
+
+### StructProperty Stages./Script/Sparta.QuestDetails:Stages  [000001F4A8870E80]
+
+### TextProperty /Script/Sparta.QuestDetails:LogDescription  [000001F4A861C800]
+
+### TextProperty /Script/Sparta.QuestDetails:QuestName  [000001F4A861C790]
+
+### TextProperty /Script/Sparta.QuestDetails:TrackingDescription  [000001F4A861C870]
+

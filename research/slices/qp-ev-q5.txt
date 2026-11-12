@@ -1,0 +1,1 @@
+﻿[00007FF46F487238] ScriptStruct /Script/Sparta.QuestObjectives[n: 137F4] [c: 00007FF46EE54338] [or: 00007FF46F17CD68] [sps: 0000000000000000]

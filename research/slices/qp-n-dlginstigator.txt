@@ -1,0 +1,43 @@
+﻿### BoolProperty /Script/Sparta.DialogueInstigatorComponent:StopDialogue:bStopAudioImmediately  [000001F4ACD59980]
+
+### Class /Script/Sparta.DialogueInstigatorComponent  [00007FF46F031B38]
+    super: /Script/Engine.ActorComponent
+    8 members:
+      PRP DlgParticipantName : StructProperty of /Script/DlgSystem.DlgParticipantName [o:0xb8]
+      PRP ParticipantDisplayName : TextProperty [o:0xc0]
+      PRP AdditionalDlgTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0xd0]
+      PRP AdditionalDlgCancelTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0xf0]
+      PRP AdditionalBlockingTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x110]
+      FUN StopDialogue 
+          param bStopAudioImmediately : BoolProperty [o:0x0]
+      FUN ReceiveInterruptDialogue 
+          param Interrupter : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+      FUN InterruptDialogue 
+          param Interrupter : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+
+### Function /Script/Sparta.DialogueInstigatorComponent:InterruptDialogue  [00007FF46F6E3D58]
+    1 members:
+      PRP Interrupter : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+
+### Function /Script/Sparta.DialogueInstigatorComponent:ReceiveInterruptDialogue  [00007FF46F6E3E38]
+    1 members:
+      PRP Interrupter : ObjectProperty of /Script/Sparta.DialogueInstigatorComponent [o:0x0]
+
+### Function /Script/Sparta.DialogueInstigatorComponent:StopDialogue  [00007FF46F6E3F18]
+    1 members:
+      PRP bStopAudioImmediately : BoolProperty [o:0x0]
+
+### ObjectProperty /Script/Sparta.DialogueInstigatorComponent:InterruptDialogue:Interrupter  [000001F4ACD59A80]
+
+### ObjectProperty /Script/Sparta.DialogueInstigatorComponent:ReceiveInterruptDialogue:Interrupter  [000001F4ACD59A00]
+
+### StructProperty /Script/Sparta.DialogueInstigatorComponent:AdditionalBlockingTags  [000001F4ACD59900]
+
+### StructProperty /Script/Sparta.DialogueInstigatorComponent:AdditionalDlgCancelTags  [000001F4ACD59880]
+
+### StructProperty /Script/Sparta.DialogueInstigatorComponent:AdditionalDlgTags  [000001F4ACD59800]
+
+### StructProperty /Script/Sparta.DialogueInstigatorComponent:DlgParticipantName  [000001F4ACD59780]
+
+### TextProperty /Script/Sparta.DialogueInstigatorComponent:ParticipantDisplayName  [000001F4ACD0E710]
+

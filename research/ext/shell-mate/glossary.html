@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181b1b">
+  <link rel="icon" href="./favicon.ico" sizes="any">
+  <title>Combat Glossary | Shell Mate</title>
+  <script src="./theme.js"></script><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#glossary">Skip to glossary</a>
+  <header class="site-header">
+    <div class="shell">
+      <div class="site-brand">
+        <p class="eyebrow">Mortal Shell 2 companion</p>
+        <h1>Shell Mate <span aria-hidden="true">◆</span></h1>
+      </div>
+      <div class="header-actions"><label class="theme-picker"><select id="theme-select" aria-label="Theme"><option value="default">Shell Mate</option><option value="obsidian">Obsidian</option><option value="porcelain-prime">Porcelain Prime</option><option value="second-son">Second Son</option><option value="sanguine-prophet">Sanguine Prophet</option><option value="king-in-yellow">King in Yellow</option><option value="warden">Warden</option><option value="ophidian">Ophidian</option><option value="bonegrafted">Bonegrafted</option><option value="apocryphal">Apocryphal</option><option value="anointed-butcher">Anointed Butcher</option><option value="white-knight">White Knight</option><option value="red-kingsnake">Red Kingsnake</option><option value="lunar-emissary">Lunar Emissary</option><option value="gilded-scarab">Gilded Scarab</option><option value="sapphire-herald">Sapphire Herald</option><option value="regal-druzhina">Regal Druzhina</option><option value="queen-of-hearts">Queen of Hearts</option></select></label><a class="glossary-back" href="./">← Guide</a></div>
+    </div>
+  </header>
+  <main class="shell glossary-page" id="glossary">
+    <p class="eyebrow">Combat reference</p>
+    <h2>Glossary</h2>
+    <label class="glossary-search">Search terms and descriptions <input id="glossary-search" type="search" autocomplete="off" placeholder="Search glossary"></label>
+    <p id="glossary-empty" hidden>No matching glossary entries.</p>
+    <div id="glossary-groups"></div>
+  </main>
+  <footer class="site-footer shell"><p>Unofficial fan guide; not affiliated with Cold Symmetry.</p></footer>
+  <script type="module" src="./glossary-page.js"></script>
+</body>
+</html>

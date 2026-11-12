@@ -1,0 +1,98 @@
+# Mortal Shell II Co-op — installer
+# Copies UE4SS (with the official MortalShell2 config) and the co-op mods into the
+# game folder, and creates the mod's state dir. Reversible: delete UE4SS.dll,
+# dwmapi.dll, UE4SS-settings.ini, UE4SS_Signatures\, UE4SS.log, Mods\ and coop\ to undo.
+#
+# Usage:
+#   .\Install.ps1 -GameDir "E:\Games\Mortal Shell II"
+
+param(
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    [switch]$Force
+)
+
+$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+$files = Join-Path $root 'files'
+$w64 = Join-Path $GameDir 'MortalShell2\Binaries\Win64'
+
+if (-not (Test-Path $w64)) { throw "Not a Mortal Shell II install (no MortalShell2\Binaries\Win64): $GameDir" }
+if (-not (Test-Path $files)) { throw "package is incomplete: $files missing" }
+
+Write-Host "Mortal Shell II co-op installer"
+Write-Host "  game : $GameDir"
+
+# --- UE4SS -------------------------------------------------------------------
+$ue4ssDir = Join-Path $files 'ue4ss'                 # UE4SS.dll, Mods\, backends
+$ms2Config = Join-Path $ue4ssDir 'MortalShell2'      # official per-game config
+$ue4ssPresent = Test-Path (Join-Path $w64 'UE4SS.dll')
+
+if ($ue4ssPresent -and -not $Force) {
+    Write-Host "  UE4SS already installed (use -Force to overwrite)"
+} else {
+    $proxy = Join-Path $files 'dwmapi.dll'
+    if (-not (Test-Path $proxy)) { $proxy = Join-Path $ue4ssDir 'dwmapi.dll' }
+    if (-not (Test-Path $proxy)) { throw "package is incomplete: dwmapi.dll missing" }
+    if (-not (Test-Path (Join-Path $ue4ssDir 'UE4SS.dll'))) { throw "package is incomplete: UE4SS.dll missing" }
+
+    Copy-Item $proxy $w64 -Force
+    foreach ($item in 'UE4SS.dll', 'LICENSE') {
+        $p = Join-Path $ue4ssDir $item
+        if (Test-Path $p) { Copy-Item $p $w64 -Force }
+    }
+    foreach ($dirItem in 'Mods', 'UE4SS_SDK_Backends') {
+        $p = Join-Path $ue4ssDir $dirItem
+        if (Test-Path $p) { Copy-Item $p $w64 -Recurse -Force }
+    }
+    # the MortalShell2 config wins over the default settings, and carries the AOB fix
+    $cfg = Join-Path $ms2Config 'UE4SS-settings.ini'
+    if (Test-Path $cfg) { Copy-Item $cfg (Join-Path $w64 'UE4SS-settings.ini') -Force }
+    else { Copy-Item (Join-Path $ue4ssDir 'UE4SS-settings.ini') (Join-Path $w64 'UE4SS-settings.ini') -Force }
+
+    $sigSrc = Join-Path $ms2Config 'UE4SS_Signatures'
+    if (Test-Path $sigSrc) {
+        New-Item -ItemType Directory -Force -Path (Join-Path $w64 'UE4SS_Signatures') | Out-Null
+        Copy-Item (Join-Path $sigSrc '*.lua') (Join-Path $w64 'UE4SS_Signatures') -Force
+    }
+    Write-Host "  UE4SS installed"
+}
+
+# --- mods --------------------------------------------------------------------
+$modsSrc = Join-Path $files 'mods'
+$modsDst = Join-Path $w64 'Mods'
+if (-not (Test-Path $modsSrc)) { throw "package is incomplete: files\mods missing" }
+New-Item -ItemType Directory -Force -Path $modsDst | Out-Null
+foreach ($mod in Get-ChildItem $modsSrc -Directory) {
+    $dst = Join-Path $modsDst $mod.Name
+    New-Item -ItemType Directory -Force -Path $dst | Out-Null
+    Copy-Item (Join-Path $mod.FullName '*') $dst -Recurse -Force
+    Write-Host "  mod: $($mod.Name)"
+}
+$modsTxt = Join-Path $modsDst 'mods.txt'
+$content = @()
+if (Test-Path $modsTxt) { $content = @(Get-Content $modsTxt | Where-Object { $_ -notmatch '^\s*CoopMod\s*:' }) }
+$content = $content + 'CoopMod : 1'
+Set-Content -Path $modsTxt -Value $content -Encoding ASCII
+
+# --- state dir + relay -------------------------------------------------------
+$coopDir = Join-Path $w64 'coop'
+New-Item -ItemType Directory -Force -Path $coopDir | Out-Null
+Set-Content -Path (Join-Path $w64 'coop_dir.txt') -Value ($coopDir.Replace('\', '/') + '/') -Encoding ASCII -NoNewline
+Write-Host "  state dir: $coopDir"
+
+$relaySrc = Join-Path $files 'relay'
+if (-not (Test-Path $relaySrc)) { throw "package is incomplete: files\relay missing" }
+$relayDst = Join-Path $coopDir 'relay'
+New-Item -ItemType Directory -Force -Path $relayDst | Out-Null
+Copy-Item (Join-Path $relaySrc '*') $relayDst -Force
+Write-Host "  relay installed"
+
+# --- prerequisites -----------------------------------------------------------
+Write-Host ""
+$py = Get-Command python -ErrorAction SilentlyContinue
+if ($py) { Write-Host "  python: $($py.Source)" } else { Write-Host "  WARNING: python not found - the relay needs Python 3.8+ (python.org)" }
+$steam = Get-Process steam -ErrorAction SilentlyContinue
+if ($steam) { Write-Host "  steam : running" } else { Write-Host "  WARNING: Steam is not running - start it before playing" }
+
+Write-Host ""
+Write-Host "DONE. Next:  .\MSCoop.ps1 -Host     (then invite your friend with the lobby id)"

@@ -1,0 +1,5 @@
+﻿path	parent
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Script/Sparta.SpartaSessionSaveObjectBase
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Script/Sparta.PlayerProgressionSaveData
+/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	/Script/Sparta.SpartaSaveObject
+# 3 rows

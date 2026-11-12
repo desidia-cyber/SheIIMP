@@ -1,0 +1,69 @@
+﻿### BoolProperty /Script/Sparta.SpartaSaveComponent:IsSaveLoaded:ReturnValue  [000001F4ACD71100]
+
+### BoolProperty /Script/Sparta.SpartaSaveComponent:bApplyPrologueSkipPreset  [000001F4ACD72F80]
+
+### BoolProperty /Script/Sparta.SpartaSaveComponent:bSaveLoaded  [000001F4ACD73100]
+
+### Class /Script/Sparta.SpartaSaveComponent  [00007FF46F038738]
+    super: /Script/Engine.ActorComponent
+    15 members:
+      PRP SaveObjectClass : ClassProperty [o:0xc0]
+      PRP OnSaveLoaded : MulticastInlineDelegateProperty [o:0xc8]
+      PRP OnPreSave : MulticastInlineDelegateProperty [o:0xd8]
+      PRP OnSessionReset : MulticastInlineDelegateProperty [o:0xe8]
+      PRP SaveProtocol : EnumProperty of /Script/Sparta.ESaveObjectProtocol [o:0xf8]
+      PRP bApplyPrologueSkipPreset : BoolProperty [o:0xf9]
+      PRP Guid : StructProperty of /Script/CoreUObject.Guid [o:0xfc]
+      PRP RuntimeData : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x110]
+      PRP bSaveLoaded : BoolProperty [o:0x118]
+      FUN Save 
+          param Events : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      FUN ResetSaveData 
+      FUN IsSaveLoaded 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetRuntimeData 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+      FUN GetGUID 
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      FUN GenerateNewGuid 
+
+### ClassProperty /Script/Sparta.SpartaSaveComponent:SaveObjectClass  [000001F4ACD72C80]
+
+### EnumProperty /Script/Sparta.SpartaSaveComponent:SaveProtocol  [000001F4ACD72F00]
+
+### Function /Script/Sparta.SpartaSaveComponent:GenerateNewGuid  [00007FF46F6E8518]
+
+### Function /Script/Sparta.SpartaSaveComponent:GetGUID  [00007FF46F6E85F8]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveComponent:GetRuntimeData  [00007FF46F6E86D8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveComponent:IsSaveLoaded  [00007FF46F6E87B8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveComponent:ResetSaveData  [00007FF46F6E8898]
+
+### Function /Script/Sparta.SpartaSaveComponent:Save  [00007FF46F6E8978]
+    1 members:
+      PRP Events : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveComponent:OnPreSave  [000001F4ACD72D80]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveComponent:OnSaveLoaded  [000001F4ACD72D00]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveComponent:OnSessionReset  [000001F4ACD72E00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveComponent:GetRuntimeData:ReturnValue  [000001F4ACD71180]
+
+### ObjectProperty /Script/Sparta.SpartaSaveComponent:RuntimeData  [000001F4ACD73080]
+
+### StructProperty /Script/Sparta.SpartaSaveComponent:GetGUID:ReturnValue  [000001F4ACD71200]
+
+### StructProperty /Script/Sparta.SpartaSaveComponent:Guid  [000001F4ACD73000]
+
+### StructProperty /Script/Sparta.SpartaSaveComponent:Save:Events  [000001F4ACD73180]
+

@@ -1,0 +1,3288 @@
+// coop_progress.cpp -- module 7: world progression (store B, quest log, data layers).
+//
+// Ported from ms2-coop\mod\CoopMod\Scripts\main.lua lines 2603-3343 (READ-ONLY reference).
+// Owns: coop::ProgressState (state().progress) -- WP.b / WP.q / WP.d, the SpartaWorldStateHelper
+// CDO, the quest log component, the DataLayerManager, the three test hooks and their verdicts.
+//
+// Behaviour is ported bug-for-bug from the Lua; every log line a harness greps is byte-identical.
+// See docs/NATIVE-PORT.md section 3.7 and section 4 items 16, 18, 19, 41.
+//
+// ---------------------------------------------------------------------------
+// CONTRACT-REQUEST -- engine-access primitives this module needs that
+// native\src\ms2_ue.h (the reflection core) does not have yet.
+//
+// The declarations below are repeated here ONLY so this translation unit compiles
+// and links against the assembled build. When the engine-access layer grows these,
+// delete the block: the signatures must match exactly.
+//
+//   1. ue::MapForEachRaw(const void* mapAddr, std::function<bool(void*, void*)>)
+//      Iterate ANY TMap by its address. Needed because USpartaSaveGame::ActorInts is a
+//      TMap<FName, FSpartaMapInt> and the real map is FSpartaMapInt::Map, i.e. a TMap at
+//      offset 0 INSIDE the value box -- it is not a property of any UObject, so the
+//      property-based ue::MapForEach() cannot reach it (main.lua:2716).
+//
+//   2. ue::MapAddNameInt(UObject*, const char* prop, const char* key, int32 value)
+//      TMap<FName,int32>::Add. The Lua adds to UQuestObject::CurrentQuestObjectiveProgress
+//      (main.lua:2919) -- a write, not a read.
+//
+//   3. ue::MapAddStrInt(UObject*, const char* prop, const char* key, int32 value)
+//      TMap<FString,int32>::Add. UQuestLogComponent_C::NPCRelationships and
+//      ::NarrativeEvents are FString-keyed (verified in the shipped SDK, see below),
+//      and the Lua adds to both (main.lua:3011, 3224).
+//
+// No other gap: everything else uses ue::MakeFName / ue::ToString / ue::ToUtf8 /
+// ue::TextToString / ue::MapForEach / ue::TArray / ue::Params, as the brief specifies.
+// ---------------------------------------------------------------------------
+//
+// SDK facts verified against research\raw\Dumper7\SDK (generated from this exact exe).
+// The four that contradict docs\NATIVE-PORT.md are marked (!):
+//
+//   USpartaSaveSubSystem::GetCurrentWorldStateSave() const -> USpartaSaveGame*
+//   USpartaSaveGame::ActorInts  TMap<FName, FSpartaMapInt >   (FSpartaMapInt ::Map = TMap<FName,int32>)
+//   USpartaSaveGame::ActorBools TMap<FName, FSpartaMapBool>   (FSpartaMapBool::Map = TMap<FName,bool>)
+//   SpartaWorldStateHelper (CDO) WriteAnInt(WorldContextObject, OwnerName, ValueName, Value, bModify)
+//                                ReadAnInt (WorldContextObject, OwnerName, ValueName, out OutValue) -> bool
+//                                WriteABool(WorldContextObject, OwnerName, ValueName, bValue)
+//                                ReadABool (WorldContextObject, OwnerName, ValueName, out OutValue) -> bool
+//   UBPC_QuestLogComponent_C::AddNarrativeTag(Tag: FGameplayTag, SaveToDisk: bool)
+//                            RemoveNarrativeTag(Tag, SaveToDisk)
+//                            AddNewQuest(QuestID: FName)   CompleteQuest(QuestID: FName)
+//                            TurnInQuest(QuestID: FName)   TrackQuests()
+//                            NarrativeTags: FGameplayTagContainer   (::GameplayTags = TArray<FGameplayTag>)
+//                            CurrentActiveQuests / CompletedQuests: TArray<FName>
+//                            ActiveQuests: TArray<UBP_QuestObject_C*>
+//                            CurrentTrackedQuest: FName
+//          (!) NPCRelationships and NarrativeEvents are TMap<**FString**,int32>, not TMap<FName,int32>.
+//   UQuestObject::QuestID: FName, CurrentQuestStage: int32,
+//                 CurrentQuestObjectiveProgress: TMap<FName,int32>,
+//                 CurrentStageDetails: FQuestStage (0x00 StageName FText, 0x20 TArray<FQuestObjectives>)
+//                 FQuestObjectives{0x28 ObjectiveID FName, 0x30 Quantity int32, 0x34 bOptional bool, size 0x38}
+//   UBP_QuestObject_C::IsTurnedIn: bool;  ::OnObjectiveIDHeard(ObjectiveID: FName); ::InitializeQuest()
+//   UDataLayerManager::GetDataLayerInstanceRuntimeState(InDataLayerInstance) -> EDataLayerRuntimeState
+//                     SetDataLayerInstanceRuntimeState(InDataLayerInstance, InState, bInIsRecursive) -> bool
+//   UDataLayerInstanceWithAsset::DataLayerAsset: UDataLayerAsset*   (asset name = the layer key)
+//   UDataTableFunctionLibrary::GetDataTableRowNames(Table, out OutRowNames: TArray<FName>)
+//
+// Toggles: QS_OFF.txt / DL_OFF.txt (main.lua:2622-2626) -> Toggles::qsEnabled / dlEnabled.
+// ---------------------------------------------------------------------------
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "coop_state.h"
+#include "ms2_ue.h"
+
+// ---------------------------------------------------------------------------
+// Every engine-access primitive this module needs is now declared in ms2_ue.h
+// (MakeFName / ToString / ToUtf8 / TextToString / MapForEach / MapForEachRaw /
+// MapAddNameInt / MapAddStrInt).  The per-module redeclaration block that used to
+// live here was removed by the integrator once the layer grew them.
+// ---------------------------------------------------------------------------
+
+namespace coop {
+namespace progress {
+namespace {
+
+// ===========================================================================
+// small local containers (the header forbids <map> in coop_state.h; the module
+// keeps its own indices here, as section 3.8 of NATIVE-PORT.md prescribes)
+// ===========================================================================
+
+// string -> string, in discovery order (Lua's `t[name] = str` tables).
+class StrStrMap {
+public:
+    const std::string* Find(const std::string& key) const {
+        for (const auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    std::string* Find(const std::string& key) {
+        for (auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    std::string Get(const std::string& key, const char* def = "") const {
+        const std::string* p = Find(key);
+        return p ? *p : std::string(def ? def : "");
+    }
+    void Set(const std::string& key, const std::string& v) {
+        if (std::string* p = Find(key)) {
+            *p = v;
+            return;
+        }
+        items_.emplace_back(key, v);
+    }
+    bool Erase(const std::string& key) {
+        for (std::size_t i = 0; i < items_.size(); ++i) {
+            if (items_[i].first == key) {
+                items_[i] = items_.back();
+                items_.pop_back();
+                return true;
+            }
+        }
+        return false;
+    }
+    std::size_t Size() const { return items_.size(); }
+    void Clear() { items_.clear(); }
+    const std::vector<std::pair<std::string, std::string>>& Items() const { return items_; }
+
+private:
+    std::vector<std::pair<std::string, std::string>> items_;
+};
+
+// name -> UObject* (WP.d.inst: data-layer name -> instance)
+class ObjMap {
+public:
+    ue::UObject** Find(const std::string& key) {
+        for (auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    ue::UObject* Get(const std::string& key) {
+        ue::UObject** p = Find(key);
+        return p ? *p : nullptr;
+    }
+    void Set(const std::string& key, ue::UObject* v) {
+        if (ue::UObject** p = Find(key)) {
+            *p = v;
+            return;
+        }
+        items_.emplace_back(key, v);
+    }
+    std::size_t Size() const { return items_.size(); }
+    void Clear() { items_.clear(); }
+
+private:
+    std::vector<std::pair<std::string, ue::UObject*>> items_;
+};
+
+// ---------------------------------------------------------------------------
+// module-private state that the shared ProgressState does not carry
+// (cleared by Reset() together with the pointers they belong to)
+// ---------------------------------------------------------------------------
+
+ObjMap    g_wdInst;          // WP.d.inst  : layer name -> UDataLayerInstanceWithAsset
+StrNumMap g_wdLast;          // WP.d.last  : layer name -> net::Now() of the last apply attempt
+StrStrMap g_wdOk;            // WP.d.ok    : layer name -> "2" / "23" accumulator (main.lua:3096)
+StrStrMap g_wbOk;            // WP.b.ok    : key -> "live" | "base"      (main.lua:2779)
+StrStrMap g_wqOk;            // WP.q.ok    : name -> "add"|"remove"|"count"|"countset"|"stage"|"turnin"|"set"
+StrStrMap g_qHist;           // WP.q.hist  : name -> the exact "+"/"-" sequence (main.lua:2890)
+                             // The shared WpSet::histMap keeps the bitmask the header documents
+                             // (bit0 = a "+" happened, bit1 = a "-" happened), but wpJudge's
+                             // "tag went away and came back" test is the literal substring "-+"
+                             // in that sequence (main.lua:3293), which a bitmask cannot express --
+                             // so the sequence itself lives here.
+
+// ===========================================================================
+// tiny helpers
+// ===========================================================================
+
+inline State& S() { return coop::state(); }
+inline ProgressState& PS() { return coop::state().progress; }
+inline bool IsHost() { return S().local.role == "host"; }
+
+// ---------------------------------------------------------------------------
+// MONOTONIC module clock -- every DURATION in this module is measured with it.
+//
+// Why not net::Now(): that is GetRealTimeSeconds(world) with a fallback to a
+// steady clock *of a different epoch* when the world is not usable yet
+// (net::Now: `if (GameRealSeconds(&t)) return t; ... return SteadySeconds();`).
+// During the first seconds after a load WorldOk() is false, so a timestamp is
+// taken on the fallback epoch and the next call returns the engine clock -- a
+// jump of the engine's whole uptime.  Every "elapsed >= N" test then fires at
+// once.  Evidence from the last run (local\test\run-two-out-slotfix4.txt and the
+// host's probe.log): `wbScan ... primed=0` and `primed=1` in the SAME wall
+// second (WP_SETTLE is 10 s), `wptest` re-added its tag 5 s after removing it
+// (the Lua waits 12) and the three `qs2test` steps (6 / 12 / 30 s) fired inside
+// 4 s.  Net effect: the 20 s live ring never holds a change long enough for the
+// peer's next packet, which is exactly the "tag removed and restored" cycle the
+// PROGRESS verdict looks for -- the removal went out as a baseline entry, and a
+// baseline skips value <= 0, so the peer never saw it.
+//
+// steady_clock is monotonic WALL time (not CPU time -- the clock the contract
+// forbids), so a duration measured with it matches the Lua's `rt()` and survives
+// level loads and the fallback flip.  net::Now() stays the clock for the shared
+// settle window (net::SetWorldSettle) and for the diagnostic gates.
+// ---------------------------------------------------------------------------
+double Mono() {
+    using namespace std::chrono;
+    static const steady_clock::time_point t0 = steady_clock::now();
+    return duration_cast<duration<double>>(steady_clock::now() - t0).count();
+}
+
+// ---------------------------------------------------------------------------
+// REAL FName registry -- the module's answer to the documented FName defect.
+//
+// ms2_ue.cpp builds an FName by calling the game's own
+// UKismetStringLibrary::Conv_StringToName, and native\README.md records that this
+// returns a DIFFERENT name-pool index than the one UObject::NamePrivate (and the
+// game's own maps/tags) hold for the same text ("WBP_MainMenu_C" 6863537 vs
+// 2449538).  FName equality is index equality, so EVERY call that takes an FName
+// argument and matches it against data the game loaded -- AddNewQuest,
+// RemoveNarrativeTag/AddNarrativeTag, WriteAnInt/WriteABool, HearObjective --
+// silently does nothing when the argument comes from a string.
+//
+// That is exactly what the last run shows: `qstest added LocationQuest ok=true`
+// (ProcessEvent succeeded, so `Call` returned true) yet the host's own wq list
+// stayed at the 8 save tags for the next five minutes, `wptest removed tag ...
+// ok=true` produced no `wq local removal` line, and the chest TimesUsed write
+// never appeared in store B -- while the data-layer calls, which take an object
+// pointer and an enum and no FName at all, worked.
+//
+// The fix needs no engine-layer change: every FName this module needs is already
+// in memory.  NameStr() is the single choke point where an FName becomes a
+// string (store-B owner/value names, narrative tags, quest IDs, objective IDs,
+// the tracked quest, DT_QuestData1 row names), so it registers the real FName
+// under that string.  Outgoing calls then use the game's own value instead of
+// round-tripping through text.  Only a name never seen in memory falls back to
+// MakeFName, and that case is logged so the next run can prove it.
+// ---------------------------------------------------------------------------
+class NameReg {
+public:
+    const ue::FName* Find(const std::string& key) const {
+        for (const auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    void Add(const std::string& key, const ue::FName& n) {
+        if (key.empty() || n.ComparisonIndex == 0) return;
+        if (items_.size() >= kMax) return;
+        if (Find(key)) return;
+        items_.emplace_back(key, n);
+    }
+    std::size_t Size() const { return items_.size(); }
+    void Clear() { items_.clear(); }
+
+private:
+    static const std::size_t kMax = 4096;
+    std::vector<std::pair<std::string, ue::FName>> items_;
+};
+
+NameReg g_realName;      // text -> the FName the game itself stores for that text
+int  g_fnMade = 0;       // outgoing names built through Conv_StringToName
+int  g_fnReal = 0;       // outgoing names taken from the registry
+int  g_fnMissLog = 0;    // how many "no real FName" lines were printed
+
+// Lua `%w` is ASCII alphanumeric in the C locale.
+inline bool IsWordChar(char c) {
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+// "^[%w_]+$"
+bool MatchName(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_') return false;
+    }
+    return true;
+}
+
+// "^[%w_%.]+$"
+bool MatchNameDot(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_' && c != '.') return false;
+    }
+    return true;
+}
+
+// "^[%w_%. ]+$"
+bool MatchNameDotSpace(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_' && c != '.' && c != ' ') return false;
+    }
+    return true;
+}
+
+bool HasSub(const std::string& hay, const char* needle) {
+    return hay.find(needle) != std::string::npos;
+}
+
+bool HasPrefix(const std::string& hay, const char* prefix) {
+    const std::size_t n = std::strlen(prefix);
+    return hay.size() >= n && std::memcmp(hay.data(), prefix, n) == 0;
+}
+
+// WpSet::ok is an int map in coop_state.h while the Lua stored the `how` string in it.
+// These are the codes; the strings themselves are kept module-locally (g_wbOk/g_wqOk/g_wdOk)
+// because the two verdicts compare them literally ("live", "add", "turnin", "23", "-+").
+int HowCode(const char* how) {
+    if (!how) return 0;
+    if (std::strcmp(how, "live") == 0) return 1;
+    if (std::strcmp(how, "base") == 0) return 2;
+    if (std::strcmp(how, "add") == 0) return 3;
+    if (std::strcmp(how, "remove") == 0) return 4;
+    if (std::strcmp(how, "count") == 0) return 5;
+    if (std::strcmp(how, "countset") == 0) return 6;
+    if (std::strcmp(how, "stage") == 0) return 7;
+    if (std::strcmp(how, "turnin") == 0) return 8;
+    if (std::strcmp(how, "set") == 0) return 9;
+    return 10;
+}
+
+
+// main.lua:2628 wpStr -- every FName -> string conversion goes through here so a
+// dead pointer degrades to "no value" exactly like the Lua's pcall did.
+// It is also where the REAL FName registry (above) is fed: the FName we hand back
+// out for this text later is the one the game itself stored, not a rebuilt one.
+bool NameStr(const ue::FName& n, std::string* out) {
+    out->clear();
+    if (n.IsNone()) {
+        *out = "None";   // FName::ToString() of FName() is literally "None"
+        return true;
+    }
+    std::string s = ue::ToString(n);
+    if (s.empty()) return false;
+    g_realName.Add(s, n);
+    *out = s;
+    return true;
+}
+
+bool FStringStr(const ue::FString& s, std::string* out) {
+    out->clear();
+    std::string v = ue::ToUtf8(s);
+    *out = v;
+    return !v.empty();
+}
+
+// A ue::FName parameter block value built from a std::string.
+//
+// The registry is consulted FIRST (see NameReg above): a name the game itself
+// handed us must never be rebuilt through Conv_StringToName, because that returns
+// a different pool index and every game function compares FNames by index.
+// Fallback = the Lua's FName(str), and it is logged (capped) so a miss is visible.
+ue::FName FN(const std::string& s) {
+    if (const ue::FName* real = g_realName.Find(s)) {
+        ++g_fnReal;
+        return *real;
+    }
+    ++g_fnMade;
+    if (g_fnMissLog < 20) {
+        ++g_fnMissLog;
+        net::Log("fn: no real FName for '%s' -- rebuilt via Conv_StringToName (index %u)",
+                 s.c_str(), (unsigned)ue::MakeFName(s.c_str()).ComparisonIndex);
+    }
+    return ue::MakeFName(s.c_str());
+}
+
+// The object's own NamePrivate (UObject::NamePrivate 0x18 -- docs and
+// native\README.md "UObject (0x28) VTable 0x00 ... NamePrivate 0x18"), so a name
+// read off an ACTOR also lands in the registry with the game's index.
+ue::FName ObjFName(ue::UObject* o) {
+    ue::FName n;
+    if (!o) return n;
+    std::memset(&n, 0, sizeof(n));
+    if (!ue::ReadMem(reinterpret_cast<const uint8_t*>(o) + 0x18, &n, sizeof(n))) return n;
+    std::string s;
+    if (NameStr(n, &s)) return n;
+    return n;
+}
+
+// ===========================================================================
+// object caches (main.lua:2687 wpObj / 2696 wpHelper / 2576 reload)
+// ===========================================================================
+
+ue::UObject* RefreshFirstOf(ue::UObject*& slot, const char* cls) {
+    if (net::Valid(slot)) return slot;
+    slot = nullptr;
+    ue::UObject* o = ue::FindFirstOf(cls);
+    if (net::Valid(o)) {
+        slot = o;
+        return o;
+    }
+    return nullptr;
+}
+
+// main.lua:2696 wpHelper()
+//
+// NOTE: the helper is a CDO ("/Script/Sparta.Default__SpartaWorldStateHelper"). ue::IsValid
+// deliberately reports CDOs as invalid (ms2_ue.h), so net::Valid() must NOT be used here --
+// it would make every store-B apply a silent no-op. CDOs are never GC'd, so the pointer is
+// stable for the process lifetime; PlausiblePtr is the only check that is ever needed.
+ue::UObject* Helper() {
+    ProgressState& ps = PS();
+    if (!ps.helper || !ue::PlausiblePtr(ps.helper)) {
+        ps.helper = ue::FindObject("/Script/Sparta.Default__SpartaWorldStateHelper");
+    }
+    return ue::PlausiblePtr(ps.helper) ? ps.helper : nullptr;
+}
+
+ue::UObject* SaveSubSystem() { return RefreshFirstOf(PS().sub, "SpartaSaveSubSystem"); }
+ue::UObject* QuestLog() { return RefreshFirstOf(PS().qlog, "BPC_QuestLogComponent_C"); }
+ue::UObject* LayerManager() { return RefreshFirstOf(PS().dlm, "DataLayerManager"); }
+
+// ===========================================================================
+// call helpers -- parameter names come from research\raw\Dumper7\SDK
+// (Sparta_parameters.hpp / BPC_QuestLogComponent_parameters.hpp / Engine_parameters.hpp)
+// ===========================================================================
+
+struct FGameplayTag {
+    ue::FName TagName;
+};
+
+// main.lua:2733 wbRead -- ReadAnInt / ReadABool through the helper CDO.
+bool ReadAnInt(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+               int32_t* out) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "ReadAnInt");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    if (!ue::Call(h, f, p.data())) return false;
+    if (out) *out = p.Get<int32_t>("OutValue");
+    return true;
+}
+
+bool ReadABool(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+               bool* out) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "ReadABool");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    if (!ue::Call(h, f, p.data())) return false;
+    if (out) *out = p.Get<bool>("OutValue");
+    return true;
+}
+
+bool WriteAnInt(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+                int v, bool modify) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "WriteAnInt");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    p.Set<int32_t>("Value", (int32_t)v);
+    p.Set<bool>("bModify", modify);
+    return ue::Call(h, f, p.data());
+}
+
+bool WriteABool(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+                bool value) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "WriteABool");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    p.Set<bool>("bValue", value);
+    return ue::Call(h, f, p.data());
+}
+
+// main.lua:2730 wbRead (the t == "i" / t == "b" wrapper). Returns false when the
+// call itself did not go through, which is the Lua's `pcall` failure.
+bool WbRead(ue::UObject* h, const std::string& owner, const std::string& vn, char t,
+            ue::UObject* ctx, int* out) {
+    if (t == 'i') {
+        int32_t v = 0;
+        if (!ReadAnInt(h, ctx, owner, vn, &v)) return false;
+        if (out) *out = (int)v;
+        return true;
+    }
+    bool b = false;
+    if (!ReadABool(h, ctx, owner, vn, &b)) return false;
+    if (out) *out = b ? 1 : 0;
+    return true;
+}
+
+// main.lua:3029 / 3128 / 3147 -- AddNarrativeTag / RemoveNarrativeTag({TagName=...}, false)
+bool TagCall(ue::UObject* q, const char* fnName, const std::string& tag) {
+    if (!q || tag.empty()) return false;
+    ue::UFunction* f = ue::FindFunction(q, fnName);
+    if (!f) return false;
+    ue::Params p(f);
+    FGameplayTag t;
+    t.TagName = FN(tag);
+    p.Set<FGameplayTag>("Tag", t);
+    p.Set<bool>("SaveToDisk", false);
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:2978 AddNewQuest / 2979 CompleteQuest / 2981 TurnInQuest / 3171 / 3180 / 3221
+bool QuestCall(ue::UObject* q, const char* fnName, const std::string& id) {
+    if (!q) return false;
+    ue::UFunction* f = ue::FindFunction(q, fnName);
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FName>("QuestID", FN(id));
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:2914 / 2951 o:OnObjectiveIDHeard(FName(obj))
+bool HearObjective(ue::UObject* o, const std::string& obj) {
+    if (!o) return false;
+    ue::UFunction* f = ue::FindFunction(o, "OnObjectiveIDHeard");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FName>("ObjectiveID", FN(obj));
+    return ue::Call(o, f, p.data());
+}
+
+// main.lua:2966 / 3244 o:InitializeQuest()
+bool InitializeQuest(ue::UObject* o) {
+    if (!o) return false;
+    ue::UFunction* f = ue::FindFunction(o, "InitializeQuest");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(o, f, p.data());
+}
+
+// main.lua:3037 q:TrackQuests()
+bool TrackQuests(ue::UObject* q) {
+    if (!q) return false;
+    ue::UFunction* f = ue::FindFunction(q, "TrackQuests");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:3068 dlm:GetDataLayerInstanceRuntimeState(inst) -> EDataLayerRuntimeState
+bool LayerState(ue::UObject* dlm, ue::UObject* inst, int* out) {
+    if (!dlm || !inst) return false;
+    ue::UFunction* f = ue::FindFunction(dlm, "GetDataLayerInstanceRuntimeState");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("InDataLayerInstance", inst);
+    if (!ue::Call(dlm, f, p.data())) return false;
+    if (out) *out = (int)p.Get<uint8_t>("ReturnValue");
+    return true;
+}
+
+// main.lua:3091 dlm:SetDataLayerInstanceRuntimeState(inst, state, false)
+bool SetLayerState(ue::UObject* dlm, ue::UObject* inst, int state) {
+    if (!dlm || !inst || state < 0 || state > 255) return false;
+    ue::UFunction* f = ue::FindFunction(dlm, "SetDataLayerInstanceRuntimeState");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("InDataLayerInstance", inst);
+    p.Set<uint8_t>("InState", (uint8_t)state);
+    p.Set<bool>("bInIsRecursive", false);
+    return ue::Call(dlm, f, p.data());
+}
+
+// ===========================================================================
+// the WpSet algorithms (main.lua:2636-2685)
+// ===========================================================================
+
+// main.lua:2636 wpPut
+void Put(WpSet& set, const std::string& name, int v, bool primed) {
+    int* cur = set.mine.Find(name);
+    if (!cur) set.order.push_back(name);
+    if (!cur || *cur != v) {
+        if (primed) set.recent.Set(name, Mono());
+        set.mine.Set(name, v);
+    }
+}
+
+// main.lua:2648 wpPrime -- a set is "primed" once it has been readable for 10 s.
+void Prime(WpSet& set) {
+    const double now = Mono();
+    if (set.firstAt == 0.0) set.firstAt = now;
+    if (now - set.firstAt >= kWpSettle) set.primed = true;
+}
+
+// main.lua:2653 wpSection -- live ring (20 s) plus a rotating window over everything.
+// Format is frozen on the wire: ,"wb":[["name",value,0|1],...]
+std::string Section(WpSet& set, const char* key, int window) {
+    std::string parts;
+    StrSet sent;
+    const double tnow = Mono();
+
+    // for name, at in pairs(set.recent) -- live entries (they may carry -1 removals)
+    for (const auto& it : set.recent.Items()) {
+        if (tnow - it.value <= kLiveSecs) {
+            const int* v = set.mine.Find(it.key);
+            if (v) {
+                if (!parts.empty()) parts += ',';
+                parts += net::Fmt("[\"%s\",%d,1]", it.key.c_str(), *v);
+                sent.Add(it.key);
+            }
+        }
+    }
+
+    const int n = (int)set.order.size();
+    const int lim = window < n ? window : n;
+    for (int i = 1; i <= lim; ++i) {
+        const int idx = ((set.rot + i - 2) % n + n) % n;
+        const std::string& name = set.order[(std::size_t)idx];
+        const int* v = set.mine.Find(name);
+        if (v && *v > 0 && !sent.Has(name)) {
+            if (!parts.empty()) parts += ',';
+            parts += net::Fmt("[\"%s\",%d,0]", name.c_str(), *v);
+            sent.Add(name);
+        }
+    }
+    if (n > 0) set.rot = (set.rot + window - 1) % n + 1;
+
+    return net::Fmt(",\"%s\":[", key) + parts + "]";
+}
+
+// main.lua:2672 wpRead -- one peer entry. Live entries replace unconditionally
+// (they carry removals); a baseline entry only ever raises.
+void PeerEntry(WpSet& set, const std::string& name, int v, bool live) {
+    const int* pv = set.peer.Find(name);
+    const bool plive = set.peerLive.Get(name, 0) != 0;
+    if (live) {
+        if (!pv || *pv != v || !plive) {
+            set.peer.Set(name, v);
+            set.peerLive.Set(name, 1);
+            set.done.Erase(name);
+        }
+    } else if (!pv || (!plive && v > *pv)) {
+        set.peer.Set(name, v);
+        set.peerLive.Set(name, 0);
+    }
+}
+
+// main.lua:2675 `sec:gmatch('%["([^"]+)",(%-?%d+),(%d)%]')`
+void Read(WpSet& set, const std::string& line, const char* key) {
+    std::string sec;
+    if (!net::Section(line, key, &sec)) return;
+
+    std::size_t i = 0;
+    while (i + 1 < sec.size()) {
+        if (sec[i] == '[' && sec[i + 1] == '"') {
+            std::size_t j = i + 2;
+            std::string name;
+            while (j < sec.size() && sec[j] != '"') name.push_back(sec[j++]);
+            // name, then `",`
+            if (j + 1 < sec.size() && sec[j] == '"' && sec[j + 1] == ',') {
+                std::size_t k = j + 2;
+                bool neg = false;
+                if (k < sec.size() && sec[k] == '-') {
+                    neg = true;
+                    ++k;
+                }
+                bool any = false;
+                long long v = 0;
+                while (k < sec.size() && sec[k] >= '0' && sec[k] <= '9') {
+                    any = true;
+                    if (v < 100000000LL) v = v * 10 + (sec[k] - '0');
+                    ++k;
+                }
+                if (any && k + 2 < sec.size() && sec[k] == ',' &&
+                    (sec[k + 1] == '0' || sec[k + 1] == '1') && sec[k + 2] == ']') {
+                    if (!name.empty()) {
+                        PeerEntry(set, name, (int)(neg ? -v : v), sec[k + 1] == '1');
+                    }
+                    i = k + 3;
+                    continue;
+                }
+            }
+        }
+        ++i;
+    }
+}
+
+// ===========================================================================
+// ---- store B (main.lua:2703-2790) ----
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// TMap walks -- why this module does not call ue::MapForEach(o, prop, ...)
+//
+// ms2_ue.cpp takes the map geometry from FProperty offsets that are the UE4
+// layout: MapLayout 0x70/0x74, KeyProp 0x78, ValueProp 0x80.  In THIS build's
+// SDK (research\raw\Dumper7\SDK\Basic.hpp, "Predefined struct FMapProperty",
+// 0x0080 - 0x0070) FMapProperty has NO MapLayout and the two pointers sit at
+//   KeyProperty  0x0070
+//   ValueProperty 0x0078
+// so the property-based walk reads the *int32 halves of KeyProperty's pointer* as
+// the key/value offsets and then reads a ValueProperty from the 8 bytes AFTER the
+// property object.  Depending on what lives there it either fails PlausiblePtr
+// (MapForEach -> false, silently) or yields a nonsense valueSize (ReadMapInfo ->
+// false).  That is why store B came out as `wp=b:0/0` where the Lua had `b:5/5`
+// while nothing in either log said a word.
+//
+// The property OFFSET is still read through reflection (`PropOffset`), which is
+// layout-independent and matches the SDK exactly (USpartaSaveGame::ActorInts
+// 0x00C8, ActorBools 0x0168), and the walk then uses ue::MapForEachRaw, which
+// needs only the map's address plus the pair's key/value sizes -- all of which the
+// SDK states.  native\briefs\TMAP-PATCH.diff fixes the property-based form as
+// well, so every other module stops being wrong too; this path works with either.
+// ---------------------------------------------------------------------------
+enum class MapWalk { none = 0, raw = 1, property = 2 };
+
+const char* MapWalkName(MapWalk w) {
+    if (w == MapWalk::raw) return "raw";
+    if (w == MapWalk::property) return "property";
+    return "NONE";
+}
+
+bool WalkMapProp(ue::UObject* o, const char* prop, int32_t keySize, int32_t valueSize,
+                 int32_t pairAlign, const std::function<bool(void*, void*)>& fn, MapWalk* how,
+                 int32_t* rows) {
+    if (how) *how = MapWalk::none;
+    if (rows) *rows = 0;
+    if (!o || !prop || !fn) return false;
+
+    // The sparse-array ELEMENT is TPair<Key,Value> padded to the pair's alignment,
+    // plus HashNextId/HashIndex.  ue::MapForEachRaw derives the stride from
+    // keySize+valueSize, so hand it a value size that already includes the pair's
+    // tail padding -- then s4 and s8 come out identical and no stride probe (which
+    // cannot tell an empty FString from garbage) is involved at all.  For every map
+    // here: FName+int32 -> 4 (pair 12, align 4), FName+bool -> 4 (pair 12, align 4),
+    // FString+int32 -> 8 (pair 24, align 8), FName+FSpartaMapInt -> 0x50 (pair 88,
+    // align 8).  Nothing ever reads the padding: callers read the value's own size.
+    int32_t padded = valueSize;
+    if (pairAlign > 1) {
+        const int32_t pairEnd = ((keySize + valueSize + pairAlign - 1) / pairAlign) * pairAlign;
+        padded = pairEnd - keySize;
+        if (padded < valueSize) padded = valueSize;
+    }
+
+    int32_t n = 0;
+    auto counting = [&](void* k, void* v) -> bool {
+        ++n;
+        return fn(k, v);
+    };
+
+    const int32_t off = ue::PropOffset(o, prop);
+    if (off >= 0) {
+        const void* map = reinterpret_cast<const uint8_t*>(o) + off;
+        if (ue::MapForEachRaw(map, keySize, padded, counting)) {
+            if (how) *how = MapWalk::raw;
+            if (rows) *rows = n;
+            return true;
+        }
+    }
+
+    n = 0;
+    if (ue::MapForEach(o, prop, counting)) {
+        if (how) *how = MapWalk::property;
+        if (rows) *rows = n;
+        return true;
+    }
+    return false;
+}
+
+// The box size of FSpartaMapInt / FSpartaMapBool (Sparta_structs.hpp: both are
+// "// 0x0050 (0x0050 - 0x0000)" with a TMap<FName,X> Map at 0x0000).  It is the
+// *value* size of the outer TMap<FName, FSpartaMapI/Bool>, and the inner TMap
+// starts at 0 inside it.
+constexpr int32_t kSpartaMapBox = 0x50;
+
+// One line per gate, throttled: a net::Log line flushes the file and wbScan runs
+// twice per 2 Hz tick.
+class Gate {
+public:
+    bool Due(double now, double every = 5.0, int maxN = 20) {
+        if (count_ >= maxN) return false;
+        // net::Now() is the world clock and restarts on a level load.
+        if (have_ && now < last_) have_ = false;
+        if (have_ && now - last_ < every) return false;
+        have_ = true;
+        last_ = now;
+        ++count_;
+        return true;
+    }
+    int count() const { return count_; }
+
+private:
+    double last_ = 0.0;
+    bool   have_ = false;
+    int    count_ = 0;
+};
+
+Gate g_gateWb;      // wbScan as a whole
+Gate g_gateWbMap;   // per ActorInts/ActorBools walk
+Gate g_gateWqMap;   // the quest-loop maps (same defect, same report)
+Gate g_gateWqSrc;   // how many entries each quest-log source contributes
+int  g_wbLastOrder = -1;   // last wp=b:<n> published, for the "grew" gate
+
+// main.lua:2710 the `for _, mp in ipairs({"ActorInts","ActorBools"})` body.
+void ScanSaveMap(ue::UObject* ws, const char* prop, char t, bool primed, int* rowsOut,
+                 int* keptOut) {
+    WpSet& b = PS().wb;
+    const bool isInt = (t == 'i');
+
+    int ownerRows = 0, ownerKept = 0, innerRows = 0, keptRows = 0;
+    MapWalk how = MapWalk::none;
+    int32_t outerRows = 0;
+
+    const bool entered = WalkMapProp(ws, prop, 8, kSpartaMapBox, 8,
+        [&](void* key, void* value) -> bool {
+            ++ownerRows;
+            ue::FName ownerName;
+            std::memset(&ownerName, 0, sizeof(ownerName));
+            if (!ue::ReadMem(key, &ownerName, sizeof(ownerName))) return true;
+            std::string owner;
+            if (!NameStr(ownerName, &owner)) return true;
+            // Sparta_Player is the local player's own record (tutorials, counters)
+            if (owner == "Sparta_Player") return true;
+            if (!MatchName(owner)) return true;
+            ++ownerKept;
+            // FSpartaMapInt/Bool::Map is the FIRST member (0x0000), so the inner
+            // TMap starts exactly at the value box.  valueSize 4 covers the pair's
+            // tail padding for BOTH shapes (FName+int32 and FName+bool are 12 bytes
+            // at align 4); the bool branch still reads exactly one byte.
+            ue::MapForEachRaw(value, 8, 4, [&](void* k2, void* v2) -> bool {
+                ++innerRows;
+                ue::FName vnName;
+                std::memset(&vnName, 0, sizeof(vnName));
+                if (!ue::ReadMem(k2, &vnName, sizeof(vnName))) return true;
+                std::string vn;
+                if (!NameStr(vnName, &vn)) return true;
+                if (!MatchName(vn)) return true;
+                int n = 0;
+                if (isInt) {
+                    int32_t raw = 0;
+                    if (!ue::ReadMem(v2, &raw, sizeof(raw))) return true;
+                    n = (int)raw;
+                } else {
+                    bool raw = false;   // TMap<FName,bool>: one byte, Lua's wsBool() is the identity
+                    if (!ue::ReadMem(v2, &raw, 1)) return true;
+                    n = raw ? 1 : 0;
+                }
+                Put(b, std::string(1, t) + "|" + owner + "|" + vn, n, primed);
+                ++keptRows;
+                return true;
+            });
+            return true;
+        },
+        &how, &outerRows);
+
+    if (rowsOut) *rowsOut = ownerRows;
+    if (keptOut) *keptOut = keptRows;
+
+    // The gate that was silent while store B was empty: did the walk enter the map
+    // at all, how many owner rows did it see, and how many key/value rows did the
+    // inner map give up?  `path=NONE` means the TMap header did not validate at
+    // the property offset either -- then the offset itself is the thing to doubt.
+    if (g_gateWbMap.Due(Mono()) &&
+        (!entered || ownerRows == 0 || innerRows == 0 || keptRows == 0)) {
+        net::Log("wb: %s path=%s entered=%d owners=%d kept=%d inner=%d rows_kept=%d off=0x%X",
+                 prop, MapWalkName(how), entered ? 1 : 0, ownerRows, ownerKept, innerRows,
+                 keptRows, (unsigned)ue::PropOffset(ws, prop));
+    }
+}
+
+// "TimesUsed" is the store-B value name the PROGRESS verdict depends on and it is a
+// property of BP_Interactable_Chest_C.  Its real FName can be read off the FProperty
+// (FField::Name 0x20 -- the same layout the layer uses) instead of being rebuilt
+// from text, which is the one value name a chest that has no store-B entry yet
+// cannot supply.  Once per session, free after that.
+void RegisterChestValueName() {
+    static bool tried = false;
+    if (tried) return;
+    ue::UClass* c = ue::FindClass("BP_Interactable_Chest_C");
+    if (!c) return;
+    ue::FProperty* p = ue::FindProperty(c, "TimesUsed");
+    if (!p) return;
+    ue::FName n;
+    std::memset(&n, 0, sizeof(n));
+    if (!ue::ReadMem(reinterpret_cast<const uint8_t*>(p) + 0x20, &n, sizeof(n))) return;
+    std::string s;
+    if (!NameStr(n, &s)) return;   // NameStr registers "TimesUsed" -> the real FName
+    tried = true;
+}
+
+// main.lua:2704 wbScan
+void WbScan() {
+    WpSet& b = PS().wb;
+    RegisterChestValueName();
+    ue::UObject* sub = SaveSubSystem();
+    if (!sub) {
+        if (g_gateWb.Due(Mono(), 10.0, 8))
+            net::Log("wbScan: no SpartaSaveSubSystem instance -- store B is invisible");
+        return;
+    }
+
+    // main.lua:2707 sub:GetCurrentWorldStateSave()
+    ue::UObject* ws = nullptr;
+    if (ue::UFunction* f = ue::FindFunction(sub, "GetCurrentWorldStateSave")) {
+        ue::Params p(f);
+        if (ue::Call(sub, f, p.data())) ws = p.Get<ue::UObject*>("ReturnValue");
+    }
+    if (!net::Valid(ws)) {
+        if (g_gateWb.Due(Mono(), 10.0, 8))
+            net::Log("wbScan: GetCurrentWorldStateSave -> %s (valid=%d) -- store B is invisible",
+                     ws ? net::FullName(ws).c_str() : "null",
+                     (ws != nullptr && ue::IsValid(ws)) ? 1 : 0);
+        return;
+    }
+
+    const bool primed = b.primed;
+    int rowsI = 0, keptI = 0, rowsB = 0, keptB = 0;
+    ScanSaveMap(ws, "ActorInts", 'i', primed, &rowsI, &keptI);
+    ScanSaveMap(ws, "ActorBools", 'b', primed, &rowsB, &keptB);
+    Prime(b);
+
+    // `entries` is what the harness prints as `wp=b:<entries>/<peer>`.
+    if (g_gateWb.Due(Mono())) {
+        net::Log("wbScan: save=%s ActorInts=%d/%d ActorBools=%d/%d entries=%d peer=%d primed=%d",
+                 ue::GetClassName(ws).c_str(), rowsI, keptI, rowsB, keptB,
+                 (int)b.order.size(), (int)b.peer.Size(), b.primed ? 1 : 0);
+    }
+
+    // GATE (progress lane): store B growing is the ONLY visible effect of the game's
+    // own WriteAnInt, and the last run's wptest wrote a chest's TimesUsed with
+    // `ok=true` that never showed up here (so no live value could reach the guest and
+    // the PROGRESS verdict never fired). Say it the moment the set changes.
+    if ((int)b.order.size() != g_wbLastOrder) {
+        g_wbLastOrder = (int)b.order.size();
+        const std::string& newest = b.order.empty() ? std::string() : b.order.back();
+        net::Log("wbScan: store B now %d key(s), newest '%s' (mine=%d peer=%d)",
+                 (int)b.order.size(), newest.c_str(), (int)b.mine.Size(), (int)b.peer.Size());
+    }
+}
+
+// main.lua:2742 wbRefreshActor -- only a chest's TimesUsed has a live follow-up; the
+// chest itself is module 6's, so the whole body is one call into coop_world.
+void WbRefreshActor(const std::string& owner, const std::string& vn, int v, bool live) {
+    if (vn != "TimesUsed") return;
+    world::ChestRefreshFromStoreB(owner, vn, v, live);
+}
+
+// `^(%a)|([%w_]+)|([%w_]+)$`
+bool SplitStoreKey(const std::string& name, std::string* t, std::string* owner, std::string* vn) {
+    if (name.size() < 5) return false;
+    const char c = name[0];
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) return false;
+    if (name[1] != '|') return false;
+    std::size_t p = 2;
+    std::string a;
+    while (p < name.size() && name[p] != '|') a.push_back(name[p++]);
+    if (p >= name.size() || name[p] != '|') return false;
+    ++p;
+    std::string bb;
+    while (p < name.size()) bb.push_back(name[p++]);
+    if (!MatchName(a) || !MatchName(bb)) return false;
+    *t = std::string(1, c);
+    *owner = a;
+    *vn = bb;
+    return true;
+}
+
+// Register a chest actor's real FName from its store-B owner text.  The peer's key
+// can name an actor this side has no store-B entry for yet, and WriteAnInt matches by
+// FName, so the name has to come from the actor rather than from the text.
+void RegisterChestOwnerName(const std::string& name) {
+    if (name.empty() || g_realName.Find(name)) return;
+    for (ue::UObject* c : ue::FindAllOf("BP_Interactable_Chest_C")) {
+        if (!net::Valid(c)) continue;
+        if (net::NameOf(c) != name) continue;
+        const ue::FName n = ObjFName(c);
+        if (!n.IsNone()) g_realName.Add(name, n);
+        return;
+    }
+}
+
+// main.lua:2755 wbApply -- budget 6 per tick, write through the game's own helper,
+// read back, and fall back from bModify=true (which may mean "add") to a plain set.
+void WbApply() {
+    WpSet& b = PS().wb;
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* h = Helper();
+    if (!net::Valid(pawn) || !h || !b.primed) return;
+
+    struct Ent {
+        std::string name;
+        int v;
+        bool live;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(b.peer.Size());
+    for (const auto& it : b.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        e.live = b.peerLive.Get(it.key, 0) != 0;
+        ents.push_back(e);
+    }
+
+    int budget = kWbApplyBudget;
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        const int mine = b.mine.Get(e.name, 0);
+        if (!(e.v > mine) || b.done.Has(e.name)) continue;
+
+        --budget;
+        b.done.Add(e.name);
+
+        std::string t, owner, vn;
+        if (!SplitStoreKey(e.name, &t, &owner, &vn)) continue;
+        RegisterChestOwnerName(owner);   // real FName for the owner, if not known yet
+
+        bool ok;
+        if (t == "i") {
+            ok = WriteAnInt(h, pawn, owner, vn, e.v, true);
+        } else {
+            ok = WriteABool(h, pawn, owner, vn, true);
+        }
+
+        bool haveBack = false;
+        int back = 0;
+        if (ok && WbRead(h, owner, vn, t[0], pawn, &back)) haveBack = true;
+
+        // bModify=true may mean "add": fall back to a plain set
+        if (ok && t == "i" && (!haveBack || back != e.v)) {
+            WriteAnInt(h, pawn, owner, vn, e.v, false);
+            int tmp = 0;
+            if (WbRead(h, owner, vn, 'i', pawn, &tmp)) {
+                back = tmp;
+                haveBack = true;
+            }
+        }
+
+        if (haveBack && back == e.v) {
+            ++b.applied;
+            g_wbOk.Set(e.name, e.live ? "live" : "base");
+            b.ok.Set(e.name, HowCode(e.live ? "live" : "base"));
+            Put(b, e.name, e.v, false);
+            net::Log("wb apply %s %s = %d (read back %s)", e.live ? "live" : "base", e.name.c_str(),
+                     e.v, haveBack ? net::Fmt("%d", back).c_str() : "nil");
+            WbRefreshActor(owner, vn, e.v, e.live);
+        } else {
+            ++b.fail;
+            net::Log("wb apply %s FAILED ok=%s back=%s %s", e.name.c_str(),
+                     ok ? "true" : "false", haveBack ? net::Fmt("%d", back).c_str() : "nil", "");
+        }
+    }
+}
+
+// ===========================================================================
+// ---- store B, gap G2: the float and the name map (the `mapsdump` verb) ----
+//
+// HANDOFF-REMAINING-SYNC G2 states the wire carries ActorInts + ActorBools and
+// nothing else, and that NOBODY has ever counted what the shipped content puts
+// into ActorFloats (0x78, TMap<FName, FSpartaMapFloat>) or ActorNames (0x118,
+// TMap<FName, FSpartaMapName>).  The data mine calls those two "a real gap, and
+// now a quantified one" -- quantified in classes, not in entries.
+//
+// This verb is that count, and nothing else: read-only, one shot, at whatever
+// moment cmd.txt says.  It walks all four maps with the same raw TMap walker
+// ScanSaveMap uses (the property-based ue::MapForEach is broken on this build's
+// FMapProperty -- see the comment above WalkMapProp), so the numbers for
+// ActorInts/ActorBools are a control: if those two come out at the counts
+// `wbScan: ActorInts=N ActorBools=M` reports, the walker is sound and the float
+// and name numbers mean something.
+//
+// OUTPUT (probe.log, greppable):
+//   mapsdump: <prop> path=<raw|property|NONE> off=0x<off> owners=<n> inner=<n> kept=<n>
+//   mapsdump <prop> <owner>|<valueName> = <value>          (up to kMapsDumpLines)
+// ===========================================================================
+
+constexpr int kMapsDumpLines = 60;   // per map: enough to see the shape, not a flood
+
+// TPair<Key,Value> padded to the pair's alignment -- the same arithmetic
+// WalkMapProp does, repeated here because the INNER map's shape is not a
+// property of any object (it is a TMap at offset 0 inside the value box).
+int32_t PaddedValueSize(int32_t keySize, int32_t valueSize, int32_t pairAlign) {
+    if (pairAlign <= 1) return valueSize;
+    const int32_t pairEnd = ((keySize + valueSize + pairAlign - 1) / pairAlign) * pairAlign;
+    int32_t padded = pairEnd - keySize;
+    if (padded < valueSize) padded = valueSize;
+    return padded;
+}
+
+// One store-B map, counted (and optionally listed).
+void DumpSaveMap(ue::UObject* ws, const char* prop, char t, bool list) {
+    // t: 'i' int32, 'b' bool, 'f' float, 'n' FName
+    const int32_t innerVal = (t == 'n') ? 8 : (t == 'i' || t == 'f') ? 4 : 4;
+    const int32_t innerAlign = (t == 'n') ? 8 : 4;
+    const int32_t innerPadded = PaddedValueSize(8, innerVal, innerAlign);
+
+    int ownerRows = 0, ownerKept = 0, innerRows = 0, keptRows = 0, matchable = 0;
+    MapWalk how = MapWalk::none;
+    int32_t outerRows = 0;
+
+    const bool entered = WalkMapProp(ws, prop, 8, kSpartaMapBox, 8,
+        [&](void* key, void* value) -> bool {
+            ++ownerRows;
+            ue::FName ownerName;
+            std::memset(&ownerName, 0, sizeof(ownerName));
+            if (!ue::ReadMem(key, &ownerName, sizeof(ownerName))) return true;
+            std::string owner;
+            if (!NameStr(ownerName, &owner)) return true;
+            // Sparta_Player is the local player's own record (tutorials, counters);
+            // ScanSaveMap skips it and so does this count, but say it was seen.
+            const bool isPlayer = (owner == "Sparta_Player");
+            if (!isPlayer) ++ownerKept;
+            const bool ownerOk = MatchName(owner);
+            ue::MapForEachRaw(value, 8, innerPadded, [&](void* k2, void* v2) -> bool {
+                ++innerRows;
+                ue::FName vnName;
+                std::memset(&vnName, 0, sizeof(vnName));
+                if (!ue::ReadMem(k2, &vnName, sizeof(vnName))) return true;
+                std::string vn;
+                if (!NameStr(vnName, &vn)) return true;
+                // `matchable` = the rows the EXISTING wire would be able to carry:
+                // SplitStoreKey() only accepts "[%w_]+|[%w_]+" style names.
+                if (ownerOk && MatchName(vn)) ++matchable;
+                std::string val;
+                if (t == 'i') {
+                    int32_t iv = 0;
+                    if (!ue::ReadMem(v2, &iv, sizeof(iv))) return true;
+                    val = net::Fmt("%d", iv);
+                } else if (t == 'f') {
+                    float fv = 0.0f;
+                    if (!ue::ReadMem(v2, &fv, sizeof(fv))) return true;
+                    val = net::Fmt("%.4f", (double)fv);
+                } else if (t == 'n') {
+                    ue::FName nv;
+                    std::memset(&nv, 0, sizeof(nv));
+                    if (!ue::ReadMem(v2, &nv, sizeof(nv))) return true;
+                    if (!NameStr(nv, &val)) return true;
+                } else {
+                    bool bv = false;   // TMap<FName,bool> is one byte
+                    if (!ue::ReadMem(v2, &bv, 1)) return true;
+                    val = bv ? "true" : "false";
+                }
+                ++keptRows;
+                if (list && keptRows <= kMapsDumpLines) {
+                    net::Log("mapsdump %s %s|%s = %s", prop, owner.c_str(), vn.c_str(),
+                             val.c_str());
+                }
+                return true;
+            });
+            return true;
+        },
+        &how, &outerRows);
+
+    // "the walk returned nothing" and "the game stores nothing" are different
+    // answers, and only the header distinguishes them (ReadMapInfo needs a
+    // non-zero allocation-bit count, so an EMPTY map always fails the walk).
+    int32_t slots = -1, cap = -1;
+    const int32_t off = ue::PropOffset(ws, prop);
+    if (off >= 0) {
+        ue::MapCountRaw(reinterpret_cast<const uint8_t*>(ws) + off, &slots, &cap);
+    }
+    const char* empty = (slots == 0) ? " EMPTY" : "";
+    net::Log("mapsdump: %s path=%s entered=%d off=0x%X slots=%d cap=%d owners=%d inner=%d "
+             "kept=%d matchable=%d%s",
+             prop, MapWalkName(how), entered ? 1 : 0, (unsigned)off, slots, cap, ownerRows,
+             innerRows, keptRows, matchable, empty);
+    (void)ownerKept;
+}
+
+// `mapsdump [all|ints|floats|names|bools]` -- default: all four, lists only the
+// two the wire does NOT carry (the ints/bools are the control count).
+void MapsDumpBody(const std::string& arg) {
+    ue::UObject* sub = SaveSubSystem();
+    if (!sub) {
+        net::Log("mapsdump: no SpartaSaveSubSystem instance -- store B is invisible");
+        return;
+    }
+    ue::UObject* ws = nullptr;
+    if (ue::UFunction* f = ue::FindFunction(sub, "GetCurrentWorldStateSave")) {
+        ue::Params p(f);
+        if (ue::Call(sub, f, p.data())) ws = p.Get<ue::UObject*>("ReturnValue");
+    }
+    if (!net::Valid(ws)) {
+        net::Log("mapsdump: GetCurrentWorldStateSave -> %s -- store B is invisible",
+                 ws ? net::FullName(ws).c_str() : "null");
+        return;
+    }
+
+    const bool all = (arg == "all");
+    net::Log("mapsdump: save=%s t=%.1f mode=%s", ue::GetClassName(ws).c_str(), Mono(),
+             arg.empty() ? "default" : arg.c_str());
+    if (all || arg.empty() || arg == "ints") DumpSaveMap(ws, "ActorInts", 'i', false);
+    if (all || arg.empty() || arg == "bools") DumpSaveMap(ws, "ActorBools", 'b', false);
+    if (all || arg.empty() || arg == "floats") DumpSaveMap(ws, "ActorFloats", 'f', true);
+    if (all || arg.empty() || arg == "names") DumpSaveMap(ws, "ActorNames", 'n', true);
+}
+
+// ===========================================================================
+// ---- quest log (main.lua:2792-3056) ----
+// ===========================================================================
+
+// main.lua:2799 wqObj -- the live BP_QuestObject_C with this QuestID.
+ue::UObject* WqObj(ue::UObject* q, const std::string& id) {
+    if (!q || id.empty()) return nullptr;
+    ue::TArray<ue::UObject*> arr;
+    if (!ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", arr)) return nullptr;
+    if (!arr.Data || arr.Num <= 0 || arr.Num > 4096) return nullptr;
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        ue::UObject* o = arr.Data[i];
+        if (!net::Valid(o)) continue;
+        ue::FName qid;
+        std::memset(&qid, 0, sizeof(qid));
+        std::string got;
+        if (!ue::Get<ue::FName>(o, "QuestID", qid)) continue;
+        if (!NameStr(qid, &got)) continue;
+        if (got == id) return o;
+    }
+    return nullptr;
+}
+
+// main.lua:2811 wqProgress -- CurrentQuestObjectiveProgress as a name -> count table.
+// TMap<FName,int32> (Sparta_classes.hpp:0x0038(0x0050)).
+//
+// Uses ue::MapWalkNameInt, NOT WalkMapProp: this build's TBitArray keeps the
+// allocation bits inline for <= 128 elements, and the older walker's key fallback
+// decodes every slot as an FName *even for the FString-keyed maps*, so it reported
+// `rows=0` for maps that are not empty (see ms2_map.cpp).  The new walker uses the
+// real header and the right key type.
+void WqProgress(ue::UObject* o, StrIntMap* out) {
+    out->Clear();
+    if (!o) return;
+    int32_t rows = 0;
+    ue::MapWalkNameInt(o, "CurrentQuestObjectiveProgress",
+                       [&](const char* k, int32_t v) -> bool {
+                           out->Set(k, (int)v);
+                           ++rows;
+                           return true;
+                       });
+    if (rows == 0 && g_gateWqMap.Due(Mono(), 5.0, 24)) {
+        net::Log("wq: CurrentQuestObjectiveProgress rows=%d class=%s -- objective counters empty/unreadable",
+                 (int)rows, ue::GetClassName(o).c_str());
+    }
+}
+
+// FQuestStage / FQuestObjectives offsets -- research\raw\Dumper7\SDK\Sparta_structs.hpp:
+//   FQuestStage { 0x00 StageName FText; 0x10 Description FText; 0x20 TArray<FQuestObjectives> Objectives; ... }
+//   FQuestObjectives { 0x00 ObjectiveName FText; 0x10 Description FText; 0x20 ObjectiveClass;
+//                      0x28 ObjectiveID FName; 0x30 Quantity int32; 0x34 bOptional bool; 0x35 bBonusXP; size 0x38 }
+// These are struct-internal offsets: reflection can find the *property* CurrentStageDetails
+// (via ue::PropOffset) but there is no property-based path into a struct value, so the
+// SDK numbers are used directly, exactly like ms2_ue.h uses the SDK's FField layout.
+constexpr int32_t kStageNameOff = 0x00;
+constexpr int32_t kStageObjectivesOff = 0x20;
+constexpr int32_t kObjectiveIdOff = 0x28;
+constexpr int32_t kObjectiveQtyOff = 0x30;
+constexpr int32_t kObjectiveOptOff = 0x34;
+constexpr int32_t kObjectiveSize = 0x38;
+
+// main.lua:2965 / 3243 wpStr(o.CurrentStageDetails.StageName) -- the FText at the head of
+// the current stage struct, only ever used for log lines.
+std::string StageNameOf(ue::UObject* o) {
+    if (!o) return "nil";
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return "nil";
+    const std::string s = ue::TextToString(reinterpret_cast<uint8_t*>(o) + off + kStageNameOff);
+    return s;
+}
+
+struct StageObjective {
+    std::string id;
+    int quantity;
+    bool optional;
+};
+
+// main.lua:2940 o.CurrentStageDetails.Objectives
+void StageObjectivesOf(ue::UObject* o, std::vector<StageObjective>* out) {
+    out->clear();
+    if (!o) return;
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return;
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kStageObjectivesOff, &arr, sizeof(arr)))
+        return;
+    if (!arr.Data || arr.Num <= 0 || arr.Num > 256) return;
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        const uint8_t* el = arr.Data + (std::size_t)i * kObjectiveSize;
+        ue::FName n;
+        std::memset(&n, 0, sizeof(n));
+        if (!ue::ReadMem(el + kObjectiveIdOff, &n, sizeof(n))) continue;
+        StageObjective so;
+        if (!NameStr(n, &so.id)) continue;
+        int32_t q = 0;
+        if (!ue::ReadMem(el + kObjectiveQtyOff, &q, sizeof(q))) continue;
+        bool opt = false;
+        if (!ue::ReadMem(el + kObjectiveOptOff, &opt, 1)) continue;
+        so.quantity = (int)q;
+        so.optional = opt;
+        out->push_back(so);
+    }
+}
+
+// main.lua:2822 WQ_PRESENCE
+inline bool WqPresence(char c) { return c == 't' || c == 'a' || c == 'c' || c == 'k'; }
+
+// main.lua:2824 wqScan -- narrative tags, active/completed quests, the tracked quest, the
+// live quest objects' stage + objective counters, and the two NPC relationship maps.
+void WqScan() {
+    ProgressState& ps = PS();
+    WpSet& qset = ps.wq;
+    ue::UObject* q = QuestLog();
+    if (!q) return;
+
+    const bool primed = qset.primed;
+    StrIntMap now;
+
+    // main.lua:2830 q.NarrativeTags.GameplayTags  (FGameplayTagContainer at the property,
+    // ::GameplayTags is a TArray<FGameplayTag> at offset 0, FGameplayTag is one FName)
+    {
+        const int32_t off = ue::PropOffset(q, "NarrativeTags");
+        if (off >= 0) {
+            ue::TArray<FGameplayTag> arr;
+            if (ue::ReadMem(reinterpret_cast<uint8_t*>(q) + off, &arr, sizeof(arr)) && arr.Data &&
+                arr.Num > 0 && arr.Num <= 8192) {
+                for (int32_t i = 0; i < arr.Num; ++i) {
+                    std::string tag;
+                    if (!NameStr(arr.Data[i].TagName, &tag)) continue;
+                    if (!MatchNameDot(tag)) continue;
+                    now.Set("t|" + tag, 1);
+                }
+            }
+        }
+    }
+
+    // main.lua:2836 CurrentActiveQuests -> "a|", CompletedQuests -> "c|"
+    {
+        static const char* kNames[2] = {"CurrentActiveQuests", "CompletedQuests"};
+        static const char* kPrefix[2] = {"a|", "c|"};
+        for (int k = 0; k < 2; ++k) {
+            ue::TArray<ue::FName> arr;
+            if (!ue::Get<ue::TArray<ue::FName>>(q, kNames[k], arr)) continue;
+            if (!arr.Data || arr.Num <= 0 || arr.Num > 8192) continue;
+            for (int32_t i = 0; i < arr.Num; ++i) {
+                std::string id;
+                if (!NameStr(arr.Data[i], &id)) continue;
+                if (!MatchNameDot(id)) continue;
+                now.Set(std::string(kPrefix[k]) + id, 1);
+            }
+        }
+    }
+
+    // main.lua:2845 the tracked quest
+    {
+        ue::FName tr;
+        std::memset(&tr, 0, sizeof(tr));
+        std::string s;
+        if (ue::Get<ue::FName>(q, "CurrentTrackedQuest", tr) && NameStr(tr, &s) && s != "None" &&
+            MatchNameDot(s)) {
+            now.Set("k|" + s, 1);
+        }
+    }
+
+    // main.lua:2848 the live quest objects (completed ones stay in ActiveQuests too)
+    {
+        ue::TArray<ue::UObject*> arr;
+        if (ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", arr) && arr.Data && arr.Num > 0 &&
+            arr.Num <= 4096) {
+            for (int32_t i = 0; i < arr.Num; ++i) {
+                ue::UObject* o = arr.Data[i];
+                if (!net::Valid(o)) continue;
+                ue::FName qid;
+                std::memset(&qid, 0, sizeof(qid));
+                std::string id;
+                if (!ue::Get<ue::FName>(o, "QuestID", qid)) continue;
+                if (!NameStr(qid, &id)) continue;
+                if (!MatchNameDot(id)) continue;
+
+                int32_t st = 0;
+                ue::Get<int32_t>(o, "CurrentQuestStage", st);
+                const std::string stageKey = net::Fmt("s|%s", id.c_str());
+                now.Set(stageKey, (int)st + 1);
+
+                StrIntMap prog;
+                WqProgress(o, &prog);
+                for (const auto& it : prog.Items()) {
+                    if (it.value > 0 && MatchNameDot(it.key)) {
+                        now.Set(net::Fmt("o|%s|%d|%s", id.c_str(), (int)st, it.key.c_str()),
+                                it.value);
+                    }
+                }
+
+                bool turned = false;
+                if (ue::Get<bool>(o, "IsTurnedIn", turned) && turned) now.Set("u|" + id, 1);
+            }
+        }
+    }
+
+    // main.lua:2863 NPCRelationships -> "r|", NarrativeEvents -> "e|"  (TMap<FString,int32>)
+    //
+    // ue::MapWalkStrInt, not WalkMapProp: the MAP_PROBE run showed that
+    // NPCRelationships is NOT empty (`num=7`, keys Sester Genessa / Gorf / Vlas /
+    // Collector / Thestus / Blacksmith / Tavern NPC) and that this build stores the
+    // allocation bits INLINE (NumBits map+0x28, MaxBits 0x80 map+0x2C).  The old
+    // walker saw no flags and then decoded each slot's key as an FName, i.e. as the
+    // wrong type for these FString-keyed maps, so it published `r|e| = 0` for the
+    // whole session.  That was the QUEST2 `rel` failure, not a missing insert.
+    {
+        static const char* kNames[2] = {"NPCRelationships", "NarrativeEvents"};
+        static const char* kPrefix[2] = {"r|", "e|"};
+        for (int k = 0; k < 2; ++k) {
+            int32_t rows = 0;
+            ue::MapWalkStrInt(q, kNames[k], [&](const char* name, int32_t v) -> bool {
+                if (!MatchNameDotSpace(name)) return true;
+                now.Set(std::string(kPrefix[k]) + name, (int)v);
+                ++rows;
+                return true;
+            });
+            if (rows == 0 && g_gateWqMap.Due(Mono(), 5.0, 24)) {
+                net::Log("wq: %s rows=%d class=%s -- relationships/events empty (or unreadable)",
+                         kNames[k], (int)rows, ue::GetClassName(q).c_str());
+            }
+        }
+    }
+
+    // main.lua:2871 `for name, v in pairs(now)` -- adopt what the log reports
+    for (const auto& it : now.Items()) {
+        if (primed && qset.mine.Get(it.key, 0) == -1) qset.removed.Erase(it.key);
+        Put(qset, it.key, it.value, primed);
+    }
+
+    // main.lua:2875 a presence key that is gone locally travels as -1
+    {
+        std::vector<std::string> names;
+        names.reserve(qset.mine.Size());
+        for (const auto& it : qset.mine.Items()) names.push_back(it.key);
+        for (const std::string& name : names) {
+            if (qset.mine.Get(name, 0) != 1) continue;
+            if (now.Find(name) != nullptr) continue;
+            if (name.empty() || !WqPresence(name[0])) continue;
+            Put(qset, name, -1, primed);
+            if (primed) {
+                qset.removed.Add(name);
+                net::Log("wq local removal %s", name.c_str());
+            }
+        }
+    }
+
+    if (now.Size() > 0) Prime(qset);
+
+    // GATE (progress lane): which quest-log source is empty?  The last run's
+    // published wq section held the 8 save tags and nothing else for the whole
+    // session, while the host's qstest added a quest; without this line there is no
+    // way to tell "the log has no quests" from "our read of it is blind".
+    if (g_gateWqSrc.Due(Mono(), 10.0, 40)) {
+        int tags = 0, aa = 0, cc = 0, kk = 0, ss = 0, oo = 0, rr = 0, ee = 0;
+        for (const auto& it : now.Items()) {
+            const std::string& n = it.key;
+            if (HasPrefix(n, "t|")) { ++tags; continue; }
+            if (n.size() < 2 || n[1] != '|') continue;
+            switch (n[0]) {
+                case 'a': ++aa; break;
+                case 'c': ++cc; break;
+                case 'k': ++kk; break;
+                case 's': ++ss; break;
+                case 'o': ++oo; break;
+                case 'r': ++rr; break;
+                case 'e': ++ee; break;
+                default: break;
+            }
+        }
+        int32_t activeQuests = -1;
+        {
+            ue::TArray<ue::UObject*> objs;
+            if (ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", objs)) activeQuests = objs.Num;
+        }
+        net::Log("wqScan: tags=%d a=%d c=%d k=%d s=%d o=%d r=%d e=%d ActiveQuests=%d "
+                 "primed=%d list=%d peer=%d (realFNames=%d)",
+                 tags, aa, cc, kk, ss, oo, rr, ee, (int)activeQuests, qset.primed ? 1 : 0,
+                 (int)qset.order.size(), (int)qset.peer.Size(), (int)g_realName.Size());
+    }
+}
+
+// main.lua:2886 wqAdopt -- adopt an applied value so the next scan does not call it a change.
+void WqAdopt(const std::string& name, int v, const char* how, bool peerLive) {
+    WpSet& qset = PS().wq;
+    ++qset.applied;
+    g_wqOk.Set(name, how);
+    qset.ok.Set(name, HowCode(how));
+    // WP.q.hist[name] = (WP.q.hist[name] or "") .. (how == "remove" and "-" or "+")
+    const bool remove = (std::strcmp(how, "remove") == 0);
+    if (std::string* h = g_qHist.Find(name)) {
+        h->push_back(remove ? '-' : '+');
+    } else {
+        g_qHist.Set(name, remove ? "-" : "+");
+    }
+    qset.histMap.Set(name, qset.histMap.Get(name, 0) | (remove ? 2 : 1));
+
+    if (!qset.mine.Find(name)) qset.order.push_back(name);
+    qset.mine.Set(name, v);
+    qset.recent.Erase(name);
+    net::Log("wq apply %s %s %s = %d", peerLive ? "live" : "base", how, name.c_str(), v);
+}
+
+// [R9-QUEST] kill switch for the turned-in catch-up below: coop\QUESTSTAGE_OFF.txt
+// restores the merged rule (a turned-in quest is history, so a late joiner keeps the
+// first stage of a quest it was handed already completed).  Same shape as the other
+// *_OFF.txt switches: checked once per session.
+bool Qs9CatchUpOff() {
+    static const bool s_off = net::FileExists("QUESTSTAGE_OFF.txt");
+    return s_off;
+}
+
+// main.lua:2901 wqApplyQuest -- one quest-state entry. false = "not ready yet, retry".
+bool WqApplyQuest(ue::UObject* q, const std::string& name, char kind, const std::string& rest,
+                  int peerV, bool peerLive) {
+    WpSet& qset = PS().wq;
+    const int mine = qset.mine.Get(name, 0);
+
+    if (kind == 'o') {
+        // rest = "<quest>|<stage>|<objective>"
+        std::string id, stageS, obj;
+        {
+            const std::size_t p1 = rest.find('|');
+            if (p1 == std::string::npos) return true;
+            const std::size_t p2 = rest.find('|', p1 + 1);
+            if (p2 == std::string::npos) return true;
+            id = rest.substr(0, p1);
+            stageS = rest.substr(p1 + 1, p2 - p1 - 1);
+            obj = rest.substr(p2 + 1);
+            if (stageS.empty() || obj.empty()) return true;
+            for (char c : stageS) {
+                if (c < '0' || c > '9') return true;
+            }
+        }
+        const int stage = std::atoi(stageS.c_str());
+        ue::UObject* o = WqObj(q, id);
+        if (!o) return false;
+
+        int32_t cur = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+        bool turned = false;
+        ue::Get<bool>(o, "IsTurnedIn", turned);
+        // a counter of a stage this side has already left is history
+        if ((int)cur > stage) return true;
+        // [R9-QUEST] a TURNED-IN quest is not history for a late joiner -- see the
+        // long note in kind 's'.  QUESTSTAGE_OFF.txt restores the merged rule.
+        if (turned && Qs9CatchUpOff()) return true;
+        if ((int)cur < stage) return false;
+
+        StrIntMap prog;
+        WqProgress(o, &prog);
+        int have = prog.Get(obj, 0);
+        if (have >= peerV) {
+            WqAdopt(name, have, "count", peerLive);
+            return true;
+        }
+        // [R9-QUEST] turned in here but the counter is behind: this side was handed
+        // the completion before it ever saw the stage.  Write the counter and read it
+        // back; do NOT hear the objective, because that would re-enter the game's own
+        // objective-completion path on a quest that is already finished.
+        if (turned && !Qs9CatchUpOff()) {
+            ue::MapInsertNameInt(o, "CurrentQuestObjectiveProgress", obj.c_str(), peerV);
+            WqProgress(o, &prog);
+            const int back = prog.Get(obj, 0);
+            if (back >= peerV) {
+                WqAdopt(name, back, "countset", peerLive);
+                net::Log("wq apply count %s = %d catch-up on a turned-in quest", name.c_str(), back);
+            } else {
+                ++qset.fail;
+                net::Log("wq apply count %s FAILED on a turned-in quest (have %d)", name.c_str(), back);
+            }
+            return true;
+        }
+        // the game's own path: one "objective heard" per missing step
+        int steps = peerV - have;
+        if (steps > 10) steps = 10;
+        for (int i = 0; i < steps; ++i) HearObjective(o, obj);
+
+        WqProgress(o, &prog);
+        int back = prog.Get(obj, 0);
+        if (back >= peerV) {
+            WqAdopt(name, back, "count", peerLive);
+        } else {
+            // not an objective of this stage's handler: write the counter.
+            // ue::MapInsertNameInt overwrites an existing key and falls back to the
+            // engine's own insert for a new one (validated separately, see
+            // ms2_map.cpp); it reads back through the same walk, so `back` below is
+            // evidence rather than an assumption.
+            ue::MapInsertNameInt(o, "CurrentQuestObjectiveProgress", obj.c_str(), peerV);
+            WqProgress(o, &prog);
+            back = prog.Get(obj, 0);
+            if (back >= peerV) {
+                WqAdopt(name, back, "countset", peerLive);
+            } else {
+                ++qset.fail;
+                net::Log("wq apply count %s FAILED (have %d)", name.c_str(), back);
+            }
+        }
+        return true;
+    }
+
+    if (kind == 's') {
+        ue::UObject* o = WqObj(q, rest);
+        if (!o) return false;
+        bool turned = false;
+        ue::Get<bool>(o, "IsTurnedIn", turned);
+        // [R9-QUEST] the merged rule (kill switch): a turned-in quest is history.
+        if (turned && Qs9CatchUpOff()) return false;
+
+        int32_t curRaw = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", curRaw);
+        const int cur = (int)curRaw + 1;
+        if (cur >= peerV) {
+            qset.behindSince.Erase(name);
+            WqAdopt(name, cur, "stage", peerLive);
+            return true;
+        }
+
+        // [R9-QUEST] TURNED-IN IS NOT HISTORY FOR A LATE JOINER.  The peer's snapshot
+        // carries a|, s|, o|, c|, u| and is applied in MAP order; when c|/u| land
+        // first this side is "turned in" at stage 1 before it ever saw the stage, and
+        // the merged `if (turned) return false` dropped the stage entry for the whole
+        // session (measured: A stage 2 / 3-of-3 vs B stage 1 / 0-of-3, unchanged for
+        // 45 s -- REPORT.md §6b).  Fix: adopt the INDEX only.  No objective is heard,
+        // so the game's completion/reward path does not run a second time here.
+        if (turned) {
+            const std::string before = StageNameOf(o);
+            bool ok = ue::Set<int32_t>(o, "CurrentQuestStage", (int32_t)(peerV - 1));
+            if (ok) ok = InitializeQuest(o);
+            int back = 0;
+            {
+                int32_t v = 0;
+                ue::Get<int32_t>(o, "CurrentQuestStage", v);
+                back = (int)v + 1;
+            }
+            if (ok && back >= peerV) {
+                qset.behindSince.Erase(name);
+                WqAdopt(name, back, "stage", peerLive);
+                net::Log("wq stage %s -> %d catch-up on a turned-in quest (name '%s' -> '%s')",
+                         rest.c_str(), peerV - 1, before.c_str(), StageNameOf(o).c_str());
+            } else {
+                ++qset.fail;
+                net::Log("wq apply stage %s FAILED on a turned-in quest (back %d)", rest.c_str(), back);
+            }
+            return true;
+        }
+
+        // the peer finished this stage: hear its objectives here so the game advances
+        // the stage itself (rewards included)
+        const std::string hk = net::Fmt("%s@%d", name.c_str(), cur);
+        if (!qset.heard.Find(hk)) {
+            qset.heard.Set(hk, 1);
+            std::vector<StageObjective> objs;
+            StageObjectivesOf(o, &objs);
+            StrIntMap prog;
+            WqProgress(o, &prog);
+            for (const StageObjective& e : objs) {
+                if (e.id.empty() || e.optional) continue;
+                int steps = e.quantity - prog.Get(e.id, 0);
+                if (steps > 10) steps = 10;
+                for (int i = 0; i < steps; ++i) HearObjective(o, e.id);
+            }
+            net::Log("wq stage %s: heard %d objective(s) of stage %d", rest.c_str(),
+                     (int)objs.size(), cur - 1);
+            qset.stageHeard.Set(rest, qset.stageHeard.Get(rest, 0) + (int)objs.size());
+            return false;
+        }
+
+        // still behind: give the game a moment, then write the stage
+        const double now = Mono();
+        double* since = qset.behindSince.Find(name);
+        if (!since) {
+            qset.behindSince.Set(name, now);
+            since = qset.behindSince.Find(name);
+        }
+        if (now - *since < kWqStageWait) return false;
+        qset.behindSince.Erase(name);
+
+        const std::string before = StageNameOf(o);
+        bool ok = ue::Set<int32_t>(o, "CurrentQuestStage", (int32_t)(peerV - 1));
+        if (ok) ok = InitializeQuest(o);
+        const std::string after = StageNameOf(o);
+        int back = 0;
+        {
+            int32_t v = 0;
+            ue::Get<int32_t>(o, "CurrentQuestStage", v);
+            back = (int)v + 1;
+        }
+        if (ok && back == peerV) {
+            WqAdopt(name, back, "stage", peerLive);
+            net::Log("wq stage %s -> %d (stage name '%s' -> '%s')", rest.c_str(), peerV - 1,
+                     before.c_str(), after.c_str());
+        } else {
+            ++qset.fail;
+            net::Log("wq apply stage %s FAILED %s", name.c_str(), ok ? "" : "call failed");
+        }
+        return true;
+    }
+
+    if (kind == 'u') {
+        if (peerV != 1 || mine == 1) return true;
+        bool ok = true;
+        if (qset.mine.Get("c|" + rest, 0) != 1) {
+            if (qset.mine.Get("a|" + rest, 0) != 1) ok = QuestCall(q, "AddNewQuest", rest);
+            if (ok) ok = QuestCall(q, "CompleteQuest", rest);
+        }
+        if (ok) ok = QuestCall(q, "TurnInQuest", rest);
+
+        ue::UObject* o = WqObj(q, rest);
+        bool turned = false;
+        if (o) ue::Get<bool>(o, "IsTurnedIn", turned);
+        if (ok && o && turned) {
+            WqAdopt(name, 1, "turnin", peerLive);
+        } else {
+            ++qset.fail;
+            net::Log("wq apply turnin %s FAILED ok=%s %s", rest.c_str(), ok ? "true" : "false",
+                     ok ? "" : "call failed");
+        }
+        return true;
+    }
+
+    return true;
+}
+
+// main.lua:2991 wqApply -- budget 4 per tick.
+Gate g_gateWqApply;
+StrNumMap g_relLast;      // r|/e| name -> Mono() of the last write attempt
+StrIntMap g_relMissLog;   // r|/e| name -> value already reported as "key absent"
+
+// Defined with the test hooks; declared here because an incoming quest key needs the
+// real FName even when this side has never heard of that quest (the guest learns
+// "LocationQuest" from the peer's payload as text -- and FN() would have to rebuild
+// it, which is exactly the index mismatch NameReg exists to avoid).
+bool QuestNamesLoad();
+
+void WqApply() {
+    ProgressState& ps = PS();
+    WpSet& qset = ps.wq;
+    ue::UObject* q = ps.qlog;
+    if (!net::Valid(q) || !qset.primed) {
+        // GATE (progress lane): the two silent early returns that would leave a
+        // guest at `q:8/8+0!0` forever with nothing in the log.
+        if (g_gateWqApply.Due(Mono(), 10.0, 12)) {
+            net::Log("wqApply: gated (q=%s valid=%d primed=%d peer=%d) -- this is why "
+                     "nothing is applied", q ? "yes" : "NO", net::Valid(q) ? 1 : 0,
+                     qset.primed ? 1 : 0, (int)qset.peer.Size());
+        }
+        return;
+    }
+
+    struct Ent {
+        std::string name;
+        int v;
+        bool live;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(qset.peer.Size());
+    for (const auto& it : qset.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        e.live = qset.peerLive.Get(it.key, 0) != 0;
+        ents.push_back(e);
+    }
+
+    // [R9-QUEST] The late-join defect this order caused is FIXED in WqApplyQuest, not
+    // here: the peer snapshot arrives in MAP order, so `c|`/`u|` can land before
+    // `s|`/`o|` and the quest is created already turned in at stage 1.  The 's' and
+    // 'o' paths therefore no longer treat "turned in" as history: they adopt the
+    // stage index and write the counter for a quest this side is behind on, without
+    // re-hearing objectives (so no second completion or reward).  A global priority
+    // sort HERE was tried first and REVERTED: it starved the 4-per-tick apply budget
+    // and pushed a normal stage from 0.6-5.5 s to >25 s.  Keep the order as it is.
+    // Kill switch: coop\QUESTSTAGE_OFF.txt restores the merged "turned in = history".
+    // in but behind, adopt the stage index anyway without re-running the completion.
+
+    int nDone = 0, nTried = 0, nNoWant = 0, nNotReady = 0;
+    int budget = kWqApplyBudget;
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        const bool hasMine = qset.mine.Find(e.name) != nullptr;
+        const int mine = qset.mine.Get(e.name, 0);
+
+        // `^(%a)|(.+)$`
+        if (e.name.size() < 3 || e.name[1] != '|') continue;
+        const char kind = e.name[0];
+        if (!((kind >= 'a' && kind <= 'z') || (kind >= 'A' && kind <= 'Z'))) continue;
+        const std::string id = e.name.substr(2);
+
+        // A quest id that came from the peer is text until this side has seen its
+        // FName; the quest datatable holds the game's own index for every quest, so
+        // load it before the first call that would need one (no-op once loaded).
+        if ((kind == 'a' || kind == 'c' || kind == 'k' || kind == 'u' || kind == 's' ||
+             kind == 'o') && !g_realName.Find(id)) {
+            QuestNamesLoad();
+        }
+
+        if (kind == 'o' || kind == 's' || kind == 'u') {
+            if (e.v > (hasMine ? mine : 0) && qset.tried.Get(e.name, 0) != e.v) {
+                // not ready yet (quest object missing / earlier stage): retry later, no budget used
+                if (WqApplyQuest(q, e.name, kind, id, e.v, e.live)) {
+                    qset.tried.Set(e.name, e.v);
+                    --budget;
+                } else {
+                    ++nNotReady;
+                }
+            } else if (qset.tried.Get(e.name, 0) == e.v) {
+                ++nTried;
+            } else {
+                ++nNoWant;
+            }
+        } else if (kind == 'r' || kind == 'e') {
+            const bool want = (e.live && e.v != (hasMine ? mine : 0)) ||
+                              (!e.live && e.v > (hasMine ? mine : 0));
+            if (want && qset.tried.Get(e.name, 0) != e.v) {
+                const char* map = (kind == 'r') ? "NPCRelationships" : "NarrativeEvents";
+                // main.lua:3011 `q[map]:Add(id, p.v)`.  For NPCRelationships this is an
+                // OVERWRITE: the blueprint defaults seed the map with every hub NPC
+                // (MAP_PROBE: `num=7 ... key='Gorf'`), which is exactly what made the
+                // old overwrite-only call fail -- it could not SEE the key, because the
+                // walker decoded these FString keys as FNames.  ue::MapInsertStrInt
+                // reads the map with the correct header/type, overwrites, reads back,
+                // and only then reports success.  A key that is genuinely absent goes
+                // through the engine's own insert (see ms2_map.cpp).
+                const bool retryDue = Mono() - g_relLast.Get(e.name, -1e9) > 5.0;
+                if (retryDue) {
+                    g_relLast.Set(e.name, Mono());
+                    const bool ok = ue::MapInsertStrInt(q, map, id.c_str(), e.v);
+                    if (ok) {
+                        --budget;
+                        qset.tried.Set(e.name, e.v);
+                        WqAdopt(e.name, e.v, "set", e.live);
+                    } else if (g_relMissLog.Get(e.name, 0) != e.v) {
+                        // one line per value, not per tick
+                        g_relMissLog.Set(e.name, e.v);
+                        ++qset.fail;
+                        net::Log("wq apply %s FAILED: %s map write did not read back "
+                                 "(retrying every 5 s)", e.name.c_str(), map);
+                    }
+                }
+            } else if (want) {
+                ++nTried;
+            } else {
+                ++nNoWant;
+            }
+        } else {
+            const char* want = nullptr;
+            if (e.v == 1 && (!hasMine || mine != 1) &&
+                (e.live || !qset.removed.Has(e.name))) {
+                want = "add";
+            } else if (e.v == -1 && e.live && hasMine && mine == 1) {
+                want = "remove";
+            }
+            // never re-open a quest this side has completed
+            if (want && kind == 'a' && qset.mine.Get("c|" + id, 0) == 1) want = nullptr;
+            if (want && kind != 't' && std::strcmp(want, "remove") == 0) want = nullptr;
+            // tracked quest: live changes both ways, the guest follows the host's baseline
+            if (want && kind == 'k' && !e.live && IsHost()) want = nullptr;
+
+            if (want && !qset.done.Has(e.name)) {
+                --budget;
+                qset.done.Add(e.name);
+
+                bool ok = true;
+                const bool isAdd = (std::strcmp(want, "add") == 0);
+                if (kind == 't') {
+                    ok = TagCall(q, isAdd ? "AddNarrativeTag" : "RemoveNarrativeTag", id);
+                } else if (kind == 'a') {
+                    ok = QuestCall(q, "AddNewQuest", id);
+                } else if (kind == 'c') {
+                    if (qset.mine.Get("a|" + id, 0) != 1) ok = QuestCall(q, "AddNewQuest", id);
+                    if (ok) ok = QuestCall(q, "CompleteQuest", id);
+                } else if (kind == 'k') {
+                    ok = ue::Set<ue::FName>(q, "CurrentTrackedQuest", FN(id));
+                    if (ok) ok = TrackQuests(q);
+                }
+
+                if (ok) {
+                    WqAdopt(e.name, isAdd ? 1 : -1, want, e.live);
+                    if (isAdd) {
+                        qset.removed.Erase(e.name);
+                    } else {
+                        qset.removed.Add(e.name);
+                    }
+                    if (kind == 'k') {
+                        // the quest tracked before is no longer tracked here
+                        std::vector<std::string> names;
+                        for (const auto& it : qset.mine.Items()) names.push_back(it.key);
+                        for (const std::string& n2 : names) {
+                            if (n2 == e.name) continue;
+                            if (qset.mine.Get(n2, 0) != 1) continue;
+                            if (!HasPrefix(n2, "k|")) continue;
+                            qset.mine.Set(n2, -1);
+                        }
+                    }
+                } else {
+                    ++qset.fail;
+                    net::Log("wq apply %s %s FAILED: %s", want, e.name.c_str(), "call failed");
+                }
+            } else if (want) {
+                ++nDone;
+            } else {
+                ++nNoWant;
+            }
+        }
+    }
+
+    // GATE (progress lane): one line per 10 s, so the next run shows whether the
+    // guest is idle because the peer sent nothing new, because every entry was
+    // already adopted, or because a call silently failed.
+    if (g_gateWqApply.Due(Mono(), 10.0, 24)) {
+        net::Log("wqApply: peer=%d applied=%d fail=%d skipped(already=%d tried=%d "
+                 "nowant=%d notready=%d) budget=4", (int)ents.size(), qset.applied,
+                 qset.fail, nDone, nTried, nNoWant, nNotReady);
+    }
+}
+
+// ===========================================================================
+// ---- data layers (main.lua:3058-3106) ----
+// ===========================================================================
+
+// main.lua:3059 wdScan -- every DataLayerInstanceWithAsset, state+1 so that
+// "unloaded" (0) still goes out through the rotating window.
+void WdScan() {
+    WpSet& d = PS().wd;
+    ue::UObject* dlm = LayerManager();
+    if (!dlm) return;
+
+    const bool primed = d.primed;
+    for (ue::UObject* inst : ue::FindAllOf("DataLayerInstanceWithAsset")) {
+        if (!net::Valid(inst)) continue;
+        ue::UObject* asset = nullptr;
+        if (!ue::Get<ue::UObject*>(inst, "DataLayerAsset", asset)) continue;
+        // The asset is a loaded /Game/ package object, not a CDO; PlausiblePtr is the right
+        // test here because net::Valid() (ue::IsValid) would refuse a CDO-like object and
+        // silently stop every layer from ever being named.
+        if (!asset || !ue::PlausiblePtr(asset)) continue;
+        const std::string name = net::NameOf(asset);
+        if (!MatchName(name)) continue;
+
+        g_wdInst.Set(name, inst);
+
+        int st = 0;
+        if (LayerState(dlm, inst, &st)) Put(d, name, st + 1, primed);
+    }
+    Prime(d);
+}
+
+// main.lua:3076 wdApply -- guest only, budget 2, 10 s cooldown per layer, and never
+// while the players are more than 15 000 uu apart (their regions load different layers).
+void WdApply() {
+    ProgressState& ps = PS();
+    WpSet& d = ps.wd;
+    if (IsHost() || !d.primed) return;
+    ue::UObject* dlm = ps.dlm;
+    if (!net::Valid(dlm)) return;
+
+    {
+        ue::UObject* pawn = net::Pawn();
+        ue::UObject* pp = puppet::Actor();
+        if (net::Valid(pawn) && net::Valid(pp)) {
+            const Vec3 me = net::Loc(pawn);
+            const Vec3 pl = net::Loc(pp);
+            const double dx = me.X - pl.X;
+            const double dy = me.Y - pl.Y;
+            if (std::sqrt(dx * dx + dy * dy) > kWdFarGate) return;
+        }
+    }
+
+    struct Ent {
+        std::string name;
+        int v;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(d.peer.Size());
+    for (const auto& it : d.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        ents.push_back(e);
+    }
+
+    int budget = kWdApplyBudget;
+    const double tnow = Mono();
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        ue::UObject* inst = g_wdInst.Get(e.name);
+        if (!net::Valid(inst)) continue;
+        const int* mineP = d.mine.Find(e.name);
+        if (!mineP) continue;
+        const int mine = *mineP;
+        if (mine == e.v) continue;
+        if (!(tnow - g_wdLast.Get(e.name, -100.0) > kWdApplyCd)) continue;
+
+        --budget;
+        g_wdLast.Set(e.name, tnow);
+
+        const bool ok = SetLayerState(dlm, inst, e.v - 1);
+        int st = 0;
+        const bool okb = LayerState(dlm, inst, &st);
+        const bool haveBack = okb;
+        const int back = st + 1;
+
+        if (ok && haveBack && back == e.v) {
+            ++d.applied;
+            std::string acc = g_wdOk.Get(e.name, "");
+            acc += net::Fmt("%d", e.v);
+            g_wdOk.Set(e.name, acc);
+            d.ok.Set(e.name, e.v);
+            Put(d, e.name, back, false);
+            net::Log("wd apply %s %d -> %d ok", e.name.c_str(), mine - 1, e.v - 1);
+            net::SetWorldSettle(kWorldSettle);
+        } else {
+            ++d.fail;
+            net::Log("wd apply %s -> %d FAILED ok=%s r=%s back=%s", e.name.c_str(), e.v - 1,
+                     ok ? "true" : "false", "", haveBack ? net::Fmt("%d", back).c_str() : "nil");
+        }
+    }
+}
+
+// ===========================================================================
+// ---- test hooks (main.lua:3110-3253) ----
+// ===========================================================================
+
+// Number of objectives in the quest's current stage (log-only).
+int StageObjectiveCount(ue::UObject* o) {
+    std::vector<StageObjective> objs;
+    StageObjectivesOf(o, &objs);
+    return (int)objs.size();
+}
+
+// NPCRelationships[key] read straight from the live map.  The scan refreshes
+// WP.q.mine only once per tick, so a probe taken right after a game call needs this.
+// ue::MapFindStrInt is the reader that actually sees these maps (FString keys plus
+// this build's inline allocation bits -- see the note in WqScan).
+bool RelRead(ue::UObject* q, const std::string& key, int* out) {
+    if (!q) return false;
+    int32_t v = 0;
+    if (!ue::MapFindStrInt(q, "NPCRelationships", key.c_str(), &v, nullptr)) return false;
+    if (out) *out = (int)v;
+    return true;
+}
+
+// DT_QuestData1's row names are the game's own FNames for every quest ID, so
+// reading them once fills the NameReg for GorfQuest / VlasQuest / LocationQuest /
+// ... and AddNewQuest / CompleteQuest / CurrentTrackedQuest then pass the index the
+// game itself compares against instead of one rebuilt from text (see NameReg).
+// Called from the two test hooks only; one successful read per session.
+bool QuestNamesLoad() {
+    static bool loaded = false;
+    static double lastTry = -1e9;
+    if (loaded) return true;
+    // A miss (datatable not streamed in yet) must not cost a full name-table walk on
+    // every apply attempt -- 10 s between tries is plenty for a table that either
+    // loads with the world or never does.
+    if (Mono() - lastTry < 10.0) return false;
+    lastTry = Mono();
+    ue::UObject* dt =
+        ue::FindObject("/Game/Sparta/Dialogue/QuestSystem/DT_QuestData1.DT_QuestData1");
+    ue::UObject* lib = ue::FindObject("/Script/Engine.Default__DataTableFunctionLibrary");
+    if (!dt || !lib || !ue::PlausiblePtr(dt) || !ue::PlausiblePtr(lib)) return false;
+    ue::UFunction* f = ue::FindFunction(lib, "GetDataTableRowNames");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("Table", dt);
+    if (!ue::Call(lib, f, p.data())) return false;
+    ue::TArray<ue::FName> names = p.Get<ue::TArray<ue::FName>>("OutRowNames");
+    if (!names.Data || names.Num < 0 || names.Num > 65536) return false;
+    int n = 0;
+    for (int32_t i = 0; i < names.Num; ++i) {
+        std::string s;
+        if (NameStr(names.Data[i], &s)) ++n;   // NameStr registers the real FName
+    }
+    loaded = n > 0;
+    net::Log("quests: %d DT_QuestData1 row FNames registered (real indices)", n);
+    return loaded;
+}
+
+// main.lua:3110 wpTest -- bump the nearest chest's TimesUsed in store B, drop a narrative
+// tag and bring it back, and flip one audio data layer for a while.
+void WpTest() {
+    ProgressState& ps = PS();
+    WpSet& b = ps.wb;
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* h = Helper();
+
+    const bool haveMe = net::Valid(pawn);
+    const Vec3 me = haveMe ? net::Loc(pawn) : Vec3{};
+    ue::UObject* best = nullptr;
+    std::string bestOwner;
+    double bd = 1e12;
+    for (ue::UObject* c : ue::FindAllOf("BP_Interactable_Chest_C")) {
+        if (!net::Valid(c)) continue;
+        const double dd = Dist(net::Loc(c), me);
+        // The Lua's wpStr(c:GetFName()): the actor's own name, which is the text
+        // store B is keyed by.  Register the game's FName for it (NameReg) so the
+        // write below passes the index the game compares against; net::NameOf is the
+        // spelling every log and the Lua use, so map that text too.
+        const ue::FName ofn = ObjFName(c);
+        const std::string owner = net::NameOf(c);
+        if (!ofn.IsNone()) g_realName.Add(owner, ofn);
+        if (!haveMe || owner.empty()) continue;
+        if (dd < bd && b.mine.Get("i|" + owner + "|TimesUsed", 0) == 0) {
+            best = c;
+            bestOwner = owner;
+            bd = dd;
+        }
+    }
+
+    if (best && h) {
+        // main.lua:3139 is one WriteAnInt(..., true).  wbApply's own comment says
+        // "bModify=true may mean 'add'", and the last run showed the write can
+        // return true without landing: `wptest chest ... write ok=true` while no
+        // TimesUsed key ever appeared in store B (and the harness's later local
+        // open read the *actor's* counter, 0 -> 1).  So do what wbApply already
+        // does on a mismatch -- plain set -- then read back and SAY what happened.
+        int back = 0;
+        bool ok = WriteAnInt(h, pawn, bestOwner, "TimesUsed", 1, true);
+        bool haveBack = ok && WbRead(h, bestOwner, "TimesUsed", 'i', pawn, &back);
+        if (ok && (!haveBack || back != 1)) {
+            ok = WriteAnInt(h, pawn, bestOwner, "TimesUsed", 1, false);
+            haveBack = WbRead(h, bestOwner, "TimesUsed", 'i', pawn, &back);
+        }
+        net::Log("wptest chest %s d=%.0f write ok=%s %s (read back %s)", bestOwner.c_str(), bd,
+                 ok ? "true" : "false", ok ? "" : "call failed",
+                 haveBack ? net::Fmt("%d", back).c_str() : "nil");
+        if (!haveBack || back != 1) {
+            net::Log("wptest chest write did NOT land (owner FName %u, TimesUsed FName %u) -- "
+                     "store B unchanged, so no live TimesUsed can reach the guest",
+                     (unsigned)FN(bestOwner).ComparisonIndex,
+                     (unsigned)FN("TimesUsed").ComparisonIndex);
+        }
+    } else {
+        net::Log("wptest: no unopened chest loaded");
+    }
+
+    std::string tag;
+    for (const auto& it : ps.wq.mine.Items()) {
+        if (it.value == 1 && HasPrefix(it.key, "t|")) {
+            tag = it.key.substr(2);
+            break;
+        }
+    }
+    if (net::Valid(ps.qlog) && !tag.empty()) {
+        const bool ok = TagCall(ps.qlog, "RemoveNarrativeTag", tag);
+        net::Log("wptest removed tag %s ok=%s (re-added in 12 s)", tag.c_str(),
+                 ok ? "true" : "false");
+    } else if (tag.empty()) {
+        net::Log("wptest: no narrative tag scanned yet -- nothing to remove (wq list=%d)",
+                 (int)ps.wq.order.size());
+    }
+
+    std::string dl;
+    for (const auto& it : ps.wd.mine.Items()) {
+        if (it.value == 3 && HasSub(it.key, "_AU")) {
+            dl = it.key;
+            break;
+        }
+    }
+    if (!dl.empty() && net::Valid(ps.dlm)) {
+        const bool ok = SetLayerState(ps.dlm, g_wdInst.Get(dl), 1);
+        net::Log("wptest layer %s -> loaded ok=%s (restored in 12 s)", dl.c_str(),
+                 ok ? "true" : "false");
+    }
+
+    ps.testActive = true;
+    ps.testAt = Mono();
+    ps.testTag = tag;
+    ps.testLayer = dl;
+    ps.testFinished = false;
+}
+
+// main.lua:3142 wpTestFollowUp
+void WpTestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.testActive || ps.testFinished) return;
+    if (Mono() - ps.testAt < 12.0) return;
+    ps.testFinished = true;
+
+    if (!ps.testTag.empty() && net::Valid(ps.qlog)) {
+        const bool ok = TagCall(ps.qlog, "AddNarrativeTag", ps.testTag);
+        net::Log("wptest re-added tag %s ok=%s", ps.testTag.c_str(), ok ? "true" : "false");
+    }
+    if (!ps.testLayer.empty() && net::Valid(ps.dlm)) {
+        const bool ok = SetLayerState(ps.dlm, g_wdInst.Get(ps.testLayer), 2);
+        net::Log("wptest layer %s -> activated ok=%s", ps.testLayer.c_str(),
+                 ok ? "true" : "false");
+    }
+}
+
+// main.lua:3159 qsTest -- start a quest from DT_QuestData1 this side has not seen, then
+// complete it 12 s later.
+void QsTest() {
+    ProgressState& ps = PS();
+    ue::UObject* q = QuestLog();          // refresh, the pointer can age out
+    if (!net::Valid(q)) {
+        net::Log("qstest: no quest log");
+        return;
+    }
+    QuestNamesLoad();                      // real FNames for every quest ID
+
+    ue::UObject* dt = ue::FindObject("/Game/Sparta/Dialogue/QuestSystem/DT_QuestData1.DT_QuestData1");
+    ue::UObject* lib = ue::FindObject("/Script/Engine.Default__DataTableFunctionLibrary");
+
+    int rows = 0;
+    std::string id;
+    if (dt && lib) {
+        if (ue::UFunction* f = ue::FindFunction(lib, "GetDataTableRowNames")) {
+            ue::Params p(f);
+            p.Set<ue::UObject*>("Table", dt);
+            if (ue::Call(lib, f, p.data())) {
+                ue::TArray<ue::FName> names = p.Get<ue::TArray<ue::FName>>("OutRowNames");
+                if (names.Data && names.Num >= 0 && names.Num <= 65536) {
+                    rows = (int)names.Num;
+                    for (int32_t i = 0; i < names.Num; ++i) {
+                        std::string n;
+                        if (!NameStr(names.Data[i], &n)) continue;
+                        if (n == "TestQuest") continue;
+                        if (ps.wq.mine.Get("a|" + n, 0) == 1) continue;
+                        if (ps.wq.mine.Get("c|" + n, 0) == 1) continue;
+                        id = n;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (id.empty()) {
+        net::Log("qstest: no unused quest (%d rows)", rows);
+        return;
+    }
+
+    const bool ok = QuestCall(q, "AddNewQuest", id);
+    net::Log("qstest added %s ok=%s %s (completed in 12 s)", id.c_str(), ok ? "true" : "false",
+             ok ? "" : "call failed");
+
+    // GATE (added by the progress lane): `ok` above only means ProcessEvent ran.
+    // Re-read the log immediately so the next run separates "the call did nothing"
+    // from "the scan cannot see the array" -- the last run logged ok=true and then
+    // published the same 8 narrative tags for five minutes, and nothing in either
+    // log said which half failed.
+    {
+        int32_t activeN = -1, objsN = -1;
+        bool has = false;
+        ue::TArray<ue::FName> arr;
+        if (ue::Get<ue::TArray<ue::FName>>(q, "CurrentActiveQuests", arr)) {
+            activeN = arr.Num;
+            for (int32_t i = 0; arr.Data && i < arr.Num && i < 8192; ++i) {
+                std::string s;
+                if (!NameStr(arr.Data[i], &s)) continue;
+                if (s == id) has = true;
+            }
+        }
+        ue::TArray<ue::UObject*> objs;
+        if (ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", objs)) objsN = objs.Num;
+        net::Log("qstest verify %s: CurrentActiveQuests=%d contains=%d ActiveQuests=%d "
+                 "AddNewQuest FName=%u wq list=%d", id.c_str(), (int)activeN, has ? 1 : 0,
+                 (int)objsN, (unsigned)FN(id).ComparisonIndex, (int)ps.wq.order.size());
+    }
+
+    ps.qtest = true;
+    ps.qtestAt = Mono();
+    ps.qtestId = id;
+    ps.qtestFinished = false;
+}
+
+// main.lua:3176 qsTestFollowUp
+void QsTestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.qtest || ps.qtestFinished) return;
+    if (Mono() - ps.qtestAt < 12.0) return;
+    ps.qtestFinished = true;
+    const bool ok = QuestCall(ps.qlog, "CompleteQuest", ps.qtestId);
+    net::Log("qstest completed %s ok=%s %s", ps.qtestId.c_str(), ok ? "true" : "false",
+             ok ? "" : "call failed");
+}
+
+// main.lua:3186 qsJudge -- guest verdict: a quest was added live and later completed live.
+//
+// FAIL path added by the progress lane.  The Lua only ever wrote result_qs.txt on
+// success, so a chain that stopped half way produced NO verdict at all -- which is
+// what the harness reported ("QUEST: no verdict").  A FAIL line with the reached
+// state is worth more than silence: it names the quest whose add arrived and whose
+// completion did not.
+double g_qsFirstAdd = 0.0;
+std::string g_qsAddId;
+
+void QsJudge() {
+    ProgressState& ps = PS();
+    if (ps.qsVerdict || IsHost()) return;
+
+    if (g_qsFirstAdd == 0.0) {
+        for (const auto& it : g_wqOk.Items()) {
+            if (it.second != "add") continue;
+            if (!HasPrefix(it.first, "a|")) continue;
+            g_qsFirstAdd = Mono();
+            g_qsAddId = it.first.substr(2);
+            net::Log("qsJudge: first live add for %s -- FAIL verdict in 20 s unless the "
+                     "completion follows", g_qsAddId.c_str());
+            break;
+        }
+    }
+
+    for (const auto& it : g_wqOk.Items()) {
+        if (it.second != "add") continue;
+        if (!HasPrefix(it.first, "c|")) continue;
+        const std::string id = it.first.substr(2);
+        const std::string aKey = "a|" + id;
+        const std::string cKey = "c|" + id;
+        if (g_wqOk.Get(aKey) != "add") continue;
+        if (ps.wq.mine.Get(cKey, 0) != 1) continue;
+
+        // read the log itself: the scan that adopts the completion runs next tick
+        bool active = false;
+        ue::UObject* q = ps.qlog;
+        if (net::Valid(q)) {
+            ue::TArray<ue::FName> arr;
+            if (ue::Get<ue::TArray<ue::FName>>(q, "CurrentActiveQuests", arr) && arr.Data &&
+                arr.Num > 0 && arr.Num <= 8192) {
+                for (int32_t i = 0; i < arr.Num; ++i) {
+                    std::string s;
+                    if (!NameStr(arr.Data[i], &s)) continue;
+                    if (s == id) active = true;
+                }
+            }
+        }
+
+        ps.qsVerdict = true;
+        const std::string text =
+            net::Fmt("%s quest %s added then completed (active now=%s, wq=%d/%d)\n",
+                     active ? "FAIL" : "PASS", id.c_str(), active ? "true" : "false",
+                     ps.wq.applied, ps.wq.fail);
+        net::WriteFile("result_qs.txt", text);
+
+        std::string flat = text;
+        flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+        net::Log("%s", flat.c_str());
+        return;
+    }
+
+    if (g_qsFirstAdd != 0.0 && Mono() - g_qsFirstAdd > 20.0) {
+        ps.qsVerdict = true;
+        const std::string text = net::Fmt(
+            "FAIL quest %s was added but never completed (wq=%d/%d, host qstest chain "
+            "stopped)\n", g_qsAddId.c_str(), ps.wq.applied, ps.wq.fail);
+        net::WriteFile("result_qs.txt", text);
+        std::string flat = text;
+        flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+        net::Log("%s", flat.c_str());
+    }
+}
+
+// A compact "what did arrive for this quest id" line, used by the FAIL verdicts so
+// the next run names the missing piece instead of "no verdict".
+std::string StageReceivedText(const std::string& id) {
+    ProgressState& ps = PS();
+    std::string out = " tracked=";
+    out += ((ps.wq.mine.Get("k|" + id, 0) == 1 || g_wqOk.Get("k|" + id) == "add") ? "yes" : "no");
+    out += " stage=";
+    out += (g_wqOk.Get("s|" + id) == "stage"
+                ? net::Fmt("%d", ps.wq.mine.Get("s|" + id, 0))
+                : std::string("no"));
+    std::string cnt;
+    for (const auto& it : g_wqOk.Items()) {
+        if (HasPrefix(it.first, ("o|" + id + "|").c_str())) cnt = it.first + "=" + it.second;
+    }
+    if (cnt.empty() && ps.wq.stageHeard.Get(id, 0) != 0) {
+        cnt = net::Fmt("heard %d objective(s)", ps.wq.stageHeard.Get(id, 0));
+    }
+    out += " count=";
+    out += cnt.empty() ? "no" : cnt;
+    std::string rel;
+    for (const auto& it : g_wqOk.Items()) {
+        if (HasPrefix(it.first, "r|") && it.second == "set") rel = it.first;
+    }
+    out += " rel=";
+    out += rel.empty() ? "no" : rel;
+    out += " turnin=";
+    out += (g_wqOk.Get("u|" + id) == "turnin") ? "yes" : "no";
+    out += " (scan: tags/a/c/k/s/o/r/e = ";
+    int tags = 0, a = 0, c = 0, k = 0, s = 0, o = 0, r = 0, e = 0;
+    for (const auto& it : ps.wq.mine.Items()) {
+        const std::string& n = it.key;
+        if (HasPrefix(n, "t|")) {
+            ++tags;
+            continue;
+        }
+        if (n.size() < 2 || n[1] != '|') continue;
+        switch (n[0]) {
+            case 'a': ++a; break;
+            case 'c': ++c; break;
+            case 'k': ++k; break;
+            case 's': ++s; break;
+            case 'o': ++o; break;
+            case 'r': ++r; break;
+            case 'e': ++e; break;
+            default: break;
+        }
+    }
+    out += net::Fmt("%d/%d/%d/%d/%d/%d/%d/%d)", tags, a, c, k, s, o, r, e);
+    return out;
+}
+
+// main.lua:3210 qs2Test -- add+track a quest, raise the NPC relationship, then let the
+// follow-up walk the stage / complete / turn-in ladder.
+void Qs2Test() {
+    ProgressState& ps = PS();
+    ue::UObject* q = QuestLog();          // refresh, the pointer can age out
+    if (!net::Valid(q)) {
+        net::Log("qs2test: no quest log");
+        return;
+    }
+    QuestNamesLoad();                      // real FNames for the four candidates
+
+    static const char* kCandidates[4] = {"GorfQuest", "VlasQuest", "TielsQuest", "AutoQuest"};
+    std::string id;
+    for (int i = 0; i < 4; ++i) {
+        const std::string n = kCandidates[i];
+        if (ps.wq.mine.Get("a|" + n, 0) == 1) continue;
+        if (ps.wq.mine.Get("c|" + n, 0) == 1) continue;
+        id = n;
+        break;
+    }
+    if (id.empty()) {
+        net::Log("qs2test: no unused quest");
+        return;
+    }
+
+    // id:gsub("Quest$", "")
+    std::string npc = id;
+    if (npc.size() >= 5 && HasSub(npc, "Quest") &&
+        npc.compare(npc.size() - 5, 5, "Quest") == 0) {
+        npc.erase(npc.size() - 5);
+    }
+    const int rel = ps.wq.mine.Get("r|" + npc, 0);
+
+    // main.lua:3220 is one pcall over four calls, so the relationship's failure
+    // ("ok=false call failed") hid whether the add/track half had worked at all.
+    // Report each step: the next run then shows exactly which one is broken.
+    const bool okAdd = QuestCall(q, "AddNewQuest", id);
+    const bool okTrack = ue::Set<ue::FName>(q, "CurrentTrackedQuest", FN(id));
+    const bool okTrackQ = okTrack && TrackQuests(q);
+    // main.lua:3224 `q.NPCRelationships:Add(npc, rel+2)`.  The key is normally already
+    // in the map -- the blueprint defaults seed NPCRelationships with every hub NPC
+    // (MAP_PROBE: `num=7 ... key='Gorf'`), so this is an overwrite; ue::MapInsertStrInt
+    // reads it back and reports whether the write really landed (the old
+    // ue::MapAddStrInt could not see the key at all: wrong key type in the fallback).
+    const bool okRel = ue::MapInsertStrInt(q, "NPCRelationships", npc.c_str(), rel + 2);
+    const bool ok = okAdd && okTrackQ && okRel;
+
+    net::Log("qs2test %s added+tracked, rel %s %d -> %d ok=%s %s", id.c_str(), npc.c_str(), rel,
+             rel + 2, ok ? "true" : "false", ok ? "" : "call failed");
+    net::Log("qs2test steps: add=%s track=%s trackQuests=%s rel=%s (rel read back from the live "
+             "map)", okAdd ? "true" : "false", okTrack ? "true" : "false",
+             okTrackQ ? "true" : "false", okRel ? "true" : "false");
+
+    ps.q2test = true;
+    ps.q2testAt = Mono();
+    ps.q2testId = id;
+    ps.q2testNpc = npc;
+    ps.q2testRel = rel + 2;
+    ps.q2testStep = 0;
+}
+
+// main.lua:3230 qs2TestFollowUp -- objective at 6 s, stage at 12 s, complete+turn in at 30 s.
+void Qs2TestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.q2test || ps.q2testStep >= 3) return;
+    const double el = Mono() - ps.q2testAt;
+    ue::UObject* q = QuestLog();          // refresh, the pointer can age out
+    ue::UObject* o = WqObj(q, ps.q2testId);
+
+    if (ps.q2testStep == 0 && el >= 6.0) {
+        ps.q2testStep = 1;
+        std::string obj;
+        {
+            std::vector<StageObjective> objs;
+            StageObjectivesOf(o, &objs);
+            if (!objs.empty()) obj = objs[0].id;
+        }
+        const bool ok = !obj.empty() && HearObjective(o, obj);
+        std::string nowS = "?";
+        if (!obj.empty() && o) {
+            StrIntMap prog;
+            WqProgress(o, &prog);
+            nowS = net::Fmt("%d", prog.Get(obj, 0));
+        }
+        net::Log("qs2test heard %s ok=%s now=%s (quest object=%s, stage objectives=%d)",
+                 obj.empty() ? "nil" : obj.c_str(), ok ? "true" : "false", nowS.c_str(),
+                 o ? "yes" : "NO", (int)StageObjectiveCount(o));
+    } else if (ps.q2testStep == 1 && el >= 12.0) {
+        ps.q2testStep = 2;
+        const std::string before = StageNameOf(o);
+        int32_t cur = 0;
+        if (o) ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+        bool ok = o && ue::Set<int32_t>(o, "CurrentQuestStage", cur + 1);
+        if (ok) ok = InitializeQuest(o);
+        int32_t back = 0;
+        if (o) ue::Get<int32_t>(o, "CurrentQuestStage", back);
+        net::Log("qs2test stage -> %d ok=%s %s (name '%s' -> '%s')", (int)back,
+                 ok ? "true" : "false", ok ? "" : "call failed", before.c_str(),
+                 StageNameOf(o).c_str());
+        // Read the live map (not the scan, which refreshes next tick) with the reader
+        // that sees FString-keyed maps: the host's rel write at step 0 has to be
+        // visible here, with the value it asked for.
+        {
+            int relNow = 0;
+            const bool have = RelRead(q, ps.q2testNpc, &relNow);
+            net::Log("qs2test after InitializeQuest: r|%s %s", ps.q2testNpc.c_str(),
+                     have ? net::Fmt("= %d (present; wanted %d)", relNow, ps.q2testRel).c_str()
+                          : "ABSENT (the map write did not land)");
+        }
+    } else if (ps.q2testStep == 2 && el >= 30.0) {
+        ps.q2testStep = 3;
+        bool ok = QuestCall(q, "CompleteQuest", ps.q2testId);
+        if (ok) ok = QuestCall(q, "TurnInQuest", ps.q2testId);
+        bool turned = false;
+        if (o) ue::Get<bool>(o, "IsTurnedIn", turned);
+        net::Log("qs2test completed+turned in %s ok=%s %s turnedin=%s (quest object=%s)",
+                 ps.q2testId.c_str(), ok ? "true" : "false", ok ? "" : "call failed",
+                 turned ? "true" : "false", o ? "yes" : "NO");
+    }
+}
+
+// main.lua:3257 qs2Judge -- guest verdict: counter, stage, tracked quest, relationship and
+// turn-in all arrived.
+//
+// The Lua only starts its 15 s window once a candidate's `u|<quest>` was APPLIED as
+// "turnin" (that is how it finds `id`), i.e. after the host's 30 s complete+turn-in
+// step.  The previous FAIL path armed on the FIRST applied quest-state entry and gave
+// up 25 s later -- before the host's turn-in ever happened -- so the guest wrote
+// `FAIL ... the turn-in never did` at ~26 s on a path that was working (the last run's
+// log shows `wq apply live turnin u|GorfQuest = 1` at 04:51:27, six seconds after the
+// verdict had already gone out at 04:51:21).  The FAIL deadline is now 42 s from the
+// first applied entry: later than the host's 30 s rung, and still inside run-two's
+// 60 s window for result_qs2.txt.
+double g_qs2Arm = 0.0;
+std::string g_qs2ArmId;
+
+void Qs2Judge() {
+    ProgressState& ps = PS();
+    if (ps.qs2Verdict || IsHost()) return;
+
+    static const char* kCandidates[4] = {"GorfQuest", "VlasQuest", "TielsQuest", "AutoQuest"};
+    std::string id;
+    for (int i = 0; i < 4; ++i) {
+        const std::string n = kCandidates[i];
+        if (g_wqOk.Get("u|" + n) == "turnin") id = n;
+    }
+
+    if (id.empty()) {
+        // arm on the first applied quest-state entry for a candidate: s|, k|, u| are
+        // whole keys, o| carries three more segments (o|<quest>|<stage>|<obj>)
+        if (g_qs2Arm == 0.0) {
+            for (int i = 0; i < 4 && g_qs2Arm == 0.0; ++i) {
+                const std::string n = kCandidates[i];
+                std::string hit;
+                for (const auto& it : g_wqOk.Items()) {
+                    const std::string& name = it.first;
+                    if (name == "s|" + n || name == "k|" + n || name == "u|" + n ||
+                        HasPrefix(name, ("o|" + n + "|").c_str())) {
+                        hit = name;
+                        break;
+                    }
+                }
+                if (hit.empty() && ps.wq.mine.Get("s|" + n, 0) != 0) hit = "s|" + n;
+                if (hit.empty() && ps.wq.mine.Get("k|" + n, 0) == 1) hit = "k|" + n;
+                if (!hit.empty()) {
+                    g_qs2Arm = Mono();
+                    g_qs2ArmId = n;
+                    net::Log("qs2Judge: armed on %s (first quest-state entry applied)", hit.c_str());
+                }
+            }
+        }
+        if (g_qs2Arm != 0.0 && Mono() - g_qs2Arm > 42.0) {
+            ps.qs2Verdict = true;
+            std::string text = net::Fmt(
+                "FAIL quest state %s: only some steps arrived, the turn-in never did "
+                "(wq=%d/%d); missing:", g_qs2ArmId.c_str(), ps.wq.applied, ps.wq.fail);
+            text += StageReceivedText(g_qs2ArmId);
+            text += "\n";
+            net::WriteFile("result_qs2.txt", text);
+            std::string flat = text;
+            flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+            net::Log("%s", flat.c_str());
+        }
+        return;
+    }
+
+    if (ps.qs2Seen == 0.0) ps.qs2Seen = Mono();
+
+    std::string count, rel;
+    for (const auto& it : g_wqOk.Items()) {
+        const std::string& name = it.first;
+        const std::string& how = it.second;
+        const std::string objPrefix = "o|" + id + "|";
+        if (HasPrefix(name, objPrefix.c_str())) count = name + "=" + how;
+        if (count.empty() && ps.wq.stageHeard.Get(id, 0) != 0) {
+            count = net::Fmt("heard %d objective(s)", ps.wq.stageHeard.Get(id, 0));
+        }
+        if (HasPrefix(name, "r|") && how == "set") {
+            rel = name + "=" + net::Fmt("%d", ps.wq.mine.Get(name, 0));
+        }
+    }
+
+    std::string stage;
+    if (g_wqOk.Get("s|" + id) == "stage") {
+        stage = net::Fmt("s=%d", ps.wq.mine.Get("s|" + id, 0));
+    }
+    const bool tracked = (ps.wq.mine.Get("k|" + id, 0) == 1) || (g_wqOk.Get("k|" + id) == "add");
+    const bool all = !count.empty() && !stage.empty() && tracked && !rel.empty();
+    if (!all && Mono() - ps.qs2Seen < 15.0) return;
+
+    ps.qs2Verdict = true;
+    const std::string text =
+        net::Fmt("%s quest state %s: count %s, stage %s, %s, rel %s, turned in (wq=%d/%d)\n",
+                 all ? "PASS" : "FAIL", id.c_str(), count.empty() ? "nil" : count.c_str(),
+                 stage.empty() ? "nil" : stage.c_str(), tracked ? "tracked" : "not tracked",
+                 rel.empty() ? "nil" : rel.c_str(), ps.wq.applied, ps.wq.fail);
+    net::WriteFile("result_qs2.txt", text);
+
+    std::string flat = text;
+    flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+    net::Log("%s", flat.c_str());
+}
+
+// main.lua:3285 wpJudge -- guest verdict: a store B value arrived live, and a tag went away
+// and came back ("-+" in the history), and a layer dropped to loaded and returned.
+//
+// Diagnostics + FAIL path added by the progress lane.  The Lua's judge only wrote a
+// file when all three parts were there, so the harness has been reporting
+// "PROGRESS: no verdict" with nothing in either log saying which part was missing.
+// The guest can tell the wptest ran as soon as a LIVE store-B value arrives (that is
+// the chest write), so 40 s after that a partial cycle writes a FAIL naming what it
+// got -- the harness's own window for this verdict is 60 s.
+Gate g_gateWpJudge;
+double g_wpChestAt = 0.0;
+std::string g_wpChestName;
+
+void WpJudge() {
+    ProgressState& ps = PS();
+    if (ps.wpVerdict || IsHost()) return;
+
+    std::string chest, tagCycle, layer;
+    for (const auto& it : g_wbOk.Items()) {
+        if (it.second == "live" && HasSub(it.first, "TimesUsed")) chest = it.first;
+    }
+    for (const auto& it : g_qHist.Items()) {
+        if (it.second.find("-+") != std::string::npos) tagCycle = it.first;
+    }
+    for (const auto& it : g_wdOk.Items()) {
+        if (HasSub(it.second, "23")) layer = it.first;
+    }
+
+    if (g_gateWpJudge.Due(Mono(), 5.0, 60)) {
+        net::Log("wpJudge: chest=%s tagCycle=%s layer=%s (wb=%d wq=%d wd=%d applied; "
+                 "wq list=%d peer=%d)",
+                 chest.empty() ? "NO" : chest.c_str(), tagCycle.empty() ? "NO" : tagCycle.c_str(),
+                 layer.empty() ? "NO" : layer.c_str(), ps.wb.applied, ps.wq.applied,
+                 ps.wd.applied, (int)ps.wq.order.size(), (int)ps.wq.peer.Size());
+    }
+
+    if (!chest.empty() && g_wpChestAt == 0.0) {
+        g_wpChestAt = Mono();
+        g_wpChestName = chest;
+    }
+
+    if (!chest.empty() && !tagCycle.empty() && !layer.empty()) {
+        ps.wpVerdict = true;
+        const std::string text =
+            net::Fmt("PASS world progression: %s, tag %s removed+restored, layer %s "
+                     "loaded+reactivated (wb=%d/%d wq=%d/%d wd=%d/%d)\n",
+                     chest.c_str(), tagCycle.c_str(), layer.c_str(), ps.wb.applied, ps.wb.fail,
+                     ps.wq.applied, ps.wq.fail, ps.wd.applied, ps.wd.fail);
+        net::WriteFile("result_wp.txt", text);
+
+        std::string flat = text;
+        flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+        net::Log("%s", flat.c_str());
+        return;
+    }
+
+    if (g_wpChestAt != 0.0 && Mono() - g_wpChestAt > 40.0) {
+        ps.wpVerdict = true;
+        const std::string text = net::Fmt(
+            "FAIL world progression: chest live %s arrived, tag cycle %s, layer %s "
+            "(wb=%d/%d wq=%d/%d wd=%d/%d)\n", g_wpChestName.c_str(),
+            tagCycle.empty() ? "MISSING" : "ok", layer.empty() ? "MISSING" : "ok",
+            ps.wb.applied, ps.wb.fail, ps.wq.applied, ps.wq.fail, ps.wd.applied, ps.wd.fail);
+        net::WriteFile("result_wp.txt", text);
+        std::string flat = text;
+        flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+        net::Log("%s", flat.c_str());
+    }
+}
+
+// count of a Lua table (wpStatus's local `cnt`)
+inline int CountOf(const StrIntMap& m) { return (int)m.Size(); }
+
+}  // namespace
+
+// ===========================================================================
+// ---- public contract ----
+// ===========================================================================
+
+// [R9-QUEST] driven from Tick2 below; defined with the quest-stage probes.
+void Qs9NextTick();
+
+// main.lua:3310 wpTick. Every step is guarded and logged as "ERR <label>: ..." by
+// net::Step, exactly like the Lua's wpStep.
+void Tick2() {
+    ProgressState& ps = PS();
+    ++ps.tickN;
+
+    const bool qs = S().toggles.qsEnabled;
+    const bool dl = S().toggles.dlEnabled;
+
+    net::Step("wbScan", Guard::None, [] { WbScan(); });
+    net::Step("wbApply", Guard::None, [] { WbApply(); });
+    // MAP_PROBE.txt diagnostic: read-only, self-throttled (5 s) and off unless the
+    // toggle is in the coop dir.  It is what proves the TMap insert's geometry.
+    net::Step("mapProbe", Guard::None, [] { ue::MapProbe(); });
+    if (qs) {
+        net::Step("wqScan", Guard::None, [] { WqScan(); });
+        net::Step("wqApply", Guard::None, [] { WqApply(); });
+    }
+    // the layer list is ~100 objects: every other tick is plenty
+    if (dl && (ps.tickN % 2) == 0) net::Step("wdScan", Guard::None, [] { WdScan(); });
+    if (dl) net::Step("wdApply", Guard::None, [] { WdApply(); });
+
+    // main.lua:3318-3321 -- built at 2 Hz, then appended verbatim at 15 Hz by
+    // Serialize(): rebuilding it there would rotate the windows 15 times a second.
+    ps.wb.payload = Section(ps.wb, "wb", kWbWindow);
+    ps.wq.payload = qs ? Section(ps.wq, "wq", kWqWindow) : std::string();
+    ps.wd.payload = (dl && IsHost()) ? Section(ps.wd, "wd", kWdWindow) : std::string();
+
+    if (IsHost()) net::Step("wpTestFollowUp", Guard::None, [] { WpTestFollowUp(); });
+    net::Step("wpJudge", Guard::None, [] { WpJudge(); });
+    if (qs) {
+        if (IsHost()) {
+            net::Step("qsTestFollowUp", Guard::None, [] { QsTestFollowUp(); });
+            net::Step("qs2TestFollowUp", Guard::None, [] { Qs2TestFollowUp(); });
+        }
+        net::Step("qsJudge", Guard::None, [] { QsJudge(); });
+        net::Step("qs2Judge", Guard::None, [] { Qs2Judge(); });
+        // [R9-QUEST] the one-stage-at-a-time walker's 2.5 s settle
+        net::Step("qs9Next", Guard::None, [] { Qs9NextTick(); });
+    }
+}
+
+// Drops every cached pointer and the module-private indices. The set values themselves
+// (mine / order / peer / primed) are deliberately kept: the Lua kept them across a map
+// load too (WP is a session-long table), and WP_SETTLE only ever primes once per session.
+void Reset() {
+    ProgressState& ps = PS();
+    ps.helper = nullptr;
+    ps.sub = nullptr;
+    ps.qlog = nullptr;
+    ps.dlm = nullptr;
+    g_wdInst.Clear();
+    g_wdLast.Clear();
+    // The layer instances are gone with the world: their entries cannot be applied any
+    // more, and a stale pointer here is exactly the class of crash this port exists to stop.
+    ps.wd.lastAt = 0.0;
+    // Windows are constants (main.lua:3318-3320); recorded per set for the contract's sake.
+    ps.wb.window = kWbWindow;
+    ps.wq.window = kWqWindow;
+    ps.wd.window = kWdWindow;
+    ps.wb.payload.clear();
+    ps.wq.payload.clear();
+    ps.wd.payload.clear();
+    // The verdict timers are wall-clock deadlines; a level load must not leave one
+    // armed (it would fire against a fresh world and write a FAIL that means nothing).
+    // g_realName is deliberately NOT cleared: an FName is a name-pool row and stays
+    // valid across a load, and re-registering costs a full name-table walk.
+    g_qsFirstAdd = 0.0;
+    g_qsAddId.clear();
+    g_qs2Arm = 0.0;
+    g_qs2ArmId.clear();
+    g_wpChestAt = 0.0;
+    g_wpChestName.clear();
+    g_wbLastOrder = -1;
+}
+
+// main.lua:3331 wpReadPeer
+void OnPeerLine(const std::string& line) {
+    Read(PS().wb, line, "wb");
+    if (S().toggles.qsEnabled) Read(PS().wq, line, "wq");
+    if (S().toggles.dlEnabled && !IsHost()) Read(PS().wd, line, "wd");
+}
+
+// main.lua:3318-3321 -- appends the prebuilt ",wb":[...] then ",wq":[...] then ",wd":[...].
+// The Lua appends WP.payload (built once per 2 Hz tick); the same thing is done here by
+// concatenating the three per-set payloads so a disabled section stays empty.
+void Serialize(std::string* out) {
+    if (!out) return;
+    ProgressState& ps = PS();
+    *out += ps.wb.payload;
+    if (S().toggles.qsEnabled) *out += ps.wq.payload;
+    if (S().toggles.dlEnabled && IsHost()) *out += ps.wd.payload;
+}
+
+// main.lua:3337 wpStatus
+std::string Status() {
+    ProgressState& ps = PS();
+    return net::Fmt("wp=b:%d/%d+%d!%d q:%d/%d+%d!%d d:%d/%d+%d!%d\n", (int)ps.wb.order.size(),
+                    CountOf(ps.wb.peer), ps.wb.applied, ps.wb.fail, (int)ps.wq.order.size(),
+                    CountOf(ps.wq.peer), ps.wq.applied, ps.wq.fail, (int)ps.wd.order.size(),
+                    CountOf(ps.wd.peer), ps.wd.applied, ps.wd.fail);
+}
+
+// cmd.txt: wptest  (main.lua:3110)
+void TestWp() { WpTest(); }
+
+// cmd.txt: qstest  (main.lua:3159)
+void TestQs() { QsTest(); }
+
+// cmd.txt: qs2test (main.lua:3210)
+void TestQs2() { Qs2Test(); }
+
+// cmd.txt: mapsdump [all|ints|floats|names|bools] -- gap G2's count (see MapsDumpBody)
+void MapsDump(const std::string& arg) { MapsDumpBody(arg); }
+
+// ===========================================================================
+// [R9-QUEST] begin -- quest-stage probes (TEST INSTRUMENTS, no sync behaviour)
+//
+// WHY THIS EXISTS.  TASK.md's open question: WqApplyQuest's kind 's' writes
+// CurrentQuestStage directly and then calls InitializeQuest, and nothing ever
+// checked that the partner's stage TEXT is right afterwards (hub quests have one
+// stage, so the quest tests never walked a second one).  These four verbs make a
+// multi-stage quest walkable and observable:
+//
+//   qlist             -- the DT_QuestData1 row names (quest ID candidates)
+//   qsid <QuestID>    -- add+track that exact quest, report its stage COUNT
+//   qnext <QuestID>   -- advance one stage through the game's own functions
+//   qstage <QuestID>  -- one-line snapshot of every text field the UI shows
+//
+// UQuestObject (Dumper7 Sparta_classes.hpp:5479) carries the whole data-table
+// row on the object, so no data-table call is needed:
+//   QuestID 0x28, CurrentQuestStage 0x30, CurrentStageDetails 0x88 (0xF8),
+//   QuestDetails 0x180 (FQuestDetails 0x58) with
+//   QuestName +0x08, LogDescription +0x18, TrackingDescription +0x28,
+//   bIsMainQuest +0x38, Stages TArray<FQuestStage> +0x40, bAutoAccept +0x50.
+// The stage COUNT therefore comes from QuestDetails.Stages.Num, and the journal
+// entry (LogDescription) and the tracked-objective line (TrackingDescription)
+// are readable for any stage index -- that is what makes "is B's text right?"
+// a question with an answer.
+// ===========================================================================
+constexpr int32_t kQs9NameOff    = 0x08;   // FQuestDetails::QuestName
+constexpr int32_t kQs9LogOff     = 0x18;   // FQuestDetails::LogDescription
+constexpr int32_t kQs9TrackOff   = 0x28;   // FQuestDetails::TrackingDescription
+constexpr int32_t kQs9StagesOff  = 0x40;   // FQuestDetails::Stages
+constexpr int32_t kQs9StageSize  = 0xF8;   // FQuestStage
+constexpr int32_t kQs9StDescOff  = 0x10;   // FQuestStage::Description
+constexpr int32_t kQs9ObjNameOff = 0x00;   // FQuestObjectives::ObjectiveName (FText)
+constexpr int32_t kQs9ObjDescOff = 0x10;   // FQuestObjectives::Description (FText)
+constexpr int32_t kQs9ObjSize    = 0x38;   // FQuestObjectives
+
+// Log lines are one line each and go through a fixed-size write, so a text field
+// is flattened (newlines -> spaces) and clipped.
+std::string Qs9San(const std::string& in, std::size_t maxLen = 64) {
+    std::string out;
+    out.reserve(in.size());
+    for (char c : in) {
+        if (c == '\n' || c == '\r' || c == '\t') {
+            if (!out.empty() && out.back() != ' ') out.push_back(' ');
+        } else {
+            out.push_back(c);
+        }
+    }
+    while (!out.empty() && out.back() == ' ') out.pop_back();
+    if (out.size() > maxLen) {
+        out.resize(maxLen);
+        out += "...";
+    }
+    return out;
+}
+
+int32_t Qs9QdOff(ue::UObject* o) { return o ? ue::PropOffset(o, "QuestDetails") : -1; }
+
+// Number of stages the quest ROW has (-1 when unreadable, 0 when the copy on the
+// object is simply empty -- the two are different findings and must not be merged).
+int Qs9StageCount(ue::UObject* o) {
+    const int32_t off = Qs9QdOff(o);
+    if (off < 0) return -1;
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kQs9StagesOff, &arr, sizeof(arr)))
+        return -1;
+    if (arr.Num < 0 || arr.Num > 64) return -1;
+    if (arr.Num == 0) return 0;
+    if (!arr.Data) return -1;
+    return (int)arr.Num;
+}
+
+std::string Qs9QdText(ue::UObject* o, int32_t fieldOff) {
+    const int32_t off = Qs9QdOff(o);
+    if (off < 0) return "nil";
+    return ue::TextToString(reinterpret_cast<uint8_t*>(o) + off + fieldOff);
+}
+
+std::string Qs9StageNameAt(ue::UObject* o, int k) {
+    const int32_t off = Qs9QdOff(o);
+    if (off < 0) return "nil";
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kQs9StagesOff, &arr, sizeof(arr)))
+        return "nil";
+    if (!arr.Data || k < 0 || k >= arr.Num || arr.Num > 64) return "nil";
+    return ue::TextToString(arr.Data + (std::size_t)k * kQs9StageSize);
+}
+
+std::string Qs9StageDescAt(ue::UObject* o, int k) {
+    const int32_t off = Qs9QdOff(o);
+    if (off < 0) return "nil";
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kQs9StagesOff, &arr, sizeof(arr)))
+        return "nil";
+    if (!arr.Data || k < 0 || k >= arr.Num || arr.Num > 64) return "nil";
+    return ue::TextToString(arr.Data + (std::size_t)k * kQs9StageSize + kQs9StDescOff);
+}
+
+// The CURRENT stage's Description FText -- the text the journal page shows under the
+// stage name.  The row copy (QuestDetails) is empty in this build, but the live
+// CurrentStageDetails copy is not, so this is the game's own string, not a guess.
+std::string Qs9CurStageDesc(ue::UObject* o) {
+    if (!o) return "nil";
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return "nil";
+    return ue::TextToString(reinterpret_cast<uint8_t*>(o) + off + kQs9StDescOff);
+}
+
+// One objective's own FText (ObjectiveName / Description) out of the live
+// CurrentStageDetails.Objectives -- the exact strings the tracked-quest HUD and the
+// journal entry bind to.
+std::string Qs9ObjText(ue::UObject* o, int idx, int32_t fieldOff) {
+    if (!o) return "nil";
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return "nil";
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kStageObjectivesOff, &arr, sizeof(arr)))
+        return "nil";
+    if (!arr.Data || idx < 0 || idx >= arr.Num || arr.Num > 256) return "nil";
+    return ue::TextToString(arr.Data + (std::size_t)idx * kQs9ObjSize + fieldOff);
+}
+
+// Every field the quest UI shows, in one line: the stage index and text the
+// object currently holds, the row's stage count and per-index names, the journal
+// entry, the tracked-objective line, and the objective counters.
+std::string Qs9State(ue::UObject* o, const std::string& id) {
+    if (!o) return net::Fmt("%s ABSENT (no live quest object)", id.c_str());
+    int32_t cur = 0;
+    ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+    bool turned = false;
+    ue::Get<bool>(o, "IsTurnedIn", turned);
+    const int staged = Qs9StageCount(o);
+
+    std::string out = net::Fmt("%s stage=%d/%d name='%s'", id.c_str(), (int)cur + 1, staged,
+                               Qs9San(StageNameOf(o), 40).c_str());
+    out += net::Fmt(" desc='%s'", Qs9San(Qs9CurStageDesc(o), 48).c_str());
+    out += net::Fmt(" journal='%s'", Qs9San(Qs9QdText(o, kQs9LogOff), 48).c_str());
+    out += net::Fmt(" track='%s'", Qs9San(Qs9QdText(o, kQs9TrackOff), 40).c_str());
+    // Proof of WHICH struct was read: the property offset reflection reports and the
+    // row's own QuestName.  Without this an all-empty QuestDetails is
+    // indistinguishable from "read the wrong address".
+    out += net::Fmt(" qdoff=%d qn='%s'", Qs9QdOff(o), Qs9San(Qs9QdText(o, kQs9NameOff), 28).c_str());
+
+    std::string names;
+    for (int k = 0; k < staged; ++k) {
+        if (k) names += "|";
+        names += Qs9San(Qs9StageNameAt(o, k), 24);
+    }
+    out += net::Fmt(" stageNames=[%s]", names.c_str());
+    // the current stage's objectives + counters: this is the text the tracked-quest
+    // HUD lists under the stage name
+    {
+        std::vector<StageObjective> objs;
+        StageObjectivesOf(o, &objs);
+        StrIntMap prog;
+        WqProgress(o, &prog);
+        std::string list;
+        for (std::size_t i = 0; i < objs.size(); ++i) {
+            const StageObjective& e = objs[i];
+            if (!list.empty()) list += ";";
+            // txt=<ObjectiveName FText> is the string the HUD/journal shows; od is its
+            // Description line.  Read from the live stage, so it is the game's own text.
+            list += net::Fmt("%s %d/%d%s txt='%s' od='%s'", e.id.c_str(), prog.Get(e.id, 0),
+                             e.quantity, e.optional ? " opt" : "",
+                             Qs9San(Qs9ObjText(o, (int)i, kQs9ObjNameOff), 44).c_str(),
+                             Qs9San(Qs9ObjText(o, (int)i, kQs9ObjDescOff), 44).c_str());
+        }
+        out += net::Fmt(" objs=[%s]", list.c_str());
+    }
+    out += net::Fmt(" turned=%d", turned ? 1 : 0);
+    return out;
+}
+
+std::string Qs9Resolve(const std::string& arg, const std::string& verb) {
+    std::string id = arg;
+    while (!id.empty() && (id.back() == '\r' || id.back() == '\n' || id.back() == ' '))
+        id.pop_back();
+    if (id.empty()) net::Log("%s: no QuestID given", verb.c_str());
+    return id;
+}
+
+// cmd.txt: qlist -- the DT_QuestData1 row names, one per line, also written to
+// result_qlist.txt so the harness can pick a candidate without a second run.
+void QuestList() {
+    ue::UObject* dt =
+        ue::FindObject("/Game/Sparta/Dialogue/QuestSystem/DT_QuestData1.DT_QuestData1");
+    ue::UObject* lib = ue::FindObject("/Script/Engine.Default__DataTableFunctionLibrary");
+    std::string text;
+    int rows = 0;
+    if (dt && lib) {
+        if (ue::UFunction* f = ue::FindFunction(lib, "GetDataTableRowNames")) {
+            ue::Params p(f);
+            p.Set<ue::UObject*>("Table", dt);
+            if (ue::Call(lib, f, p.data())) {
+                ue::TArray<ue::FName> names = p.Get<ue::TArray<ue::FName>>("OutRowNames");
+                if (names.Data && names.Num >= 0 && names.Num <= 65536) {
+                    for (int32_t i = 0; i < names.Num; ++i) {
+                        std::string n;
+                        if (!NameStr(names.Data[i], &n)) continue;
+                        ++rows;
+                        text += n;
+                        text += "\n";
+                    }
+                }
+            }
+        }
+    }
+    net::WriteFile("result_qlist.txt", text);
+    net::Log("qlist: %d DT_QuestData1 rows (result_qlist.txt)", rows);
+}
+
+// cmd.txt: qsid <QuestID> -- add + track one exact quest and report its row.
+void QuestStageStart(const std::string& arg) {
+    const std::string id = Qs9Resolve(arg, "qsid");
+    if (id.empty()) return;
+    ue::UObject* q = QuestLog();
+    if (!net::Valid(q)) {
+        net::Log("qsid: no quest log");
+        return;
+    }
+    QuestNamesLoad();
+    const bool okAdd = QuestCall(q, "AddNewQuest", id);
+    const bool okTrack = ue::Set<ue::FName>(q, "CurrentTrackedQuest", FN(id));
+    const bool okTrackQ = okTrack && TrackQuests(q);
+    ue::UObject* o = WqObj(q, id);
+    const bool okInit = InitializeQuest(o);
+    net::Log("qsid %s add=%s track=%s trackQuests=%s init=%s stages=%d obj=%s", id.c_str(),
+             okAdd ? "true" : "false", okTrack ? "true" : "false", okTrackQ ? "true" : "false",
+             okInit ? "true" : "false", Qs9StageCount(o), o ? "yes" : "NO");
+    net::Log("qstage %s", Qs9State(o, id).c_str());
+}
+
+// cmd.txt: qstage <QuestID> -- snapshot only (call it on both clients).
+void QuestStageDump(const std::string& arg) {
+    const std::string id = Qs9Resolve(arg, "qstage");
+    if (id.empty()) return;
+    ue::UObject* q = QuestLog();
+    ue::UObject* o = WqObj(q, id);
+    std::string st = Qs9State(o, id);
+    net::Log("qstage %s", st.c_str());
+    net::WriteFile("result_qstage.txt", st + "\n");
+}
+
+// cmd.txt: qlog <SubTabIndex> -- open the JOURNAL on screen through the game's own
+// UI handler.  BPC_UserInterfaceHandler_C::HandleGameMenu(SubTabIndex, AllowClose) is
+// what IA_Menu_Game calls (Dumper7 BPC_UserInterfaceHandler_parameters.hpp), so this
+// is the game's own menu, not a hand-built widget.  Test instrument.
+void QuestOpenLog(const std::string& arg) {
+    int idx = 0;
+    if (!arg.empty()) idx = std::atoi(arg.c_str());
+    ue::UObject* ui = ue::FindFirstOf("BPC_UserInterfaceHandler_C");
+    if (!net::Valid(ui)) {
+        net::Log("qlog: no BPC_UserInterfaceHandler_C instance");
+        return;
+    }
+    ue::UFunction* f = ue::FindFunction(ui, "HandleGameMenu");
+    if (!f) {
+        net::Log("qlog: HandleGameMenu not found on the UI handler");
+        return;
+    }
+    ue::Params p(f);
+    p.Set<int32_t>("SubTabIndex", idx);
+    p.Set<bool>("AllowClose", false);
+    const bool ok = ue::Call(ui, f, p.data());
+    net::Log("qlog: HandleGameMenu(SubTabIndex=%d, AllowClose=false) ok=%s", idx,
+             ok ? "true" : "false");
+}
+
+// The journal's text as the UI binds it: the live WBP_QuestLogEntry_Objective_C rows
+// (ObjectiveData + the two UTextBlocks it shows).  If the journal has never been
+// created there are no instances, which is itself the answer.
+std::string Qs9WidgetText(ue::UObject* w, const char* prop) {
+    ue::UObject* tb = nullptr;
+    if (!ue::Get<ue::UObject*>(w, prop, tb) || !net::Valid(tb)) return "";
+    const int32_t off = ue::PropOffset(tb, "Text");
+    if (off < 0) return "";
+    return ue::TextToString(reinterpret_cast<uint8_t*>(tb) + off);
+}
+
+// cmd.txt: qwidget -- dump the journal entry widgets that exist right now.
+void QuestWidgetDump() {
+    std::string out;
+    int n = 0;
+    for (ue::UObject* w : ue::FindAllOf("WBP_QuestLogEntry_Objective_C")) {
+        if (!net::Valid(w)) continue;
+        ++n;
+        std::string qs = "?", os = "?";
+        ue::FName qid;
+        std::memset(&qid, 0, sizeof(qid));
+        if (ue::Get<ue::FName>(w, "QuestID", qid)) {
+            std::string s;
+            if (NameStr(qid, &s)) qs = s;
+        }
+        ue::FName oid;
+        std::memset(&oid, 0, sizeof(oid));
+        if (ue::Get<ue::FName>(w, "ObjectiveID", oid)) {
+            std::string s;
+            if (NameStr(oid, &s)) os = s;
+        }
+        const std::string t1 = Qs9WidgetText(w, "Text_ObjectiveDescription");
+        const std::string t2 = Qs9WidgetText(w, "Text Description");
+        out += net::Fmt("%s|%s text='%s' desc='%s'\n", qs.c_str(), os.c_str(),
+                        Qs9San(t1, 70).c_str(), Qs9San(t2, 70).c_str());
+    }
+    net::WriteFile("result_qwidget.txt", out);
+    net::Log("qwidget: %d live WBP_QuestLogEntry_Objective_C row(s) -- the journal's own "
+             "objective lines", n);
+    std::string line;
+    for (char c : out) {
+        if (c == '\n') {
+            if (!line.empty()) net::Log("qwidget row: %s", line.c_str());
+            line.clear();
+        } else {
+            line.push_back(c);
+        }
+    }
+    if (!line.empty()) net::Log("qwidget row: %s", line.c_str());
+}
+
+// cmd.txt: qnext <QuestID> -- ONE stage, through the game's own path first: hear
+// every non-optional objective of the current stage, which is what the game's own
+// handler reacts to, and only fall back to the direct CurrentQuestStage write
+// when the stage does not move (the fallback is the behaviour under test, and it
+// is logged as such).  Driven from Tick2 so the 2.5 s wait is not on the stack.
+struct Qs9Next {
+    std::string id;
+    double at = 0.0;
+    int step = 0;
+    int stageBefore = 0;
+};
+Qs9Next g_qs9Next;
+
+void QuestStageNext(const std::string& arg) {
+    const std::string id = Qs9Resolve(arg, "qnext");
+    if (id.empty()) return;
+    ue::UObject* q = QuestLog();
+    ue::UObject* o = WqObj(q, id);
+    if (!o) {
+        net::Log("qnext %s: ABSENT -- add it with qsid first", id.c_str());
+        return;
+    }
+    int32_t cur = 0;
+    ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+    g_qs9Next.id = id;
+    g_qs9Next.at = Mono();
+    g_qs9Next.step = 0;
+    g_qs9Next.stageBefore = (int)cur;
+    net::Log("qnext %s: armed at stage %d/%d '%s'", id.c_str(), g_qs9Next.stageBefore + 1,
+             Qs9StageCount(o), Qs9San(StageNameOf(o), 40).c_str());
+}
+
+void Qs9NextTick() {
+    if (g_qs9Next.id.empty()) return;
+    const double el = Mono() - g_qs9Next.at;
+    ue::UObject* q = QuestLog();
+    ue::UObject* o = WqObj(q, g_qs9Next.id);
+    if (!o) {
+        if (el > 3.0) {
+            net::Log("qnext %s: quest object gone -- abandoned", g_qs9Next.id.c_str());
+            g_qs9Next.id.clear();
+        }
+        return;
+    }
+
+    if (g_qs9Next.step == 0) {
+        g_qs9Next.step = 1;
+        std::vector<StageObjective> objs;
+        StageObjectivesOf(o, &objs);
+        StrIntMap prog;
+        WqProgress(o, &prog);
+        int heard = 0;
+        std::string list;
+        for (const StageObjective& e : objs) {
+            if (e.id.empty() || e.optional) continue;
+            int steps = e.quantity - prog.Get(e.id, 0);
+            if (steps <= 0) steps = 1;
+            if (steps > 10) steps = 10;
+            for (int i = 0; i < steps; ++i) {
+                if (HearObjective(o, e.id)) ++heard;
+            }
+            if (!list.empty()) list += ";";
+            list += net::Fmt("%s x%d", e.id.c_str(), e.quantity);
+        }
+        net::Log("qnext %s: heard %d call(s) over %d objective(s) [%s]", g_qs9Next.id.c_str(),
+                 heard, (int)objs.size(), list.c_str());
+        return;
+    }
+
+    if (g_qs9Next.step == 1 && el >= 2.5) {
+        g_qs9Next.step = 2;
+        int32_t cur = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+        if ((int)cur > g_qs9Next.stageBefore) {
+            net::Log("qnext %s: the game advanced %d -> %d on its own ('%s' -> '%s')",
+                     g_qs9Next.id.c_str(), g_qs9Next.stageBefore + 1, (int)cur + 1,
+                     Qs9San(Qs9StageNameAt(o, g_qs9Next.stageBefore), 32).c_str(),
+                     Qs9San(StageNameOf(o), 32).c_str());
+            net::Log("qstage %s", Qs9State(o, g_qs9Next.id).c_str());
+            g_qs9Next.id.clear();
+            return;
+        }
+        // hearing the last stage's objectives COMPLETES the quest instead of moving
+        // the stage; writing the index then would point one past the end of the row
+        bool complete = false;
+        ue::Get<bool>(o, "IsComplete", complete);
+        if (complete) {
+            net::Log("qnext %s: already at the last stage (IsComplete=1) -- not writing "
+                     "CurrentQuestStage", g_qs9Next.id.c_str());
+            net::Log("qstage %s", Qs9State(o, g_qs9Next.id).c_str());
+            g_qs9Next.id.clear();
+            return;
+        }
+        // the fallback: the direct write WqApplyQuest uses
+        const bool ok = ue::Set<int32_t>(o, "CurrentQuestStage", cur + 1) && InitializeQuest(o);
+        int32_t back = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", back);
+        net::Log("qnext %s: direct set %d -> %d ok=%s ('%s' -> '%s')", g_qs9Next.id.c_str(),
+                 (int)cur + 1, (int)back + 1, ok ? "true" : "false",
+                 Qs9San(Qs9StageNameAt(o, g_qs9Next.stageBefore), 32).c_str(),
+                 Qs9San(StageNameOf(o), 32).c_str());
+        return;
+    }
+
+    if (g_qs9Next.step == 2 && el >= 4.0) {
+        g_qs9Next.step = 3;
+        net::Log("qstage %s", Qs9State(o, g_qs9Next.id).c_str());
+        g_qs9Next.id.clear();
+    }
+}
+// [R9-QUEST] end
+
+// [R7-BREAK] Write ONE int into store B for an owner/value name that the caller
+// read off an actor (coop_world_break.cpp's destructible walls).  Same two-step
+// wbApply/printer does -- bModify=true first, then a plain set when the readback
+// disagrees -- because `bModify` has been measured to mean "add" for this helper.
+bool StoreBWriteInt(const std::string& owner, const std::string& valueName, int value) {
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* h = Helper();
+    if (!net::Valid(pawn) || !h || owner.empty() || valueName.empty()) return false;
+    int back = 0;
+    bool ok = WriteAnInt(h, pawn, owner, valueName, value, true);
+    bool haveBack = ok && WbRead(h, owner, valueName, 'i', pawn, &back);
+    if (ok && (!haveBack || back != value)) {
+        ok = WriteAnInt(h, pawn, owner, valueName, value, false);
+        haveBack = WbRead(h, owner, valueName, 'i', pawn, &back);
+    }
+    const bool landed = haveBack && back == value;
+    net::Log("storeB write %s|%s = %d -> %s (read back %s)", owner.c_str(), valueName.c_str(),
+             value, landed ? "ok" : "FAILED",
+             haveBack ? net::Fmt("%d", back).c_str() : "nil");
+    return landed;
+}
+
+}  // namespace progress
+}  // namespace coop

@@ -1,0 +1,1 @@
+SELECT type, path FROM obj WHERE type IN ('GameplayTagsList','GameplayTagsSettings','GameplayTagsDeveloperSettings','RestrictedGameplayTagsList','GameplayTagAssetInterface','GameplayTagReponseTable') ORDER BY type, path

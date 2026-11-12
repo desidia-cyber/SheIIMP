@@ -1,0 +1,69 @@
+--- a/native/src/coop_net.cpp
++++ b/native/src/coop_net.cpp
+@@ -842,16 +842,49 @@
+ // clock -- main.lua:221 `rt()` and os.time()
+ // ---------------------------------------------------------------------------
+ 
++// ONE CLOCK, MONOTONE.  This is the root cause of three verdicts in the last run
++// (WORLD, LIFT and CHEST) and it is in net because every module reads it.
++//
++// Now() returned GameplayStatics:GetRealTimeSeconds(World) verbatim, with a
++// silent fallback to steady_clock-since-DLL-load whenever it was momentarily
++// unavailable. That is not one clock, it is three:
++//   * the reading itself has been seen lying: probe.log carries
++//     "spawnscan: clock rewound (stamp 243388915243820045087367015432192.0 -> now 0.0)"
++//     and "... (stamp -0.6 -> now -160.0)" on both clients at boot -- 2.4e32,
++//     0.0 and negative values out of a float that is supposed to be seconds;
++//   * the fallback is a DIFFERENT epoch (process uptime vs world seconds), so a
++//     one-tick unavailability is a +-40 s step with no level change;
++//   * it restarts at ~0 with the world on every level load.
++// Every consumer in coop_world/coop_progress/coop_puppet compares two readings
++// (the 8 s settle, the 20 s live announce, the 8 s chest loot window, the 40 s
++// chest keep, the 10 s lift prime, the 6 s replay guard). A single bad reading
++// therefore either expires a window instantly or stalls it forever, and that is
++// exactly what happened:
++//   - a chest event stamped by a bad reading completed its loot window and then
++//     aged out 40 s past it in the SAME scan, so the done=1 packet that carries
++//     the loot was erased before it was published: the guest replayed the lid,
++//     never received the loot, and result_chest.txt was never written;
++//   - a `born` stamped by a bad reading made the WS settle test false forever,
++//     which delayed the world-state readback to 56 s (harness deadline: 45 s).
++//
++// So: derive the value from steady_clock (which cannot go backwards or lie) and
++// use the world reading ONLY to notice a new epoch, which keeps the "restarts
++// with the world" behaviour ResetAll() re-arms against. Every use of Now() in
++// the tree is a difference of two readings, so the absolute value is free.
+ double Now() {
++    static double base = 0.0;        // steady - world at the current epoch
++    static double lastWorld = 0.0;
++    static bool haveWorld = false;
++    const double steady = SteadySeconds();
+     double t = 0.0;
+-    if (GameRealSeconds(&t)) return t;
+-    if (!g_clockWarned) {
+-        g_clockWarned = true;
+-        Log("real-time clock unavailable (GetRealTimeSeconds); using a monotonic clock");
++    if (GameRealSeconds(&t) && t >= 0.0 && t <= 1.0e8) {
++        if (!haveWorld || t + 2.0 < lastWorld) {   // first reading, or a new world
++            lastWorld = t;
++            haveWorld = true;
++            base = steady - t;
++            if (!g_clockWarned) {
++                g_clockWarned = true;
++                Log("clock: world epoch seeded (world %.1fs, steady %.1fs)", t, steady);
++            }
++        } else if (t > lastWorld) {
++            lastWorld = t;
++        }
++    } else if (!haveWorld) {
++        if (!g_clockWarned) {
++            g_clockWarned = true;
++            Log("real-time clock unavailable (GetRealTimeSeconds); using a monotonic clock");
++        }
++        base = 0.0;                                // pure steady from here
+     }
+-    return SteadySeconds();
++    return steady - base;
+ }
+ 
+ int64_t Wall() {

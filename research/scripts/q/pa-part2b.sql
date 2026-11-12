@@ -1,0 +1,3 @@
+SELECT 'swap' AS k, path FROM cls WHERE path LIKE '%/GA\_%' ESCAPE '\' AND path LIKE '/Game/Sparta/%' AND (path LIKE '%Swap%' OR path LIKE '%ShellChange%' OR path LIKE '%TransferShell%') ORDER BY path;;
+SELECT 'ppitems' AS k, substr(path, length(rtrim(path, replace(path,'/','')))+1) AS name FROM cls WHERE path LIKE '/Game/Sparta/Items/Pickups/PermProgression/%' AND path LIKE '%/GA\_%' ESCAPE '\' ORDER BY path;;
+SELECT 'rest' AS k, path FROM cls WHERE path LIKE '%/GA\_%' ESCAPE '\' AND path LIKE '/Game/Sparta/Core/%' AND (path LIKE '%Rest%' OR path LIKE '%Beacon%' OR path LIKE '%Sit%') ORDER BY path

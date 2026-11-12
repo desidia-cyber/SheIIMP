@@ -1,0 +1,10 @@
+﻿### Class /Script/Sparta.HubEventComponent  [00007FF46F034738]
+    super: /Script/Engine.ActorComponent
+    2 members:
+      PRP CurrentHubEventPoints : FloatProperty [o:0xb8]
+      PRP TotalHubEventPoints : FloatProperty [o:0xbc]
+
+### FloatProperty /Script/Sparta.HubEventComponent:CurrentHubEventPoints  [000001F4ACD0F7B0]
+
+### FloatProperty /Script/Sparta.HubEventComponent:TotalHubEventPoints  [000001F4ACD0F820]
+

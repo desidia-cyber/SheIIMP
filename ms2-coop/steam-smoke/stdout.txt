@@ -1,0 +1,18 @@
+[02:14:23] steam dll: E:\Games\Mortal Shell II\Engine\Binaries\ThirdParty\Steamworks\Steamv157\Win64\steam_api64.dll
+[02:14:23] steam init ok
+[02:14:23] logged on as 76561197960271872
+[02:14:23] manual dispatch ready (pipe 1)
+[02:14:24] creating friends-only lobby
+[02:14:24] LobbyCreated result=1 lobby=108086395351860111
+[02:14:24] callback 513
+[02:14:24] LobbyEnter lobby=108086395351860111 response=1
+[02:14:24] callback 506
+[02:14:24] callback 505
+[02:14:24] LOBBY=108086395351860111  (friend joins with --lobby 108086395351860111)
+[02:14:24] running; player=A dir=G:\Freespace\shell_coop\ms2-coop\steam-smoke\coop
+[02:14:27] no peer traffic for 3 s
+[02:14:30] no peer traffic for 3 s
+[02:14:33] no peer traffic for 3 s
+[02:14:36] no peer traffic for 3 s
+[02:14:39] no peer traffic for 3 s
+[02:14:42] no peer traffic for 3 s

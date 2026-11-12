@@ -1,0 +1,40 @@
+Mortal Shell 2 Beginner Combat Tips — Dodge, Parry and Harden 
+Skip to content
+ Mortal Shell 2 Beginner Combat Tips
+ Mortal Shell 2 beginner combat tips from a launch-day Steam guide: dodge i-frames, parry and harden timing, red attack sigils, healing and shielded enemies.
+Last verified 2026-08-20 
+ This Mortal Shell 2 beginner combat tips guide turns the first launch-day Steam combat guide into a practical checklist. It is based on a public player guide, so the timing advice is labelled as community experience rather than a developer rules document.
+ Official Mortal Shell II Steam screenshot used for the launch combat guide. 
+ The three ways to avoid damage in Mortal Shell 2
+ The Steam guide identifies three reliable defensive options. Learning at least two of them for every enemy is safer than trying to force a single reaction into every attack.
+ 1. Leave the hitbox
+ Running out of range or strafing behind an enemy avoids the damaging hitbox without spending a dodge. This is the least glamorous option, but it creates space when an attack has a long reach, a grab, or an unclear timing window.
+ 2. Dodge through the attack
+ The guide reports that a successful dodge grants a brief invulnerability window, commonly called dodge i-frames. It also notes that dodging normally prevents grab attacks from connecting. Use the dodge for a committed attack, then return to a safe position instead of immediately mashing a second input.
+ 3. Use the Seal defensively
+ The launch-day guide groups block, parry and harden timing under Seal-based defense. The practical lesson is to watch the enemy’s attack animation and press the defensive action at the correct moment, rather than treating harden or parry as a panic button.
+ What the red attack sigil means
+ Some attacks cannot be parried or blocked. The community guide says a red sigil appears on the enemy during these attack animations. When that warning appears, do not stand still waiting for a perfect parry: create distance, strafe behind the enemy, or use the dodge instead.
+ This is one of the most useful early habits because it prevents a common mistake: reading every attack as a parry test when the game is actually signalling that movement is required.
+ Healing with Mether’s Pulse
+ The same Steam guide reports that early healing is weak, while Mether’s Pulse becomes stronger and gains more charges as it is upgraded. Treat a heal as a deliberate opening rather than something to mash when health is low.
+ The practical sequence is:
+ Avoid or stagger the next attack.
+ Wait for a real gap in the enemy’s pressure.
+ Use Mether’s Pulse during that opening.
+ Resume defense immediately instead of assuming the heal makes you safe.
+ The exact upgrade costs and final charge values should be verified from the retail build before being added to a numerical build guide.
+ Shielded enemies: try heavy attacks
+ The public Steam guide reports that enemies carrying shields are especially weak to heavy attacks. Test a heavy hit when a shielded enemy is blocking rather than spending the whole encounter on light attacks that fail to create an opening.
+ This is a community-tested matchup tip, not a universal damage multiplier. If a patch changes shield resistance or stagger values, the retail result should take priority over this first-day report.
+ A simple first-run combat routine
+ Keep two dependable answers ready: dodge plus movement, or dodge plus Seal timing.
+ Read the red sigil before attempting a parry.
+ Use movement to reset a fight when several enemies aggro together.
+ Save healing for an actual opening.
+ Test heavy attacks against shielded enemies.
+ Record enemy-specific timing only after repeating it in the current retail patch.
+ Related Mortal Shell 2 guides
+ Mortal Shell II PC Requirements 
+ Mortal Shell 2 Steam Reviews 
+ Mortal Shell II Open Beta Walkthrough

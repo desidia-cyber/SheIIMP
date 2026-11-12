@@ -1,0 +1,640 @@
+﻿### ArrayProperty /Script/DlgSystem.DlgContext:GetAllOptionsArray:ReturnValue  [000001F4ACCF8E00]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgEdgeData [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgContext:GetOptionEnterConditions:ReturnValue  [000001F4ACCF8680]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgCondition [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgContext:GetOptionsArray:ReturnValue  [000001F4ACCF8500]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgEdge [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgContext:SerializedParticipants  [000001F4ACCF9900]
+    1 members:
+      PRP SerializedParticipants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ChooseChild:ReturnValue  [000001F4ACCF9380]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ChooseOption:ReturnValue  [000001F4ACCF9300]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ChooseOptionFromAll:ReturnValue  [000001F4ACCF9280]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ChooseSpeechSequenceOptionFromReplicated:ReturnValue  [000001F4ACCF9200]
+
+### BoolProperty /Script/DlgSystem.DlgContext:HasDialogueEnded:ReturnValue  [000001F4ACCFA280]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsNodeVisited:ReturnValue  [000001F4ACCFA200]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsNodeVisited:bLocalHistory  [000001F4ACCFA180]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToEndNode:ReturnValue  [000001F4ACCFA080]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToEndNode:bIndexSkipsUnsatisfiedEdges  [000001F4ACCFA000]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToVisitedNode:ReturnValue  [000001F4ACCF9F80]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToVisitedNode:bIndexSkipsUnsatisfiedEdges  [000001F4ACCF9F00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToVisitedNode:bLocalHistory  [000001F4ACCF9E80]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsOptionSatisfied:ReturnValue  [000001F4ACCF9E00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsValidAllOptionIndex:ReturnValue  [000001F4ACCF8D00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsValidNodeGUID:ReturnValue  [000001F4ACCF8C80]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsValidNodeIndex:ReturnValue  [000001F4ACCF9D00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:IsValidOptionIndex:ReturnValue  [000001F4ACCF9C80]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ReevaluateChildren:ReturnValue  [000001F4ACCF9C00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:ReevaluateOptions:ReturnValue  [000001F4ACCF9B80]
+
+### BoolProperty /Script/DlgSystem.DlgContext:WasNodeGUIDVisitedInThisContext:ReturnValue  [000001F4ACCF9B00]
+
+### BoolProperty /Script/DlgSystem.DlgContext:WasNodeIndexVisitedInThisContext:ReturnValue  [000001F4ACCF9A00]
+
+### Class /Script/DlgSystem.DlgContext  [00007FF46F013938]
+    super: /Script/DlgSystem.DlgObject
+    62 members:
+      PRP OnDialogueEnded : MulticastInlineDelegateProperty [o:0x28]
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x38]
+      PRP SerializedParticipants : ArrayProperty of SerializedParticipants./Script/DlgSystem.DlgContext:SerializedParticipants [o:0x40]
+      PRP Participants : MapProperty [o:0x50]
+      FUN WasNodeIndexVisitedInThisContext 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN WasNodeGUIDVisitedInThisContext 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ReevaluateOptions 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN ReevaluateChildren 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN OnRep_SerializedParticipants 
+      FUN IsValidOptionIndex 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN IsValidNodeIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN IsValidNodeGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN IsValidAllOptionIndex 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN IsOptionSatisfied 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN IsOptionConnectedToVisitedNode 
+          param Index : IntProperty [o:0x0]
+          param bLocalHistory : BoolProperty [o:0x4]
+          param bIndexSkipsUnsatisfiedEdges : BoolProperty [o:0x5]
+          param ReturnValue : BoolProperty [o:0x6]
+      FUN IsOptionConnectedToEndNode 
+          param Index : IntProperty [o:0x0]
+          param bIndexSkipsUnsatisfiedEdges : BoolProperty [o:0x4]
+          param ReturnValue : BoolProperty [o:0x5]
+      FUN IsNodeVisited 
+          param NodeIndex : IntProperty [o:0x0]
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+          param bLocalHistory : BoolProperty [o:0x14]
+          param ReturnValue : BoolProperty [o:0x15]
+      FUN HasDialogueEnded 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetVisitedNodeIndices 
+          param ReturnValue : SetProperty [o:0x0]
+      FUN GetVisitedNodeGUIDs 
+          param ReturnValue : SetProperty [o:0x0]
+      FUN GetParticipantsMap 
+          param ReturnValue : MapProperty [o:0x0]
+      FUN GetParticipants 
+          param ReturnValue : MapProperty [o:0x0]
+      FUN GetParticipantFromName 
+          param Participant : StructProperty of /Script/DlgSystem.DlgParticipantName [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      FUN GetOptionTextFromAll 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : TextProperty [o:0x8]
+      FUN GetOptionText 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : TextProperty [o:0x8]
+      FUN GetOptionSpeakerStateFromAll 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : NameProperty [o:0x4]
+      FUN GetOptionSpeakerState 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : NameProperty [o:0x4]
+      FUN GetOptionsNum 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetOptionsArray 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetOptionsArray:ReturnValue [o:0x0]
+      FUN GetOptionFromAll 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : StructProperty of /Script/DlgSystem.DlgEdgeData [o:0x8]
+      FUN GetOptionEnterConditions 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetOptionEnterConditions:ReturnValue [o:0x8]
+      FUN GetOption 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : StructProperty of /Script/DlgSystem.DlgEdge [o:0x8]
+      FUN GetNodeIndexForGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN GetNodeGUIDForIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+      FUN GetMutableParticipant 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      FUN GetMutableNodeFromIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x8]
+      FUN GetMutableNodeFromGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x10]
+      FUN GetMutableActiveNodeAsSpeechSequence 
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode_SpeechSequence [o:0x0]
+      FUN GetMutableActiveNode 
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+      FUN GetDialoguePathName 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN GetDialogueName 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetDialogueGUID 
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      FUN GetDialogue 
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      FUN GetContextString 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN GetAllOptionsNum 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetAllOptionsArray 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetAllOptionsArray:ReturnValue [o:0x0]
+      FUN GetActiveNodeVoiceDialogueWave 
+          param ReturnValue : ObjectProperty of /Script/Engine.DialogueWave [o:0x0]
+      FUN GetActiveNodeText 
+          param ReturnValue : TextProperty [o:0x0]
+      FUN GetActiveNodeSpeakerState 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetActiveNodeSound 
+          param ReturnValue : ObjectProperty of /Script/Engine.SoundBase [o:0x0]
+      FUN GetActiveNodeParticipantName 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetActiveNodeParticipantIcon 
+          param ReturnValue : ObjectProperty of /Script/Engine.Texture2D [o:0x0]
+      FUN GetActiveNodeParticipantDisplayName 
+          param ReturnValue : TextProperty [o:0x0]
+      FUN GetActiveNodeParticipant 
+          param ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN GetActiveNodeIndex 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetActiveNodeGUID 
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      FUN GetActiveNodeGenericData 
+          param ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN GetActiveNodeData 
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNodeData [o:0x0]
+      FUN ChooseSpeechSequenceOptionFromReplicated 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN ChooseOptionFromAll 
+          param Index : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN ChooseOption 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN ChooseChild 
+          param OptionIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:ChooseChild  [00007FF46F6C3058]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:ChooseOption  [00007FF46F6C3138]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:ChooseOptionFromAll  [00007FF46F6C3218]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:ChooseSpeechSequenceOptionFromReplicated  [00007FF46F6C32F8]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeData  [00007FF46F6C33D8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNodeData [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeGUID  [00007FF46F6C3598]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeGenericData  [00007FF46F6C34B8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeIndex  [00007FF46F6C3678]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeParticipant  [00007FF46F6C3758]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeParticipantDisplayName  [00007FF46F6C3838]
+    1 members:
+      PRP ReturnValue : TextProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeParticipantIcon  [00007FF46F6C3918]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.Texture2D [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeParticipantName  [00007FF46F6C39F8]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeSound  [00007FF46F6C3AD8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.SoundBase [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeSpeakerState  [00007FF46F6C3BB8]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeText  [00007FF46F6C3C98]
+    1 members:
+      PRP ReturnValue : TextProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetActiveNodeVoiceDialogueWave  [00007FF46F6C3D78]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.DialogueWave [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetAllOptionsArray  [00007FF46F6C3E58]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetAllOptionsArray:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetAllOptionsNum  [00007FF46F6C3F38]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetContextString  [00007FF46F6C4018]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetDialogue  [00007FF46F6C40F8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetDialogueGUID  [00007FF46F6C41D8]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetDialogueName  [00007FF46F6C42B8]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetDialoguePathName  [00007FF46F6C4398]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetMutableActiveNode  [00007FF46F6C4478]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetMutableActiveNodeAsSpeechSequence  [00007FF46F6C4558]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode_SpeechSequence [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetMutableNodeFromGUID  [00007FF46F6C4638]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x10]
+
+### Function /Script/DlgSystem.DlgContext:GetMutableNodeFromIndex  [00007FF46F6C4718]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetMutableParticipant  [00007FF46F6C47F8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetNodeGUIDForIndex  [00007FF46F6C48D8]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:GetNodeIndexForGUID  [00007FF46F6C49B8]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgContext:GetOption  [00007FF46F6C4A98]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgEdge [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionEnterConditions  [00007FF46F6C4B78]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetOptionEnterConditions:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionFromAll  [00007FF46F6C4C58]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgEdgeData [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionSpeakerState  [00007FF46F6C4EF8]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : NameProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionSpeakerStateFromAll  [00007FF46F6C4FD8]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : NameProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionText  [00007FF46F6C50B8]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : TextProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionTextFromAll  [00007FF46F6C5198]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : TextProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionsArray  [00007FF46F6C4D38]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgContext:GetOptionsArray:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetOptionsNum  [00007FF46F6C4E18]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetParticipantFromName  [00007FF46F6C5278]
+    2 members:
+      PRP Participant : StructProperty of /Script/DlgSystem.DlgParticipantName [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### Function /Script/DlgSystem.DlgContext:GetParticipants  [00007FF46F6C5358]
+    1 members:
+      PRP ReturnValue : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetParticipantsMap  [00007FF46F6C5438]
+    1 members:
+      PRP ReturnValue : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetVisitedNodeGUIDs  [00007FF46F6C5518]
+    1 members:
+      PRP ReturnValue : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:GetVisitedNodeIndices  [00007FF46F6C55F8]
+    1 members:
+      PRP ReturnValue : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:HasDialogueEnded  [00007FF46F6C56D8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:IsNodeVisited  [00007FF46F6C57B8]
+    4 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+      PRP bLocalHistory : BoolProperty [o:0x14]
+      PRP ReturnValue : BoolProperty [o:0x15]
+
+### Function /Script/DlgSystem.DlgContext:IsOptionConnectedToEndNode  [00007FF46F6C5898]
+    3 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP bIndexSkipsUnsatisfiedEdges : BoolProperty [o:0x4]
+      PRP ReturnValue : BoolProperty [o:0x5]
+
+### Function /Script/DlgSystem.DlgContext:IsOptionConnectedToVisitedNode  [00007FF46F6C5978]
+    4 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP bLocalHistory : BoolProperty [o:0x4]
+      PRP bIndexSkipsUnsatisfiedEdges : BoolProperty [o:0x5]
+      PRP ReturnValue : BoolProperty [o:0x6]
+
+### Function /Script/DlgSystem.DlgContext:IsOptionSatisfied  [00007FF46F6C5A58]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:IsValidAllOptionIndex  [00007FF46F6C5B38]
+    2 members:
+      PRP Index : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:IsValidNodeGUID  [00007FF46F6C5C18]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgContext:IsValidNodeIndex  [00007FF46F6C5CF8]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:IsValidOptionIndex  [00007FF46F6C5DD8]
+    2 members:
+      PRP OptionIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgContext:OnRep_SerializedParticipants  [00007FF46F6C5EB8]
+
+### Function /Script/DlgSystem.DlgContext:ReevaluateChildren  [00007FF46F6C5F98]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:ReevaluateOptions  [00007FF46F6C6078]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgContext:WasNodeGUIDVisitedInThisContext  [00007FF46F6C6158]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgContext:WasNodeIndexVisitedInThisContext  [00007FF46F6C6238]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### IntProperty /Script/DlgSystem.DlgContext:ChooseChild:OptionIndex  [000001F4ACBCFBA0]
+
+### IntProperty /Script/DlgSystem.DlgContext:ChooseOption:OptionIndex  [000001F4ACBCFB30]
+
+### IntProperty /Script/DlgSystem.DlgContext:ChooseOptionFromAll:Index  [000001F4ACBCFAC0]
+
+### IntProperty /Script/DlgSystem.DlgContext:ChooseSpeechSequenceOptionFromReplicated:OptionIndex  [000001F4ACBCFA50]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetActiveNodeIndex:ReturnValue  [000001F4ACBCF9E0]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetAllOptionsNum:ReturnValue  [000001F4ACBCF7B0]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetMutableNodeFromIndex:NodeIndex  [000001F4ACBCF5F0]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetNodeGUIDForIndex:NodeIndex  [000001F4ACD00E10]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetNodeIndexForGUID:ReturnValue  [000001F4ACD00DA0]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOption:OptionIndex  [000001F4ACD00D30]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionEnterConditions:OptionIndex  [000001F4ACD00CC0]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionFromAll:Index  [000001F4ACD00C50]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionSpeakerState:OptionIndex  [000001F4ACD00B00]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionSpeakerStateFromAll:Index  [000001F4ACD00A20]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionText:OptionIndex  [000001F4ACD00940]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionTextFromAll:Index  [000001F4ACD00860]
+
+### IntProperty /Script/DlgSystem.DlgContext:GetOptionsNum:ReturnValue  [000001F4ACD00BE0]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsNodeVisited:NodeIndex  [000001F4ACD006A0]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToEndNode:Index  [000001F4ACD00630]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsOptionConnectedToVisitedNode:Index  [000001F4ACD005C0]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsOptionSatisfied:Index  [000001F4ACD00550]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsValidAllOptionIndex:Index  [000001F4ACD004E0]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsValidNodeIndex:NodeIndex  [000001F4ACD00470]
+
+### IntProperty /Script/DlgSystem.DlgContext:IsValidOptionIndex:OptionIndex  [000001F4ACD00400]
+
+### IntProperty /Script/DlgSystem.DlgContext:WasNodeIndexVisitedInThisContext:NodeIndex  [000001F4ACD00390]
+
+### MapProperty /Script/DlgSystem.DlgContext:GetParticipants:ReturnValue  [000001F49C789E80]
+    2 members:
+      PRP ReturnValue_Key : NameProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### MapProperty /Script/DlgSystem.DlgContext:GetParticipantsMap:ReturnValue  [000001F49C789F20]
+    2 members:
+      PRP ReturnValue_Key : NameProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### MapProperty /Script/DlgSystem.DlgContext:Participants  [000001F49C789FC0]
+    2 members:
+      PRP Participants_Key : NameProperty [o:0x0]
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### MulticastInlineDelegateProperty /Script/DlgSystem.DlgContext:OnDialogueEnded  [000001F4ACCF9780]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetActiveNodeParticipantName:ReturnValue  [000001F4ACBCF900]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetActiveNodeSpeakerState:ReturnValue  [000001F4ACBCF890]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetDialogueName:ReturnValue  [000001F4ACBCF6D0]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetMutableParticipant:ParticipantName  [000001F4ACBCF580]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetOptionSpeakerState:ReturnValue  [000001F4ACD00B70]
+
+### NameProperty /Script/DlgSystem.DlgContext:GetOptionSpeakerStateFromAll:ReturnValue  [000001F4ACD00A90]
+
+### NameProperty Participants./Script/DlgSystem.DlgContext:Participants_Key  [000001F4ACD00320]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgContext:GetParticipants:ReturnValue_Key  [000001F4ACD007F0]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgContext:GetParticipantsMap:ReturnValue_Key  [000001F4ACD00780]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:Dialogue  [000001F4ACCF9800]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeData:ReturnValue  [000001F4ACCF9180]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeGenericData:ReturnValue  [000001F4ACCF9100]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeParticipant:ReturnValue  [000001F4ACCF9000]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeParticipantIcon:ReturnValue  [000001F4ACCF8F80]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeSound:ReturnValue  [000001F4ACCF8F00]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetActiveNodeVoiceDialogueWave:ReturnValue  [000001F4ACCF8E80]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetDialogue:ReturnValue  [000001F4ACCF8C00]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetMutableActiveNode:ReturnValue  [000001F4ACCF8B00]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetMutableActiveNodeAsSpeechSequence:ReturnValue  [000001F4ACCF8A80]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetMutableNodeFromGUID:ReturnValue  [000001F4ACCF8A00]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetMutableNodeFromIndex:ReturnValue  [000001F4ACCF8900]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetMutableParticipant:ReturnValue  [000001F4ACCF8880]
+
+### ObjectProperty /Script/DlgSystem.DlgContext:GetParticipantFromName:ReturnValue  [000001F4ACCFA500]
+
+### ObjectProperty Participants./Script/DlgSystem.DlgContext:Participants  [000001F4ACCF9980]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgContext:GetParticipants:ReturnValue  [000001F4ACCFA400]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgContext:GetParticipantsMap:ReturnValue  [000001F4ACCFA380]
+
+### ObjectProperty SerializedParticipants./Script/DlgSystem.DlgContext:SerializedParticipants  [000001F4ACCF9880]
+
+### SetProperty /Script/DlgSystem.DlgContext:GetVisitedNodeGUIDs:ReturnValue  [000001F4A93E7D80]
+
+### SetProperty /Script/DlgSystem.DlgContext:GetVisitedNodeIndices:ReturnValue  [000001F4A93E7CF0]
+
+### StrProperty /Script/DlgSystem.DlgContext:GetContextString:ReturnValue  [000001F4ACBCF740]
+
+### StrProperty /Script/DlgSystem.DlgContext:GetDialoguePathName:ReturnValue  [000001F4ACBCF660]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetActiveNodeGUID:ReturnValue  [000001F4ACCF9080]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetDialogueGUID:ReturnValue  [000001F4ACCF8B80]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetMutableNodeFromGUID:NodeGuid  [000001F4ACCF8980]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetNodeGUIDForIndex:ReturnValue  [000001F4ACCF8800]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetNodeIndexForGUID:NodeGuid  [000001F4ACCF8780]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetOption:ReturnValue  [000001F4ACCF8700]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetOptionFromAll:ReturnValue  [000001F4ACCF8580]
+
+### StructProperty /Script/DlgSystem.DlgContext:GetParticipantFromName:Participant  [000001F4ACCFA480]
+
+### StructProperty /Script/DlgSystem.DlgContext:IsNodeVisited:NodeGuid  [000001F4ACCFA100]
+
+### StructProperty /Script/DlgSystem.DlgContext:IsValidNodeGUID:NodeGuid  [000001F4ACCF9D80]
+
+### StructProperty /Script/DlgSystem.DlgContext:WasNodeGUIDVisitedInThisContext:NodeGuid  [000001F4ACCF9A80]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgContext:GetAllOptionsArray:ReturnValue  [000001F4ACCF8D80]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgContext:GetOptionEnterConditions:ReturnValue  [000001F4ACCF8600]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgContext:GetOptionsArray:ReturnValue  [000001F4ACCF8480]
+
+### TextProperty /Script/DlgSystem.DlgContext:GetActiveNodeParticipantDisplayName:ReturnValue  [000001F4ACBCF970]
+
+### TextProperty /Script/DlgSystem.DlgContext:GetActiveNodeText:ReturnValue  [000001F4ACBCF820]
+
+### TextProperty /Script/DlgSystem.DlgContext:GetOptionText:ReturnValue  [000001F4ACD009B0]
+
+### TextProperty /Script/DlgSystem.DlgContext:GetOptionTextFromAll:ReturnValue  [000001F4ACD008D0]
+

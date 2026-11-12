@@ -1,0 +1,138 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ReceiveEndPlay	EndPlayReason ByteProperty	1		2358
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ReceiveBeginPlay		0		2360
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Script/Sparta.PlayerInventoryComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	RemoveItemStacksByInstance	ItemInstance ObjectProperty of /Script/Sparta.SpartaItemInstance; NumToRemove IntProperty	2	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60816
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	RemoveItemStacksByClass	ItemDef ClassProperty; NumToRemove IntProperty	2	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60819
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	RemoveItemInstance	ItemInstance ObjectProperty of /Script/Sparta.SpartaItemInstance	1	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60822
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	GetTotalItemCountByDefinition	ItemDef ClassProperty; ReturnValue IntProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	60824
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	GetItemStacksByClass	ItemDef ClassProperty; ReturnValue IntProperty	2	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable, BlueprintPure, Const	60827
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	GetAllItems	ReturnValue ArrayProperty of ReturnValue./Script/Sparta.SpartaItemManagerComponent:GetAllItems:ReturnValue	1	Final, Native, Public, BlueprintCallable, Const	60830
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	FindFirstItemStackByClass	ItemDef ClassProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaItemInstance	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	60833
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	CanAddItemByClass	ItemDef ClassProperty; StackCount IntProperty; ReturnValue BoolProperty	3	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60836
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	AddItemInstance	ItemInstance ObjectProperty of /Script/Sparta.SpartaItemInstance	1	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60840
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	AddItemByClass	ItemDef ClassProperty; StackCount IntProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaItemInstance	3	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60842
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ReceiveEndPlay	EndPlayReason ByteProperty	1		2358
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ReceiveBeginPlay		0		2360
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemManagerComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	RemoveStatTagStack	Tag StructProperty of /Script/GameplayTags.GameplayTag; StackCount IntProperty	2	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60790
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	HasStatTag	Tag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue BoolProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	60793
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	GetStatTagStackCount	Tag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	60796
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	GetItemDef	ReturnValue ClassProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	60799
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	FindFragmentByClass	FragmentClass ClassProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaItemFragment	2	Final, Native, Public, BlueprintCallable, Const	60801
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	AddStatTagStack	Tag StructProperty of /Script/GameplayTags.GameplayTag; StackCount IntProperty	2	Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable	60804
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemInstance	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemDefinition	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFunctionLibrary	/Script/Sparta.SpartaItemFunctionLibrary	FindMutableItemDefinitionFragment	ItemDef ClassProperty; FragmentClass ClassProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaItemFragment	3	Final, Native, Static, Public, BlueprintCallable	60771
+/Script/Sparta.SpartaItemFunctionLibrary	/Script/Sparta.SpartaItemFunctionLibrary	FindItemDefinitionFragments	ItemDef ClassProperty; FragmentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Sparta.SpartaItemFunctionLibrary:FindItemDefinitionFragments:ReturnValue	3	Final, Native, Static, Public, BlueprintCallable	60775
+/Script/Sparta.SpartaItemFunctionLibrary	/Script/Sparta.SpartaItemFunctionLibrary	FindItemDefinitionFragment	ItemDef ClassProperty; FragmentClass ClassProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaItemFragment	3	Final, Native, Static, Public, BlueprintCallable	60780
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemFunctionLibrary	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemChangeEvent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.SpartaItemFragment	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2	Native, Event, Public, BlueprintEvent, Const	53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.SpartaItemFragment	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2	Native, Event, Public, BlueprintEvent, Const	53649
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemFragment	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.SpartaItemFragment_StatLevels	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.SpartaItemFragment_StatLevels	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.SpartaItemFragment_StatLevels	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.AdditionalContainerComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Display	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Display	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_Display	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.ItemFragment_StackabilityRules	/Script/Sparta.ItemFragment_StackabilityRules	GetStackStatValue	StatTag StructProperty of /Script/GameplayTags.GameplayTag; Values ArrayProperty of Values./Script/Sparta.ItemFragment_StackabilityRules:GetStackStatValue:Values; ReturnValue FloatProperty	3	Native, Event, Public, HasOutParams, BlueprintEvent, Const	53702
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_StackabilityRules	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_StackabilityRules	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_StackabilityRules	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.ItemFragment_StackabilityRules	/Script/Sparta.ItemFragment_StackableDivideSumByCountSquared	GetStackStatValue	StatTag StructProperty of /Script/GameplayTags.GameplayTag; Values ArrayProperty of Values./Script/Sparta.ItemFragment_StackabilityRules:GetStackStatValue:Values; ReturnValue FloatProperty	3		53702
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_StackableDivideSumByCountSquared	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_StackableDivideSumByCountSquared	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_StackableDivideSumByCountSquared	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Tarstone	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Tarstone	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_Tarstone	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetStats	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetStats	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_SetStats	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.ItemFragment_ItemTag	/Script/Sparta.ItemFragment_ItemTag	GetItemTag	ReturnValue StructProperty of /Script/GameplayTags.GameplayTag	1	Native, Event, Public, BlueprintEvent, Const	53677
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_ItemTag	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_ItemTag	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_ItemTag	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_GiveItemToPlayer	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_GiveItemToPlayer	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_GiveItemToPlayer	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_GiveItemToShell	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_GiveItemToShell	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_GiveItemToShell	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_WorldStateModifier	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_WorldStateModifier	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_WorldStateModifier	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.ItemFragment_Executable	/Script/Sparta.ItemFragment_Executable	Execute	ContextObject ObjectProperty of /Script/CoreUObject.Object	1	Final, Native, Public, BlueprintCallable, Const	60753
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Executable	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Executable	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_Executable	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetShellClass	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetShellClass	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_SetShellClass	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetDarkformClass	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_SetDarkformClass	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_SetDarkformClass	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_AbilitySets	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_AbilitySets	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_AbilitySets	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_PickupIcon	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_PickupIcon	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_PickupIcon	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.ItemFragment_Spawnable	/Script/Sparta.ItemFragment_Spawnable	ShouldSpawn	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent; ReturnValue BoolProperty	3	Native, Event, Public, BlueprintEvent, Const	53692
+/Script/Sparta.ItemFragment_Spawnable	/Script/Sparta.ItemFragment_Spawnable	ChooseSpawnableActor	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent; ReturnValue ClassProperty	3	Native, Event, Public, BlueprintEvent, Const	53696
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Spawnable	OnInstanceRemoved	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53646
+/Script/Sparta.SpartaItemFragment	/Script/Sparta.ItemFragment_Spawnable	OnInstanceCreated	Instance ObjectProperty of /Script/Sparta.SpartaItemInstance; OwnerComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	2		53649
+/Script/CoreUObject.Object	/Script/Sparta.ItemFragment_Spawnable	ExecuteUbergraph	EntryPoint IntProperty	1		3

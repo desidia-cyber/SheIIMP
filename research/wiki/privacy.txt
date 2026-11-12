@@ -1,0 +1,28 @@
+Privacy Policy — Mortal Shell II Wiki 
+Skip to content
+ Privacy Policy
+ Last updated 2026-07-23 
+This policy explains what data Mortal Shell 2 Wiki collects and how it is used. We keep it
+ short and specific — no boilerplate we don't actually rely on.
+ Analytics
+We use Google Analytics 4 to understand which guides are useful and where readers
+ run into trouble. GA4 sets cookies and collects anonymised usage data such as pages
+ visited, approximate region, device type, and session duration. We do not collect
+ your name, email, or any information that identifies you personally through
+ analytics.
+ Cookies
+Cookies on this site come from the analytics and, in future, advertising services
+ named here. You can block or delete cookies in your browser settings; the site
+ continues to work without them. Where required, a consent banner lets you choose
+ before non-essential cookies are set.
+ Advertising
+If and when we display ads (for example, Google AdSense), the ad provider may use
+ cookies to serve and measure ads. This section will be updated with the specific
+ provider and its policy link before any ads go live. Any sponsored link on this
+ site is marked with rel="sponsored" .
+ Third-party links
+We link to official sources (developer posts, Steam, trailers) so you can verify
+ our facts. Those sites have their own privacy policies, which we don't control.
+ Contact
+Questions about this policy? Email
+ [email&#160;protected] .

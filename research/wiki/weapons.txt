@@ -1,0 +1,173 @@
+Mortal Shell 2 Weapons — 8 Melee, 8 Sidearms, Locations and Upgrades 
+Skip to content
+ Mortal Shell 2 Weapons Guide
+You always carry one melee weapon and one sidearm. There are eight of each. Pickup locations, Tarforge
+ materials, and the player-consensus ranking below are walkthrough notes for this wiki — damage numbers
+ on the HUD are not a published stat sheet.
+ How the loadout works
+Combat is Resolve and posture, not a stamina bar. Weapons stay unlocked once found and can move between
+ Shells. Tarstones are infusions, not smithing stones. Merrick in Marrow Keep sells maps that mark weapon
+ pins if you would rather spend Coins than explore. The weapon location index 
+lists every melee weapon and sidearm in one table.
+ Melee weapons
+ Look Weapon Feel Where to get it Achievement 
+ The Iconoclast 
+ Light greatsword, all-rounder. Prologue starter.
+ Prologue. Talk to the Undermether, inhabit Harros — it is already in the inventory.
+ Counts toward Lord of War
+ Axe and Dagger 
+ Fast dual-wield. Dagger lights into an axe heavy.
+ South of Mushroom Village Beacon. Illusion stone arch, Chapel Key off the statue rope, then Shrine of Trials (NW Grisha Hunter camp). Pressure plates, loot the Knight room.
+ Deep Cuts · Lord of War
+ Veteran's Battle Axe 
+ Two-handed heavy axe. High stagger.
+ Near Shattered Beacon / Blackridge Pass. Drop into The King's Crypt. Long hole, body or sarcophagus near an enemy.
+ Cut You Down to Size · Lord of War
+ Great Martyr's Blade 
+ Colossal greatsword with freeze.
+ NE from Gloomshade Grove Beacon, outside Citadel of Penance walls: Martyr's Prison. Pouch on the stone counter teleports you in. Needs the Citadel key from Bloodcursed Lithopod.
+ Big Boi · Lord of War
+ Obsidian Hammer 
+ Blunt hammer. Shield-break.
+ SW from Outskirts of Mammon, Abandoned Slums pit, Obsidianite Mines. Drops from Prophet of Profane Infinities.
+ Stop - Hammer Time · Lord of War
+ Black Needle 
+ Long spear. Fast pokes.
+ Sester's Gate (SE Corrupt Gate). Cleanse the Beacon, twin Sesters then Stray Sester. Drops on the kill.
+ Point Taken · Lord of War
+ Axatana 
+ Axe that switches into dual katanas.
+ NE from The Silent Steps / Sester's Gate. Bone Gate to the tower near the SE Corrupt Gate. Button behind the tower, Dagger Sester, alcove loot.
+ Dual Wielding · Lord of War
+ Clockwork Scythe 
+ Wide mechanical scythe. Crowd control.
+ SE from The Silent Steps. Beat Sariel on the platform to open Chamber of Becoming. Smash four glowing tombstones so he stays dead. Drops with the Sariel Shell.
+ Like Clockwork · Lord of War
+ Sidearms
+ Look Sidearm Feel Where to get it Achievement 
+ Naylshotte 
+ Close shotgun interrupt.
+ Prologue with Harros and the Untarnished Seal. Automatic.
+ Guns. Lots of Guns
+ Forgotten Crossbow 
+ Single-target pull shot.
+ NW of Blackridge Pass Beacon, Flooded Village. Break the boarded arch, second elevator, Damp Key off a crate by the wrecked boat, central building table.
+ Old School · Guns. Lots of Guns
+ Troubador's Lute 
+ Confusion. Enemies fight each other. Cannot be upgraded.
+ One-Legged Wolf Tavern. Needs Mother's Breath (siphon 8 Ova) to clear the growths from Mushroom Village toward Hilga's house. Stage left of the lute player.
+ Guns. Lots of Guns
+ Salvaged Trebuchaxe 
+ Arcing explosive axes. Slow reload.
+ South of Gloomshade Grove. Beat Bloodcursed Lithopod for the Citadel lever, then Ravaged Hideout next door. Loot the body at the end.
+ Chop Chop · Guns. Lots of Guns
+ Ballistazooka 
+ Shoulder ballista. Pins and knocks down.
+ NW of Gate of Mammon Beacon, Sentry's Grave. Beat Subjugated Guardian at the bottom.
+ Speared · Guns. Lots of Guns
+ Triarch Repeater 
+ Three-barrel pressure. Resolve-gated fire.
+ Blackwell Cavern north of Castigator's Keep. Wooden elevator, cliff edge, lift, break the barricade. On the ground in the first lit fog room. No boss.
+ Old Painless · Guns. Lots of Guns
+ Cursed Child 
+ Lifedrain channel. Execution heals a little.
+ Revered Beacon from Sester's Gate. NW stairs, western platform, Bone Gate, north past the hammer enemy. Destroy the central light pillar, then loot.
+ Beautiful Baby · Guns. Lots of Guns
+ Caged Hystrix 
+ Tracking poison spikes.
+ Chamber of Becoming after Sariel. Do not fast-travel out — back stairs near the exit.
+ Spiked · Guns. Lots of Guns
+ Tarforge levels
+Upgrade at the Tarforge in Marrow Keep. Cap for a first playthrough is +16. Materials climb
+ Ventrium (+1 to +6), Laterite (+7 to +11), then Dorsalite (+12 to +16), plus Coins. Each step is
+ about +5% damage (105% at +1, 180% at +16 on the Iconoclast table). Troubador's Lute cannot be
+ upgraded. Smelting later refunds spent stones. Players also report a late-game item that goes past
+ +16 — treat +16 as the advertised cap until you find that chest.
+ Level Damage Material Coins 
+ +1
+ 105%
+ Ventrium x2
+ 100
+ +2
+ 110%
+ Ventrium x2
+ 100
+ +3
+ 115%
+ Ventrium x4
+ 300
+ +4
+ 120%
+ Ventrium x9
+ 500
+ +5
+ 125%
+ Ventrium x13
+ 1,000
+ +6
+ 130%
+ Ventrium x18
+ 1,250
+ +7
+ 135%
+ Laterite x2
+ 2,750
+ +8
+ 140%
+ Laterite x4
+ 2,750
+ +9
+ 145%
+ Laterite x9
+ 3,500
+ +10
+ 150%
+ Laterite x13
+ 4,250
+ +11
+ 155%
+ Laterite x18
+ 5,000
+ +12
+ 160%
+ Dorsalite x2
+ 5,750
+ +13
+ 165%
+ Dorsalite x4
+ 6,500
+ +14
+ 170%
+ Dorsalite x9
+ 7,250
+ +15
+ 175%
+ Dorsalite x13
+ 8,000
+ +16
+ 180%
+ Dorsalite x18
+ 8,750
+Iconoclast ladder as measured in play. Other melee weapons match through at least +9. Sidearm
+ stone counts are not fully mapped.
+ Player ranking
+Not a developer list. Axatana and Black Needle sit at the top of most player write-ups. Obsidian
+ Hammer sits at the bottom because it is slow. Patches and Shells will move this around.
+ Melee
+ S — Axatana. Fast dual-wield plus a heavy axe. Most lists put it here. 
+ S — Black Needle. Long, safe pokes. Consistent in boss fights. 
+ A — Axe and Dagger. Early fast weapon. Same niche as Axatana, weaker later. 
+ A — Veteran's Battle Axe. Best heavy for stagger. Some runs find it already +4. 
+ A — The Iconoclast. Safest first playthrough sword. No peak, no hole. 
+ B — Clockwork Scythe. Group sweeps. Recovery is long against fast bosses. 
+ B — Great Martyr's Blade. Reach and freeze. Slow startups. 
+ C — Obsidian Hammer. Huge blunt hits, slowest moveset. Veteran's Axe is the friendlier heavy. 
+ Sidearms
+ S — Triarch Repeater. Sustained fire. High ceiling with a DoT Tarstone. 
+ S — Troubador's Lute. Confusion is unique. Cannot be upgraded. 
+ S — Ballistazooka. Highest single-shot burst. Long recovery. 
+ A — Forgotten Crossbow. Early precise pull. Cheap power spike. 
+ A — Cursed Child. Sustain and execution heal. 
+ A — Caged Hystrix. Tracking poison. Needs the right Tarstone. 
+ B — Naylshotte. Starter shotgun. Replaced once you have a specialist. 
+ B — Salvaged Trebuchaxe. Splash throw. Reload is too slow in melee.

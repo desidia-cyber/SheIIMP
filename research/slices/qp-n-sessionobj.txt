@@ -1,0 +1,12 @@
+﻿### Class /Script/Sparta.SpartaSessionSaveObjectBase  [00007FF46F057D38]
+    super: /Script/Sparta.SpartaSaveObject
+    1 members:
+      FUN GetSessionStartTransform 
+          param ReturnValue : StructProperty of /Script/CoreUObject.Transform [o:0x0]
+
+### Function /Script/Sparta.SpartaSessionSaveObjectBase:GetSessionStartTransform  [00007FF46F7126D8]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Transform [o:0x0]
+
+### StructProperty /Script/Sparta.SpartaSessionSaveObjectBase:GetSessionStartTransform:ReturnValue  [000001F4ACDF4E80]
+

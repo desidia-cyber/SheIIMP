@@ -1,0 +1,184 @@
+declared_in	class	member	type	offset	dump_line
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	276310
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bTriggeredSecondPhase	BoolProperty	0xC0	276311
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bTriggeredThirdPhase	BoolProperty	0xC1	276312
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bIsAggroed	BoolProperty	0xC2	276313
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BossAICharacter	ObjectProperty of /Game/Sparta/Core/AI/BP_AICharacter.BP_AICharacter_C	0xC8	276314
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SpartaAIController	ObjectProperty of /Script/Sparta.SpartaAIController	0xD0	276315
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDeath	MulticastInlineDelegateProperty	0xD8	276316
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossAggro	MulticastInlineDelegateProperty	0xE8	276317
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SecondPhaseHealthPercent	DoubleProperty	0xF8	276318
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ThirdPhaseHealthPercent	DoubleProperty	0x100	276319
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDeaggro	MulticastInlineDelegateProperty	0x108	276320
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnSecondPhaseStarted	MulticastInlineDelegateProperty	0x118	276321
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CameraModifierHande	StructProperty of /Script/CameraStateFramework.CSCameraStateModifierHandle	0x128	276322
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CameraModifier	StructProperty of /Script/CameraStateFramework.CSCameraStateModifier	0x130	276323
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	VestigeItem	ClassProperty	0x238	276324
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	VestigeEffects	ArrayProperty of VestigeEffects./Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C:VestigeEffects	0x240	276325
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ItemStacks	IntProperty	0x250	276327
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bIsDead	BoolProperty	0x254	276328
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	TempBossHealthCalc	DoubleProperty	0x258	276329
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnThirdPhaseStarted	MulticastInlineDelegateProperty	0x260	276330
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	CurrentBoss	ByteProperty	0xB8	173808
+/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	RelevantDL	ObjectProperty of /Script/Engine.DataLayerAsset	0xC0	173809
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	Unlocked	BoolProperty	0xB8	171980
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	EndStrandingCompleted	BoolProperty	0xB8	195162
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	AllCorruptionCoresClensed	BoolProperty	0xB9	195163
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ClensedCores	IntProperty	0xBC	195164
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	TotalCoresNeeded	IntProperty	0xC0	195165
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	Cleansed	BoolProperty	0xB8	201629
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T1Cleansed	BoolProperty	0xB8	202310
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T2Cleansed	BoolProperty	0xB9	202311
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T3Clensed	BoolProperty	0xBA	202312
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	CenterClensed	BoolProperty	0xBB	202313
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	HutchbackDefeated	BoolProperty	0xB8	171812
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	BeaconRisen	BoolProperty	0xB8	172556
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	StoneSealClaimed	BoolProperty	0xB8	205408
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	WagerPlaced	BoolProperty	0xB8	171807
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ArenaCombatLVL	IntProperty	0xBC	171808
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	RewardGiven	BoolProperty	0xC0	171809
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2D0	268673
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InGameDebugTextWidget	ObjectProperty of /Script/UMG.WidgetComponent	0x2D8	268674
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SpartaSave	ObjectProperty of /Script/Sparta.SpartaSaveComponent	0x2E0	268675
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EditorDebugText	ObjectProperty of /Script/Engine.TextRenderComponent	0x2E8	268676
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SM_Plane	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2F0	268677
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2F8	268678
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PreviewEvent	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x300	268679
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Enabled	BoolProperty	0x308	268680
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DrawDebug	BoolProperty	0x309	268681
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventType	ByteProperty	0x30A	268682
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadingPolicy	ByteProperty	0x30B	268683
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SingleEvent	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x310	268684
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventsOverride	ArrayProperty of EventsOverride./Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C:EventsOverride	0x318	268685
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OptionSet	ObjectProperty of /Script/CSOptionSet.CSOptionSetDataAsset	0x328	268687
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PreviewLevelInstance	ObjectProperty of /Script/Engine.LevelInstance	0x330	268688
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LevelInstance	SoftObjectProperty of /Script/Engine.World	0x338	268689
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadedLevel	ObjectProperty of /Script/Engine.LevelStreamingDynamic	0x360	268690
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	HidePlane	BoolProperty	0x368	268691
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnFailedLoad	MulticastInlineDelegateProperty	0x370	268692
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIsLevelLoaded	BoolProperty	0x380	268693
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LastEventLoaded	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x388	268694
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Optional	ClassProperty	0x390	268695
+/Script/Sparta.SpartaEventSpaceActor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventSettings	StructProperty of /Script/Sparta.LevelEventSettings	0x2A8	56009
+/Script/Sparta.SpartaEventSpaceActor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventGameTime	FloatProperty	0x2C8	56010
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129

@@ -1,0 +1,393 @@
+:root{color-scheme:dark;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;background:var(--theme-page, #181b1b);color:#e9e7df}
+*{box-sizing:border-box}
+body{margin:0;min-width:320px}
+button,input,select{font:inherit}
+button,select,input[type=search]{background:var(--theme-control, #242a29);color:#f5f3eb;border:1px solid var(--theme-control-border, #4e5b56);border-radius:5px}
+button{cursor:pointer;padding:.56rem .75rem}
+button:hover,select:hover,input[type=search]:hover{border-color:#b9a76c}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--theme-accent, #e9bb69);outline-offset:3px}
+a{color:var(--theme-accent, #e9bb69);text-underline-offset:3px}
+.shell{width:min(1120px,calc(100% - 32px));margin-inline:auto}
+.skip{position:absolute;top:-80px;left:16px;z-index:10;background:var(--theme-accent, #e9bb69);color:#171919;padding:8px}
+.skip:focus{top:12px}
+.site-header{border-bottom:1px solid var(--theme-border, #46534e);background:var(--theme-header, #202624)}
+.site-header .shell{display:flex;justify-content:space-between;align-items:center;gap:18px;padding:16px 0}
+.kofi-button{display:inline-flex;align-items:center;justify-content:center;flex:none;width:48px;height:48px;margin-top:2px;border:1px solid #df785f;border-radius:5px;background:#38231f;color:#ffe6d8;text-decoration:none;font-size:2rem;line-height:1}
+.kofi-button:hover{border-color:#ffab88;background:#4a2b24;color:#fff}
+.eyebrow{text-transform:uppercase;letter-spacing:.09em;color:var(--theme-eyebrow, #94b7aa);font-size:.74rem;font-weight:700;margin:0 0 5px}
+h1,h2,h3,p{margin-top:0}
+h1{font-family:Georgia,serif;font-size:2.6rem;line-height:1.1;margin-bottom:8px;font-weight:500}
+h1 span{color:#d1aa68;font-size:.6em;vertical-align:middle}
+.intro{color:#c2c8c0;margin:0}
+.overview{padding:24px 0 18px;border-bottom:1px solid var(--theme-border, #46534e)}
+.overview-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.overview-top .completion-banner:not([hidden]){margin-left:auto}
+.overview-top #overall-count{margin-left:auto}
+.overview-top .completion-banner:not([hidden]) + #overall-count{margin-left:0}
+.overview h2,.guide h2{font-family:Georgia,serif;font-weight:500}
+.overview h2{font-size:1.2rem;margin:0}
+.overview strong{font-variant-numeric:tabular-nums;color:var(--theme-accent, #e9bb69)}
+progress{display:block;width:100%;height:9px;margin:14px 0 18px;accent-color:#8bba9c}
+.completion-banner[hidden]{display:none}
+.completion-banner:not([hidden]){display:flex;align-items:center;gap:8px;margin:0;padding:6px 10px;border:1px solid #c29b51;border-radius:7px;background:linear-gradient(110deg,#393324,#282d27 58%,#342a20);color:#f6ebcf;box-shadow:0 0 18px #d2a74a22}
+.completion-banner strong{color:#f3d58d;font-size:1rem}
+.completion-banner p{margin:3px 0 0;color:#d2d7c8;font-size:.84rem}
+.completion-spark{flex:none;color:#f0ca68;font-size:1.8rem;text-shadow:0 0 12px #edc55b99}
+.completion-spark-end{margin-left:auto}
+.completion-banner.celebrate{animation:completion-pop .65s cubic-bezier(.2,.8,.2,1),completion-glow 1.8s ease-out .25s}
+@keyframes completion-pop{0%{opacity:0;transform:translateY(10px) scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes completion-glow{0%,100%{box-shadow:0 0 18px #d2a74a22}35%{box-shadow:0 0 32px #f0c55b77}}
+@media(prefers-reduced-motion:reduce){.completion-banner.celebrate{animation:none}}
+.progress-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.progress-stat{border-left:2px solid #576c60;padding-left:10px;font-size:.82rem;color:#becbc2}
+.progress-stat strong{display:block;color:#f2ede1;font-size:1.05rem}
+.tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;border-bottom:1px solid var(--theme-border, #46534e);margin-top:8px}
+.tab{display:flex;align-items:center;gap:9px;flex:none;background:transparent;border:0;border-bottom:3px solid transparent;border-radius:0;color:#c4cbc4;padding:11px 16px 9px;font-weight:600}
+.tab{text-decoration:none}
+.tab-icon{width:34px;height:34px;object-fit:contain;flex:none}
+.category-icon-frame{display:flex;align-items:center;justify-content:center;overflow:hidden}.category-icon{width:100%;height:100%;object-fit:contain;transform:scale(1.5)}
+.tab[data-category="bosses"] .category-icon{transform:scale(1.2)}
+.tab[data-category="shades"] .tab-icon,.tab[data-category="achievements"] .tab-icon,.tab[data-category="shells"] .tab-icon,.tab[data-category="weapons"] .tab-icon,.tab[data-category="sidearms"] .tab-icon,.tab[data-category="tarstones"] .tab-icon,.tab[data-category="beacons"] .tab-icon,.tab[data-category="dungeons"] .tab-icon,.tab[data-category="bosses"] .tab-icon{padding:4px;border:1px solid #b8beb6;border-radius:5px;background:#d9dcd4}
+.tab[aria-current=page]{color:#f3e5c8;border-color:#d7a969}
+.tab:hover{background:var(--theme-hover, #242b28);border-color:#8ba99a}
+.guide{padding:12px 0 60px}
+.guide-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:12px}
+.guide h2{font-size:1.65rem;line-height:1.2;margin:0}
+.guide-head p:last-child{margin:0;color:#b8c2ba;font-size:.9rem}
+.file-actions{display:flex;gap:7px;flex:none}
+.file-actions button{font-size:.86rem}
+.file-actions #select-all{margin-right:12px}
+.filters{display:grid;grid-template-columns:minmax(180px,2fr) minmax(160px,1.35fr) minmax(160px,1.1fr) minmax(90px,.8fr) repeat(2,minmax(100px,1fr));gap:9px;align-items:end;background:var(--theme-panel, #202625);border-top:1px solid var(--theme-border, #46534e);border-bottom:1px solid var(--theme-border, #46534e);padding:13px 0}
+.filters label{display:flex;flex-direction:column;gap:5px;min-width:0}
+.filters label span{font-size:.72rem;color:#bcc7bf;font-weight:700}
+.filters select,.filters input{width:100%;height:38px;padding:6px 8px;min-width:0}
+.results{color:#abbab0;font-size:.85rem;margin:16px 0 10px}
+.entries{display:grid;gap:8px}
+.entry{border:1px solid #45534d;background:var(--theme-card, #212725);border-radius:6px;overflow:hidden}
+.entry.done{border-color:#597866}
+.entry-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:11px;min-height:64px;padding:9px 13px}
+.entry-check{appearance:none;width:23px;height:23px;border:1.5px solid #9cac9f;border-radius:3px;background:#181c1a;cursor:pointer;position:relative;margin:0}
+.entry-check:checked{background:#94b9a0;border-color:#94b9a0}
+.entry-check:checked:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#122019;font-size:23px;font-weight:800;line-height:1}
+.entry-heading{min-width:0}
+.entry-name{font-size:1rem;font-weight:700;color:#f0eee7;line-height:1.25;margin:0}
+.entry.done .entry-name{color:#b3c9b9}
+.entry-meta{color:#adbbb0;font-size:.78rem;margin-top:3px;overflow-wrap:anywhere}
+.entry-tag{color:#d6b878;font-size:.72rem;text-transform:uppercase;font-weight:700;white-space:nowrap}
+.boss-portrait{display:block;width:min(100%,28rem);aspect-ratio:16/9;margin:12px 0 7px 52px;border:1px solid var(--theme-border, #46534e);border-radius:8px;background:#17151b;object-fit:cover}
+.tarstone-portrait{display:block;width:60px;height:60px;margin:0 4px;border:1px solid var(--theme-border, #46534e);border-radius:6px;background:#17151b;object-fit:contain}
+.shell-portrait{display:block;width:76px;height:76px;margin:0 4px;border:1px solid var(--theme-border, #46534e);border-radius:6px;background:#17151b;object-fit:contain}
+.equipment-portrait{display:block;width:84px;height:70px;margin:0 4px;border:1px solid var(--theme-border, #46534e);border-radius:6px;background:#17151b;object-fit:contain;padding:1px}
+.sidearm-portrait{transform:scale(.84)}
+.entry-row:has(.equipment-portrait){grid-template-columns:28px minmax(0,1fr) auto 92px}
+.equipment-description{color:#d5ddd4}
+.entry-row:has(.shell-portrait){grid-template-columns:28px minmax(0,1fr) auto 84px}
+.shell-signature{margin:0 0 12px;color:#d5ddd4}
+.shell-skills-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:15px 0 5px}
+.route-body .shell-skills-header h3{margin:0}
+.shell-points-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.shell-points{display:inline-block;padding:2px 8px;border:1px solid #75bd8b;border-radius:5px;color:#b9f5c8;background:#1d3628;box-shadow:0 0 10px #62dc8938;font-size:.8rem;font-weight:750;font-variant-numeric:tabular-nums}
+.shell-points.over-limit{border-color:#ef7373;color:#ffd2d2;background:#422424;box-shadow:0 0 12px #fa565675}
+.shell-reset{padding:2px 9px;border-color:#718779;color:#d5e6d8;font-size:.78rem;font-weight:700}
+.shell-reset:disabled{cursor:default;border-color:#4a5550;color:#7d8a81;background:var(--theme-control, #242a29)}
+.shell-tiers{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.shell-tier{border:1px solid var(--theme-border, #45534d);border-radius:5px;background:var(--theme-panel, #1c2220);padding:10px 12px}
+.shell-tier-title{margin:0 0 8px;color:#d6b878;font-size:.83rem;text-transform:uppercase;letter-spacing:.06em}
+.shell-skills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+.shell-skills>.shell-skill{min-width:0;margin:0;padding:0 10px;border-left:1px solid var(--theme-border, #45534d)}
+.shell-skills>.shell-skill:first-child{padding-left:0;border-left:0}
+.shell-skills>.shell-skill:last-child{padding-right:0}
+.shell-skill-note{margin:0 0 8px;color:#aebbb0;font-size:.82rem}
+.shell-skill-title{margin:0;color:#e9e7df;font-size:.88rem;font-weight:650}
+.shell-skill-description{margin:4px 0 0;color:#aebbb0;font-size:.82rem;line-height:1.4}
+.route-body .shell-skill-ranks{list-style:none;margin:5px 0 10px;padding-left:0;color:#c7d0c8;font-size:.83rem;line-height:1.45}
+.route-body .shell-skill-ranks li{display:flex;align-items:flex-start;gap:8px;margin:6px 0}
+.shell-rank-button{display:grid;place-items:center;flex:none;width:28px;height:28px;padding:0;border:1px solid #67716c;border-radius:50%;background:#2a302d;color:#a8b2aa;font-size:.78rem;font-weight:800;line-height:1;box-shadow:inset 0 1px 3px #0008}
+.shell-rank-button:hover{border-color:#b0c7b5;background:#354139}
+.shell-rank-button[aria-pressed="true"]{border-color:#a9efb8;background:#417e54;color:#f3fff4;box-shadow:0 0 10px #77e897a8,inset 0 0 5px #c5ffd688}
+.shell-rank-effect{padding-top:4px}
+.shell-skill-ranks li.selected{color:#e5f4e8;text-shadow:0 0 6px #8edda54d}
+.beacon-portrait{display:block;width:56px;height:56px;margin:0 4px;object-fit:contain;filter:drop-shadow(0 0 5px #64b9ee55)}
+.entry-row:has(.beacon-portrait){grid-template-columns:28px minmax(0,1fr) auto 64px}
+.entry-row:has(.tarstone-portrait){grid-template-columns:28px minmax(0,1fr) auto 68px}
+.entry-row:has(.boss-portrait){grid-template-columns:28px minmax(0,1fr) auto 144px}
+.entry-row .boss-portrait{width:144px;height:90px;aspect-ratio:auto;margin:0;justify-self:end;border-radius:5px}
+.boss-description{margin:4px 0 0;color:#c2c8c0;font-size:.78rem}
+.route{border-top:1px solid #38443e}
+.route>summary{padding:8px 13px 9px 52px;cursor:pointer;color:#d9cba8;font-size:.85rem;list-style:none}
+.route>summary::-webkit-details-marker{display:none}
+.route>summary:before{content:"＋";display:inline-block;width:20px;color:#b6c2af}
+.route[open]>summary:before{content:"−"}
+.route-body{padding:5px 16px 17px 52px;color:#d3d8cf;font-size:.9rem;line-height:1.55}
+.route-body p{margin:0 0 8px}
+.route-body h3{font-size:.76rem;text-transform:uppercase;color:#9fb8a8;margin:15px 0 5px}
+.route-body ol{margin:5px 0 12px;padding-left:1.2rem}
+.route-body .tarstone-levels{list-style:none;padding-left:0}
+.tarstone-stat-value{color:#d9ff68;font-weight:750;text-shadow:0 0 8px #b7eb4d55}
+.tarstone-number{color:#fff;font-weight:750;text-shadow:none}
+.tarstone-keyword{font-weight:700}
+.glossary-term{cursor:help;text-decoration:underline dotted;text-decoration-color:currentColor;text-underline-offset:3px}
+.glossary-term:focus-visible{outline:2px solid var(--theme-accent, #e9bb69);outline-offset:3px;border-radius:2px}
+.glossary-tooltip{position:fixed;z-index:20;width:min(320px,calc(100vw - 24px));padding:11px 13px;border:1px solid #94b9a0;border-radius:7px;background:linear-gradient(140deg,#2b3730,#1d2522);color:#e8eee6;box-shadow:0 10px 26px #000b,0 0 15px #6db98d30;pointer-events:none;font-size:.83rem;line-height:1.45;overflow-wrap:anywhere}
+.glossary-tooltip[hidden]{display:none}
+.glossary-tooltip-term{display:block;color:var(--theme-accent, #e9bb69);font-size:.88rem;margin-bottom:4px}
+.glossary-tooltip p{margin:0}
+.tarstone-keyword-gloom,.tarstone-keyword-damage-reduction,.tarstone-keyword-massive,.tarstone-keyword-methers-pulse,.tarstone-keyword-severed,.tarstone-keyword-negative-conditions,.tarstone-keyword-retribution,.tarstone-keyword-armor,.tarstone-keyword-heat-meter,.tarstone-keyword-riposte,.tarstone-keyword-seals,.tarstone-keyword-small,.tarstone-keyword-medium,.tarstone-keyword-slightly,.tarstone-keyword-depleted,.tarstone-keyword-immediately,.tarstone-keyword-immunity,.tarstone-keyword-specimen,.tarstone-keyword-reviving,.tarstone-keyword-grafted-armor,.tarstone-keyword-biosampler,.tarstone-keyword-doubled,.tarstone-keyword-lingering-shadow,.tarstone-keyword-shadow-dash,.tarstone-keyword-shadow-clone,.tarstone-keyword-shadow-strike,.tarstone-keyword-perfect-guard,.tarstone-keyword-parry,.tarstone-keyword-perfect-harden{color:#fff}
+.tarstone-keyword-faithful-doubles{color:#fff}
+.tarstone-keyword-stray,.tarstone-keyword-stray-doubles{color:#fff}
+.tarstone-keyword-weak,.tarstone-keyword-burn,.tarstone-keyword-health,.tarstone-keyword-perforation{color:#ff737b}
+.tarstone-keyword-chaos,.tarstone-keyword-warp{color:#b8a0ff}
+.tarstone-keyword-faithful{color:#b5e5ff}
+.tarstone-keyword-staggering-blow,.tarstone-keyword-revered-heart,.tarstone-keyword-exodus-of-thorns,.tarstone-keyword-ethereal-diapason,.tarstone-keyword-executioner,.tarstone-keyword-shoulder-bash,.tarstone-keyword-fight-stance,.tarstone-keyword-kick,.tarstone-keyword-miracle,.tarstone-keyword-deadly-revelation{color:#fff}
+.tarstone-keyword-leech{color:#ff9b55}
+.tarstone-keyword-break-damage{color:#ffc36a}
+.tarstone-keyword-shock,.tarstone-keyword-critical-hit,.tarstone-keyword-lightning,.tarstone-keyword-critical-damage,.tarstone-keyword-critical-chance{color:#ffe16b}
+.tarstone-keyword-stagger-damage,.tarstone-keyword-resolve{color:#c39a79}
+.tarstone-keyword-at-night{color:#25bfff}
+.tarstone-keyword-blocked{color:#ff583d}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-blocked{color:#b52e19}
+.tarstone-keyword-lute,.tarstone-keyword-weapon,.tarstone-keyword-sidearm,.tarstone-keyword-permanent,.tarstone-keyword-dungeon{color:#fff}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-dungeon{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-permanent{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-sidearm{color:#27241e}
+.keyword-ordinal{color:#fff}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .keyword-ordinal{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-lute,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-weapon{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-at-night{color:#0079ad}
+.tarstone-keyword-frost,.tarstone-keyword-stasis{color:#72bfff}
+.tarstone-keyword-phantom{color:#9be4ff}
+.tarstone-keyword-shadow{color:#a277c4}
+.tarstone-keyword-poison{color:#83df82}
+.tarstone-keyword-pain{color:#d5669b}
+.tarstone-keyword-slaughterer{color:#ff4050}
+.tarstone-keyword-bloodcurse{color:#df5961}
+.tarstone-keyword-curse{color:#c18aff}
+.tarstone-keyword-trauma{color:#ffc36a}
+.tarstone-keyword-fragile{color:#d1b38b}
+.route-body li{margin:4px 0}
+.route-body .note{border-left:2px solid #cc9e60;padding-left:10px;color:#ebd8b9}
+.route-body .related{display:flex;gap:7px;flex-wrap:wrap}
+.route-body .related a{display:inline-block;border:1px solid #5e7066;border-radius:4px;padding:2px 7px;text-decoration:none;font-size:.79rem}
+.route-body .related a:hover{border-color:#ddbd7d}
+.sources{display:flex;flex-wrap:wrap;gap:8px;font-size:.76rem;margin-top:14px}
+.tips{margin:12px 0;border:1px solid #6b5d43;border-radius:4px;background:#282722}
+.tips summary{cursor:pointer;padding:8px 10px;color:#f0cc8f;font-weight:700}
+.tips p{padding:0 10px 9px;margin:0}
+.empty{padding:32px 10px;text-align:center;color:#bcc7bd}
+.site-footer{border-top:1px solid var(--theme-border, #46534e);padding:20px 0 35px;font-size:.78rem;color:#aab7ac}
+.site-footer p{margin:0 0 5px}
+.glossary-back{align-self:center;flex:none;padding:7px 11px;border:1px solid #718779;border-radius:5px;background:#26312b;color:#e2eddf;text-decoration:none;font-size:.86rem;font-weight:700}
+.glossary-back:hover{border-color:#c7af76;background:#303a30}
+.glossary-page{padding:30px 0 60px}
+.glossary-page h2{font-family:Georgia,serif;font-size:2rem;font-weight:500;margin:0 0 8px}
+.glossary-intro{max-width:68ch;color:#becbc2;line-height:1.55}
+.glossary-section{margin-top:26px}
+.glossary-section h3{margin:0 0 10px;color:#d6b878;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em}
+.glossary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.glossary-card{min-width:0;padding:14px 15px;border:1px solid #45534d;border-radius:6px;background:var(--theme-card, #212725);scroll-margin-top:16px}
+.glossary-card:target{border-color:#b4d7a5;box-shadow:0 0 14px #87c89855}
+.glossary-card h4{margin:0 0 7px;font-size:1rem}
+.glossary-card p{margin:0;color:#c8d2c9;font-size:.88rem;line-height:1.5}
+.toast{position:fixed;right:16px;bottom:16px;max-width:min(420px,calc(100% - 32px));background:#33463a;border:1px solid #83a98b;color:#f2f5ec;border-radius:5px;padding:10px 13px;box-shadow:0 8px 24px #0008;display:none;z-index:5;font-size:.85rem}
+.toast.show{display:block}
+.progress-note,.guide-note,.backup-note{font-size:.82rem;line-height:1.5;color:#becbc2;margin:10px 0}
+.storage-warning{border:1px solid #d6b878;background:#302b20;color:#f2dfb4;padding:12px;line-height:1.5;border-radius:5px}
+.entry-scope{font-size:.75rem;color:#becbc2;margin-top:4px}
+.entry-warning{display:inline-block;margin-top:7px;padding:3px 7px;border:1px solid #ff713d;border-radius:4px;background:#49251e;color:#ffe16b;font-size:.7rem;font-weight:800;letter-spacing:.035em}
+.entry-check{width:28px;height:28px}
+.entry-row{grid-template-columns:28px minmax(0,1fr) auto;min-height:78px}
+.entry:focus-visible,.results:focus-visible{outline:2px solid var(--theme-accent, #e9bb69);outline-offset:3px}
+@media(max-width:900px){.filters{grid-template-columns:repeat(3,minmax(0,1fr))}.search-field{grid-column:span 3}.shell-skills{grid-template-columns:minmax(0,1fr)}.shell-skills>.shell-skill{margin:6px 0;padding:0;border-left:0}}
+@media(max-width:900px){.glossary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.glossary-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:540px){.shell{width:min(100% - 24px,1120px)}.site-header .shell{padding:19px 0}h1{font-size:2rem}.progress-grid{grid-template-columns:repeat(2,1fr)}.guide-head{align-items:start}.guide-head{flex-direction:column}.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.search-field,.content-field{grid-column:span 2}.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.entry-row{grid-template-columns:28px minmax(0,1fr);gap:8px}.entry-row:has(.boss-portrait){grid-template-columns:28px minmax(0,1fr) 104px}.entry-row:has(.beacon-portrait){grid-template-columns:28px minmax(0,1fr) 56px}.entry-row:has(.tarstone-portrait){grid-template-columns:28px minmax(0,1fr) 68px}.entry-row:has(.equipment-portrait){grid-template-columns:28px minmax(0,1fr) 72px}.entry-row .boss-portrait{grid-column:3;grid-row:1 / span 2;width:104px;height:68px}.entry-row .beacon-portrait{grid-column:3;grid-row:1 / span 2}.entry-row .tarstone-portrait{grid-column:3;grid-row:1 / span 2}.entry-row .equipment-portrait{grid-column:3;grid-row:1 / span 2;width:68px;height:60px}.entry-tag{grid-column:2;justify-self:start}.route>summary{padding-left:48px}.route-body{padding-left:16px}.tab{padding:9px 10px;font-size:.9rem}.tab-icon{width:28px;height:28px}.tab[data-category="shades"] .tab-icon,.tab[data-category="achievements"] .tab-icon,.tab[data-category="shells"] .tab-icon,.tab[data-category="weapons"] .tab-icon,.tab[data-category="sidearms"] .tab-icon,.tab[data-category="tarstones"] .tab-icon,.tab[data-category="beacons"] .tab-icon,.tab[data-category="dungeons"] .tab-icon,.tab[data-category="bosses"] .tab-icon{padding:3px}}
+@media(max-width:540px){.entry-row:has(.shell-portrait){grid-template-columns:28px minmax(0,1fr) 64px}.entry-row .shell-portrait{grid-column:3;grid-row:1 / span 2;width:60px;height:60px}.shell-tiers{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+.overview summary{cursor:pointer;list-style:none}
+.overview summary::-webkit-details-marker{display:none}
+.overview summary::after{content:"▸";color:var(--theme-accent, #e9bb69)}
+.overview[open] summary::after{content:"▾"}
+.overview #progress-title{font:500 1.2rem Georgia,serif}
+.overview .completion-banner:not([hidden]){margin-top:14px}
+
+.header-actions{display:flex;gap:8px;flex:none}
+.glossary-button{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;margin-top:2px;border:1px solid #8fae9c;border-radius:5px;background:#26362f;text-decoration:none}
+.glossary-button:hover{border-color:#c5ddc9;background:#344a3d}
+.glossary-button img{width:32px;height:32px;filter:brightness(0) saturate(100%) invert(89%) sepia(11%) saturate(477%) hue-rotate(77deg) brightness(97%)}
+
+.loadout-button{display:inline-flex;align-items:center;justify-content:center;overflow:hidden;flex:none;width:48px;height:48px;margin-top:2px;border:1px solid #8fae9c;border-radius:5px;background:#26362f}
+.loadout-button:hover{border-color:#c5ddc9;background:#344a3d}
+.loadout-button img{width:32px;height:32px;filter:brightness(0) saturate(100%) invert(89%) sepia(11%) saturate(477%) hue-rotate(77deg) brightness(97%)}
+.header-actions .kofi-button{margin-left:12px}
+@media(max-width:540px){.header-actions{gap:4px}.header-actions .kofi-button{margin-left:4px}.site-header .shell{gap:8px}}
+.glossary-search{display:flex;flex-direction:column;gap:.4rem;max-width:30rem;margin:1rem 0;color:#c7b792}.glossary-search input{width:100%;padding:.65rem;background:var(--theme-loadout-control, #101311);color:#eee;border:1px solid var(--theme-loadout-control-border, #565549);border-radius:2px}.glossary-card[hidden],.glossary-section[hidden]{display:none}
+
+:root[data-theme="obsidian"]{--theme-page:#0c0c0d;--theme-header:#171719;--theme-control:#222224;--theme-control-border:#625254;--theme-accent:#f09d94;--theme-border:#50383a;--theme-panel:#171719;--theme-card:#1b1b1d;--theme-hover:#302728;--theme-eyebrow:#d7a29e;--theme-loadout-panel:#111112;--theme-loadout-border:#50383a;--theme-loadout-card:#1b1b1d;--theme-loadout-control:#151516;--theme-loadout-control-border:#625254;}
+.theme-picker{display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:inherit}.theme-picker select{padding:.5rem;max-width:100%}
+@media(max-width:540px){.site-header .shell{flex-wrap:wrap}.header-actions{flex-wrap:wrap}}
+
+@media(max-width:540px){.header-actions{flex:0 1 100%;min-width:0}.theme-picker{flex-wrap:wrap}}
+@media(max-width:540px){.site-header .shell{padding:12px 0}}
+
+/* Shade-inspired palettes share the same semantic color roles. */
+:root[data-theme="porcelain-prime"]{--theme-page:#f1f2f1;--theme-header:#fafafa;--theme-control:#fff;--theme-control-border:#92989b;--theme-accent:#50575c;--theme-border:#a5aaac;--theme-panel:#e4e7e7;--theme-card:#fafbfa;--theme-hover:#e1e4e4;--theme-eyebrow:#555c60;--theme-loadout-panel:#f7f8f7;--theme-loadout-border:#a5aaac;--theme-loadout-card:#e8eaea;--theme-loadout-control:#fff;--theme-loadout-control-border:#92989b;}
+:root[data-theme="second-son"]{--theme-page:#17170f;--theme-header:#24251a;--theme-control:#303125;--theme-control-border:#777851;--theme-accent:#d6d09a;--theme-border:#575a3e;--theme-panel:#212218;--theme-card:#2c2d20;--theme-hover:#393b29;--theme-eyebrow:#ccc48b;--theme-loadout-panel:#17170f;--theme-loadout-border:#575a3e;--theme-loadout-card:#2c2d20;--theme-loadout-control:#17170f;--theme-loadout-control-border:#777851;}
+:root[data-theme="sanguine-prophet"]{--theme-page:#190b0c;--theme-header:#321116;--theme-control:#40171b;--theme-control-border:#a35656;--theme-accent:#efaaa4;--theme-border:#733439;--theme-panel:#2b1013;--theme-card:#381518;--theme-hover:#512024;--theme-eyebrow:#e9aaa5;--theme-loadout-panel:#1e0c0e;--theme-loadout-border:#733439;--theme-loadout-card:#381518;--theme-loadout-control:#250e10;--theme-loadout-control-border:#a35656;}
+:root[data-theme="king-in-yellow"]{--theme-page:#111212;--theme-header:#1d1d1a;--theme-control:#27251e;--theme-control-border:#8b774c;--theme-accent:#e6bd6b;--theme-border:#5b5038;--theme-panel:#1c1c19;--theme-card:#24231e;--theme-hover:#363024;--theme-eyebrow:#dfbf79;--theme-loadout-panel:#111212;--theme-loadout-border:#5b5038;--theme-loadout-card:#24231e;--theme-loadout-control:#111212;--theme-loadout-control-border:#8b774c;}
+:root[data-theme="warden"]{--theme-page:hsl(135 19% 7%);--theme-header:hsl(135 19% 12%);--theme-control:hsl(135 19% 16%);--theme-control-border:hsl(135 19% 41%);--theme-accent:hsl(135 34% 78%);--theme-border:hsl(135 19% 32%);--theme-panel:hsl(135 19% 11%);--theme-card:hsl(135 19% 14%);--theme-hover:hsl(135 19% 21%);--theme-eyebrow:hsl(135 27% 76%);--theme-loadout-panel:hsl(135 19% 9%);--theme-loadout-border:hsl(135 19% 32%);--theme-loadout-card:hsl(135 19% 14%);--theme-loadout-control:hsl(135 19% 9%);--theme-loadout-control-border:hsl(135 19% 41%);}
+:root[data-theme="ophidian"]{--theme-page:#e9e2d2;--theme-header:#1c1b18;--theme-control:#292722;--theme-control-border:#8a774d;--theme-accent:#e4c67b;--theme-border:#827556;--theme-panel:#ded4bf;--theme-card:#f5f0e5;--theme-hover:#ded3b9;--theme-eyebrow:#e1c583;--theme-loadout-panel:#f3eddf;--theme-loadout-border:#a99b7b;--theme-loadout-card:#e9dfca;--theme-loadout-control:#211f1b;--theme-loadout-control-border:#8a774d;}
+:root[data-theme="bonegrafted"]{--theme-page:#e7e2d7;--theme-header:#f2eee6;--theme-control:#faf8f3;--theme-control-border:#999792;--theme-accent:#565a5c;--theme-border:#aaa69e;--theme-panel:#dcd8cf;--theme-card:#f5f2eb;--theme-hover:#dfddd6;--theme-eyebrow:#5b5d5c;--theme-loadout-panel:#f1eee7;--theme-loadout-border:#aaa69e;--theme-loadout-card:#e5e2db;--theme-loadout-control:#faf8f3;--theme-loadout-control-border:#999792;}
+:root[data-theme="apocryphal"]{--theme-page:#111213;--theme-header:#1e1e20;--theme-control:#29282a;--theme-control-border:#807375;--theme-accent:#dba7a5;--theme-border:#5e4c4e;--theme-panel:#1c1c1e;--theme-card:#272426;--theme-hover:#392a2c;--theme-eyebrow:#d1b8b7;--theme-loadout-panel:#111213;--theme-loadout-border:#5e4c4e;--theme-loadout-card:#272426;--theme-loadout-control:#111213;--theme-loadout-control-border:#807375;}
+:root[data-theme="anointed-butcher"]{--theme-page:hsl(8 30% 7%);--theme-header:hsl(8 30% 12%);--theme-control:hsl(8 30% 16%);--theme-control-border:hsl(8 30% 41%);--theme-accent:hsl(8 45% 78%);--theme-border:hsl(8 30% 32%);--theme-panel:hsl(8 30% 11%);--theme-card:hsl(8 30% 14%);--theme-hover:hsl(8 30% 21%);--theme-eyebrow:hsl(8 38% 76%);--theme-loadout-panel:hsl(8 30% 9%);--theme-loadout-border:hsl(8 30% 32%);--theme-loadout-card:hsl(8 30% 14%);--theme-loadout-control:hsl(8 30% 9%);--theme-loadout-control-border:hsl(8 30% 41%);}
+:root[data-theme="white-knight"]{--theme-page:hsl(200 12% 7%);--theme-header:hsl(200 12% 12%);--theme-control:hsl(200 12% 16%);--theme-control-border:hsl(200 12% 41%);--theme-accent:hsl(200 27% 78%);--theme-border:hsl(200 12% 32%);--theme-panel:hsl(200 12% 11%);--theme-card:hsl(200 12% 14%);--theme-hover:hsl(200 12% 21%);--theme-eyebrow:hsl(200 20% 76%);--theme-loadout-panel:hsl(200 12% 9%);--theme-loadout-border:hsl(200 12% 32%);--theme-loadout-card:hsl(200 12% 14%);--theme-loadout-control:hsl(200 12% 9%);--theme-loadout-control-border:hsl(200 12% 41%);}
+:root[data-theme="red-kingsnake"]{--theme-page:hsl(0 40% 7%);--theme-header:hsl(0 40% 12%);--theme-control:hsl(0 40% 16%);--theme-control-border:hsl(0 40% 41%);--theme-accent:hsl(0 55% 78%);--theme-border:hsl(0 40% 32%);--theme-panel:hsl(0 40% 11%);--theme-card:hsl(0 40% 14%);--theme-hover:hsl(0 40% 21%);--theme-eyebrow:hsl(0 48% 76%);--theme-loadout-panel:hsl(0 40% 9%);--theme-loadout-border:hsl(0 40% 32%);--theme-loadout-card:hsl(0 40% 14%);--theme-loadout-control:hsl(0 40% 9%);--theme-loadout-control-border:hsl(0 40% 41%);}
+:root[data-theme="lunar-emissary"]{--theme-page:hsl(225 25% 7%);--theme-header:hsl(225 25% 12%);--theme-control:hsl(225 25% 16%);--theme-control-border:hsl(225 25% 41%);--theme-accent:hsl(225 40% 78%);--theme-border:hsl(225 25% 32%);--theme-panel:hsl(225 25% 11%);--theme-card:hsl(225 25% 14%);--theme-hover:hsl(225 25% 21%);--theme-eyebrow:hsl(225 33% 76%);--theme-loadout-panel:hsl(225 25% 9%);--theme-loadout-border:hsl(225 25% 32%);--theme-loadout-card:hsl(225 25% 14%);--theme-loadout-control:hsl(225 25% 9%);--theme-loadout-control-border:hsl(225 25% 41%);}
+:root[data-theme="gilded-scarab"]{--theme-page:hsl(42 40% 7%);--theme-header:hsl(42 40% 12%);--theme-control:hsl(42 40% 16%);--theme-control-border:hsl(42 40% 41%);--theme-accent:hsl(42 55% 78%);--theme-border:hsl(42 40% 32%);--theme-panel:hsl(42 40% 11%);--theme-card:hsl(42 40% 14%);--theme-hover:hsl(42 40% 21%);--theme-eyebrow:hsl(42 48% 76%);--theme-loadout-panel:hsl(42 40% 9%);--theme-loadout-border:hsl(42 40% 32%);--theme-loadout-card:hsl(42 40% 14%);--theme-loadout-control:hsl(42 40% 9%);--theme-loadout-control-border:hsl(42 40% 41%);}
+:root[data-theme="sapphire-herald"]{--theme-page:hsl(215 43% 7%);--theme-header:hsl(215 43% 12%);--theme-control:hsl(215 43% 16%);--theme-control-border:hsl(215 43% 41%);--theme-accent:hsl(215 58% 78%);--theme-border:hsl(215 43% 32%);--theme-panel:hsl(215 43% 11%);--theme-card:hsl(215 43% 14%);--theme-hover:hsl(215 43% 21%);--theme-eyebrow:hsl(215 51% 76%);--theme-loadout-panel:hsl(215 43% 9%);--theme-loadout-border:hsl(215 43% 32%);--theme-loadout-card:hsl(215 43% 14%);--theme-loadout-control:hsl(215 43% 9%);--theme-loadout-control-border:hsl(215 43% 41%);}
+:root[data-theme="regal-druzhina"]{--theme-page:hsl(255 30% 7%);--theme-header:hsl(255 30% 12%);--theme-control:hsl(255 30% 16%);--theme-control-border:hsl(255 30% 41%);--theme-accent:hsl(255 45% 78%);--theme-border:hsl(255 30% 32%);--theme-panel:hsl(255 30% 11%);--theme-card:hsl(255 30% 14%);--theme-hover:hsl(255 30% 21%);--theme-eyebrow:hsl(255 38% 76%);--theme-loadout-panel:hsl(255 30% 9%);--theme-loadout-border:hsl(255 30% 32%);--theme-loadout-card:hsl(255 30% 14%);--theme-loadout-control:hsl(255 30% 9%);--theme-loadout-control-border:hsl(255 30% 41%);}
+:root[data-theme="queen-of-hearts"]{--theme-page:#21080b;--theme-header:#480a10;--theme-control:#501117;--theme-control-border:#b64a51;--theme-accent:#ff9696;--theme-border:#87313a;--theme-panel:#390c11;--theme-card:#410e14;--theme-hover:#661820;--theme-eyebrow:#ffaaaa;--theme-loadout-panel:#2b090d;--theme-loadout-border:#87313a;--theme-loadout-card:#410e14;--theme-loadout-control:#350b10;--theme-loadout-control-border:#b64a51;}
+
+/* Material and accent colors follow the corresponding shell artwork. */
+:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) h1 span,:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .entry-tag{color:var(--theme-accent)}
+:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .tab[aria-current=page]{color:var(--theme-accent);border-color:var(--theme-accent)}
+:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .entry,:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .glossary-card{border-color:var(--theme-border)}
+:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .loadout-build{background:radial-gradient(ellipse at center,var(--theme-hover) 0,var(--theme-panel) 60%,var(--theme-loadout-panel) 100%)}
+:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .effects,:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .loadout-skills,:root:is([data-theme="king-in-yellow"],[data-theme="porcelain-prime"],[data-theme="second-son"],[data-theme="sanguine-prophet"],[data-theme="ophidian"],[data-theme="bonegrafted"],[data-theme="apocryphal"]) .loadout-saves{background:var(--theme-loadout-panel);border-color:var(--theme-loadout-border)}
+
+/* A subtle sheen and ember-red highlights for Obsidian. */
+:root[data-theme="obsidian"] .site-header{background:linear-gradient(160deg,#29292b 0%,#151516 48%,#101011 100%)}
+:root[data-theme="obsidian"] .entry,:root[data-theme="obsidian"] .glossary-card{background:linear-gradient(155deg,#29292b 0%,#1b1b1d 28%,#151516 100%);border-color:#50383a}
+:root[data-theme="obsidian"] h1 span,:root[data-theme="obsidian"] .entry-tag{color:var(--theme-accent)}
+:root[data-theme="obsidian"] .tab[aria-current=page]{color:var(--theme-accent);border-color:#c65c53}
+:root[data-theme="obsidian"] .loadout-build{background:radial-gradient(ellipse at center,#343133 0%,#1a1a1b 48%,#101011 100%)}
+:root[data-theme="obsidian"] .effects,:root[data-theme="obsidian"] .loadout-skills,:root[data-theme="obsidian"] .loadout-saves{background:#141415;border-color:var(--theme-border)}
+
+/* Ophidian: bone-colored canvas with dark armor and aged gold. */
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]){color-scheme:light;color:#211f1b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .site-header{color:#f4eee0}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) button,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) select,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) input[type=search]{color-scheme:dark}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tab{color:#39352d}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tab[aria-current=page]{color:#5e480f;border-color:#9a742c}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .overview strong,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .overview summary::after,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-section h3{color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .progress-stat,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .progress-note,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .results,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .site-footer,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-search,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-intro,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .empty,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-heading p{color:#514a3d}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .progress-stat strong{color:#25221c}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-card,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-build,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effects,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-skills,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-saves{color:#f0eadd}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-page > .eyebrow,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-heading .eyebrow{color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .completion-banner strong{color:#f3d58d}
+
+/* Light surfaces share text and panel roles across the guide, glossary and loadout. */
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) {--light-text:#27241e;--light-muted:#514a3d;--light-gold:#705218;--light-surface:#f5f0e5;--light-panel:#e5dccb;}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-card,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-build,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effects,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-skills,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-saves,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-dialog,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .stone-preview,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .equipped-preview{color:var(--light-text)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry-name,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry.done .entry-name,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-card p,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route-body,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-skill-title,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-skill h4,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effect-description,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .stone-stat,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tarstone-number{color:var(--light-text)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry-meta,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry-scope,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .equipment-description,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-signature,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .boss-description,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route-body h3,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-skill-note,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-skill-description,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route-body .shell-skill-ranks,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-skill p,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effects-intro,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .empty-effects,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .level-label,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .filters label span{color:var(--light-muted)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry-tag,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route>summary,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route>summary:before,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-tier-title,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .section-title,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .slot-label,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effect-divider,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .effect-type,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .concise-toggle,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-saves label,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-saves p,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .skills-heading p,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout-skill-tier h3,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .stone-preview strong,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .equipped-preview strong,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .preview-category{color:var(--light-gold)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .entry a,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .loadout a{color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-tier,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tips,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .stone-preview,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .equipped-preview,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .stone-preview .effect-description,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .equipped-preview .effect-description{background:var(--light-panel);border-color:var(--theme-border);color:var(--light-text)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tips summary,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .route-body .note{color:#624816}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-dialog{background:var(--light-surface);border-color:var(--theme-border)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-option{color:var(--light-text)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-option:hover,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-option:focus-visible,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-option.is-selected{background:var(--light-panel);border-color:#9a742c}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-option small,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-empty,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-empty span{color:var(--light-gold)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .gear-card{background:#e5dccbdd;border-color:var(--theme-border)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .tarstone-stat-value{color:#35591a;text-shadow:none}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .shell-skill-ranks li.selected{color:#285d36;text-shadow:none}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .skills-heading .over-limit{color:#9b2525}
+
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-gloom,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-damage-reduction,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-massive,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-methers-pulse,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-severed,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-negative-conditions,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-retribution,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-armor,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-heat-meter,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-riposte,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-seals,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-small,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-medium,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-slightly,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-depleted,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-immediately,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-immunity,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-specimen,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-reviving,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-grafted-armor,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-biosampler,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-doubled,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-lingering-shadow,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shadow-dash,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shadow-clone,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shadow-strike,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-perfect-guard,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-parry,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-perfect-harden{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-faithful-doubles{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-stray,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-stray-doubles{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-weak,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-burn,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-health,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-perforation{color:#a52430}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-chaos,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-warp{color:#633aa3}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-faithful{color:#14577b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-staggering-blow,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-revered-heart,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-exodus-of-thorns,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-ethereal-diapason,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-executioner,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shoulder-bash,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-fight-stance,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-kick,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-miracle,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-deadly-revelation{color:#27241e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-leech{color:#944512}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-break-damage{color:#87500b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shock,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-critical-hit,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-lightning,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-critical-damage,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-critical-chance{color:#745800}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-stagger-damage,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-resolve{color:#795039}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-frost,:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-stasis{color:#145b91}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-phantom{color:#176478}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-shadow{color:#684080}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-poison{color:#286426}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-pain{color:#963b69}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-slaughterer{color:#a51b29}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-bloodcurse{color:#a32e36}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-curse{color:#713c9b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-trauma{color:#87500b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry,.glossary-card,.loadout,.picker-dialog,.equipped-preview) .tarstone-keyword-fragile{color:#765436}
+
+/* Light controls and image frames complete Ophidian's bone palette. */
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(button:not(.tab):not(.picker-option):not(.shell-rank-button):not([aria-pressed]),select,input[type="search"],.loadout-saves input){background:#f8f3e8;color:#29251e;border-color:#9d8a60;color-scheme:light}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(button:not(.tab):not(.picker-option):not(.shell-rank-button):not([aria-pressed]),select,input[type="search"],.loadout-saves input):hover{border-color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(input[type="search"],.loadout-saves input)::placeholder{color:#6e675b;opacity:1}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .picker-trigger::after{color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.tarstone-portrait,.stone-icon){background:#e6ddc9;border-color:#a99b7b}
+
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .site-header{background:#f5f0e5;color:#211f1b;border-color:#a99b7b}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .site-header .eyebrow{color:#705218}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .site-header h1 span{color:#89671f}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .glossary-back{background:#f8f3e8;color:#29251e;border-color:#9d8a60}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.loadout-button,.glossary-button){background:#f8f3e8;border-color:#9d8a60}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.loadout-button,.glossary-button) img{filter:brightness(0) saturate(100%) invert(20%) sepia(12%) saturate(725%) hue-rotate(359deg) brightness(92%)}
+
+/* Porcelain Prime: cool white, black and silver. */
+:root[data-theme="porcelain-prime"]{--light-text:#222426;--light-muted:#484d50;--light-gold:#4d555a;--light-surface:#fafbfa;--light-panel:#e8eaea;color:#222426}
+:root[data-theme="porcelain-prime"] .site-header{background:#fafafa;color:#222426;border-color:#a5aaac}
+:root[data-theme="porcelain-prime"] .site-header .eyebrow,:root[data-theme="porcelain-prime"] .site-header h1 span,:root[data-theme="porcelain-prime"] .glossary-page > .eyebrow,:root[data-theme="porcelain-prime"] .loadout-heading .eyebrow,:root[data-theme="porcelain-prime"] .overview strong,:root[data-theme="porcelain-prime"] .overview summary::after,:root[data-theme="porcelain-prime"] .glossary-section h3,:root[data-theme="porcelain-prime"] .entry a,:root[data-theme="porcelain-prime"] .loadout a,:root[data-theme="porcelain-prime"] .tips summary,:root[data-theme="porcelain-prime"] .route-body .note{color:#4d555a}
+:root[data-theme="porcelain-prime"] .tab{color:#34383a}
+:root[data-theme="porcelain-prime"] .tab[aria-current=page]{color:#252a2d;border-color:#777f83}
+:root[data-theme="porcelain-prime"] .progress-stat,:root[data-theme="porcelain-prime"] .progress-note,:root[data-theme="porcelain-prime"] .results,:root[data-theme="porcelain-prime"] .site-footer,:root[data-theme="porcelain-prime"] .glossary-search,:root[data-theme="porcelain-prime"] .glossary-intro,:root[data-theme="porcelain-prime"] .empty,:root[data-theme="porcelain-prime"] .loadout-heading p{color:#484d50}
+:root[data-theme="porcelain-prime"] :is(button:not(.tab):not(.picker-option):not(.shell-rank-button):not([aria-pressed]),select,input[type="search"],.loadout-saves input),:root[data-theme="porcelain-prime"] .glossary-back,:root[data-theme="porcelain-prime"] :is(.loadout-button,.glossary-button){background:#fff;color:#222426;border-color:#92989b}
+:root[data-theme="porcelain-prime"] :is(button,select,input[type="search"],.loadout-saves input):hover{border-color:#555d62}
+:root[data-theme="porcelain-prime"] :is(input[type="search"],.loadout-saves input)::placeholder{color:#666d71}
+:root[data-theme="porcelain-prime"] .picker-trigger::after{color:#4d555a}
+:root[data-theme="porcelain-prime"] :is(.tarstone-portrait,.stone-icon){background:#e8eaea;border-color:#a5aaac}
+:root[data-theme="porcelain-prime"] .gear-card{background:#e8eaeadd}
+:root[data-theme="porcelain-prime"] .picker-option:hover,:root[data-theme="porcelain-prime"] .picker-option:focus-visible,:root[data-theme="porcelain-prime"] .picker-option.is-selected{border-color:#777f83}
+:root[data-theme="porcelain-prime"] :is(.loadout-button,.glossary-button) img{filter:brightness(0) saturate(100%) invert(25%)}
+
+/* Bonegrafted: warm bone surfaces with weathered silver details. */
+:root[data-theme="bonegrafted"]{--light-text:#222426;--light-muted:#484d50;--light-gold:#4d555a;--light-surface:#f5f2eb;--light-panel:#e5e2db;color:#222426}
+:root[data-theme="bonegrafted"] .site-header{background:#f2eee6;color:#222426;border-color:#aaa69e}
+:root[data-theme="bonegrafted"] .site-header .eyebrow,:root[data-theme="bonegrafted"] .site-header h1 span,:root[data-theme="bonegrafted"] .glossary-page > .eyebrow,:root[data-theme="bonegrafted"] .loadout-heading .eyebrow,:root[data-theme="bonegrafted"] .overview strong,:root[data-theme="bonegrafted"] .overview summary::after,:root[data-theme="bonegrafted"] .glossary-section h3,:root[data-theme="bonegrafted"] .entry a,:root[data-theme="bonegrafted"] .loadout a,:root[data-theme="bonegrafted"] .tips summary,:root[data-theme="bonegrafted"] .route-body .note{color:#4d555a}
+:root[data-theme="bonegrafted"] .tab{color:#34383a}
+:root[data-theme="bonegrafted"] .tab[aria-current=page]{color:#252a2d;border-color:#777f83}
+:root[data-theme="bonegrafted"] .progress-stat,:root[data-theme="bonegrafted"] .progress-note,:root[data-theme="bonegrafted"] .results,:root[data-theme="bonegrafted"] .site-footer,:root[data-theme="bonegrafted"] .glossary-search,:root[data-theme="bonegrafted"] .glossary-intro,:root[data-theme="bonegrafted"] .empty,:root[data-theme="bonegrafted"] .loadout-heading p{color:#484d50}
+:root[data-theme="bonegrafted"] :is(button:not(.tab):not(.picker-option):not(.shell-rank-button):not([aria-pressed]),select,input[type="search"],.loadout-saves input),:root[data-theme="bonegrafted"] .glossary-back,:root[data-theme="bonegrafted"] :is(.loadout-button,.glossary-button){background:#faf8f3;color:#222426;border-color:#999792}
+:root[data-theme="bonegrafted"] :is(button,select,input[type="search"],.loadout-saves input):hover{border-color:#555d62}
+:root[data-theme="bonegrafted"] :is(input[type="search"],.loadout-saves input)::placeholder{color:#666d71}
+:root[data-theme="bonegrafted"] .picker-trigger::after{color:#4d555a}
+:root[data-theme="bonegrafted"] :is(.tarstone-portrait,.stone-icon){background:#e5e2db;border-color:#aaa69e}
+:root[data-theme="bonegrafted"] .gear-card{background:#e5e2dbdd}
+:root[data-theme="bonegrafted"] .picker-option:hover,:root[data-theme="bonegrafted"] .picker-option:focus-visible,:root[data-theme="bonegrafted"] .picker-option.is-selected{border-color:#777f83}
+:root[data-theme="bonegrafted"] :is(.loadout-button,.glossary-button) img{filter:brightness(0) saturate(100%) invert(25%)}
+
+/* Queen of Hearts: deep blood-red surfaces with bright red details. */
+:root[data-theme="queen-of-hearts"] h1 span,:root[data-theme="queen-of-hearts"] .entry-tag{color:#ff9696}
+:root[data-theme="queen-of-hearts"] .tab[aria-current=page]{color:#ffd0cf;border-color:#f0444f}
+:root[data-theme="queen-of-hearts"] .entry,:root[data-theme="queen-of-hearts"] .glossary-card{border-color:var(--theme-border)}
+:root[data-theme="queen-of-hearts"] .loadout-build{background:radial-gradient(ellipse at center,#6a1921 0%,#390c11 60%,#21080b 100%)}
+:root[data-theme="queen-of-hearts"] :is(.effects,.loadout-skills,.loadout-saves){background:var(--theme-loadout-panel);border-color:var(--theme-loadout-border)}
+
+/* Light image frames for Shell and equipment artwork. */
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) :is(.entry .shell-portrait,.equipment-portrait,.gear-image,.gear-placeholder){background:var(--light-panel);border-color:var(--theme-border)}
+
+.theme-picker{margin-right:16px}
+@media(max-width:540px){.theme-picker{margin-right:8px}}
+
+/* Header navigation follows the selected dark theme's control colors. */
+:root[data-theme]:not([data-theme="default"]):not([data-theme="ophidian"]):not([data-theme="porcelain-prime"]):not([data-theme="bonegrafted"]) :is(.glossary-back,.loadout-button,.glossary-button){background:var(--theme-control);border-color:var(--theme-control-border);color:#f5f3eb}
+:root[data-theme]:not([data-theme="default"]):not([data-theme="ophidian"]):not([data-theme="porcelain-prime"]):not([data-theme="bonegrafted"]) :is(.glossary-back,.loadout-button,.glossary-button):hover{background:var(--theme-hover);border-color:var(--theme-accent)}
+:root[data-theme]:not([data-theme="default"]):not([data-theme="ophidian"]):not([data-theme="porcelain-prime"]):not([data-theme="bonegrafted"]) :is(.loadout-button,.glossary-button) img{filter:brightness(0) invert(.92)}
+
+/* Naylshotte artwork has transparent space on its right side. */
+.tab[data-category="sidearms"] .category-icon{transform:translateX(15%) scale(1.15)}
+#sidearm-01 .equipment-portrait{object-position:right center}
+
+/* Match the support link to the active theme while retaining its coffee icon. */
+:root[data-theme]:not([data-theme="default"]):not([data-theme="ophidian"]):not([data-theme="porcelain-prime"]):not([data-theme="bonegrafted"]) .kofi-button{background:var(--theme-control);border-color:var(--theme-control-border);color:#f5f3eb}
+:root[data-theme]:not([data-theme="default"]):not([data-theme="ophidian"]):not([data-theme="porcelain-prime"]):not([data-theme="bonegrafted"]) .kofi-button:hover{background:var(--theme-hover);border-color:var(--theme-accent)}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .kofi-button{background:#f8f3e8;border-color:#9d8a60;color:#29251e}
+:root:is([data-theme="ophidian"],[data-theme="porcelain-prime"],[data-theme="bonegrafted"]) .kofi-button:hover{background:var(--theme-hover);border-color:var(--light-gold)}
+:root[data-theme="porcelain-prime"] .kofi-button,:root[data-theme="bonegrafted"] .kofi-button{background:var(--theme-control);border-color:var(--theme-control-border);color:#222426}
+:root[data-theme="porcelain-prime"] .kofi-button:hover,:root[data-theme="bonegrafted"] .kofi-button:hover{background:var(--theme-hover);border-color:var(--light-gold)}

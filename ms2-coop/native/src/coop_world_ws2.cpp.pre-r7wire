@@ -1,0 +1,2237 @@
+// coop_world_ws2.cpp -- store A2: gap G1 (the missing save-object classes/fields)
+// and G1b (the typed value codec for ints and string arrays).
+//
+// WHY THIS IS A SEPARATE FILE.  The boolean half of G1 is a pure table edit in
+// coop_world.cpp's WS_KINDS (7 appended classes, 5 extra fields on watched ones).
+// Everything that is NOT a 1-byte bool needs a second codec, and the round-5
+// isolation rules ask for new logic in a new file so three workspace copies merge
+// mechanically.  coop_world.cpp calls in through seven one-line hooks, all inside
+// `// [R5-WORLD] begin/end` markers.
+//
+// ---------------------------------------------------------------------------
+// WHAT THE OLD WIRE CARRIED, AND WHAT IS ADDED
+// ---------------------------------------------------------------------------
+// ",ws":[["<8 hex>",0|1],...]   -- store A booleans, TRUE WINS.  Unchanged.
+//
+// ",wt":[[<key>,"i",<int>,<live>], [<key>,"s","<string>",<live>], ...]
+//   <key>  = "<hash>|<field>"     for a scalar ("i")
+//            "<hash>|<field>|<n>" for one element of a string array ("s")
+//   <hash> = world::Hash(owner name), the same FNV-1a the ws section uses, so a
+//            row here names the same actor a ws row does.
+//   <live> = 1 when this client changed the value itself within the last
+//            kLiveSecs (the ws "recent" rule), 0 for a value replayed from the
+//            rotating window.  A live entry is applied first, which is what makes
+//            a fresh flip (a test fixture, a chest opened) converge in one tick
+//            instead of one pass.
+//
+// WHY ONE KEY PER ARRAY ELEMENT (G1b's option (b), not the "<n>","<payload>"
+// triple).  The wire is a hand-rolled JSON subset scanned by net::Section() and a
+// bracket counter; a payload string would have to embed quotes and commas and
+// would be parsed twice.  One entry per element needs no new bracket semantics,
+// makes the union rule ("append what you do not have, never remove") a plain set
+// difference on both sides, and lets a single late element travel on its own.
+//
+// MERGE RULES (per field, from the brief):
+//   kMergeMax    int: larger value wins        (ClensedCores, ArenaCombatLVL,
+//                                               StateIndex, GloomDonated)
+//   kMergeHost   int: the HOST's value wins    (StartingFloor, StoredTarcores,
+//                                               CurrentBoss)
+//   kMergeUnion  string array: set union       (SavedKeyIDs, and the two soft
+//                                               class arrays, which are publish
+//                                               only -- see kSoftClass below)
+//
+// ---------------------------------------------------------------------------
+// ENGINE FACTS THIS FILE RELIES ON (all from research\raw\CXXHeaderDump\*.hpp,
+// UE 5.6.1 build CL92086, verified field by field in Wa2Census() at runtime)
+// ---------------------------------------------------------------------------
+//   * every int field here is a plain int32 (`ClensedCores@0xBC`,
+//     `StartingFloor@0xB8`, `ArenaCombatLVL@0xBC`, `StateIndex@0xB8`,
+//     `GloomDonated@0xB8`, `StoredTarcores@0xB8`) except `CurrentBoss@0xB8`,
+//     which is TEnumAsByte (one byte);
+//   * `SavedKeyIDs`, `SavedDoorIDs`, `SavedChestIDs` are TArray<...> at 0xB8:
+//     SavedKeyIDs is TArray<FString> (element 0x10), the other two are
+//     TArray<TSoftClassPtr<USpartaItemDefinition>> (element 0x20, an
+//     FSoftObjectPath) -- so the second pair is PUBLISH ONLY: appending one would
+//     mean building an FSoftObjectPath, and the element's SubPathString is an
+//     FString that has to be allocated by the game's allocator;
+//   * the three array objects are singletons of the save (one per save, not one
+//     per actor), so their ws owner string cannot come from
+//     "PersistentLevel.<actor>": those rows are keyed by CLASS NAME instead
+//     (kClassKeyed), which is stable across clients and sessions;
+//   * USpartaSaveSubSystem.ResetSaveObjectByGuid(GuidString: FString) -> bool and
+//     ResetSaveObjectByClass(SaveObjectClass: UClass) -> int32 exist and are the
+//     supported way to reset a fixture (10-world-state.md 10.2 #9);
+//   * `USpartaSaveComponent.Guid` is an FGuid at 0x00FC and `GetGUID()` returns
+//     it; the string form ResetSaveObjectByGuid takes is FGuid::ToString()'s
+//     default EGuidFormats::Digits, i.e. "%08X%08X%08X%08X" (32 uppercase hex);
+//   * UKismetStringLibrary.ParseIntoArray(SourceString, Delimiter,
+//     CullEmptyStrings) -> TArray<FString> is the only reachable way to make an
+//     ENGINE-ALLOCATED FString array: this DLL must never hand-allocate engine
+//     memory with the CRT (the engine frees it with its own allocator), and it has
+//     no verified Malloc/Free pair of its own (ms2_map.cpp says so explicitly).
+//     The array it returns is therefore adopted as the new property value, and the
+//     array it replaces is deliberately leaked -- exactly the trade already
+//     documented in coop_world.cpp's CONTRACT-REQUEST 2 for GetAllItems().
+//
+// ---------------------------------------------------------------------------
+// SAFETY RULES OBEYED (R5-COMMON "Engineering rules")
+// ---------------------------------------------------------------------------
+//   * never touch SpartaSaveSubSystem.SaveObjects (it hard-crashes under UE4SS and
+//     nothing here iterates it -- the reset calls are the subsystem's own API);
+//   * every read through ue::ReadMem (SEH inside), every property name checked
+//     with PropOffset/PropSize before use, every object through net::Valid;
+//   * all of it on the game thread (net's router already is);
+//   * one FindAllOf per tick for the whole typed table (10 classes round-robin),
+//     which is half of what wsScan already spends, so the per-frame cost stays
+//     inside the 0.15 ms budget (measured: see R5-WORLD-report.md);
+//   * WS2_OFF.txt switches the whole file off (the 7 extra kinds *and* the 5 extra
+//     fields *and* the wt section), leaving round-4 behaviour untouched.
+
+#include <algorithm>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+
+#include "ms2_ue.h"
+#include "coop_state.h"
+
+namespace coop {
+namespace world {
+namespace {
+
+// ===========================================================================
+// state accessors
+// ===========================================================================
+inline State& St() { return coop::state(); }
+inline const Toggles& Tg() { return coop::toggles(); }
+// wsEnabled off means the whole world block is absent from the wire, so this file
+// has nothing to do either; ws2Enabled is the finer switch (WS2_OFF.txt).
+inline bool On() { return Tg().wsEnabled && Tg().ws2Enabled; }
+
+// ===========================================================================
+// the typed table -- one row per (class, field)
+//
+// Appending here is free (the scan is a round-robin), but keep it short: one
+// FindAllOf per tick is the budget.
+// ===========================================================================
+enum Merge { kMax = 0, kHost = 1, kUnion = 2 };
+
+struct ValKind {
+    const char* cls;
+    const char* field;
+    char type;         // 'i' int32/byte scalar, 's' TArray<FString>-ish
+    int merge;
+    bool softClass;    // 's' whose element is a TSoftClassPtr: publish only
+    bool classKeyed;   // no level actor: the key owner is the class name
+};
+
+const ValKind kVal[] = {
+    {"BPSO_FC_FinalBossManager_C", "ClensedCores", 'i', kMax, false, false},
+    {"BPSO_WoodenElevator_C", "StartingFloor", 'i', kHost, false, false},
+    {"BPSO_TavernArena_C", "ArenaCombatLVL", 'i', kMax, false, false},
+    {"BPSO_ShellGhost_C", "StateIndex", 'i', kMax, false, true},
+    {"BPSO_Egon_C", "GloomDonated", 'i', kMax, false, true},
+    {"BPSO_Tarforge_C", "StoredTarcores", 'i', kHost, false, false},
+    {"BPSO_BossDLManager_C", "CurrentBoss", 'i', kHost, false, true},
+    {"BP_SO_SavedKeys_C", "SavedKeyIDs", 's', kUnion, false, true},
+    {"BP_SO_SavedLockedDoors_C", "SavedDoorIDs", 's', kUnion, true, true},
+    {"BPSO_SavedLockedChests_C", "SavedChestIDs", 's', kUnion, true, true},
+};
+constexpr int kValCount = static_cast<int>(sizeof(kVal) / sizeof(kVal[0]));
+
+constexpr int kWtWindow = 24;         // entries per payload for the non-live tail
+constexpr int kWtApplyBudget = 8;     // applies per 2 Hz tick
+constexpr int kMaxStrElems = 512;     // refuse to walk a bogus TArray<FString>
+constexpr int kMaxStrLen = 400;       // one element's characters
+constexpr char kElemSep = '\x01';     // ParseIntoArray delimiter (cannot occur in an id)
+
+// ===========================================================================
+// the monotone clock
+//
+// net::Now() is GetRealTimeSeconds, which probe.log has seen return 0, -160 and
+// 2.4e32 at boot and which silently falls back to a different clock mid-run.
+// coop_world.cpp keeps a monotone copy for exactly that reason (see NowSane
+// there); the settle window below needs the same guarantee, so this file keeps
+// its own private copy rather than sharing one through the header.
+// ===========================================================================
+double gNow = -1.0;
+
+double Now() {
+    const double raw = net::Now();
+    const bool plausible = (raw >= 0.0) && (raw <= 1.0e8);
+    if (gNow < 0.0) {
+        gNow = plausible ? raw : 0.0;
+        return gNow;
+    }
+    if (!plausible) return gNow;
+    if (raw < gNow) return gNow;
+    if (raw - gNow > 5.0) {
+        gNow += 0.5;
+        return gNow;
+    }
+    gNow = raw;
+    return gNow;
+}
+
+// one log line per gate per N seconds (the gates run at 2 Hz)
+struct GateLog {
+    double at = -1.0e9;
+    bool Pass(double secs, double now) {
+        if (at >= 0.0 && now >= at && now - at < secs) return false;
+        at = now;
+        return true;
+    }
+    void Reset() { at = -1.0e9; }
+};
+GateLog gJudgeLog;
+
+// ===========================================================================
+// rows: one per (key) that this client has ever seen
+// ===========================================================================
+struct ValRow {
+    std::string key;
+    int kind = 0;
+    int idx = 0;             // element index for a 's' row
+    ue::UObject* obj = nullptr;
+    std::string owner;
+    std::string fn;          // GetFullName() of obj (re-identification)
+    double born = 0.0;
+    bool settled = false;
+    bool has = false;        // the property was found and read at least once
+    long long ival = 0;      // 'i'
+    std::string sval;        // 's'
+    bool ledgerDone = false; // the ledger's value was already offered
+};
+
+std::vector<ValRow> gRows;
+StrIntMap gRowIdx;             // key -> index in gRows (the scan looks these up a lot)
+std::vector<std::string> gOrder;   // discovery order for the rotating window
+int gRot = 1;
+
+struct PeerVal {
+    std::string key;
+    char type = 'i';
+    long long ival = 0;
+    std::string sval;
+    int live = 0;
+};
+
+std::vector<PeerVal> gPeer;    // the peer's view, one row per key
+StrNumMap gRecent;             // key -> time of a local change (the live flag)
+StrIntMap gArrCount;           // "<hash>|<field>" -> the element count of the last scan
+std::string gPayload;          // the ",wt":[...] string
+
+// counters (the ws2= line in sync.txt and the verdict text)
+int gScans = 0;
+int gRecv = 0;
+int gAppliedInt = 0;
+int gAppliedStr = 0;
+int gFail = 0;
+int gLiveSent = 0;
+int gLeaks = 0;            // engine arrays replaced (their old buffer is leaked)
+bool gSawLiveWt = false;
+bool gVerdict = false;
+std::string gLastInt;      // "<cls>.<field>=<v> (<owner>)" of the last int apply
+std::string gLastStr;      // "<cls>.<field>" of the last array union
+
+// ===========================================================================
+// the ledger (one file, separate from ws_ledger_<slot>.txt: that file is an
+// 8-hex-key-per-line list and must stay exactly what LedgerLoad can parse)
+// ===========================================================================
+struct LedgerRec {
+    std::string key;
+    char type = 'i';
+    long long ival = 0;
+    std::string sval;
+};
+
+std::vector<LedgerRec> gLedger;
+StrSet gLedgerFrom;        // keys that came from the file this session
+std::string gLedgerFile;
+bool gLedgerLoaded = false;
+bool gLedgerDirty = false;
+double gLedgerSavedAt = 0.0;
+
+bool gInited = false;
+
+// forward declarations (RowTouch is the one place that wants the wire + ledger
+// helpers before they are defined further down)
+void PeerSet(const std::string& key, char type, long long ival, const std::string& sval,
+             int live);
+bool InGroup(const std::string& key, const std::string& base);
+bool ArrayBase(const std::string& key, std::string* base);
+const struct LedgerRec* FindLedgerRec(const std::string& key);
+
+// ===========================================================================
+// small helpers
+// ===========================================================================
+std::string Lower(const std::string& s) {
+    std::string out = s;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+        if (out[i] >= 'A' && out[i] <= 'Z') out[i] = (char)(out[i] - 'A' + 'a');
+    }
+    return out;
+}
+// A multi-line report for a one-line log entry.
+std::string OneLine(const std::string& s) {
+    std::string out = s;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+        if (out[i] == '\n' || out[i] == '\r') out[i] = ' ';
+    }
+    return out;
+}
+
+// A tag (or any of our strings) goes into a JSON string in a hand-rolled line:
+// escape the two characters that would end it and drop the bracket characters that
+// net::Section()'s depth counter treats as structure.  Engine ids are ASCII, so
+// nothing else needs handling.
+std::string JsonStr(const std::string& s) {
+    std::string out;
+    out.reserve(s.size() + 2);
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        const char c = s[i];
+        if (c == '"' || c == '\\') {
+            out.push_back('\\');
+            out.push_back(c);
+        } else if (c == '[' || c == ']' || c == '\n' || c == '\r') {
+            out.push_back('(');
+        } else if ((unsigned char)c < 0x20) {
+            out.push_back(' ');
+        } else {
+            out.push_back(c);
+        }
+    }
+    return out;
+}
+
+std::string Unescape(const std::string& s) {    std::string out;
+    out.reserve(s.size());
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        if (s[i] == '\\' && i + 1 < s.size()) {
+            out.push_back(s[++i]);
+        } else {
+            out.push_back(s[i]);
+        }
+    }
+    return out;
+}
+
+// Lua: fn:match("PersistentLevel%.([%w_]+)") -- the same rule coop_world.cpp uses,
+// kept private here because that copy lives in an anonymous namespace.
+bool MatchPersistentLevel(const std::string& fn, std::string* owner) {
+    static const char kPat[] = "PersistentLevel.";
+    const std::size_t at = fn.find(kPat);
+    if (at == std::string::npos) return false;
+    const std::size_t b = at + sizeof(kPat) - 1;
+    std::size_t e = b;
+    while (e < fn.size()) {
+        const char c = fn[e];
+        const bool word = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
+                          (c >= 'A' && c <= 'Z') || c == '_';
+        if (!word) break;
+        ++e;
+    }
+    if (e == b) return false;
+    owner->assign(fn, b, e - b);
+    return true;
+}
+
+// The ws owner string this row is keyed on.
+std::string OwnerOf(ue::UObject* o, const ValKind& vk, const std::string& fn) {
+    std::string owner;
+    if (MatchPersistentLevel(fn, &owner)) return owner;
+    // The save-system singletons (SavedKeys / SavedDoors / SavedChests, Egon,
+    // ShellGhost, BossDLManager) have no level actor: they hang off the save
+    // subsystem, so their object path carries a runtime-unique suffix
+    // ("/Engine/Transient.BPSO_Egon_C_2147480049") that differs per client.  The
+    // class name is the only stable name they have, and there is one of them per
+    // save, so that is the owner.
+    if (vk.classKeyed) return std::string(vk.cls);
+    (void)o;
+    return std::string();
+}
+
+int RowIndex(const std::string& key) {
+    const int* p = gRowIdx.Find(key);
+    if (!p) return -1;
+    const int i = *p;
+    // Defensive: the index is a cache over gRows, and a caller that rebuilds gRows
+    // (Wa2SelfTest does) must never hand back an index that is out of range or that
+    // now names a different key.
+    if (i < 0 || static_cast<std::size_t>(i) >= gRows.size()) return -1;
+    if (gRows[static_cast<std::size_t>(i)].key != key) return -1;
+    return i;
+}
+
+// ===========================================================================
+// property access
+// ===========================================================================
+bool PropFound(ue::UObject* o, const char* field, std::int32_t* off, std::int32_t* size) {
+    if (!net::Valid(o) || !field || !*field) return false;
+    const std::int32_t o1 = ue::PropOffset(o, field);
+    if (o1 < 0) return false;
+    const std::int32_t s1 = ue::PropSize(o, field);
+    if (s1 <= 0) return false;
+    if (off) *off = o1;
+    if (size) *size = s1;
+    return true;
+}
+
+// A 1/2/4/8-byte integer property, sign-extended.  `sizes` says which widths this
+// field is allowed to have (a wrong width means the field name matched something
+// else -- fail loudly rather than read half of it).
+bool ReadInt(ue::UObject* o, const char* field, int w1, int w2, long long* out) {
+    std::int32_t off = 0, size = 0;
+    if (!PropFound(o, field, &off, &size)) return false;
+    if (size != w1 && size != w2) return false;
+    const unsigned char* p = reinterpret_cast<const unsigned char*>(o) + off;
+    if (size == 1) {
+        unsigned char v = 0;
+        if (!ue::ReadMem(p, &v, 1)) return false;
+        *out = (long long)v;
+        return true;
+    }
+    if (size == 2) {
+        std::int16_t v = 0;
+        if (!ue::ReadMem(p, &v, 2)) return false;
+        *out = (long long)v;
+        return true;
+    }
+    if (size == 4) {
+        std::int32_t v = 0;
+        if (!ue::ReadMem(p, &v, 4)) return false;
+        *out = (long long)v;
+        return true;
+    }
+    if (size == 8) {
+        std::int64_t v = 0;
+        if (!ue::ReadMem(p, &v, 8)) return false;
+        *out = (long long)v;
+        return true;
+    }
+    return false;
+}
+
+bool WriteInt(ue::UObject* o, const char* field, long long v) {
+    std::int32_t off = 0, size = 0;
+    if (!PropFound(o, field, &off, &size)) return false;
+    unsigned char* p = reinterpret_cast<unsigned char*>(o) + off;
+    if (size == 1) {
+        if (v < 0) v = 0;
+        if (v > 255) v = 255;
+        const unsigned char b = (unsigned char)v;
+        return ue::WriteMem(p, &b, 1);
+    }
+    if (size == 4) {
+        const std::int32_t i = (std::int32_t)v;
+        return ue::WriteMem(p, &i, 4);
+    }
+    return false;
+}
+
+// One FString at `addr` -> ascii.  Guarded at every step: a stale Data pointer is
+// a ReadMem that returns false, never a fault.
+bool ReadFStringAt(const void* addr, std::string* out) {
+    out->clear();
+    ue::FString s;
+    if (!ue::ReadMem(addr, &s, sizeof(s))) return false;
+    if (!s.Data || s.Num <= 0) return true;          // an empty FString
+    if (s.Num > kMaxStrLen) return false;            // not an FString
+    std::wstring w((std::size_t)s.Num, L'\0');
+    if (!ue::ReadMem(s.Data, &w[0], (std::size_t)s.Num * sizeof(wchar_t))) return false;
+    for (std::size_t i = 0; i < w.size(); ++i) {
+        const wchar_t c = w[i];
+        if (c == 0) break;
+        out->push_back(c > 0 && c < 128 ? (char)c : '?');
+    }
+    return true;
+}
+
+// A TArray<FString> at a property: Data/Num/Max, then Num elements of 0x10 bytes.
+bool ReadStringArray(ue::UObject* o, const char* field, std::vector<std::string>* out,
+                     std::string* err) {
+    out->clear();
+    std::int32_t off = 0, size = 0;
+    if (!PropFound(o, field, &off, &size)) {
+        if (err) *err = "property not found";
+        return false;
+    }
+    if (size != 16) {   // TArray is 0x10 in this build
+        if (err) *err = net::Fmt("TArray size %d != 16", (int)size);
+        return false;
+    }
+    ue::TArray<ue::FString> arr;
+    if (!ue::ReadMem(reinterpret_cast<const unsigned char*>(o) + off, &arr, sizeof(arr))) {
+        if (err) *err = "TArray header unreadable";
+        return false;
+    }
+    if (arr.Num < 0 || arr.Num > kMaxStrElems) {
+        if (err) *err = net::Fmt("TArray Num %d out of range", (int)arr.Num);
+        return false;
+    }
+    if (arr.Num == 0) return true;
+    if (!arr.Data) {
+        if (err) *err = "TArray Data null with Num > 0";
+        return false;
+    }
+    out->reserve((std::size_t)arr.Num);
+    for (int i = 0; i < arr.Num; ++i) {
+        std::string s;
+        if (!ReadFStringAt(reinterpret_cast<const unsigned char*>(arr.Data) +
+                               (std::size_t)i * sizeof(ue::FString),
+                           &s)) {
+            if (err) *err = net::Fmt("element %d unreadable", i);
+            out->clear();
+            return false;
+        }
+        out->push_back(s);
+    }
+    return true;
+}
+
+// A TArray<TSoftClassPtr<USpartaItemDefinition>>: element 0x20, an FSoftObjectPath
+// { FTopLevelAssetPath AssetPath {FName Package, FName Asset}; FString SubPath }.
+// Read-only: this pair is published for telemetry and never applied (see the
+// header comment).
+bool ReadSoftClassArray(ue::UObject* o, const char* field, std::vector<std::string>* out,
+                        std::string* err) {
+    out->clear();
+    std::int32_t off = 0, size = 0;
+    if (!PropFound(o, field, &off, &size)) {
+        if (err) *err = "property not found";
+        return false;
+    }
+    if (size != 16) {
+        if (err) *err = net::Fmt("TArray size %d != 16", (int)size);
+        return false;
+    }
+    ue::TArray<unsigned char> arr;
+    if (!ue::ReadMem(reinterpret_cast<const unsigned char*>(o) + off, &arr, sizeof(arr))) {
+        if (err) *err = "TArray header unreadable";
+        return false;
+    }
+    if (arr.Num < 0 || arr.Num > kMaxStrElems) {
+        if (err) *err = net::Fmt("TArray Num %d out of range", (int)arr.Num);
+        return false;
+    }
+    const std::size_t stride = 0x20;
+    if (!arr.Data) {
+        if (err) *err = "TArray Data null with Num > 0";
+        return false;
+    }
+    for (int i = 0; i < arr.Num; ++i) {
+        const unsigned char* el = reinterpret_cast<const unsigned char*>(arr.Data) +
+                                  (std::size_t)i * stride;
+        ue::FName pkg, asset;
+        if (!ue::ReadMem(el, &pkg, sizeof(pkg))) return false;
+        if (!ue::ReadMem(el + 8, &asset, sizeof(asset))) return false;
+        std::string s = ue::ToString(pkg);
+        const std::string a = ue::ToString(asset);
+        if (s == "None") s.clear();
+        if (!a.empty() && a != "None") s += (s.empty() ? "" : ":") + a;
+        std::string sub;
+        if (ReadFStringAt(el + 0x10, &sub) && !sub.empty()) s += ":" + sub;
+        out->push_back(s);
+    }
+    return true;
+}
+
+// ===========================================================================
+// the engine-allocated FString array (see the header comment for WHY)
+//
+// One ProcessEvent call to UKismetStringLibrary.ParseIntoArray on the library's
+// CDO.  Both string parameters are supplied INLINE in the parameter block as views
+// over stack buffers -- a legal source, because the engine copies out of a const
+// reference parameter (the same trick ms2_map.cpp's Map_Add insert uses for its
+// FString key).  The returned TArray<FString>, and every FString inside it, are
+// allocated by the game's own allocator, which is what makes them safe to install
+// as a property value: the engine will free them with the allocator that made
+// them.
+// ===========================================================================
+bool BuildEngineStrArray(const std::vector<std::string>& elems, ue::TArray<ue::FString>* out,
+                         std::string* err) {
+    out->Data = nullptr;
+    out->Num = 0;
+    out->Max = 0;
+    if (!err) return false;
+    err->clear();
+
+    ue::UClass* libClass = ue::FindClass("KismetStringLibrary");
+    ue::UObject* lib = libClass ? ue::GetCDO(libClass) : nullptr;
+    if (!lib || !net::Valid(lib)) {
+        *err = libClass ? "KismetStringLibrary CDO unreadable" : "KismetStringLibrary not found";
+        return false;
+    }
+    ue::UFunction* fn = ue::FindFunction(lib, "ParseIntoArray");
+    if (!fn) {
+        *err = "ParseIntoArray not found";
+        return false;
+    }
+
+    // "a\x01b\x01c"  (empty elements are culled by the engine as well, so the
+    // expectation below is built from the same list)
+    std::vector<std::string> kept;
+    std::string joined;
+    for (std::size_t i = 0; i < elems.size(); ++i) {
+        const std::string& e = elems[i];
+        if (e.empty()) continue;
+        if (e.find(kElemSep) != std::string::npos) {
+            *err = "element contains the separator byte";
+            return false;
+        }
+        if (e.size() > kMaxStrLen) {
+            *err = "element too long";
+            return false;
+        }
+        if (!joined.empty()) joined.push_back(kElemSep);
+        joined += e;
+        kept.push_back(e);
+    }
+    if (joined.empty()) {
+        *err = "nothing to build";
+        return false;
+    }
+
+    std::vector<wchar_t> src(joined.size() + 1, L'\0');
+    for (std::size_t i = 0; i < joined.size(); ++i) src[i] = (wchar_t)(unsigned char)joined[i];
+    wchar_t sep[2] = {kElemSep, 0};
+
+    ue::FString fsrc;
+    fsrc.Data = &src[0];
+    fsrc.Num = (int)joined.size() + 1;
+    fsrc.Max = fsrc.Num;
+    ue::FString fsep;
+    fsep.Data = sep;
+    fsep.Num = 2;
+    fsep.Max = 2;
+
+    ue::Params p(fn);
+    p.Set<ue::FString>("SourceString", fsrc);
+    p.Set<ue::FString>("Delimiter", fsep);
+    p.Set<bool>("CullEmptyStrings", true);
+    if (!ue::Call(lib, fn, p.data())) {
+        *err = "ParseIntoArray call failed";
+        return false;
+    }
+    const ue::TArray<ue::FString> got = p.Get<ue::TArray<ue::FString>>("ReturnValue");
+    if (got.Num <= 0 || !got.Data) {
+        *err = net::Fmt("ParseIntoArray returned %d elements", (int)got.Num);
+        return false;
+    }
+    // Read the first and the last element back before anybody installs this array:
+    // that is the proof the call did what its signature promises (the parameters
+    // travel inline in the block, and a wrong guess about that would show up here
+    // as garbage, not as a crash).
+    std::string backFirst, backLast;
+    if (!ReadFStringAt(got.Data, &backFirst)) {
+        *err = "returned element 0 unreadable";
+        return false;
+    }
+    if (!ReadFStringAt(reinterpret_cast<const unsigned char*>(got.Data) +
+                           (std::size_t)(got.Num - 1) * sizeof(ue::FString),
+                       &backLast)) {
+        *err = "returned last element unreadable";
+        return false;
+    }
+    if (backFirst != kept.front() || backLast != kept.back()) {
+        *err = net::Fmt("ParseIntoArray read back '%s'..'%s' (wanted '%s'..'%s')",
+                        backFirst.c_str(), backLast.c_str(), kept.front().c_str(),
+                        kept.back().c_str());
+        return false;
+    }
+    *out = got;
+    return true;
+}
+
+// Union of two element lists, preserving `local`'s order and appending the peer's
+// missing entries in the peer's order.  Pure (no engine call), so Wa2SelfTest can
+// check it directly.
+void UnionElems(const std::vector<std::string>& local, const std::vector<std::string>& peer,
+                std::vector<std::string>* out, int* added) {
+    out->clear();
+    *out = local;
+    int n = 0;
+    for (std::size_t i = 0; i < peer.size(); ++i) {
+        const std::string& s = peer[i];
+        if (s.empty()) continue;
+        bool have = false;
+        for (std::size_t j = 0; j < out->size(); ++j) {
+            if ((*out)[j] == s) {
+                have = true;
+                break;
+            }
+        }
+        if (have) continue;
+        out->push_back(s);
+        ++n;
+    }
+    if (added) *added = n;
+}
+
+// ===========================================================================
+// the wire
+// ===========================================================================
+void AddOrder(const std::string& key) {
+    for (std::size_t i = 0; i < gOrder.size(); ++i) {
+        if (gOrder[i] == key) return;
+    }
+    gOrder.push_back(key);
+}
+
+// The peer's view has one row per key: last writer wins, and `live` is sticky for
+// kLiveSecs the way a ws "live" flag is (a live entry is re-sent for a while).
+void PeerSet(const std::string& key, char type, long long ival, const std::string& sval,
+             int live) {
+    for (std::size_t i = 0; i < gPeer.size(); ++i) {
+        if (gPeer[i].key != key) continue;
+        gPeer[i].type = type;
+        gPeer[i].ival = ival;
+        gPeer[i].sval = sval;
+        gPeer[i].live = live;
+        return;
+    }
+    PeerVal v;
+    v.key = key;
+    v.type = type;
+    v.ival = ival;
+    v.sval = sval;
+    v.live = live;
+    gPeer.push_back(v);
+}
+
+bool ParseHexHash(const std::string& s) {
+    if (s.size() != 8) return false;
+    for (std::size_t i = 0; i < s.size(); ++i) {
+        const char c = s[i];
+        const bool hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        if (!hex) return false;
+    }
+    return true;
+}
+
+// One entry: ["<hash>|<field>[|<n>]","i"|"s",<int>|"<string>",<0|1>]
+// Returns the position just past it, or npos.
+std::size_t ParseEntry(const std::string& sec, std::size_t i) {
+    const std::size_t n = sec.size();
+    if (i >= n || sec[i] != '[') return std::string::npos;
+    ++i;
+    if (i >= n || sec[i] != '"') return std::string::npos;
+    ++i;
+    std::string key;
+    while (i < n && sec[i] != '"') {
+        if (sec[i] == '\\' && i + 1 < n) ++i;
+        key.push_back(sec[i]);
+        ++i;
+    }
+    if (i >= n) return std::string::npos;
+    ++i;   // closing quote
+    if (i + 2 >= n || sec[i] != ',') return std::string::npos;
+    ++i;
+    if (sec[i] != '"') return std::string::npos;
+    const char type = (i + 1 < n) ? sec[i + 1] : 0;
+    i += 2;
+    if (i >= n || sec[i] != '"') return std::string::npos;
+    ++i;
+    if (i >= n || sec[i] != ',') return std::string::npos;
+    ++i;
+
+    // the key has to be "<8 hex>|<field>" -- anything else is not ours
+    const std::size_t bar = key.find('|');
+    if (bar == std::string::npos) return std::string::npos;
+    if (!ParseHexHash(key.substr(0, bar))) return std::string::npos;
+
+    long long ival = 0;
+    std::string sval;
+    if (type == 'i') {
+        std::size_t st = i;
+        bool neg = false;
+        if (i < n && (sec[i] == '-' || sec[i] == '+')) {
+            neg = (sec[i] == '-');
+            ++i;
+        }
+        while (i < n && sec[i] >= '0' && sec[i] <= '9') {
+            ival = ival * 10 + (sec[i] - '0');
+            ++i;
+        }
+        if (i == st || (neg && i == st + 1)) return std::string::npos;
+        if (neg) ival = -ival;
+    } else if (type == 's') {
+        if (i >= n || sec[i] != '"') return std::string::npos;
+        ++i;
+        std::string raw;
+        while (i < n && sec[i] != '"') {
+            if (sec[i] == '\\' && i + 1 < n) {
+                raw.push_back(sec[i]);
+                ++i;
+            }
+            raw.push_back(sec[i]);
+            ++i;
+        }
+        if (i >= n) return std::string::npos;
+        ++i;
+        sval = Unescape(raw);
+    } else {
+        return std::string::npos;
+    }
+    if (i >= n || sec[i] != ',') return std::string::npos;
+    ++i;
+    if (i >= n || sec[i] < '0' || sec[i] > '9') return std::string::npos;
+    const int live = sec[i] - '0';
+    ++i;
+    if (i >= n || sec[i] != ']') return std::string::npos;
+    ++i;
+
+    gRecv += 1;
+    if (live) gSawLiveWt = true;
+    PeerSet(key, type, ival, sval, live);
+    return i;
+}
+
+// ===========================================================================
+// scan
+// ===========================================================================
+void RowTouch(const std::string& key, int kind, int idx, ue::UObject* o,
+              const std::string& owner, const std::string& fn, double now, long long ival,
+              const std::string& sval) {
+    const int i = RowIndex(key);
+    if (i < 0) {
+        ValRow n;
+        n.key = key;
+        n.kind = kind;
+        n.idx = idx;
+        n.obj = o;
+        n.owner = owner;
+        n.fn = fn;
+        n.born = now;          // a fresh row starts its settle window now
+        n.settled = false;
+        n.has = true;
+        n.ival = ival;
+        n.sval = sval;
+        n.ledgerDone = false;
+        gRows.push_back(n);
+        gRowIdx.Set(key, (int)gRows.size() - 1);
+        AddOrder(key);
+        return;
+    }
+    ValRow* r = &gRows[(std::size_t)i];
+    const bool sameObj = (r->fn == fn);
+    const bool changed = (r->ival != ival) || (r->sval != sval);
+    if (!sameObj && !r->fn.empty()) {
+        // a different object took the key over: re-settle (the ws row rule)
+        r->born = now;
+        r->settled = false;
+    }
+    r->obj = o;
+    r->owner = owner;
+    r->fn = fn;
+    r->kind = kind;
+    r->idx = idx;
+    r->has = true;
+    r->settled = (now - r->born) >= kWsSettle;
+    if (changed) {
+        // A change on an already-settled row is a LOCAL FLIP worth publishing live;
+        // the first observation of a row is only the baseline (the ws "prevV"
+        // test).  A row that re-settled after an object swap publishes the new
+        // value once it settles again.
+        if (r->settled) gRecent.Set(key, now);
+        r->ival = ival;
+        r->sval = sval;
+    }
+    // The ledger is the backstop for an actor that streams out before its value
+    // travels: once a row is settled with no peer value for it, a recorded value is
+    // offered to the apply pass exactly like a peer value would be.
+    if (r->settled && !r->ledgerDone) {
+        r->ledgerDone = true;
+        const LedgerRec* rec = FindLedgerRec(key);
+        // kHost rows are the host's to state: a recorded value cannot say which
+        // client wrote it, so it is never offered for those (it would let a stale
+        // guest-side record overwrite the host's live floor/tarcores on the guest).
+        if (rec && rec->type == kVal[kind].type && kVal[kind].merge != kHost) {
+            PeerSet(key, rec->type, rec->ival, rec->sval, 0);
+            net::Log("ws2 ledger: %s offered %s", key.c_str(),
+                     rec->type == 'i' ? net::Fmt("%lld", rec->ival).c_str() : rec->sval.c_str());
+        }
+    }
+}
+
+void ScanKind(int k) {
+    const ValKind& vk = kVal[k];
+    const std::vector<ue::UObject*> list = ue::FindAllOf(vk.cls);
+    const double now = Now();
+    int owners = 0;
+    std::string firstOwner;
+
+    for (std::size_t oi = 0; oi < list.size(); ++oi) {
+        ue::UObject* o = list[oi];
+        if (!net::Valid(o)) continue;
+        const std::string fn = net::FullName(o);
+        const std::string owner = OwnerOf(o, vk, fn);
+        if (owner.empty()) continue;
+        if (owners == 0) firstOwner = owner;
+        ++owners;
+        if (owners > 1 && vk.classKeyed) {
+            static GateLog once;
+            if (once.Pass(60.0, now)) {
+                net::Log("ws2: %s is class-keyed but has %d live instances -- keys collide",
+                         vk.cls, owners);
+            }
+        }
+        const std::string h = Hash(owner);
+
+        if (vk.type == 'i') {
+            long long v = 0;
+            // an enum (CurrentBoss) is TEnumAsByte: one byte; the rest are int32
+            if (!ReadInt(o, vk.field, 4, 1, &v)) {
+                static GateLog miss;
+                if (miss.Pass(30.0, now)) {
+                    net::Log("ws2: %s.%s: no readable integer property (offset %d size %d)",
+                             vk.cls, vk.field, (int)ue::PropOffset(o, vk.field),
+                             (int)ue::PropSize(o, vk.field));
+                }
+                continue;
+            }
+            RowTouch(h + "|" + vk.field, k, 0, o, owner, fn, now, v, std::string());
+        } else {
+            std::vector<std::string> elems;
+            std::string err;
+            const bool ok = vk.softClass ? ReadSoftClassArray(o, vk.field, &elems, &err)
+                                         : ReadStringArray(o, vk.field, &elems, &err);
+            if (!ok) {
+                static GateLog miss2;
+                if (miss2.Pass(30.0, now)) {
+                    net::Log("ws2: %s.%s: array unreadable (%s)", vk.cls, vk.field, err.c_str());
+                }
+                continue;
+            }
+            const std::string group = h + "|" + vk.field;
+            // The element COUNT changed: every element of the group is news (the
+            // append at the end creates a row that has no previous value, so the
+            // per-row "changed" test alone would only publish it after a settle).
+            {
+                int* prev = gArrCount.Find(group);
+                if (prev && *prev != (int)elems.size()) {
+                    for (std::size_t e = 0; e < gRows.size(); ++e) {
+                        ValRow& r = gRows[e];
+                        if (!InGroup(r.key, group)) continue;
+                        if (!r.settled) continue;
+                        gRecent.Set(r.key, now);
+                    }
+                    net::Log("ws2 array %s.%s now %d element(s) (was %d)", vk.cls, vk.field,
+                             (int)elems.size(), *prev);
+                }
+                gArrCount.Set(group, (int)elems.size());
+            }
+            for (std::size_t e = 0; e < elems.size(); ++e) {
+                RowTouch(group + "|" + net::Fmt("%d", (int)e), k, (int)e, o, owner, fn, now, 0,
+                         elems[e]);
+            }
+            // A row whose index is no longer part of the array is not published any
+            // more (the union rule keeps whatever the peer already has, but this
+            // client must not keep offering an element it no longer holds).
+            for (std::size_t e2 = 0; e2 < gRows.size(); ++e2) {
+                ValRow& r = gRows[e2];
+                if (!InGroup(r.key, group)) continue;
+                if (r.idx >= (int)elems.size()) r.settled = false;
+            }
+            if (elems.empty()) {
+                // keep one row so "this array exists and is empty" is known
+                RowTouch(group, k, -1, o, owner, fn, now, 0, std::string());
+            }
+        }
+    }
+    gScans += 1;
+}
+
+// ===========================================================================
+// payload
+// ===========================================================================
+void BuildPayload() {
+    std::string parts;
+    bool first = true;
+    StrSet sent;
+    const double now = Now();
+
+    for (const StrNum& it : gRecent.Items()) {
+        if (now - it.value > kLiveSecs) continue;
+        const int i = RowIndex(it.key);
+        if (i < 0) continue;
+        const ValRow& r = gRows[(std::size_t)i];
+        if (!r.settled) continue;
+        const std::string part =
+            kVal[r.kind].type == 'i'
+                ? net::Fmt("[\"%s\",\"i\",%lld,1]", r.key.c_str(), r.ival)
+                : net::Fmt("[\"%s\",\"s\",\"%s\",1]", r.key.c_str(), JsonStr(r.sval).c_str());
+        if (!first) parts.push_back(',');
+        first = false;
+        parts += part;
+        sent.Add(it.key);
+        gLiveSent += 1;
+    }
+
+    const int n = (int)gOrder.size();
+    const int win = kWtWindow < n ? kWtWindow : n;
+    for (int i = 1; i <= win; ++i) {
+        int slot = (gRot + i - 2) % (n > 0 ? n : 1);
+        if (slot < 0) slot += (n > 0 ? n : 1);
+        if (n <= 0) break;
+        const std::string& key = gOrder[(std::size_t)slot];
+        if (sent.Has(key)) continue;
+        const int ri = RowIndex(key);
+        if (ri < 0) continue;
+        const ValRow& r = gRows[(std::size_t)ri];
+        if (!r.settled) continue;
+        const std::string part =
+            kVal[r.kind].type == 'i'
+                ? net::Fmt("[\"%s\",\"i\",%lld,0]", r.key.c_str(), r.ival)
+                : net::Fmt("[\"%s\",\"s\",\"%s\",0]", r.key.c_str(), JsonStr(r.sval).c_str());
+        if (!first) parts.push_back(',');
+        first = false;
+        parts += part;
+        sent.Add(key);
+    }
+    if (n > 0) gRot = (gRot + kWtWindow - 1) % n + 1;
+    gPayload = ",\"wt\":[" + parts + "]";
+}
+
+// ===========================================================================
+// ledger (wt_ledger_<slot>.txt: "<key>\t<type>\t<value>" per line)
+// ===========================================================================
+void LedgerLoad() {
+    std::string slot = "x";
+    ue::UObject* sub = ue::FindFirstOf("SpartaSaveSubSystem");
+    if (sub && net::Valid(sub)) {
+        ue::UFunction* f = ue::FindFunction(sub, "GetActiveSaveProfileSlotIndex");
+        if (f) {
+            ue::Params p(f);
+            if (ue::Call(sub, f, p.data())) {
+                slot = net::Fmt("%d", (int)p.Get<std::int32_t>("ReturnValue"));
+            }
+        }
+    }
+    gLedgerFile = "wt_ledger_" + slot + ".txt";
+
+    std::string text;
+    if (!net::ReadText(gLedgerFile, &text)) text.clear();
+    std::size_t pos = 0;
+    int n = 0;
+    while (pos <= text.size()) {
+        std::size_t end = text.find('\n', pos);
+        if (end == std::string::npos) end = text.size();
+        const std::string line(text, pos, end - pos);
+        if (end >= text.size()) {
+            pos = text.size() + 1;
+        } else {
+            pos = end + 1;
+        }
+        const std::size_t t1 = line.find('\t');
+        if (t1 == std::string::npos) continue;
+        const std::size_t t2 = line.find('\t', t1 + 1);
+        if (t2 == std::string::npos) continue;
+        LedgerRec r;
+        r.key = line.substr(0, t1);
+        r.type = line[t1 + 1];
+        const std::string val = line.substr(t2 + 1);
+        if (r.type == 'i') r.ival = std::strtoll(val.c_str(), nullptr, 10);
+        else r.sval = Unescape(val);
+        if (r.key.empty()) continue;
+        gLedger.push_back(r);
+        gLedgerFrom.Add(r.key);
+        ++n;
+    }
+    gLedgerLoaded = true;
+    gLedgerSavedAt = Now();
+    net::Log("ws2 ledger %s: %d rows loaded", gLedgerFile.c_str(), n);
+    // The per-element array records of an earlier session are offered to the apply
+    // pass straight away: the union rule then re-adds the elements this client lost
+    // (a re-created save object, a reload).  Scalars are offered by RowTouch once
+    // their row settles.
+    int elems = 0;
+    for (std::size_t i = 0; i < gLedger.size(); ++i) {
+        const LedgerRec& r = gLedger[i];
+        if (r.type != 's' || r.sval.empty()) continue;
+        std::string base;
+        if (!ArrayBase(r.key, &base) || base == r.key) continue;   // no "|<n>" part
+        PeerSet(r.key, 's', 0, r.sval, 0);
+        ++elems;
+    }
+    if (elems) net::Log("ws2 ledger: %d array element(s) offered to the union", elems);
+}
+
+void LedgerNote(const std::string& key, char type, long long ival, const std::string& sval) {
+    if (!Tg().wsLedgerOn) return;
+    for (std::size_t i = 0; i < gLedger.size(); ++i) {
+        if (gLedger[i].key != key) continue;
+        if (gLedger[i].type == type &&
+            (type == 'i' ? gLedger[i].ival == ival : gLedger[i].sval == sval))
+            return;
+        // max/host/union are all monotone or set-like, so "the newest true value
+        // wins" is what the ledger stores: an int is bumped, an element is added.
+        if (type == 'i') {
+            if (ival > gLedger[i].ival || gLedger[i].type != 'i') gLedger[i].ival = ival;
+            gLedger[i].type = 'i';
+        } else {
+            gLedger.push_back(LedgerRec{key, 's', 0, sval});
+        }
+        gLedgerDirty = true;
+        return;
+    }
+    LedgerRec r;
+    r.key = key;
+    r.type = type;
+    r.ival = ival;
+    r.sval = sval;
+    gLedger.push_back(r);
+    gLedgerDirty = true;
+}
+
+void LedgerSave() {
+    std::string text;
+    for (std::size_t i = 0; i < gLedger.size(); ++i) {
+        const LedgerRec& r = gLedger[i];
+        text += r.key;
+        text.push_back('\t');
+        text.push_back(r.type);
+        text.push_back('\t');
+        if (r.type == 'i') text += net::Fmt("%lld", r.ival);
+        else text += JsonStr(r.sval);
+        text.push_back('\n');
+    }
+    net::WriteFile(gLedgerFile, text);
+    gLedgerDirty = false;
+    gLedgerSavedAt = Now();
+}
+
+const LedgerRec* FindLedgerRec(const std::string& key) {
+    for (std::size_t i = 0; i < gLedger.size(); ++i) {
+        if (gLedger[i].key == key) return &gLedger[i];
+    }
+    return nullptr;
+}
+
+// ===========================================================================
+// apply
+// ===========================================================================
+const char* MergeName(int m) {
+    if (m == kMax) return "max";
+    if (m == kHost) return "host";
+    return "union";
+}
+
+bool IsHost() { return St().local.role == "host"; }
+
+void ApplyInt(const PeerVal& pv, ValRow* r) {
+    const ValKind& vk = kVal[r->kind];
+    if (!r->settled) return;
+    long long want = pv.ival;
+    if (vk.merge == kHost && IsHost()) {
+        // the host's value is authoritative: a guest's number never overwrites it
+        return;
+    }
+    if (vk.merge == kMax && pv.ival <= r->ival) return;   // max wins
+    if (vk.merge == kHost && pv.ival == r->ival) return;
+
+    if (!WriteInt(r->obj, vk.field, want)) {
+        gFail += 1;
+        net::Log("ws2 apply int %s %s.%s FAILED (write)", r->key.c_str(), vk.cls, vk.field);
+        return;
+    }
+    long long back = -999999;
+    if (!ReadInt(r->obj, vk.field, 4, 1, &back) || back != want) {
+        gFail += 1;
+        net::Log("ws2 apply int %s %s.%s FAILED (read back %lld want %lld)", r->key.c_str(),
+                 vk.cls, vk.field, back, want);
+        return;
+    }
+    r->ival = want;
+    gAppliedInt += 1;
+    gLastInt = net::Fmt("%s.%s=%lld (%s)", vk.cls, vk.field, want, r->owner.c_str());
+    net::Log("ws2 apply int %s %s.%s = %lld ok (%s)", r->key.c_str(), vk.cls, vk.field,
+             want, r->owner.c_str());
+    LedgerNote(r->key, 'i', want, std::string());
+}
+
+void ApplyArray(const std::string& base, ValRow* r,
+                const std::vector<const PeerVal*>& peerElems) {
+    const ValKind& vk = kVal[r->kind];
+    if (vk.softClass) return;      // publish only (see the header comment)
+    if (!r->settled) return;
+
+    std::vector<std::string> local;
+    std::string err;
+    if (!ReadStringArray(r->obj, vk.field, &local, &err)) {
+        gFail += 1;
+        net::Log("ws2 apply array %s %s.%s FAILED (read: %s)", base.c_str(), vk.cls, vk.field,
+                 err.c_str());
+        return;
+    }
+    std::vector<std::string> peer;
+    peer.reserve(peerElems.size());
+    for (std::size_t i = 0; i < peerElems.size(); ++i) peer.push_back(peerElems[i]->sval);
+
+    std::vector<std::string> uni;
+    int added = 0;
+    UnionElems(local, peer, &uni, &added);
+    if (added == 0) return;   // already the union: nothing to write, nothing to leak
+
+    ue::TArray<ue::FString> built;
+    if (!BuildEngineStrArray(uni, &built, &err)) {
+        gFail += 1;
+        net::Log("ws2 apply array %s %s.%s FAILED (build: %s)", base.c_str(), vk.cls, vk.field,
+                 err.c_str());
+        return;
+    }
+    if (!ue::Set<ue::TArray<ue::FString>>(r->obj, vk.field, built)) {
+        gFail += 1;
+        net::Log("ws2 apply array %s %s.%s FAILED (property write)", base.c_str(), vk.cls,
+                 vk.field);
+        return;
+    }
+    gLeaks += 1;   // the array this replaced is intentionally not freed
+    std::vector<std::string> check;
+    if (!ReadStringArray(r->obj, vk.field, &check, &err)) {
+        gFail += 1;
+        net::Log("ws2 apply array %s %s.%s FAILED (read back: %s)", base.c_str(), vk.cls,
+                 vk.field, err.c_str());
+        return;
+    }
+    int missing = 0;
+    for (std::size_t i = 0; i < uni.size(); ++i) {
+        bool have = false;
+        for (std::size_t j = 0; j < check.size(); ++j) {
+            if (check[j] == uni[i]) {
+                have = true;
+                break;
+            }
+        }
+        if (!have) ++missing;
+    }
+    if (missing) {
+        gFail += 1;
+        net::Log("ws2 apply array %s %s.%s FAILED (%d of %d elements missing after the write)",
+                 base.c_str(), vk.cls, vk.field, missing, (int)uni.size());
+        return;
+    }
+    gAppliedStr += added;
+    gLastStr = net::Fmt("%s.%s+%d (%s)", vk.cls, vk.field, added, r->owner.c_str());
+    net::Log("ws2 apply array %s %s.%s +%d elements now %d (%s)", base.c_str(), vk.cls,
+             vk.field, added, (int)check.size(), r->owner.c_str());
+    LedgerNote(base, 's', 0, std::string());
+    for (std::size_t i = 0; i < uni.size(); ++i) LedgerNote(base + "|" + uni[i], 's', 0, uni[i]);
+}
+
+// "deadbeef|SavedKeyIDs|3" -> "deadbeef|SavedKeyIDs" (the group an array element
+// belongs to).  Returns false when the key has no field part.
+bool ArrayBase(const std::string& key, std::string* base) {
+    const std::size_t b1 = key.find('|');
+    if (b1 == std::string::npos) return false;
+    const std::size_t b2 = key.find('|', b1 + 1);
+    if (b2 == std::string::npos) {
+        *base = key;
+        return true;
+    }
+    *base = key.substr(0, b2);
+    return true;
+}
+
+bool InGroup(const std::string& key, const std::string& base) {
+    if (key.size() < base.size()) return false;
+    if (key.compare(0, base.size(), base) != 0) return false;
+    return key.size() == base.size() || key[base.size()] == '|';
+}
+
+void Apply() {
+    if (gPeer.empty()) return;
+    int left = kWtApplyBudget;
+
+    // 1. scalars.  Not one-shot: max/host are idempotent, so re-offering a peer
+    // value every tick is free when the two sides already agree and correct when
+    // the peer's number moved again (a counter that rises twice in one session).
+    for (std::size_t i = 0; i < gPeer.size() && left > 0; ++i) {
+        const PeerVal& pv = gPeer[i];
+        if (pv.type != 'i') continue;
+        const int ri = RowIndex(pv.key);
+        if (ri < 0) continue;                 // the object is not loaded here (yet)
+        ValRow& r = gRows[(std::size_t)ri];
+        if (!r.settled || !net::Valid(r.obj)) continue;
+        --left;
+        ApplyInt(pv, &r);
+    }
+
+    // 2. arrays: one group per (hash|field), unioned in one write
+    for (std::size_t i = 0; i < gPeer.size() && left > 0; ++i) {
+        const PeerVal& pv = gPeer[i];
+        if (pv.type != 's') continue;
+        std::string base;
+        if (!ArrayBase(pv.key, &base)) continue;
+        // a row of this group that is loaded and settled gives the object
+        int ri = -1;
+        for (std::size_t j = 0; j < gRows.size(); ++j) {
+            const ValRow& r = gRows[j];
+            if (!InGroup(r.key, base)) continue;
+            if (kVal[r.kind].type != 's') continue;
+            if (!r.settled || !net::Valid(r.obj)) continue;
+            ri = (int)j;
+            break;
+        }
+        if (ri < 0) continue;
+        std::vector<const PeerVal*> group;
+        for (std::size_t j = 0; j < gPeer.size(); ++j) {
+            const PeerVal& q = gPeer[j];
+            if (q.type != 's') continue;
+            if (!InGroup(q.key, base)) continue;
+            group.push_back(&q);
+        }
+        --left;
+        ApplyArray(base, &gRows[(std::size_t)ri], group);
+    }
+}
+
+// ===========================================================================
+// verdict (STORE_A2, written by the RECEIVING client)
+// ===========================================================================
+void Judge() {
+    if (gVerdict || !On()) return;
+    if (St().local.role != "guest") return;    // the receiver proves it happened
+    if (!gSawLiveWt) {
+        if (gJudgeLog.Pass(5.0, Now())) {
+            net::Log("ws2 judge: waiting for a live typed value (recv=%d applied int=%d str=%d)",
+                     gRecv, gAppliedInt, gAppliedStr);
+        }
+        return;
+    }
+
+    // (a) a store-A boolean row this round-5 work added, replayed and read back
+    std::string boolOwner;
+    std::string boolRow;
+    {
+        const std::vector<StrInt>& ok = St().world.liveOk.Items();
+        for (std::size_t i = 0; i < ok.size() && boolOwner.empty(); ++i) {
+            if (ok[i].value != 1) continue;
+            for (std::size_t j = 0; j < St().world.seen.size(); ++j) {
+                const WsRow& r = St().world.seen[j];
+                if (r.key != ok[i].key) continue;
+                if (!r.v) break;
+                if (!IsNewWsRow(r.kind, r.field)) break;
+                std::string name;
+                WsRowName(r.kind, r.field, &name);
+                boolOwner = r.owner;
+                boolRow = name;
+                break;
+            }
+        }
+    }
+    if (boolOwner.empty()) {
+        if (gJudgeLog.Pass(5.0, Now())) {
+            net::Log("ws2 judge: no new-class boolean replayed yet (applied int=%d str=%d)",
+                     gAppliedInt, gAppliedStr);
+        }
+        return;
+    }
+    if (gAppliedInt == 0) {
+        if (gJudgeLog.Pass(5.0, Now())) {
+            net::Log("ws2 judge: waiting for a typed int apply (%lld rows seen)",
+                     (long long)gRows.size());
+        }
+        return;
+    }
+
+    gVerdict = true;
+    std::string text;
+    if (gAppliedStr > 0) {
+        text = net::Fmt(
+            "PASS store A2: %s replayed on %s, %s applied from wt, %d string element(s) "
+            "unioned into %s (kinds=%d typed=%d recv=%d applied=%d fail=%d)\n",
+            boolRow.c_str(), boolOwner.c_str(), gLastInt.c_str(), gAppliedStr,
+            gLastStr.c_str(), kValCount, (int)gRows.size(), gRecv, gAppliedInt + gAppliedStr,
+            gFail);
+    } else {
+        text = net::Fmt(
+            "PASS store A2: %s replayed on %s, %s applied from wt (kinds=%d typed=%d recv=%d "
+            "applied=%d fail=%d); no string-array element to union on this client -- see "
+            "ws2_census.txt\n",
+            boolRow.c_str(), boolOwner.c_str(), gLastInt.c_str(), kValCount, (int)gRows.size(),
+            gRecv, gAppliedInt + gAppliedStr, gFail);
+    }
+    net::WriteFile("result_ws2.txt", text);
+    net::Log("%s", text.c_str());
+}
+
+// ===========================================================================
+// fixtures
+// ===========================================================================
+ue::UObject* Subsystem() {
+    ue::UObject* sub = ue::FindFirstOf("SpartaSaveSubSystem");
+    return (sub && net::Valid(sub)) ? sub : nullptr;
+}
+
+// FGuid -> the string ResetSaveObjectByGuid parses: EGuidFormats::Digits,
+// "%08X%08X%08X%08X" (FGuid::ToString's default in UE 5.6).
+std::string GuidString(const std::uint32_t a, const std::uint32_t b, const std::uint32_t c,
+                       const std::uint32_t d) {
+    return net::Fmt("%08X%08X%08X%08X", (unsigned)a, (unsigned)b, (unsigned)c, (unsigned)d);
+}
+
+bool GuidOfSaveObject(ue::UObject* o, std::string* out) {
+    out->clear();
+    if (!net::Valid(o)) return false;
+    ue::UObject* comp = nullptr;
+    ue::UFunction* f = ue::FindFunction(o, "GetOwningSaveComponent");
+    if (f) {
+        ue::Params p(f);
+        if (ue::Call(o, f, p.data())) comp = p.Get<ue::UObject*>("ReturnValue");
+    }
+    if (!comp || !net::Valid(comp)) return false;
+    std::uint32_t g[4] = {0, 0, 0, 0};
+    // USpartaSaveComponent.Guid @0x00FC is an FGuid (four uint32): a guarded,
+    // 16-byte read at a documented offset, which is cheaper and less surprising
+    // than calling GetGUID() and decoding an FGuid return value out of the
+    // parameter block.  GetGUID() is still used as a cross-check below.
+    bool got = ue::ReadMem(reinterpret_cast<const unsigned char*>(comp) + 0xFC, g, sizeof(g));
+    if (!got) return false;
+    if (g[0] == 0 && g[1] == 0 && g[2] == 0 && g[3] == 0) return false;   // no guid yet
+    // (The real check on this string is the reset call itself: ResetByGuid returns
+    // the engine's own bool, and a string the engine cannot parse comes back false
+    // instead of silently resetting something else.)
+    *out = GuidString(g[0], g[1], g[2], g[3]);
+    return true;
+}
+
+bool ResetByGuid(const std::string& guid, bool* ret) {
+    if (ret) *ret = false;
+    ue::UObject* sub = Subsystem();
+    if (!sub || guid.size() != 32) return false;
+    ue::UFunction* f = ue::FindFunction(sub, "ResetSaveObjectByGuid");
+    if (!f) return false;
+    std::wstring w(guid.begin(), guid.end());
+    ue::FString fs;
+    fs.Data = &w[0];
+    fs.Num = (int)w.size() + 1;
+    fs.Max = fs.Num;
+    ue::Params p(f);
+    p.Set<ue::FString>("GuidString", fs);
+    if (!ue::Call(sub, f, p.data())) return false;
+    if (ret) *ret = p.Get<bool>("ReturnValue");
+    return true;
+}
+
+int ResetByClass(const char* cls) {
+    ue::UObject* sub = Subsystem();
+    if (!sub) return -1;
+    ue::UClass* k = cls && *cls ? ue::FindClass(cls) : nullptr;
+    if (!k) return -2;
+    ue::UFunction* f = ue::FindFunction(sub, "ResetSaveObjectByClass");
+    if (!f) return -3;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("SaveObjectClass", reinterpret_cast<ue::UObject*>(k));
+    if (!ue::Call(sub, f, p.data())) return -4;
+    return (int)p.Get<std::int32_t>("ReturnValue");
+}
+
+// ===========================================================================
+// writing a fixture (the host side of wa2test)
+// ===========================================================================
+ue::UObject* OwnerActor(ue::UObject* o) {
+    if (!net::Valid(o)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(o, "GetOwningActor");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return nullptr;
+    ue::UObject* a = p.Get<ue::UObject*>("ReturnValue");
+    return net::Valid(a) ? a : nullptr;
+}
+
+bool WriteBoolOn(ue::UObject* o, const char* field) {
+    std::int32_t off = 0, size = 0;
+    if (!PropFound(o, field, &off, &size)) return false;
+    if (size != 1) return false;
+    const unsigned char one = 1;
+    return ue::WriteMem(reinterpret_cast<unsigned char*>(o) + off, &one, 1);
+}
+
+// Nearest instance of a class to the local pawn.  Instances that have a level
+// actor win over instances that do not: a save object created straight under the
+// transient package never appears in the ws scan (that scan keys on
+// "PersistentLevel.<actor>"), so writing a fixture into one would be invisible.
+ue::UObject* NearestOf(const char* cls, double* distOut) {
+    const std::vector<ue::UObject*> list = ue::FindAllOf(cls);
+    ue::UObject* pawn = net::Pawn();
+    const Vec3 me = net::Loc(pawn);
+    ue::UObject* best = nullptr;
+    double bd = 1e12;
+    ue::UObject* bestAny = nullptr;
+    double bdAny = 1e12;
+    for (std::size_t i = 0; i < list.size(); ++i) {
+        ue::UObject* o = list[i];
+        if (!net::Valid(o)) continue;
+        const std::string fn = net::FullName(o);
+        double d = 1e11;
+        if (ue::UObject* a = OwnerActor(o)) d = Dist(net::Loc(a), me);
+        if (d < bdAny) {
+            bdAny = d;
+            bestAny = o;
+        }
+        if (fn.find("PersistentLevel.") == std::string::npos) continue;
+        if (d < bd) {
+            bd = d;
+            best = o;
+        }
+    }
+    if (best) {
+        if (distOut) *distOut = bd;
+        return best;
+    }
+    if (distOut) *distOut = bdAny;
+    return bestAny;
+}
+
+}  // namespace
+
+// ===========================================================================
+// public API
+// ===========================================================================
+void Ws2Tick() {
+    if (!On()) return;
+    if (!gInited) {
+        gInited = true;
+        if (gNow < 0.0) Now();
+    }
+    if (Tg().wsLedgerOn) {
+        if (!gLedgerLoaded) {
+            if (net::Pawn()) LedgerLoad();
+        } else if (gLedgerDirty && Now() - gLedgerSavedAt > kLedgerSaveGap) {
+            LedgerSave();
+        }
+    }
+    // one class per tick: 10 kinds = a 5 s pass, which keeps the whole extra cost
+    // at half of what the two wsScan calls per tick already spend.
+    static int k = 0;
+    if (kValCount > 0) {
+        ScanKind(k % kValCount);
+        k = (k + 1) % kValCount;
+    }
+    Apply();
+    BuildPayload();
+    Judge();
+}
+
+void Ws2Reset() {
+    gNow = -1.0;
+    gJudgeLog.Reset();
+    for (std::size_t i = 0; i < gRows.size(); ++i) {
+        gRows[i].obj = nullptr;
+        gRows[i].born = 0.0;
+        gRows[i].settled = false;
+    }
+    gRows.clear();
+    gRowIdx.Clear();
+    gOrder.clear();
+    gRot = 1;
+    gPeer.clear();
+    gRecent.Clear();
+    gArrCount.Clear();
+    gPayload.clear();
+    gLedger.clear();
+    gLedgerFrom.Clear();
+    gLedgerLoaded = false;
+    gLedgerDirty = false;
+    gInited = false;
+}
+
+void Ws2OnPeerLine(const std::string& line) {
+    if (!On()) return;
+    std::string sec;
+    if (!net::Section(line, "wt", &sec)) return;
+    std::size_t i = 0;
+    const std::size_t n = sec.size();
+    int guard = 0;
+    while (i < n && guard < 8192) {
+        ++guard;
+        const std::size_t open = sec.find('[', i);
+        if (open == std::string::npos) break;
+        const std::size_t next = ParseEntry(sec, open);
+        if (next == std::string::npos) {
+            i = open + 1;
+            continue;
+        }
+        i = next;
+    }
+}
+
+void Ws2Serialize(std::string* out) {
+    if (!out || !On()) return;
+    out->append(gPayload);
+}
+
+std::string Ws2Status() {
+    if (!On()) return "ws2=off\n";
+    return net::Fmt("ws2=kinds:%d typed:%d scans:%d recv:%d applied:%d str:%d fail:%d leaks:%d\n",
+                    kValCount, (int)gRows.size(), gScans, gRecv, gAppliedInt, gAppliedStr, gFail,
+                    gLeaks);
+}
+
+void Ws2OnApplied(int kind, int field, ue::UObject* obj, int how) {
+    if (!On()) return;
+    (void)field;
+    (void)how;
+    // BPSO_MovingObject_C.MovedToEnd: setting the save flag does not move the
+    // drawbridge; the actor's own BPI_LiftCall action does.  It is off by default
+    // because it physically moves world geometry (a test-only opt-in:
+    // WS2_MOVING.txt in the coop dir); everything else ignores this hook.
+    if (!obj || !net::Valid(obj)) return;
+    const std::string cls = ue::GetClassName(obj);
+    if (cls.size() < 20 || cls.compare(0, 20, "BPSO_MovingObject_C") != 0) return;
+    if (!net::FileExists("WS2_MOVING.txt")) {
+        net::Log("ws2 moving: %s.MovedToEnd set; the actor action is gated off "
+                 "(WS2_MOVING.txt)", cls.c_str());
+        return;
+    }
+    ue::UObject* actor = OwnerActor(obj);
+    if (!actor) {
+        net::Log("ws2 moving: no owning actor for the save object -- field only");
+        return;
+    }
+    ue::UFunction* f = ue::FindFunction(actor, "TriggerMovingActor");
+    if (!f) {
+        net::Log("ws2 moving: actor %s has no TriggerMovingActor -- field only",
+                 net::NameOf(actor).c_str());
+        return;
+    }
+    ue::Params p(f);
+    p.Set<bool>("TopLevelLever", true);
+    const bool ok = ue::Call(actor, f, p.data());
+    net::Log("ws2 moving: TriggerMovingActor(TopLevelLever=true) on %s ok=%s",
+             net::NameOf(actor).c_str(), ok ? "true" : "false");
+}
+
+int ResetFixtures(const char* clsList) {
+    if (!On()) return 0;
+    if (!clsList || !*clsList) return 0;
+    // a comma-separated list, so one call can cover a verb's whole fixture set
+    std::vector<std::string> classes;
+    {
+        std::string cur;
+        for (const char* p = clsList;; ++p) {
+            if (*p == ',' || *p == 0) {
+                while (!cur.empty() && (cur[0] == ' ' || cur[0] == '\t')) cur.erase(0, 1);
+                if (!cur.empty()) classes.push_back(cur);
+                cur.clear();
+                if (*p == 0) break;
+            } else {
+                cur.push_back(*p);
+            }
+        }
+    }
+    int total = 0;
+    for (std::size_t c = 0; c < classes.size(); ++c) {
+        const std::string& cls = classes[c];
+        // 1. by GUID first (the brief's order): one call per live instance of the
+        //    class, using the guid the instance's own save component carries.  A
+        //    class with many instances (BPSO_NPC_C has ~40) is not worth 40 engine
+        //    round trips in one tick -- ResetSaveObjectByClass does the same job in
+        //    one call, so the guid path is used for the small classes only.
+        int byGuid = 0;
+        int instances = 0;
+        const std::vector<ue::UObject*> list = ue::FindAllOf(cls.c_str());
+        for (std::size_t i = 0; i < list.size(); ++i) {
+            if (net::Valid(list[i])) ++instances;
+        }
+        if (instances <= 16) {
+            for (std::size_t i = 0; i < list.size(); ++i) {
+                ue::UObject* o = list[i];
+                if (!net::Valid(o)) continue;
+                std::string guid;
+                if (!GuidOfSaveObject(o, &guid)) continue;
+                bool ret = false;
+                if (ResetByGuid(guid, &ret) && ret) ++byGuid;
+            }
+        }
+        if (instances > 0 && byGuid == instances) {
+            total += byGuid;
+            net::Log("ws2 fixture: %s reset all %d instance(s) by guid", cls.c_str(), byGuid);
+            continue;
+        }
+        // 2. anything the guid path could not reach (no component, no guid yet, the
+        //    engine's parse said no): ResetSaveObjectByClass covers the whole class.
+        const int n = ResetByClass(cls.c_str());
+        if (n >= 0) {
+            total += n;
+            net::Log("ws2 fixture: %s reset by class -> %d object(s) (by guid: %d of %d ok)",
+                     cls.c_str(), n, byGuid, instances);
+        } else {
+            net::Log("ws2 fixture: %s reset UNAVAILABLE (code %d; by guid: %d of %d; "
+                     "subsystem=%d)", cls.c_str(), n, byGuid, instances, Subsystem() ? 1 : 0);
+        }
+    }
+    return total;
+}
+
+void Wa2FixtureReset() {
+    if (!On()) return;
+    // only the classes the store-A verbs touch; resetting more would wipe hub
+    // progress the later verdicts rely on (and the harness restores saves anyway,
+    // but a run must be judged on its own effects).
+    static const char* kList[] = {"BPSO_BearTrap_C", "BPSO_FallingCorpse_C",
+                                  "BPSO_FallingStatue_C", "BPSO_NPC_C",
+                                  "BPSO_WoodenElevator_C", "BPSO_Tarforge_C"};
+    int total = 0;
+    for (std::size_t i = 0; i < sizeof(kList) / sizeof(kList[0]); ++i) {
+        total += ResetFixtures(kList[i]);
+    }
+    net::Log("ws2 wa2reset: %d object(s) reset over %d classes",
+             total, (int)(sizeof(kList) / sizeof(kList[0])));
+}
+
+// A read-only census: which of the new classes/fields have live instances in the
+// world this client is standing in, what the fields currently read, and whether
+// every property name in the tables resolves.  Writes ws2_census.txt.
+void Wa2Census() {
+    if (!On()) {
+        net::Log("ws2 census: store-A2 is OFF (WS2_OFF.txt)");
+        return;
+    }
+    std::string text;
+    text += "# store-A2 census: live instances, resolved fields and current values\n";
+    net::AppendFmt(&text, "# role=%s kinds=%d typed=%d\n", St().local.role.c_str(),
+                   kWsKindCount, kValCount);
+
+    for (int k = 0; k < kValCount; ++k) {
+        const ValKind& vk = kVal[k];
+        const std::vector<ue::UObject*> list = ue::FindAllOf(vk.cls);
+        int live = 0;
+        std::string firstOwner, firstFn;
+        std::string value;
+        std::string err;
+        for (std::size_t i = 0; i < list.size(); ++i) {
+            ue::UObject* o = list[i];
+            if (!net::Valid(o)) continue;
+            const std::string fn = net::FullName(o);
+            const std::string owner = OwnerOf(o, vk, fn);
+            if (owner.empty()) continue;
+            if (live == 0) {
+                firstOwner = owner;
+                firstFn = fn;
+                if (vk.type == 'i') {
+                    long long v = 0;
+                    value = ReadInt(o, vk.field, 4, 1, &v) ? net::Fmt("%lld", v)
+                                                           : std::string("<unreadable>");
+                } else {
+                    std::vector<std::string> elems;
+                    const bool ok = vk.softClass
+                                        ? ReadSoftClassArray(o, vk.field, &elems, &err)
+                                        : ReadStringArray(o, vk.field, &elems, &err);
+                    if (!ok) {
+                        value = "<unreadable: " + err + ">";
+                    } else {
+                        value = net::Fmt("n=%d", (int)elems.size());
+                        for (std::size_t e = 0; e < elems.size() && e < 3; ++e) {
+                            value += " [" + elems[e] + "]";
+                        }
+                    }
+                }
+            }
+            ++live;
+        }
+        const std::int32_t off = list.empty() ? -1 : ue::PropOffset(list[0], vk.field);
+        const std::int32_t sz = list.empty() ? -1 : ue::PropSize(list[0], vk.field);
+        net::AppendFmt(&text, "%s.%s type=%c merge=%s instances=%d field=off:%d size:%d "
+                              "value=%s owner=%s\n",
+                       vk.cls, vk.field, vk.type, MergeName(vk.merge), live, (int)off, (int)sz,
+                       value.empty() ? "-" : value.c_str(),
+                       firstOwner.empty() ? "-" : firstOwner.c_str());
+        net::Log("ws2 census: %s.%s type=%c merge=%s instances=%d off=%d size=%d value=%s",
+                 vk.cls, vk.field, vk.type, MergeName(vk.merge), live, (int)off, (int)sz,
+                 value.empty() ? "-" : value.c_str());
+    }
+
+    // The boolean half: how many live instances of every class G1 appended (or of
+    // the classes whose field list G1 extended), and whether the new field resolves
+    // on one.  This is the "which of the new classes exist in this save" census.
+    for (int k = 0; k < kWsKindCount; ++k) {
+        bool any = false;
+        std::string fields;
+        for (int f = 0; f < 4; ++f) {
+            if (!IsNewWsRow(k, f)) continue;
+            any = true;
+        }
+        if (!any) continue;
+        std::string cls;
+        WsKindName(k, &cls);
+        const std::vector<ue::UObject*> list = cls.empty() ? std::vector<ue::UObject*>()
+                                                          : ue::FindAllOf(cls.c_str());
+        int live = 0;
+        std::string firstOwner;
+        for (std::size_t i = 0; i < list.size(); ++i) {
+            ue::UObject* o = list[i];
+            if (!net::Valid(o)) continue;
+            const std::string fn = net::FullName(o);
+            std::string owner;
+            if (!MatchPersistentLevel(fn, &owner)) owner = cls;
+            if (live == 0) firstOwner = owner;
+            ++live;
+        }
+        for (int f = 0; f < 4; ++f) {
+            if (!IsNewWsRow(k, f)) continue;
+            std::string name;
+            WsRowName(k, f, &name);
+            if (name.empty() || name[name.size() - 1] == '.') continue;   // no such field
+            std::int32_t off = -1, sz = -1;
+            std::string val = "-";
+            if (!list.empty()) {
+                ue::UObject* o = list[0];
+                off = ue::PropOffset(o, name.c_str() + name.rfind('.') + 1);
+                sz = ue::PropSize(o, name.c_str() + name.rfind('.') + 1);
+                std::int32_t o1 = 0, s1 = 0;
+                if (PropFound(o, name.c_str() + name.rfind('.') + 1, &o1, &s1) && s1 == 1) {
+                    unsigned char b = 0;
+                    if (ue::ReadMem(reinterpret_cast<const unsigned char*>(o) + o1, &b, 1)) {
+                        val = b ? "true" : "false";
+                    }
+                }
+            }
+            fields += net::Fmt(" %s(off:%d size:%d val:%s)", name.c_str(), (int)off, (int)sz,
+                               val.c_str());
+        }
+        net::AppendFmt(&text, "%s instances=%d owner=%s %s\n", cls.c_str(), live,
+                       firstOwner.empty() ? "-" : firstOwner.c_str(), fields.c_str());
+        net::Log("ws2 census: %s instances=%d%s", cls.c_str(), live, fields.c_str());
+    }
+
+    net::Log("ws2 census: written to ws2_census.txt (%d typed rows, %d boolean kinds)",
+             kValCount, kWsKindCount);
+    net::WriteFile("ws2_census.txt", text);
+}
+
+// The codec's unit test, runnable in the lab on a live client: no engine calls, so
+// it also covers the paths no reachable class exercises (an array union that has to
+// append, the ledger line format, the parser's edge cases).
+void Wa2SelfTest() {
+    std::string text;
+    int pass = 0;
+    int fail = 0;
+
+    // This runs inside a live client, so it SAVES and restores every table it
+    // touches: a scan in the same second must never see a half-rebuilt row set, and
+    // (the reason this matters) clearing gRows while gRowIdx still pointed into it
+    // is an out-of-range row index.
+    std::vector<ValRow> keepRows;
+    keepRows.swap(gRows);
+    std::vector<std::string> keepOrder;
+    keepOrder.swap(gOrder);
+    std::vector<PeerVal> keepPeer;
+    keepPeer.swap(gPeer);
+    std::vector<StrInt> keepIdx = gRowIdx.Items();
+    std::vector<StrNum> keepRecent = gRecent.Items();
+    const std::string keepPayload = gPayload;
+    const int keepRot = gRot;
+    const bool keepSawLive = gSawLiveWt;
+    gRowIdx.Clear();
+    gRecent.Clear();
+    gPayload.clear();
+
+    struct R {
+        std::string* out;
+        int* pass;
+        int* fail;
+        void Check(const char* name, bool ok, const std::string& detail) {
+            if (ok) {
+                ++*pass;
+                *out += net::Fmt("PASS %s\n", name);
+            } else {
+                ++*fail;
+                *out += net::Fmt("FAIL %s -- %s\n", name, detail.c_str());
+            }
+        }
+    } r{&text, &pass, &fail};
+
+    // 1. Hash is the cross-client key: the ws section's FNV-1a over the same string
+    {
+        const std::string a = Hash("BP_Test_Actor_C_1");
+        const std::string b = Hash("BP_Test_Actor_C_1");
+        r.Check("hash stable", a == b && a.size() == 8, a + " vs " + b);
+        r.Check("hash differs", Hash("A") != Hash("B"), Hash("A") + " vs " + Hash("B"));
+    }
+    // 2. JSON escaping round trip (a key or id with the two dangerous characters)
+    {
+        const std::string raw = "a\"b\\c[d]e";
+        const std::string esc = JsonStr(raw);
+        r.Check("json escape drops brackets", esc.find('[') == std::string::npos &&
+                                                  esc.find(']') == std::string::npos,
+                esc);
+        // JsonStr keeps the text but swaps the two bracket characters for '(' and
+        // escapes the quote and the backslash, so the unescaped form is the input
+        // with the brackets replaced.
+        r.Check("json escape keeps the text", Unescape(esc) == "a\"b\\c(d(e",
+                Unescape(esc));
+        r.Check("json unescape", Unescape("a\\\"b") == "a\"b", Unescape("a\\\"b"));
+    }
+    // 3. the entry parser: an int, a string, a bad hash, a truncated entry
+    {
+        gPeer.clear();
+        const std::string sec =
+            "[[\"deadbeef|ClensedCores\",\"i\",7,1],"
+            "[\"deadbeef|SavedKeyIDs|2\",\"s\",\"CoopTestKey1\",0]]";
+        std::size_t i = 0;
+        int parsed = 0;
+        while (i < sec.size()) {
+            const std::size_t open = sec.find('[', i);
+            if (open == std::string::npos) break;
+            const std::size_t next = ParseEntry(sec, open);
+            if (next == std::string::npos) {
+                i = open + 1;
+                continue;
+            }
+            i = next;
+            ++parsed;
+        }
+        r.Check("parse entries", parsed == 2, net::Fmt("%d parsed", parsed));
+        r.Check("parse peer rows", gPeer.size() == 2, net::Fmt("%d rows", (int)gPeer.size()));
+        if (gPeer.size() == 2) {
+            r.Check("parse int value", gPeer[0].type == 'i' && gPeer[0].ival == 7,
+                    net::Fmt("%c %lld", gPeer[0].type, gPeer[0].ival));
+            r.Check("parse int live", gPeer[0].live == 1, net::Fmt("%d", gPeer[0].live));
+            r.Check("parse str value", gPeer[1].type == 's' && gPeer[1].sval == "CoopTestKey1",
+                    gPeer[1].sval);
+            r.Check("parse str live", gPeer[1].live == 0, net::Fmt("%d", gPeer[1].live));
+        }
+        gPeer.clear();
+        r.Check("parse rejects a non-hex key", ParseEntry("[\"zzzzzzzz|X\",\"i\",1,1]", 0) ==
+                                                  std::string::npos,
+                "accepted");
+        r.Check("parse rejects a truncated entry", ParseEntry("[\"deadbeef|X\",\"i\",1", 0) ==
+                                                          std::string::npos,
+                "accepted");
+    }
+    // 4. the array union: append missing, never remove, keep local order
+    {
+        std::vector<std::string> local, peer, out;
+        local.push_back("A");
+        local.push_back("B");
+        peer.push_back("B");
+        peer.push_back("C");
+        peer.push_back("A");
+        peer.push_back("D");
+        int added = 0;
+        UnionElems(local, peer, &out, &added);
+        r.Check("union appends", added == 2 && out.size() == 4, net::Fmt("%d added", added));
+        r.Check("union keeps local order", out.size() == 4 && out[0] == "A" && out[1] == "B",
+                out.empty() ? "" : out[0]);
+        r.Check("union never removes", out.size() >= local.size(), "shrunk");
+    }
+    // 5. the ledger line format survives a round trip (key|field|index has two '|')
+    {
+        const std::string key = "0123abcd|SavedKeyIDs|3";
+        const std::string line = key + "\t" + "s" + "\t" + JsonStr("Coop Test;Key");
+        const std::size_t t1 = line.find('\t');
+        const std::size_t t2 = line.find('\t', t1 + 1);
+        r.Check("ledger split", t1 != std::string::npos && t2 != std::string::npos &&
+                                    line.substr(0, t1) == key,
+                "bad split");
+        r.Check("ledger value", Unescape(line.substr(t2 + 1)) == "Coop Test;Key",
+                line.substr(t2 + 1));
+    }
+    // 6. the payload is a well-formed section that the same parser reads back
+    {
+        gRows.clear();
+        gRowIdx.Clear();
+        gOrder.clear();
+        ValRow a;
+        a.key = "deadbeef|ClensedCores";
+        a.kind = 0;
+        a.settled = true;
+        a.ival = 3;
+        gRows.push_back(a);
+        gRowIdx.Set(a.key, 0);
+        AddOrder(a.key);
+        gRecent.Clear();
+        BuildPayload();
+        std::string sec;
+        const bool have = net::Section("{\"x\":1,\"wt\":" + gPayload.substr(6) + "}", "wt", &sec);
+        r.Check("payload section", have, gPayload);
+        gPeer.clear();
+        std::size_t i = 0;
+        int parsed = 0;
+        while (have && i < sec.size()) {
+            const std::size_t open = sec.find('[', i);
+            if (open == std::string::npos) break;
+            const std::size_t next = ParseEntry(sec, open);
+            if (next == std::string::npos) {
+                i = open + 1;
+                continue;
+            }
+            i = next;
+            ++parsed;
+        }
+        r.Check("payload round trip", parsed == 1 && gPeer.size() == 1 && gPeer[0].ival == 3,
+                net::Fmt("%d parsed", parsed));
+        gRows.clear();
+        gRowIdx.Clear();
+        gOrder.clear();
+        gPeer.clear();
+        gPayload.clear();
+    }
+
+    // restore the live tables exactly
+    {
+        gRows.swap(keepRows);
+        gOrder.swap(keepOrder);
+        gPeer.swap(keepPeer);
+        gRowIdx.Clear();
+        for (std::size_t i = 0; i < keepIdx.size(); ++i) gRowIdx.Set(keepIdx[i].key, keepIdx[i].value);
+        gRecent.Clear();
+        for (std::size_t i = 0; i < keepRecent.size(); ++i) {
+            gRecent.Set(keepRecent[i].key, keepRecent[i].value);
+        }
+        gPayload = keepPayload;
+        gRot = keepRot;
+        gSawLiveWt = keepSawLive;
+    }
+
+    text = net::Fmt("ws2 self test: %d pass, %d fail\n", pass, fail) + text;
+    net::WriteFile("result_ws2selftest.txt", text);
+    net::Log("ws2 selftest: %d pass, %d fail (result_ws2selftest.txt)", pass, fail);
+}
+
+// The string-array WRITE path, exercised on its own: no save object of the three
+// array classes is loaded in this save (census: 0 instances), so the union's
+// engine half -- UKismetStringLibrary.ParseIntoArray + the property write -- would
+// otherwise never run at all.  This verb builds an ENGINE-ALLOCATED TArray<FString>
+// from synthetic elements, reads every element back, installs it on a live
+// BP_SO_SavedKeys_C if one exists (writing the FString array in place), and reports.
+// Result: result_ws2array.txt.
+void Wa2ArrayTest() {
+    if (!On()) {
+        net::Log("ws2 arraytest: store-A2 is OFF (WS2_OFF.txt)");
+        return;
+    }
+    std::string text;
+    bool ok = false;
+    std::vector<std::string> elems;
+    elems.push_back("CoopArrayTest_A");
+    elems.push_back("CoopArrayTest_B");
+    elems.push_back("CoopArrayTest_C");
+    ue::TArray<ue::FString> built;
+    std::string err;
+    if (!BuildEngineStrArray(elems, &built, &err)) {
+        text = net::Fmt("FAIL ws2 array: ParseIntoArray build failed: %s\n", err.c_str());
+    } else {
+        // read every element of the engine array back through the guarded reader
+        std::vector<std::string> back;
+        for (int i = 0; i < built.Num; ++i) {
+            std::string s;
+            if (!ReadFStringAt(reinterpret_cast<const unsigned char*>(built.Data) +
+                                   (std::size_t)i * sizeof(ue::FString),
+                               &s)) {
+                s = "<unreadable>";
+            }
+            back.push_back(s);
+        }
+        const bool same = back.size() == elems.size() && back[0] == elems[0] &&
+                          back[1] == elems[1] && back[2] == elems[2];
+        ok = same;
+        text = net::Fmt("PASS ws2 array: ParseIntoArray built %d engine FString "
+                        "element(s) [%s|%s|%s]\n",
+                        built.Num, back.size() > 0 ? back[0].c_str() : "",
+                        back.size() > 1 ? back[1].c_str() : "",
+                        back.size() > 2 ? back[2].c_str() : "");
+        if (!same) text = "FAIL ws2 array: read-back mismatch " + text;
+        // and, when the class IS loaded, install it on the real property
+        ue::UObject* o = NearestOf("BP_SO_SavedKeys_C", nullptr);
+        if (o && same) {
+            std::vector<std::string> uni;
+            int added = 0;
+            std::vector<std::string> local;
+            if (ReadStringArray(o, "SavedKeyIDs", &local, &err)) {
+                UnionElems(local, elems, &uni, &added);
+                if (added > 0 && ue::Set<ue::TArray<ue::FString>>(o, "SavedKeyIDs", built)) {
+                    std::vector<std::string> check;
+                    const bool wrote = ReadStringArray(o, "SavedKeyIDs", &check, &err) &&
+                                       check.size() == uni.size();
+                    text += net::Fmt("        property write on %s: %d -> %d element(s) ok=%s\n",
+                                     net::NameOf(o).c_str(), (int)local.size(),
+                                     (int)check.size(), wrote ? "true" : "false");
+                    if (!local.empty()) gLeaks += 1;   // the replaced array is leaked
+                }
+            }
+        } else if (!o) {
+            text += "        (no BP_SO_SavedKeys_C instance loaded: the property write "
+                    "half of the union is unexercised in this save)\n";
+        }
+    }
+    net::WriteFile("result_ws2array.txt", text);
+    net::Log("ws2 arraytest: %s", OneLine(text).c_str());
+}
+
+// The host side: set one fixture per reachable new class/field.
+void TestWs2() {
+    if (!On()) {
+        net::Log("ws2 wa2test: store-A2 is OFF (WS2_OFF.txt)");
+        return;
+    }
+    // 1. fixtures first, so the verb can be run twice in one session
+    Wa2FixtureReset();
+
+    int bools = 0;
+    int ints = 0;
+    int arrays = 0;
+    int skipped = 0;
+
+    // 2. one boolean per reachable class G1 added.  NPC gets field 0 only: field 1
+    // is WasEverKilled and writing it would leave an NPC permanently dead.
+    struct BoolPick {
+        const char* cls;
+        const char* field;
+    };
+    static const BoolPick kBoolPicks[] = {
+        {"BPSO_NPC_C", "HasTriggeredInitialGreeting"},
+        {"BPSO_ShellRevive_C", "StationUsed"},
+        {"BPSO_PlayerTrapDungeon_C", "TrappedOnce"},
+        {"BPSO_PetrifiedCultistManager_C", "Harros"},
+        {"BPSO_WoodenElevator_C", "HasBrokenOnce"},
+        {"BPSO_TavernArena_C", "WagerPlaced"},
+        {"BPSO_SavedLockedChests_C", "HasBeenOpened"},
+        // BPSO_MovingObject_C.MovedToEnd is deliberately NOT set here: flipping it
+        // moves a drawbridge/platform on ONE client (the field write does not move
+        // the actor), so it would leave the two worlds visibly different for the
+        // rest of the run.  The row is watched (kKinds) and its apply path is
+        // covered by Ws2OnApplied (WS2_MOVING.txt, lab-gated).
+    };
+    for (std::size_t i = 0; i < sizeof(kBoolPicks) / sizeof(kBoolPicks[0]); ++i) {
+        double d = 0.0;
+        ue::UObject* o = NearestOf(kBoolPicks[i].cls, &d);
+        if (!o) {
+            ++skipped;
+            net::Log("ws2 wa2test: %s: no live instance (skipped)", kBoolPicks[i].cls);
+            continue;
+        }
+        const std::string fn = net::FullName(o);
+        std::string owner;
+        if (!MatchPersistentLevel(fn, &owner)) owner = kBoolPicks[i].cls;
+        const bool ok = WriteBoolOn(o, kBoolPicks[i].field);
+        net::Log("ws2 wa2test: bool %s.%s := true on %s d=%.0f ok=%s key=%s", kBoolPicks[i].cls,
+                 kBoolPicks[i].field, owner.c_str(), d, ok ? "true" : "false",
+                 Hash(owner).c_str());
+        if (ok) {
+            ++bools;
+            // [R6-WORLD] same rule as the ints: this bool is OUR change, so publish
+            // it live instead of hoping the 14-tick scan observes it (the fixture
+            // reset above re-creates these save objects, so the row is usually not
+            // settled yet and the scan saw nothing).
+            MarkLocalWorldKey(Hash(owner));
+        } else {
+            ++skipped;
+        }
+    }
+
+    // 3. one int per reachable typed class.  Every merge rule here is monotone
+    // (max / host), so "the next value up" is always the value that has to travel.
+    struct IntPick {
+        const char* cls;
+        const char* field;
+    };
+    static const IntPick kIntPicks[] = {
+        {"BPSO_WoodenElevator_C", "StartingFloor"},
+        {"BPSO_Tarforge_C", "StoredTarcores"},
+        {"BPSO_TavernArena_C", "ArenaCombatLVL"},
+        {"BPSO_ShellGhost_C", "StateIndex"},
+        {"BPSO_Egon_C", "GloomDonated"},
+        {"BPSO_FC_FinalBossManager_C", "ClensedCores"},
+    };
+    for (std::size_t i = 0; i < sizeof(kIntPicks) / sizeof(kIntPicks[0]); ++i) {
+        double d = 0.0;
+        ue::UObject* o = NearestOf(kIntPicks[i].cls, &d);
+        if (!o) {
+            ++skipped;
+            net::Log("ws2 wa2test: int %s: no live instance (skipped)", kIntPicks[i].cls);
+            continue;
+        }
+        long long cur = 0;
+        if (!ReadInt(o, kIntPicks[i].field, 4, 1, &cur)) {
+            ++skipped;
+            net::Log("ws2 wa2test: int %s.%s: unreadable (skipped)", kIntPicks[i].cls,
+                     kIntPicks[i].field);
+            continue;
+        }
+        const long long want = cur + 1;
+        if (!WriteInt(o, kIntPicks[i].field, want)) {
+            ++skipped;
+            net::Log("ws2 wa2test: int %s.%s: write refused (skipped)", kIntPicks[i].cls,
+                     kIntPicks[i].field);
+            continue;
+        }
+        long long back = 0;
+        const bool ok = ReadInt(o, kIntPicks[i].field, 4, 1, &back) && back == want;
+        const std::string fn = net::FullName(o);
+        std::string owner;
+        if (!MatchPersistentLevel(fn, &owner)) owner = kIntPicks[i].cls;
+        net::Log("ws2 wa2test: int %s.%s %lld -> %lld on %s ok=%s key=%s", kIntPicks[i].cls,
+                 kIntPicks[i].field, cur, want, owner.c_str(), ok ? "true" : "false",
+                 Hash(owner).c_str());
+        if (ok) {
+            ++ints;
+            // [R6-WORLD] this int is a change THIS client just made: publish it live
+            // now.  Waiting for the round-robin scan lost the whole verdict whenever
+            // the row was not settled at that moment (the verb resets its fixtures
+            // first, which re-creates those save objects) -- measured, run-two r6e-1..3
+            // and r6f-1: the guest sat on "ws2 judge: waiting for a live typed value
+            // (applied int=1 str=0)" for the whole 130 s window in 4 of 4 runs, while
+            // the same verb passed in r6b-1 when the scan happened to see a value
+            // change on its own.
+            gRecent.Set(Hash(owner) + "|" + kIntPicks[i].field, Now());
+        } else {
+            ++skipped;
+        }
+    }
+
+    // 4. one string-array element (the FString union path)
+    {
+        double d = 0.0;
+        ue::UObject* o = NearestOf("BP_SO_SavedKeys_C", &d);
+        if (!o) {
+            ++skipped;
+            net::Log("ws2 wa2test: array BP_SO_SavedKeys_C: no live instance (skipped)");
+        } else {
+            std::vector<std::string> cur;
+            std::string err;
+            if (!ReadStringArray(o, "SavedKeyIDs", &cur, &err)) {
+                ++skipped;
+                net::Log("ws2 wa2test: array SavedKeyIDs unreadable (%s)", err.c_str());
+            } else {
+                std::vector<std::string> next = cur;
+                next.push_back(net::Fmt("CoopTestKey%d", (int)(cur.size() + 1)));
+                ue::TArray<ue::FString> built;
+                if (!BuildEngineStrArray(next, &built, &err)) {
+                    ++skipped;
+                    net::Log("ws2 wa2test: array build failed (%s)", err.c_str());
+                } else if (!ue::Set<ue::TArray<ue::FString>>(o, "SavedKeyIDs", built)) {
+                    ++skipped;
+                    net::Log("ws2 wa2test: array property write failed");
+                } else {
+                    std::vector<std::string> check;
+                    const bool ok = ReadStringArray(o, "SavedKeyIDs", &check, &err) &&
+                                    check.size() == next.size();
+                    const std::string fn = net::FullName(o);
+                    std::string owner;
+                    if (!MatchPersistentLevel(fn, &owner)) owner = "BP_SO_SavedKeys_C";
+                    net::Log("ws2 wa2test: array BP_SO_SavedKeys_C.SavedKeyIDs += %s (%d -> %d) "
+                             "on %s ok=%s key=%s", next.back().c_str(), (int)cur.size(),
+                             (int)check.size(), owner.c_str(), ok ? "true" : "false",
+                             Hash(owner).c_str());
+                    if (ok) ++arrays; else ++skipped;
+                }
+            }
+        }
+    }
+
+    const std::string text =
+        net::Fmt("wa2test: bools=%d ints=%d arrays=%d skipped=%d (kinds=%d typed=%d)\n", bools,
+                 ints, arrays, skipped, kWsKindCount, kValCount);
+    net::WriteFile("ws2_wa2test.txt", text);
+    net::Log("ws2 wa2test: bools=%d ints=%d arrays=%d skipped=%d", bools, ints, arrays, skipped);
+}
+
+}  // namespace world
+}  // namespace coop
+

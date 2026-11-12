@@ -1,0 +1,18 @@
+﻿### Class /Script/Sparta.SpartaAchievementsSubsystem  [00007FF46F03BD38]
+    super: /Script/Engine.GameInstanceSubsystem
+    3 members:
+      FUN SubscribeToAchievementEvents 
+      FUN SetAchievementProgress 
+          param EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN QueryAchievements 
+
+### Function /Script/Sparta.SpartaAchievementsSubsystem:QueryAchievements  [00007FF46F6EF6D8]
+
+### Function /Script/Sparta.SpartaAchievementsSubsystem:SetAchievementProgress  [00007FF46F6EF7B8]
+    1 members:
+      PRP EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/Sparta.SpartaAchievementsSubsystem:SubscribeToAchievementEvents  [00007FF46F6EF898]
+
+### ObjectProperty /Script/Sparta.SpartaAchievementsSubsystem:SetAchievementProgress:EventData  [000001F4ACD7FC80]
+

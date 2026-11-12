@@ -1,0 +1,121 @@
+﻿### ArrayProperty /Script/Sparta.SpartaAreaId:PossibleActivities  [000001F4ACD95680]
+    1 members:
+      PRP PossibleActivities : ObjectProperty of /Script/Sparta.PossibleActivity [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:ReturnValue  [000001F4ACD97380]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaAreaSubsystem:IsAreaActive:ReturnValue  [000001F4ACD97200]
+
+### BoolProperty /Script/Sparta.SpartaAreaSubsystem:IsCompleteActive:ReturnValue  [000001F4ACD97100]
+
+### Class /Script/Sparta.SpartaAreaId  [00007FF46F03F138]
+    super: /Script/Engine.DataAsset
+    4 members:
+      PRP DisplayName : TextProperty [o:0x30]
+      PRP DataLayer : StrProperty [o:0x40]
+      PRP DataLayerAsset : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x50]
+      PRP PossibleActivities : ArrayProperty of PossibleActivities./Script/Sparta.SpartaAreaId:PossibleActivities [o:0x58]
+
+### Class /Script/Sparta.SpartaAreaSubsystem  [00007FF46F03F338]
+    super: /Script/Engine.WorldSubsystem
+    12 members:
+      PRP ActiveArea : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x30]
+      PRP CompletedAreas : SetProperty [o:0x38]
+      PRP OnAreaActivated : MulticastInlineDelegateProperty [o:0x88]
+      PRP OnAreaDeactivated : MulticastInlineDelegateProperty [o:0x98]
+      PRP OnAreaComplete : MulticastInlineDelegateProperty [o:0xa8]
+      FUN IsCompleteActive 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN IsAreaActive 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN GetConnectedAreas 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:ReturnValue [o:0x8]
+      FUN GetActivityType 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaActivityType [o:0x8]
+      FUN GetActiveArea 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      FUN CompleteArea 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      FUN ActivateArea 
+          param Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### DelegateFunction /Script/Sparta.SpartaAreaEvent__DelegateSignature  [00007FF46F3D24F0]
+    1 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:ActivateArea  [00007FF46F6F1FF8]
+    1 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:CompleteArea  [00007FF46F6F20D8]
+    1 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:GetActiveArea  [00007FF46F6F21B8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:GetActivityType  [00007FF46F6F2298]
+    2 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaActivityType [o:0x8]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas  [00007FF46F6F2378]
+    2 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:ReturnValue [o:0x8]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:IsAreaActive  [00007FF46F6F2458]
+    2 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaAreaSubsystem:IsCompleteActive  [00007FF46F6F2538]
+    2 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaAreaSubsystem:OnAreaActivated  [000001F4ACD96F00]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaAreaSubsystem:OnAreaComplete  [000001F4ACD97000]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaAreaSubsystem:OnAreaDeactivated  [000001F4ACD96F80]
+
+### ObjectProperty /Script/Sparta.SpartaAreaEvent__DelegateSignature:Area  [000001F4A6CB5200]
+
+### ObjectProperty /Script/Sparta.SpartaAreaId:DataLayerAsset  [000001F4ACD95580]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:ActivateArea:Area  [000001F4ACD95500]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:ActiveArea  [000001F4ACD96E00]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:CompleteArea:Area  [000001F4ACD95480]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:GetActiveArea:ReturnValue  [000001F4ACD95400]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:GetActivityType:Area  [000001F4ACD95300]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:GetActivityType:ReturnValue  [000001F4ACD95380]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:Area  [000001F4ACD97280]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:IsAreaActive:Area  [000001F4ACD97180]
+
+### ObjectProperty /Script/Sparta.SpartaAreaSubsystem:IsCompleteActive:Area  [000001F4ACD97080]
+
+### ObjectProperty PossibleActivities./Script/Sparta.SpartaAreaId:PossibleActivities  [000001F4ACD95600]
+
+### ObjectProperty ReturnValue./Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:ReturnValue  [000001F4ACD97300]
+
+### SetProperty /Script/Sparta.SpartaAreaSubsystem:CompletedAreas  [000001F4A93E8950]
+
+### StrProperty /Script/Sparta.SpartaAreaId:DataLayer  [000001F4ACD63F10]
+
+### TextProperty /Script/Sparta.SpartaAreaId:DisplayName  [000001F4ACD63EA0]
+

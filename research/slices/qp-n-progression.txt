@@ -1,0 +1,290 @@
+﻿### ArrayProperty /Script/Sparta.PlayerProgressionComponent:GetTierSkills:ReturnValue  [000001F4ACD72680]
+    1 members:
+      PRP ReturnValue : SoftClassProperty [o:0x0]
+
+### BoolProperty /Script/Sparta.PlayerProgressionComponent:CanLevelUp:ReturnValue  [000001F4ACD72A00]
+
+### BoolProperty /Script/Sparta.PlayerProgressionComponent:HasSkill:ReturnValue  [000001F4ACD72500]
+
+### BoolProperty /Script/Sparta.PlayerProgressionComponent:HasTierSkill:ReturnValue  [000001F4ACD72400]
+
+### BoolProperty /Script/Sparta.PlayerProgressionComponent:IsSkillAtMaxLevel:ReturnValue  [000001F4ACD72280]
+
+### Class /Script/Sparta.PlayerProgressionComponent  [00007FF46F038538]
+    super: /Script/Sparta.SpartaSaveComponent
+    23 members:
+      PRP ShellBuilds : MapProperty [o:0x120]
+      PRP TierBuilds : MapProperty [o:0x170]
+      PRP SkillLevels : MapProperty [o:0x1c0]
+      PRP EquippedSkillInstances : MapProperty [o:0x210]
+      PRP OnSkillEquipped : MulticastInlineDelegateProperty [o:0x260]
+      PRP OnSkillUnequipped : MulticastInlineDelegateProperty [o:0x270]
+      PRP OnSkillLevelChanged : MulticastInlineDelegateProperty [o:0x280]
+      FUN UnequipSkill 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SkillClass : SoftClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+      FUN UnequipAllSkills 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      FUN SetSkillLevel 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param NewLevel : IntProperty [o:0x28]
+      FUN RemoveTierSkill 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SkillClass : SoftClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+      FUN RefundAllSkills 
+      FUN OnChangeShellItem 
+          param OldShell : ClassProperty [o:0x0]
+          param NewShell : ClassProperty [o:0x8]
+      FUN IsSkillAtMaxLevel 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN HasTierSkill 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SkillClass : SoftClassProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x30]
+      FUN HasSkill 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN GetTierSkills 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.PlayerProgressionComponent:GetTierSkills:ReturnValue [o:0x8]
+      FUN GetSkillLevel 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x28]
+      FUN FindSkillMaximumLevel 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x28]
+      FUN EquipSkill 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SkillClass : SoftClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+      FUN CanLevelUp 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN AddToSkillLevel 
+          param SkillClass : SoftClassProperty [o:0x0]
+          param Delta : IntProperty [o:0x28]
+      FUN AddTierSkill 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SkillClass : SoftClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+
+### Class /Script/Sparta.PlayerProgressionSaveData  [00007FF46F038138]
+    super: /Script/Sparta.SpartaSaveObject
+    3 members:
+      PRP SkillLevels : MapProperty [o:0xb8]
+      PRP ShellBuilds : MapProperty [o:0x108]
+      PRP TierBuilds : MapProperty [o:0x158]
+
+### ClassProperty /Script/Sparta.PlayerProgressionComponent:OnChangeShellItem:NewShell  [000001F4ACD72180]
+
+### ClassProperty /Script/Sparta.PlayerProgressionComponent:OnChangeShellItem:OldShell  [000001F4ACD74200]
+
+### Function /Script/Sparta.PlayerProgressionComponent:AddTierSkill  [00007FF46F6E8A58]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SkillClass : SoftClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+
+### Function /Script/Sparta.PlayerProgressionComponent:AddToSkillLevel  [00007FF46F6E8B38]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP Delta : IntProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:CanLevelUp  [00007FF46F6E8C18]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:EquipSkill  [00007FF46F6E8CF8]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SkillClass : SoftClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+
+### Function /Script/Sparta.PlayerProgressionComponent:FindSkillMaximumLevel  [00007FF46F6E8DD8]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:GetSkillLevel  [00007FF46F6E8EB8]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:GetTierSkills  [00007FF46F6E8F98]
+    2 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.PlayerProgressionComponent:GetTierSkills:ReturnValue [o:0x8]
+
+### Function /Script/Sparta.PlayerProgressionComponent:HasSkill  [00007FF46F6E9078]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:HasTierSkill  [00007FF46F6E9158]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SkillClass : SoftClassProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x30]
+
+### Function /Script/Sparta.PlayerProgressionComponent:IsSkillAtMaxLevel  [00007FF46F6E9238]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:OnChangeShellItem  [00007FF46F6E9318]
+    2 members:
+      PRP OldShell : ClassProperty [o:0x0]
+      PRP NewShell : ClassProperty [o:0x8]
+
+### Function /Script/Sparta.PlayerProgressionComponent:RefundAllSkills  [00007FF46F6E93F8]
+
+### Function /Script/Sparta.PlayerProgressionComponent:RemoveTierSkill  [00007FF46F6E94D8]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SkillClass : SoftClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+
+### Function /Script/Sparta.PlayerProgressionComponent:SetSkillLevel  [00007FF46F6E95B8]
+    2 members:
+      PRP SkillClass : SoftClassProperty [o:0x0]
+      PRP NewLevel : IntProperty [o:0x28]
+
+### Function /Script/Sparta.PlayerProgressionComponent:UnequipAllSkills  [00007FF46F6E9698]
+    1 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### Function /Script/Sparta.PlayerProgressionComponent:UnequipSkill  [00007FF46F6E9778]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SkillClass : SoftClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x30]
+
+### IntProperty /Script/Sparta.PlayerProgressionComponent:AddToSkillLevel:Delta  [000001F4ACD602B0]
+
+### IntProperty /Script/Sparta.PlayerProgressionComponent:FindSkillMaximumLevel:ReturnValue  [000001F4ACD60240]
+
+### IntProperty /Script/Sparta.PlayerProgressionComponent:GetSkillLevel:ReturnValue  [000001F4ACD601D0]
+
+### IntProperty /Script/Sparta.PlayerProgressionComponent:SetSkillLevel:NewLevel  [000001F4ACD60160]
+
+### IntProperty SkillLevels./Script/Sparta.PlayerProgressionComponent:SkillLevels  [000001F4ACD600F0]
+
+### IntProperty SkillLevels./Script/Sparta.PlayerProgressionSaveData:SkillLevels  [000001F4ACD60320]
+
+### MapProperty /Script/Sparta.PlayerProgressionComponent:EquippedSkillInstances  [000001F49CD2CFE0]
+    2 members:
+      PRP EquippedSkillInstances_Key : SoftClassProperty [o:0x0]
+      PRP EquippedSkillInstances : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x28]
+
+### MapProperty /Script/Sparta.PlayerProgressionComponent:ShellBuilds  [000001F49CD2CE00]
+    2 members:
+      PRP ShellBuilds_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ShellBuilds : StructProperty of /Script/Sparta.ShellSkillSet [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerProgressionComponent:SkillLevels  [000001F49CD2CF40]
+    2 members:
+      PRP SkillLevels_Key : SoftClassProperty [o:0x0]
+      PRP SkillLevels : IntProperty [o:0x28]
+
+### MapProperty /Script/Sparta.PlayerProgressionComponent:TierBuilds  [000001F49CD2CEA0]
+    2 members:
+      PRP TierBuilds_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP TierBuilds : StructProperty of /Script/Sparta.ShellSkillSet [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerProgressionSaveData:ShellBuilds  [000001F49CD2D120]
+    2 members:
+      PRP ShellBuilds_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ShellBuilds : StructProperty of /Script/Sparta.ShellSkillSet [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerProgressionSaveData:SkillLevels  [000001F49CD2D080]
+    2 members:
+      PRP SkillLevels_Key : SoftClassProperty [o:0x0]
+      PRP SkillLevels : IntProperty [o:0x28]
+
+### MapProperty /Script/Sparta.PlayerProgressionSaveData:TierBuilds  [000001F49CD252E0]
+    2 members:
+      PRP TierBuilds_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP TierBuilds : StructProperty of /Script/Sparta.ShellSkillSet [o:0x8]
+
+### MulticastInlineDelegateProperty /Script/Sparta.PlayerProgressionComponent:OnSkillEquipped  [000001F4ACD73C80]
+
+### MulticastInlineDelegateProperty /Script/Sparta.PlayerProgressionComponent:OnSkillLevelChanged  [000001F4ACD73D80]
+
+### MulticastInlineDelegateProperty /Script/Sparta.PlayerProgressionComponent:OnSkillUnequipped  [000001F4ACD73D00]
+
+### ObjectProperty /Script/Sparta.PlayerProgressionComponent:AddTierSkill:ReturnValue  [000001F4ACD72C00]
+
+### ObjectProperty /Script/Sparta.PlayerProgressionComponent:EquipSkill:ReturnValue  [000001F4ACD72900]
+
+### ObjectProperty /Script/Sparta.PlayerProgressionComponent:RemoveTierSkill:ReturnValue  [000001F4ACD74180]
+
+### ObjectProperty /Script/Sparta.PlayerProgressionComponent:UnequipSkill:ReturnValue  [000001F4ACD73F00]
+
+### ObjectProperty EquippedSkillInstances./Script/Sparta.PlayerProgressionComponent:EquippedSkillInstances  [000001F4ACD73B80]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:AddTierSkill:SkillClass  [000001F4ACD72B80]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:AddToSkillLevel:SkillClass  [000001F4ACD72A80]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:CanLevelUp:SkillClass  [000001F4ACD72980]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:EquipSkill:SkillClass  [000001F4ACD72880]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:FindSkillMaximumLevel:SkillClass  [000001F4ACD72780]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:GetSkillLevel:SkillClass  [000001F4ACD72700]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:HasSkill:SkillClass  [000001F4ACD72480]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:HasTierSkill:SkillClass  [000001F4ACD72380]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:IsSkillAtMaxLevel:SkillClass  [000001F4ACD72200]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:RemoveTierSkill:SkillClass  [000001F4ACD74100]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:SetSkillLevel:SkillClass  [000001F4ACD74000]
+
+### SoftClassProperty /Script/Sparta.PlayerProgressionComponent:UnequipSkill:SkillClass  [000001F4ACD73E80]
+
+### SoftClassProperty EquippedSkillInstances./Script/Sparta.PlayerProgressionComponent:EquippedSkillInstances_Key  [000001F4ACD73C00]
+
+### SoftClassProperty ReturnValue./Script/Sparta.PlayerProgressionComponent:GetTierSkills:ReturnValue  [000001F4ACD72600]
+
+### SoftClassProperty SkillLevels./Script/Sparta.PlayerProgressionComponent:SkillLevels_Key  [000001F4ACD73B00]
+
+### SoftClassProperty SkillLevels./Script/Sparta.PlayerProgressionSaveData:SkillLevels_Key  [000001F4ACD71280]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:AddTierSkill:ShellTag  [000001F4ACD72B00]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:EquipSkill:ShellTag  [000001F4ACD72800]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:GetTierSkills:ShellTag  [000001F4ACD72580]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:HasTierSkill:ShellTag  [000001F4ACD72300]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:RemoveTierSkill:ShellTag  [000001F4ACD74080]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:UnequipAllSkills:ShellTag  [000001F4ACD73F80]
+
+### StructProperty /Script/Sparta.PlayerProgressionComponent:UnequipSkill:ShellTag  [000001F4ACD73E00]
+
+### StructProperty ShellBuilds./Script/Sparta.PlayerProgressionComponent:ShellBuilds  [000001F4ACD73900]
+
+### StructProperty ShellBuilds./Script/Sparta.PlayerProgressionComponent:ShellBuilds_Key  [000001F4ACD73980]
+
+### StructProperty ShellBuilds./Script/Sparta.PlayerProgressionSaveData:ShellBuilds  [000001F4ACD71300]
+
+### StructProperty ShellBuilds./Script/Sparta.PlayerProgressionSaveData:ShellBuilds_Key  [000001F4ACD71380]
+
+### StructProperty TierBuilds./Script/Sparta.PlayerProgressionComponent:TierBuilds  [000001F4ACD73A00]
+
+### StructProperty TierBuilds./Script/Sparta.PlayerProgressionComponent:TierBuilds_Key  [000001F4ACD73A80]
+
+### StructProperty TierBuilds./Script/Sparta.PlayerProgressionSaveData:TierBuilds  [000001F4ACD71400]
+
+### StructProperty TierBuilds./Script/Sparta.PlayerProgressionSaveData:TierBuilds_Key  [000001F4ACD71480]
+

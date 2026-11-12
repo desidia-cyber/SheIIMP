@@ -1,0 +1,5 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CoreUObject	FTransform	0x0000	0x0020	struct FQuat	Rotation	(Edit, BlueprintVisible, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FTransform	0x0020	0x0018	struct FVector	Translation	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FTransform	0x0040	0x0018	struct FVector	Scale3D	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+Engine	FTimerHandle	0x0000	0x0008	uint64	Handle	(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)

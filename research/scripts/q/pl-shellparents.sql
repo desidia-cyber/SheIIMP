@@ -1,0 +1,1 @@
+SELECT c.path, COALESCE(s.path,'') AS parent FROM cls c LEFT JOIN obj s ON s.addr=UPPER(c.super) WHERE c.path LIKE '/Game/Sparta/Core/Characters/Player/%' AND (c.path LIKE '%/BP_Shell_%' OR c.path LIKE '%/BP_Darkform_%' OR c.path LIKE '%/BP_DarkForm_%' OR c.path LIKE '%/BP_Decoy_%') ORDER BY c.path

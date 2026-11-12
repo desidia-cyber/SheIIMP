@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""Mortal Shell II co-op relay.
+
+The game-side Lua mod cannot open sockets, so it talks to this helper through a
+state directory:
+
+    <dir>/out_<player>.txt     mod -> relay   (one JSON line, rewritten every tick)
+    <dir>/peer_<player>.txt    relay -> mod   (one JSON line per peer, rewritten)
+    <dir>/relay_<player>.log   relay log
+
+Transports:
+    --transport file    local only: bridge two state dirs (test stand-in)
+    --transport udp     host/client over UDP (LAN, or two copies on one PC)
+    --transport steam   Steam AppID 480 lobby + ISteamNetworkingMessages (friends)
+
+Usage:
+    # host on a LAN / same PC, port 47010
+    python cooprelay.py --transport udp --role host --port 47010 --player A --dir ..\\coop
+    python cooprelay.py --transport udp --role client --host 127.0.0.1 --port 47010 --player B --dir ..\\coop
+"""
+
+import argparse
+import json
+import os
+import socket
+import sys
+import threading
+import time
+
+TICK = 1.0 / 30.0
+
+
+def now_ms():
+    return int(time.monotonic() * 1000)
+
+
+class Log:
+    def __init__(self, path):
+        self.path = path
+        self.lock = threading.Lock()
+
+    def __call__(self, msg):
+        line = "[%s] %s" % (time.strftime("%H:%M:%S"), msg)
+        print(line, flush=True)
+        with self.lock:
+            try:
+                with open(self.path, "a", encoding="utf-8") as f:
+                    f.write(line + "\n")
+            except OSError:
+                pass
+
+
+class StateDir:
+    """The mod's contract: one latest-value JSON line each way."""
+
+    def __init__(self, path, player):
+        self.path = path
+        self.player = player
+        os.makedirs(path, exist_ok=True)
+        self.out_path = os.path.join(path, "out_%s.txt" % player)
+        self.peer_path_cache = {}
+        self._last_out = None
+        self._out_mtime = None
+
+    def read_out(self):
+        try:
+            st = os.stat(self.out_path)
+            if st.st_mtime == self._out_mtime:
+                return None
+            with open(self.out_path, "r", encoding="utf-8") as f:
+                line = f.read().strip()
+            self._out_mtime = st.st_mtime
+            if not line or line == self._last_out:
+                return None
+            self._last_out = line
+            return line
+        except (OSError, ValueError):
+            return None
+
+    def write_peer(self, peer_id, line):
+        path = os.path.join(self.path, "peer_%s.txt" % peer_id)
+        tmp = path + ".tmp"
+        try:
+            with open(tmp, "w", encoding="utf-8") as f:
+                f.write(line + "\n")
+            os.replace(tmp, path)
+        except OSError:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# udp transport
+# ---------------------------------------------------------------------------
+class UdpLink:
+    def __init__(self, role, host, port, log):
+        self.role = role
+        self.log = log
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # the host owns the fixed port; a client must take an ephemeral one or two
+        # copies on one PC fight over the same UDP port (that cost a test round)
+        bind_port = port if role == "host" else 0
+        self.sock.bind(("0.0.0.0", bind_port))
+        self.sock.settimeout(0.2)
+        self.host_addr = None
+        self.client_addr = None
+        if role == "host":
+            self.log("udp host on 0.0.0.0:%d" % port)
+        else:
+            self.sock.sendto(b'{"t":"hello"}', (host, port))
+            self.host_addr = (host, port)
+            self.log("udp client -> %s:%d" % (host, port))
+
+    def poll(self, outbox):
+        """Send pending outbox, return list of received lines."""
+        if outbox:
+            payload = outbox.encode("utf-8")
+            if self.role == "host":
+                if self.client_addr:
+                    try:
+                        self.sock.sendto(payload, self.client_addr)
+                    except OSError:
+                        pass
+            else:
+                try:
+                    self.sock.sendto(payload, self.host_addr)
+                except OSError:
+                    pass
+        received = []
+        while True:
+            try:
+                data, addr = self.sock.recvfrom(65535)
+            except socket.timeout:
+                break
+            except OSError:
+                break
+            if self.role == "host":
+                if self.client_addr != addr:
+                    self.client_addr = addr
+                    self.log("client joined from %s:%d" % addr)
+            else:
+                self.host_addr = addr
+            try:
+                received.append(data.decode("utf-8", "replace").strip())
+            except Exception:
+                pass
+        return received
+
+    def close(self):
+        try:
+            self.sock.close()
+        except OSError:
+            pass
+
+
+# ---------------------------------------------------------------------------
+# file transport (no sockets): two state dirs bridged by this process
+# ---------------------------------------------------------------------------
+class FileLink:
+    def __init__(self, peer_out, log):
+        self.peer_out = peer_out
+        self.log = log
+        self._mtime = None
+        self.log("file bridge from %s" % peer_out)
+
+    def poll(self, outbox):
+        received = []
+        try:
+            st = os.stat(self.peer_out)
+            if st.st_mtime != self._mtime:
+                self._mtime = st.st_mtime
+                with open(self.peer_out, "r", encoding="utf-8") as f:
+                    line = f.read().strip()
+                if line:
+                    received.append(line)
+        except OSError:
+            pass
+        return received
+
+    def close(self):
+        pass
+
+
+def run_link(link, state, log, players):
+    log("running; player=%s dir=%s" % (state.player, state.path))
+    last_peer_tick = now_ms()
+    while True:
+        out = state.read_out()
+        for line in link.poll(out):
+            try:
+                msg = json.loads(line)
+            except ValueError:
+                # malformed state line: say so instead of silently dropping the peer
+                # (a stray quote in the mod's format string cost a test round)
+                log("bad json from mod (%d bytes): %r" % (len(line), line[:160]))
+                continue
+            if msg.get("t") == "hello":
+                continue
+            peer = msg.get("id") or "peer"
+            if peer == state.player:
+                continue
+            state.write_peer(peer, line)
+            last_peer_tick = now_ms()
+        if now_ms() - last_peer_tick > 3000:
+            log("no peer traffic for 3 s")
+            last_peer_tick = now_ms()
+        time.sleep(TICK)
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--transport", choices=["file", "udp", "steam"], default="udp")
+    ap.add_argument("--role", choices=["host", "client"], default="host")
+    ap.add_argument("--port", type=int, default=47010)
+    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--player", default="A")
+    ap.add_argument("--dir", default=".")
+    ap.add_argument("--peer-dir", default=None, help="file transport: the other state dir")
+    ap.add_argument("--lobby", default=None, help="steam: lobby id to join")
+    ap.add_argument("--game", default=None, help="steam: game install dir (for its steam_api64.dll)")
+    args = ap.parse_args(argv)
+
+    log = Log(os.path.join(args.dir, "relay_%s.log" % args.player))
+    state = StateDir(args.dir, args.player)
+
+    if args.transport == "udp":
+        link = UdpLink(args.role, args.host, args.port, log)
+    elif args.transport == "file":
+        if not args.peer_dir:
+            ap.error("--transport file needs --peer-dir")
+        link = FileLink(os.path.join(args.peer_dir, "out_%s.txt" % ("B" if args.player == "A" else "A")), log)
+    else:  # steam
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from steamlink import SteamLink
+
+        try:
+            sl = SteamLink(args.role, args.player, args.lobby, args.game, log)
+            sl.establish()
+        except Exception as exc:  # a failure here must be loud and specific
+            log("STEAM UNAVAILABLE: %s" % exc)
+            return 2
+
+        class SteamAdapter:
+            def __init__(self, link):
+                self.link = link
+
+            def poll(self, outbox):
+                if outbox:
+                    self.link.send(outbox)
+                self.link._pump()
+                lines = []
+                for line in self.link.receive():
+                    try:
+                        msg = json.loads(line)
+                    except ValueError:
+                        continue
+                    if msg.get("id") == self.link.player:
+                        continue
+                    lines.append(line)
+                return lines
+
+            def close(self):
+                self.link.close()
+
+        link = SteamAdapter(sl)
+
+    try:
+        run_link(link, state, log, None)
+    except KeyboardInterrupt:
+        log("stopped")
+    finally:
+        link.close()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

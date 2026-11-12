@@ -1,0 +1,7 @@
+﻿### Class /Script/Sparta.DialogueNodeData  [00007FF46F031D38]
+    super: /Script/DlgSystem.DlgNodeData
+    1 members:
+      PRP FacialAnimation : ObjectProperty of /Script/Engine.AnimSequence [o:0x28]
+
+### ObjectProperty /Script/Sparta.DialogueNodeData:FacialAnimation  [000001F4ACD59700]
+

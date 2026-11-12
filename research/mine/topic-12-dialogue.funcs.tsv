@@ -1,0 +1,269 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	StopDialogue	Instigator ObjectProperty of /Script/Sparta.DialogueInstigatorComponent; bStopAudioImmediately BoolProperty	2	Final, Native, Public, BlueprintCallable	53444
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	StopActiveAudioOfContext	Context ObjectProperty of /Script/DlgSystem.DlgContext	1	Final, Native, Public, BlueprintCallable	53447
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	SpartaStartDialogue	Dialogue ObjectProperty of /Script/DlgSystem.DlgDialogue; Participants ArrayProperty of Participants./Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants; Instigator ObjectProperty of /Script/Sparta.DialogueInstigatorComponent; AdditionalInterruptTags StructProperty of /Script/GameplayTags.GameplayTagContainer; AdditionalTags StructProperty of /Script/GameplayTags.GameplayTagContainer; AdditionalBlockingTags StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue ObjectProperty of /Script/DlgSystem.DlgContext	7	Final, Native, Public, HasOutParams, BlueprintCallable	53449
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnWaveWeaverAudioEventFinished	EventInstance ObjectProperty of /Script/WaveWeaver.AudioEventInstance	1	Final, Native, Public	53458
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnSoundCompFinished	AudioComp ObjectProperty of /Script/Engine.AudioComponent	1	Final, Native, Public	53460
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	IsDialogueWithTagActive	DlgTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue BoolProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53462
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	IsDialogueCurrentlyActive	InDialogue ObjectProperty of /Script/DlgSystem.DlgDialogue; ReturnValue BoolProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53465
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	InterruptDialogues	Instigator ObjectProperty of /Script/Sparta.DialogueInstigatorComponent; Asset ObjectProperty of /Script/DlgSystem.DlgDialogue; AdditionalInterruptTags StructProperty of /Script/GameplayTags.GameplayTagContainer	3	Final, Native, Public, BlueprintCallable	53468
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	GetAllActiveDialoguesWithTag	Dialogues ArrayProperty of Dialogues./Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues; InTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue BoolProperty	3	Final, Native, Public, HasOutParams, BlueprintCallable	53472
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	FindActiveDialogueForInstigator	Instigator ObjectProperty of /Script/Sparta.DialogueInstigatorComponent; ReturnValue IntProperty	2	Final, Native, Public, BlueprintCallable	53477
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	EndAllDialoguesWithTags	Tags StructProperty of /Script/GameplayTags.GameplayTagContainer	1	Final, Native, Public, BlueprintCallable	53480
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	DialogueStarted	ActiveDlgIndex IntProperty	1	Final, Native, Public	53482
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	DialogueEnded	Context ObjectProperty of /Script/DlgSystem.DlgContext	1	Final, Native, Public	53484
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	CheckTagConditions	Component ObjectProperty of /Script/Sparta.DialogueInstigatorComponent; Asset ObjectProperty of /Script/DlgSystem.DlgDialogue; AdditionalTags StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	4	Final, Native, Public, BlueprintCallable	53486
+/Script/CoreUObject.Object	/Script/Sparta.DialogueSubsystem	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.DialogueNodeData	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	IsVirtualParent	ReturnValue BoolProperty	1	Native, Public, BlueprintCallable, BlueprintPure, Const	53509
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetSubtitleSpeakerText	ReturnValue TextProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53511
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetSubtitleSpeakerName	ReturnValue NameProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53513
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeSoundWave	ReturnValue ObjectProperty of /Script/Engine.SoundWave	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53515
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeAudioEvent	ReturnValue ObjectProperty of /Script/WaveWeaver.AudioEvent	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53517
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	HasGUID	ReturnValue BoolProperty	1		51078
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	HasAnyEnterEvents	ReturnValue BoolProperty	1		51080
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	HasAnyEnterConditions	ReturnValue BoolProperty	1		51082
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetTextArguments	ReturnValue ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode:GetTextArguments:ReturnValue	1		51084
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetSpeakerState	ReturnValue NameProperty	1		51087
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNumNodeChildren	ReturnValue IntProperty	1		51089
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeVoiceDialogueWave	ReturnValue ObjectProperty of /Script/Engine.DialogueWave	1		51091
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeUnformattedText	ReturnValue TextProperty	1		51093
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeText	ReturnValue TextProperty	1		51095
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeSound	ReturnValue ObjectProperty of /Script/Engine.SoundBase	1		51097
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeParticipantName	ReturnValue NameProperty	1		51099
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeGenericData	ReturnValue ObjectProperty of /Script/CoreUObject.Object	1		51101
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeEnterEvents	ReturnValue ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode:GetNodeEnterEvents:ReturnValue	1		51103
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeEnterConditions	ReturnValue ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode:GetNodeEnterConditions:ReturnValue	1		51106
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeData	ReturnValue ObjectProperty of /Script/DlgSystem.DlgNodeData	1		51109
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeChildren	ReturnValue ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode:GetNodeChildren:ReturnValue	1		51111
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetNodeChildAt	EdgeIndex IntProperty; ReturnValue StructProperty of /Script/DlgSystem.DlgEdge	2		51114
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetGUID	ReturnValue StructProperty of /Script/CoreUObject.Guid	1		51117
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GetCheckChildrenOnEvaluation	ReturnValue BoolProperty	1		51119
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	ForceDefaultNodeDataOnEmpty		0		51121
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	ForceDefaultEdgeTextData		0		51122
+/Script/CoreUObject.Object	/Script/Sparta.Dialogue_SpartaSpeechNode	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.DlgBlueprintLibrary	/Script/Sparta.DlgBlueprintLibrary	MigrateSubtitleSpeakerNamesToStringTables	Dialogue ObjectProperty of /Script/DlgSystem.DlgDialogue; StringTableIds ArrayProperty of StringTableIds./Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:StringTableIds; bOverwriteExistingSubtitleSpeakerText BoolProperty; ReturnValue IntProperty	4	Final, Native, Static, Public, HasOutParams, BlueprintCallable	53521
+/Script/CoreUObject.Object	/Script/Sparta.DlgBlueprintLibrary	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	StopDialogue	bStopAudioImmediately BoolProperty	1	Final, Native, Public, BlueprintCallable	53422
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	ReceiveInterruptDialogue	Interrupter ObjectProperty of /Script/Sparta.DialogueInstigatorComponent	1	Event, Public, BlueprintEvent	53424
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	InterruptDialogue	Interrupter ObjectProperty of /Script/Sparta.DialogueInstigatorComponent	1	Final, Native, Public, BlueprintCallable	53426
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ReceiveEndPlay	EndPlayReason ByteProperty	1		2358
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ReceiveBeginPlay		0		2360
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Script/Sparta.DialogueInstigatorComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	WasRecentlyRendered	Tolerance FloatProperty; ReturnValue BoolProperty	2		131
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	UserConstructionScript		0		134
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	UnregisterAsFocalPointInPhysicsReplicationLOD		0		135
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	TearOff		0		136
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetTickGroup	NewTickGroup ByteProperty	1		137
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		139
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetReplicates	bInReplicates BoolProperty	1		141
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetReplicateMovement	bInReplicateMovement BoolProperty	1		143
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetRayTracingGroupId	InRaytracingGroupId IntProperty	1		145
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetPhysicsReplicationMode	ReplicationMode EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		147
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetOwner	NewOwner ObjectProperty of /Script/Engine.Actor	1		149
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetNetUpdateFrequency	Frequency FloatProperty	1		151
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetNetDormancy	NewDormancy ByteProperty	1		153
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetNetCullDistanceSquared	DistanceSq FloatProperty	1		155
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetMinNetUpdateFrequency	MinFrequency FloatProperty	1		157
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetLifeSpan	InLifespan FloatProperty	1		159
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetAutoDestroyWhenFinished	bVal BoolProperty	1		161
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorTickInterval	TickInterval FloatProperty	1		163
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorTickEnabled	bEnabled BoolProperty	1		165
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorScale3D	NewScale3D StructProperty of /Script/CoreUObject.Vector	1		167
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorRelativeScale3D	NewRelativeScale StructProperty of /Script/CoreUObject.Vector	1		169
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorHiddenInGame	bNewHidden BoolProperty	1		171
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SetActorEnableCollision	bNewActorEnableCollision BoolProperty	1		173
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		175
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		177
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RegisterAsFocalPointInPhysicsReplicationLOD		0		179
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveTick	DeltaSeconds FloatProperty	1		180
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveRadialDamage	DamageReceived FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; Origin StructProperty of /Script/CoreUObject.Vector; HitInfo StructProperty of /Script/Engine.HitResult; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	6		182
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceivePointDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; HitComponent ObjectProperty of /Script/Engine.PrimitiveComponent; BoneName NameProperty; ShotFromDirection StructProperty of /Script/CoreUObject.Vector; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor; HitInfo StructProperty of /Script/Engine.HitResult	10		189
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveHit	MyComp ObjectProperty of /Script/Engine.PrimitiveComponent; Other ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; bSelfMoved BoolProperty; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; NormalImpulse StructProperty of /Script/CoreUObject.Vector; Hit StructProperty of /Script/Engine.HitResult	8		200
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveEndPlay	EndPlayReason ByteProperty	1		209
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveDestroyed		0		211
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveBeginPlay		0		212
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		213
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveAnyDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	4		216
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnReleased	ButtonReleased StructProperty of /Script/InputCore.Key	1		221
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnInputTouchLeave	FingerIndex ByteProperty	1		223
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnInputTouchEnter	FingerIndex ByteProperty	1		225
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnInputTouchEnd	FingerIndex ByteProperty	1		227
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnInputTouchBegin	FingerIndex ByteProperty	1		229
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorOnClicked	ButtonPressed StructProperty of /Script/InputCore.Key	1		231
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorEndOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		233
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorEndCursorOver		0		235
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorBeginOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		236
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReceiveActorBeginCursorOver		0		238
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	PrestreamTextures	Seconds FloatProperty; bEnableStreaming BoolProperty; CinematicTextureGroups IntProperty	3		239
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnRep_ReplicateMovement		0		243
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnRep_ReplicatedMovement		0		244
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnRep_Owner		0		245
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnRep_Instigator		0		246
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnRep_AttachmentReplication		0		247
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	MakeNoise	Loudness FloatProperty; NoiseInstigator ObjectProperty of /Script/Engine.Pawn; NoiseLocation StructProperty of /Script/CoreUObject.Vector; MaxRange FloatProperty; Tag NameProperty	5		248
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_TeleportTo	DestLocation StructProperty of /Script/CoreUObject.Vector; DestRotation StructProperty of /Script/CoreUObject.Rotator; ReturnValue BoolProperty	3		254
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		258
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorRotation	NewRotation StructProperty of /Script/CoreUObject.Rotator; bTeleportPhysics BoolProperty; ReturnValue BoolProperty	3		264
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorRelativeTransform	NewRelativeTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		268
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorRelativeRotation	NewRelativeRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		273
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorRelativeLocation	NewRelativeLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		278
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorLocationAndRotation	NewLocation StructProperty of /Script/CoreUObject.Vector; NewRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	6		283
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_SetActorLocation	NewLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		290
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_OnReset		0		296
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_OnEndViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		297
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_OnBecomeViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		299
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_GetRootComponent	ReturnValue ObjectProperty of /Script/Engine.SceneComponent	1		301
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_GetComponentsByClass	ComponentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:K2_GetComponentsByClass:ReturnValue	2		303
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_GetActorRotation	ReturnValue StructProperty of /Script/CoreUObject.Rotator	1		307
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_GetActorLocation	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		309
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_DetachFromActor	LocationRule EnumProperty of /Script/Engine.EDetachmentRule; RotationRule EnumProperty of /Script/Engine.EDetachmentRule; ScaleRule EnumProperty of /Script/Engine.EDetachmentRule	3		311
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_DestroyActor		0		315
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AttachToComponent	Parent ObjectProperty of /Script/Engine.SceneComponent; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		316
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AttachToActor	ParentActor ObjectProperty of /Script/Engine.Actor; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		324
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AttachRootComponentToActor	InParentActor ObjectProperty of /Script/Engine.Actor; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		332
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AttachRootComponentTo	InParent ObjectProperty of /Script/Engine.SceneComponent; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		337
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorWorldTransformKeepScale	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		342
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorWorldTransform	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		347
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorWorldRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		352
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorWorldOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		357
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorLocalTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		362
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorLocalRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		367
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	K2_AddActorLocalOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		372
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	IsOverlappingActor	Other ObjectProperty of /Script/Engine.Actor; ReturnValue BoolProperty	2		377
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	IsChildActor	ReturnValue BoolProperty	1		380
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	IsActorTickEnabled	ReturnValue BoolProperty	1		382
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	IsActorBeingDestroyed	ReturnValue BoolProperty	1		384
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	HasAuthority	ReturnValue BoolProperty	1		386
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetVerticalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		388
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetVelocity	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		391
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		393
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetTickableWhenPaused	ReturnValue BoolProperty	1		395
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetSquaredHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		397
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetSquaredDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		400
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetResimulationThreshold	ReturnValue FloatProperty	1		403
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetRemoteRole	ReturnValue ByteProperty	1		405
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetRayTracingGroupId	ReturnValue IntProperty	1		407
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetPhysicsReplicationMode	ReturnValue EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		409
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetParentComponent	ReturnValue ObjectProperty of /Script/Engine.ChildActorComponent	1		411
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		413
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		415
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetOverlappingComponents	OverlappingComponents ArrayProperty of OverlappingComponents./Script/Engine.Actor:GetOverlappingComponents:OverlappingComponents	1		417
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetOverlappingActors	OverlappingActors ArrayProperty of OverlappingActors./Script/Engine.Actor:GetOverlappingActors:OverlappingActors; ClassFilter ClassProperty	2		420
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetNetUpdateFrequency	ReturnValue FloatProperty	1		424
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetNetCullDistanceSquared	ReturnValue FloatProperty	1		426
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetMinNetUpdateFrequency	ReturnValue FloatProperty	1		428
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetLocalRole	ReturnValue ByteProperty	1		430
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetLifeSpan	ReturnValue FloatProperty	1		432
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetLevelTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		434
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetLevel	ReturnValue ObjectProperty of /Script/Engine.Level	1		436
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetInstigatorController	ReturnValue ObjectProperty of /Script/Engine.Controller	1		438
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetInstigator	ReturnValue ObjectProperty of /Script/Engine.Pawn	1		440
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetInputVectorAxisValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue StructProperty of /Script/CoreUObject.Vector	2		442
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetInputAxisValue	InputAxisName NameProperty; ReturnValue FloatProperty	2		445
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetInputAxisKeyValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue FloatProperty	2		448
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetHorizontalDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		451
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		454
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetGameTimeSinceCreation	ReturnValue FloatProperty	1		457
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		459
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		462
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetComponentsByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByTag:ReturnValue	3		465
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetComponentsByInterface	Interface ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByInterface:ReturnValue	2		470
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetComponentByClass	ComponentClass ClassProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	2		474
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetAttachParentSocketName	ReturnValue NameProperty	1		477
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetAttachParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		479
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetAttachedActors	OutActors ArrayProperty of OutActors./Script/Engine.Actor:GetAttachedActors:OutActors; bResetArray BoolProperty; bRecursivelyIncludeAttachedActors BoolProperty	3		481
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetAllChildActors	ChildActors ArrayProperty of ChildActors./Script/Engine.Actor:GetAllChildActors:ChildActors; bIncludeDescendants BoolProperty	2		486
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorUpVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		490
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorTimeDilation	ReturnValue FloatProperty	1		492
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorTickInterval	ReturnValue FloatProperty	1		494
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		496
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorRightVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		498
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorRelativeScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		500
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorForwardVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		502
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorEyesViewPoint	OutLocation StructProperty of /Script/CoreUObject.Vector; OutRotation StructProperty of /Script/CoreUObject.Rotator	2		504
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorEnableCollision	ReturnValue BoolProperty	1		507
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	GetActorBounds	bOnlyCollidingComponents BoolProperty; Origin StructProperty of /Script/CoreUObject.Vector; BoxExtent StructProperty of /Script/CoreUObject.Vector; bIncludeFromChildActors BoolProperty	4		509
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ForceNetUpdate		0		514
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	FlushNetDormancy		0		515
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	FinishAddComponent	Component ObjectProperty of /Script/Engine.ActorComponent; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform	3		516
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	FindComponentByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	3		520
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	EnableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		524
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	DisableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		526
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	DetachRootComponentFromParent	bMaintainWorldPosition BoolProperty	1		528
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	CreateInputComponent	InputComponentToCreate ClassProperty	1		530
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	CanTriggerResimulation	ReturnValue BoolProperty	1		532
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		534
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		536
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AddComponentByClass	Class ClassProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	5		538
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AddComponent	TemplateName NameProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; ComponentTemplateContext ObjectProperty of /Script/CoreUObject.Object; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	6		544
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ActorHasTag	Tag NameProperty; ReturnValue BoolProperty	2		551
+/Script/CoreUObject.Object	/Script/Sparta.SpartaDialogueActor	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaDlgParticipant	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaEventDataAsset	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ReceiveEndPlay	EndPlayReason ByteProperty	1		2358
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ReceiveBeginPlay		0		2360
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Script/Sparta.HubEventComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ExecuteUbergraph	EntryPoint IntProperty	1		3

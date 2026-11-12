@@ -1,0 +1,10 @@
+﻿### Class /Script/Sparta.SpartaDlgParticipant  [00007FF46F046138]
+    super: /Script/CoreUObject.Object
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x30]
+      PRP DisplayName : TextProperty [o:0x38]
+
+### NameProperty /Script/Sparta.SpartaDlgParticipant:ParticipantName  [000001F4ACD68890]
+
+### TextProperty /Script/Sparta.SpartaDlgParticipant:DisplayName  [000001F4ACD68900]
+

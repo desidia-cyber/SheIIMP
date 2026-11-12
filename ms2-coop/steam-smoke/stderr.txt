@@ -1,0 +1,2 @@
+G:\Freespace\shell_coop\ms2-coop\relay\steamlink.py:4: SyntaxWarning: invalid escape sequence '\E'
+  (<game>\Engine\Binaries\ThirdParty\Steamworks\Steamv157\Win64\steam_api64.dll),

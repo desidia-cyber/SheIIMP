@@ -1,0 +1,8 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CoreUObject	FGuid	0x0000	0x0004	int32	A	(Edit, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FGuid	0x0004	0x0004	int32	B	(Edit, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FGuid	0x0008	0x0004	int32	C	(Edit, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FGuid	0x000C	0x0004	int32	D	(Edit, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+GameplayTags	FGameplayTagContainer	0x0000	0x0010	TArray<struct FGameplayTag>	GameplayTags	(Edit, BlueprintVisible, ZeroConstructor, EditConst, SaveGame, Protected, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0010	0x0010	TArray<struct FGameplayTag>	ParentTags	(ZeroConstructor, Transient, Protected, NativeAccessSpecifierProtected)
+Sparta	FSaveObjectTickFunction	0x0028	0x0008	class USpartaSaveObject*	Target	(ZeroConstructor, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)

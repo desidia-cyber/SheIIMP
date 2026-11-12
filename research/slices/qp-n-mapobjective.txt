@@ -1,0 +1,19 @@
+﻿### Class /Script/Sparta.WorldMapObjectiveComponent  [00007FF46F064538]
+    super: /Script/Sparta.SpartaSaveComponent
+    5 members:
+      PRP RevealType : EnumProperty of /Script/Sparta.ERevealType [o:0x120]
+      PRP RevealDistance : FloatProperty [o:0x124]
+      FUN RevealObjective 
+      FUN EnableRevealDistanceCheck 
+      FUN DisableRevealDistanceCheck 
+
+### EnumProperty /Script/Sparta.WorldMapObjectiveComponent:RevealType  [000001F4ACE1C980]
+
+### FloatProperty /Script/Sparta.WorldMapObjectiveComponent:RevealDistance  [000001F4ACDE8970]
+
+### Function /Script/Sparta.WorldMapObjectiveComponent:DisableRevealDistanceCheck  [00007FF46F724338]
+
+### Function /Script/Sparta.WorldMapObjectiveComponent:EnableRevealDistanceCheck  [00007FF46F724418]
+
+### Function /Script/Sparta.WorldMapObjectiveComponent:RevealObjective  [00007FF46F7244F8]
+

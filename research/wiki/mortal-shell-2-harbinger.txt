@@ -1,0 +1,31 @@
+Mortal Shell 2 Harbinger — The Body You Leave Behind 
+Skip to content
+ Mortal Shell 2 Harbinger
+ What the Harbinger is in Mortal Shell 2: what levels with Gloom vs what belongs to a Shell, severing and returning, Genessa's Stray form and Cosmic Disease.
+Last verified 2026-10-15 
+ The Harbinger is you – the frail, hatched creature that inhabits Shells. Understanding what the Harbinger keeps and what a Shell provides explains most of Mortal Shell 2’s systems.
+ Harbinger vs Shell
+ Belongs to the Harbinger Belongs to the Shell 
+ Level (raised with Gloom at cleansed beacons)
+ Abilities and passive
+ Health and damage growth from levels
+ Bond tiers, Memories and upgrades (bought with Glimpse at Zhirelle)
+ Weapons, sidearms, Seals, Tarstones
+ Base health and handling
+ Gloom and coins
+ Temperament / perks
+ Your Harbinger level is the reason to spend Gloom early: it raises health and damage for every Shell at once.
+ Being knocked out of a Shell
+ When a Shell’s health hits zero you are severed back to the Harbinger. Deal melee damage to enemies to transform back into the Shell (the same rule teaches you in the prologue with Harros). Die as the bare Harbinger and you lose your carried Gloom at that spot.
+ Genessa is the exception: at zero health she becomes Stray instead of severing.
+ Before the Week 1 Update, Zmey’s tail grab removed both the Shell and the Harbinger at once. That is fixed, except in Night Mode, where it is intentional.
+ Cosmic Disease (Zmey) strips your Shell, items, Tarstones and weapon and leaves you as a weak Harbinger – which is why Seedbearer’s Scripture matters.
+ Harbinger cosmetics
+ Shades and masks for the Harbinger show in the level-up tab (fixed on 24 September). The Skeletal Harbinger Skin was a pre-order bonus.
+ Tips
+ Level up before every Corrupted Gate boss and before the Hidden Nave, which asks you to offer all your Gloom.
+ Gloom drop-on-death logic was improved on 6 September, so lost piles are easier to recover.
+ Related pages
+ Leveling system 
+ All 8 Shells 
+ Combat system

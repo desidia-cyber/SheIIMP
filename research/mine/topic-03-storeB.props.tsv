@@ -1,0 +1,29 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ChangedActors	SetProperty	0x28	57806
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorFloats	MapProperty	0x78	57807
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorInts	MapProperty	0xC8	57810
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorNames	MapProperty	0x118	57813
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorBools	MapProperty	0x168	57816
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorObjectMap	MapProperty	0x1B8	57819
+/Script/Sparta.SpartaSaveGame	/Script/Sparta.SpartaSaveGame	ActorObjectMapAsString	StrProperty	0x208	57822
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	OnSaveGameLoaded	MulticastInlineDelegateProperty	0x30	57843
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	PostSessionReset	MulticastInlineDelegateProperty	0x40	57844
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	OnSaveSystemInitialized	MulticastInlineDelegateProperty	0x50	57845
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	OnSaveStarted	MulticastInlineDelegateProperty	0x60	57846
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	OnSaveFinished	MulticastInlineDelegateProperty	0x70	57847
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	SaveObjects	MapProperty	0xB8	57848
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	CurrentOnDiskWorldStateSave	ObjectProperty of /Script/Sparta.SpartaSaveGame	0x108	57851
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	SaveInterfaces	ArrayProperty of SaveInterfaces./Script/Sparta.SpartaSaveSubSystem:SaveInterfaces	0x110	57852
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	SessionSaveObject	ObjectProperty of /Script/Sparta.SpartaSaveObject	0x120	57854
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	RuntimeSessionSaveObject	ObjectProperty of /Script/Sparta.SpartaSaveObject	0x128	57855
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	MetaData	ObjectProperty of /Script/Sparta.SpartaMetaSave	0x140	57856
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	bSaveLoaded	BoolProperty	0x14C	57857
+/Script/Sparta.SpartaSaveSubSystem	/Script/Sparta.SpartaSaveSubSystem	bApplySkipProloguePresetOnNextLoad	BoolProperty	0x14E	57858
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	TotalDeathsName	NameProperty	0x38	57824
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	MetaDataFileName	StrProperty	0x40	57825
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	SaveProfileFileNamePrefix	StrProperty	0x50	57826
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	SaveRecoveryFileNamePrefix	StrProperty	0x60	57827
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	SessionFileNamePrefix	StrProperty	0x70	57828
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	MaxSaveProfileSlots	IntProperty	0x80	57829
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	MaxSaveRecoverySlots	IntProperty	0x84	57830
+/Script/Sparta.SpartaSaveGlobalSettings	/Script/Sparta.SpartaSaveGlobalSettings	SaveRecoveryBackupFrequency	FloatProperty	0x88	57831

@@ -1,0 +1,1526 @@
+# Run a two-client co-op test on one PC, fully in the background.
+#   .\deploy.ps1 -GameDir "E:\Games\_MS2-coop-test"      # native DLL + coop_dir.txt first
+#   .\deploy.ps1 -GameDir "E:\Games\_MS2-coop-b"
+#   .\run-two.ps1 -GameA "E:\Games\_MS2-coop-test" -GameB "E:\Games\_MS2-coop-b"
+#
+# Both installs must already have the native module (deploy.ps1): dxgi.dll next to
+# MortalShell2-Win64-Shipping.exe, coop_dir.txt pointing at <Win64>\coop, and no UE4SS
+# (deploy.ps1 moves it into _ue4ss_disabled). The harness only reads/writes coop\:
+# probe.log/sync.txt/result*.txt are the native module's own files, byte-identical to
+# the Lua's, so every verdict below works unchanged. ms2coop-native.log next to the
+# exe is printed at the end for the loader/engine diagnostics the Lua had in UE4SS.log.
+#
+# Each client gets its own LOCALAPPDATA (seeded with a copy of the owner's saves),
+# so two instances never fight over one save file and the owner's saves are never
+# touched at all. Clients enter their own save, summon a puppet, publish their
+# transform and drive the peer's puppet; relays carry the bytes over localhost UDP.
+# Prints "RESULT: PASS" or "RESULT: FAIL".
+
+param(
+    [Parameter(Mandatory = $true)][string]$GameA,
+    [Parameter(Mandatory = $true)][string]$GameB,
+    [int]$BootWait = 75,
+    [int]$TimeoutSeconds = 300,
+    [int]$Port = 47010,
+    [string]$TeleportB = "",
+    [string]$MoveNpc = "",
+    [switch]$FreshLocal,
+    [switch]$StreamOnly,
+    [string]$FarPoint = "42382 -42703 -42382",
+    [string]$SpawnPoint = "66992 -125076 -44454",
+    [string]$ExtraArgs = "-windowed -ResX=1024 -ResY=576 -nosound -nosplash -nocrashreport",
+    [int]$LossPct = 0
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Start-ReporterKiller {
+    # Crash dialogs must never reach the owner's screen. Kill them on sight.
+    $script:killerFlag = Join-Path $env:TEMP ("ms2killer_" + (Get-Date -Format 'HHmmss') + ".flag")
+    New-Item -ItemType File -Force -Path $script:killerFlag | Out-Null
+    $script:killerJob = Start-Job -ArgumentList $script:killerFlag -ScriptBlock {
+        param($flag)
+        while (Test-Path $flag) {
+            Get-Process CrashReportClient -ErrorAction SilentlyContinue | ForEach-Object {
+                try { Stop-Process -Id $_.Id -Force } catch {}
+            }
+            Start-Sleep -Milliseconds 150
+        }
+    }
+}
+
+function Stop-ReporterKiller {
+    try { Remove-Item $script:killerFlag -Force -ErrorAction SilentlyContinue } catch {}
+    try { Stop-Job $script:killerJob -ErrorAction SilentlyContinue; Remove-Job $script:killerJob -Force -ErrorAction SilentlyContinue } catch {}
+}
+$root = $PSScriptRoot
+$realLocal = $env:LOCALAPPDATA
+
+# The native module (native\build\dxgi.dll) is deployed by deploy.ps1, not here. Check
+# it before two clients are started: without the DLL the run produces a page of FAILs
+# that look like sync bugs, and with UE4SS still present two proxies fight for the
+# process. coop_dir.txt is the DLL's only input (coop_net.cpp ResolveCoopDir).
+function Assert-NativeDeploy([string]$gameDir) {
+    $w64 = Join-Path $gameDir 'MortalShell2\Binaries\Win64'
+    if (-not (Test-Path (Join-Path $w64 'dxgi.dll'))) {
+        throw "native module not deployed in $w64 (dxgi.dll missing) - run: .\deploy.ps1 -GameDir `"$gameDir`""
+    }
+    foreach ($bad in @('dwmapi.dll', 'UE4SS.dll')) {
+        if (Test-Path (Join-Path $w64 $bad)) {
+            Write-Host "=== WARNING: $w64 still has $bad (UE4SS); run .\deploy.ps1 -GameDir `"$gameDir`" to disable it"
+        }
+    }
+    $dirFile = Join-Path $w64 'coop_dir.txt'
+    if (-not (Test-Path $dirFile)) {
+        throw "coop_dir.txt missing in $w64 - run: .\deploy.ps1 -GameDir `"$gameDir`""
+    }
+    $declared = (Get-Content $dirFile -Raw).Trim().Replace('\', '/').TrimEnd('/')
+    $expect = ($w64.Replace('\', '/') + '/coop').TrimEnd('/')
+    if ($declared -ne $expect) {
+        throw "coop_dir.txt says '$declared' but this harness uses '$expect' - re-run deploy.ps1 for $gameDir"
+    }
+}
+
+Add-Type -Namespace Win32 -Name W -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern bool SetWindowPos(System.IntPtr hWnd, System.IntPtr after, int x, int y, int cx, int cy, uint flags);
+'@
+
+function Hide-GameWindow {
+    Get-Process | Where-Object ProcessName -match 'MortalShell2-Win64' | ForEach-Object {
+        if ($_.MainWindowHandle -ne 0) {
+            [Win32.W]::SetWindowPos($_.MainWindowHandle, [IntPtr]::Zero, -30000, -30000, 0, 0, 0x0001 -bor 0x0010 -bor 0x0004) | Out-Null
+        }
+    }
+}
+
+function Stop-All {
+    Get-Process | Where-Object ProcessName -match 'MortalShell2' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+    Get-Process | Where-Object ProcessName -match 'CrashReportClient' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+    Get-CimInstance Win32_Process -Filter "Name like 'python%'" | Where-Object { $_.CommandLine -match 'cooprelay' } | ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force } catch {} }
+}
+
+function Seed-LocalAppData([string]$target) {
+    $mine = Join-Path $target 'MortalShell2\Saved'
+    if ($FreshLocal -and (Test-Path (Join-Path $target 'MortalShell2'))) {
+        Remove-Item (Join-Path $target 'MortalShell2') -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    if (-not (Test-Path $mine)) {
+        New-Item -ItemType Directory -Force -Path (Join-Path $mine 'SaveGames') | Out-Null
+        $srcSaves = Join-Path $realLocal 'MortalShell2\Saved\SaveGames'
+        if (Test-Path $srcSaves) { Copy-Item "$srcSaves\*.sav" (Join-Path $mine 'SaveGames') -Force }
+        $srcCfg = Join-Path $realLocal 'MortalShell2\Saved\Config'
+        if (Test-Path $srcCfg) { Copy-Item $srcCfg (Join-Path $mine 'Config') -Recurse -Force }
+        Write-Host "seeded $target"
+    }
+}
+
+function Start-Client([string]$gameDir, [string]$localAppData) {
+    $exe = Join-Path $gameDir 'MortalShell2\Binaries\Win64\MortalShell2-Win64-Shipping.exe'
+    $argList = @('MortalShell2') + ($ExtraArgs -split '\s+' | Where-Object { $_ })
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = $exe
+    $psi.Arguments = ($argList | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '
+    $psi.WorkingDirectory = $gameDir
+    $psi.UseShellExecute = $true
+    $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Normal
+    $env:LOCALAPPDATA = $localAppData
+    $p = [System.Diagnostics.Process]::Start($psi)
+    $env:LOCALAPPDATA = $realLocal
+    Write-Host "started $gameDir (pid $($p.Id)) local=$localAppData"
+}
+
+Start-ReporterKiller
+Stop-All
+Start-Sleep -Seconds 3
+
+# This game resolves its save folder through the Windows shell API, so an overridden
+# LOCALAPPDATA is NOT enough. Snapshot the real save dir and restore it afterwards,
+# deleting any save files the run created (the game writes WorldState_Backup_0_*.sav).
+$realSaveDir = Join-Path $env:LOCALAPPDATA "MortalShell2\Saved\SaveGames"
+$saveSnap = Join-Path $env:TEMP ("ms2saves_" + (Get-Date -Format "HHmmss"))
+$saveNamesBefore = @()
+if (Test-Path $realSaveDir) {
+    New-Item -ItemType Directory -Force -Path $saveSnap | Out-Null
+    Copy-Item (Join-Path $realSaveDir "*.sav") $saveSnap -Force
+    $saveNamesBefore = @(Get-ChildItem $realSaveDir -Filter *.sav | Select-Object -ExpandProperty Name)
+    Write-Host "saves snapshotted: $($saveNamesBefore -join ", ")"
+}
+
+
+$localA = Join-Path $root 'local-appdata\A'
+$localB = Join-Path $root 'local-appdata\B'
+Seed-LocalAppData $localA
+Seed-LocalAppData $localB
+
+$coopA = Join-Path $GameA 'MortalShell2\Binaries\Win64\coop'
+$coopB = Join-Path $GameB 'MortalShell2\Binaries\Win64\coop'
+foreach ($d in @($coopA, $coopB)) {
+    New-Item -ItemType Directory -Force -Path $d | Out-Null
+    Remove-Item (Join-Path $d 'result.txt'), (Join-Path $d 'probe.log'), (Join-Path $d 'cmd.txt'), (Join-Path $d 'peer_*.txt'), (Join-Path $d 'out_*.txt'), (Join-Path $d 'relay_*.log') -Force -ErrorAction SilentlyContinue
+}
+Set-Content -Path (Join-Path $coopA 'playerid.txt') -Value 'A' -Encoding ASCII -NoNewline
+Set-Content -Path (Join-Path $coopA 'role.txt') -Value 'host' -Encoding ASCII -NoNewline
+Set-Content -Path (Join-Path $coopB 'role.txt') -Value 'guest' -Encoding ASCII -NoNewline
+Remove-Item (Join-Path $coopB 'result_npc.txt'), (Join-Path $coopA 'result_stream.txt'), (Join-Path $coopB 'result_stream.txt'), (Join-Path $coopA 'result_spawn.txt'), (Join-Path $coopB 'result_pd.txt'), (Join-Path $coopA 'result_ai.txt'), (Join-Path $coopB 'result_anim.txt') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $coopA 'result_ws.txt'), (Join-Path $coopB 'result_ws.txt'), (Join-Path $coopA 'result_ws2.txt'), (Join-Path $coopB 'result_ws2.txt'), (Join-Path $coopA 'ws2_census.txt'), (Join-Path $coopA 'result_ws2selftest.txt'), (Join-Path $coopA 'ws2_wa2test.txt'), (Join-Path $coopB 'result_wp.txt'), (Join-Path $coopB 'result_qs.txt'), (Join-Path $coopB 'result_qs2.txt'), (Join-Path $coopB 'result_lift.txt'), (Join-Path $coopB 'result_chest.txt'), (Join-Path $coopA 'result_ledger.txt'), (Join-Path $coopB 'result_ledger.txt') -Force -ErrorAction SilentlyContinue
+# [R7-DROPS] the drop verdict files: the killer's claim and the receiver's grant.
+Remove-Item (Join-Path $coopA 'result_drops_a.txt'), (Join-Path $coopB 'result_drops_a.txt'), (Join-Path $coopB 'result_drops.txt'), (Join-Path $coopA 'result_drops.txt') -Force -ErrorAction SilentlyContinue
+# [R5-BODY] the body lane's verdict files (written by the receiving client)
+Remove-Item (Join-Path $coopA 'result_zone.txt'), (Join-Path $coopA 'result_bh.txt'), (Join-Path $coopA 'result_bhdead.txt'), (Join-Path $coopB 'result_zone.txt'), (Join-Path $coopB 'result_bh.txt'), (Join-Path $coopB 'result_bhdead.txt'), (Join-Path $coopA 'bodydump.txt'), (Join-Path $coopB 'bodydump.txt') -Force -ErrorAction SilentlyContinue
+# [R7-DIALOG] the dialogue / cinematic lane's verdict files (written by A)
+Remove-Item (Join-Path $coopA 'result_dialog.txt'), (Join-Path $coopA 'result_cine.txt'), (Join-Path $coopB 'result_dialog.txt'), (Join-Path $coopB 'result_cine.txt') -Force -ErrorAction SilentlyContinue
+Set-Content -Path (Join-Path $coopB 'playerid.txt') -Value 'B' -Encoding ASCII -NoNewline
+
+Assert-NativeDeploy $GameA
+Assert-NativeDeploy $GameB
+
+Start-Client $GameA $localA
+Start-Sleep -Seconds 8
+Start-Client $GameB $localB
+
+$relay = Join-Path $root 'relay\cooprelay.py'
+# [R7-WIRE] -LossPct makes both relays drop that percentage of their outgoing
+# datagrams, which is the lossy-transport test (each part dies on its own)
+$lossArgs = if ($LossPct -gt 0) { @('--loss', "$LossPct") } else { @() }
+Start-Process -FilePath 'python' -ArgumentList (@($relay, '--transport', 'udp', '--role', 'host', '--port', "$Port", '--player', 'A', '--dir', $coopA) + $lossArgs) -WindowStyle Hidden
+Start-Sleep -Seconds 2
+Start-Process -FilePath 'python' -ArgumentList (@($relay, '--transport', 'udp', '--role', 'client', '--host', '127.0.0.1', '--port', "$Port", '--player', 'B', '--dir', $coopB) + $lossArgs) -WindowStyle Hidden
+
+$until = (Get-Date).AddSeconds($BootWait)
+while ((Get-Date) -lt $until) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+
+# ===========================================================================
+# [R7-WIRE] fixture reset + the split's own round trip, on BOTH clients, before
+# any test runs.
+#
+# The WORLD/LIFT/CHEST verbs need "not consumed yet" fixtures and the store-A
+# ledger deliberately re-applies last session's keys on load, so until this verb
+# existed the only cure was deleting coop\ws_ledger_*.txt on both installs before
+# every run -- which also destroyed the ledger the LEDGER verdict is about.  The
+# verb resets the save objects through the game's own
+# USpartaSaveSubSystem.ResetSaveObjectByGuid(GuidString) instead, so two runs back
+# to back must both pass with the ledger left alone.
+# ===========================================================================
+$fixA = Join-Path $coopA 'result_fixreset.txt'
+$fixB = Join-Path $coopB 'result_fixreset.txt'
+$wireT = Join-Path $coopA 'result_wire.txt'
+$wireTB = Join-Path $coopB 'result_wire.txt'
+foreach ($f in @($fixA, $fixB, $wireT, $wireTB)) { Remove-Item $f -Force -ErrorAction SilentlyContinue }
+# The current world has to be up before a save-object reset means anything (and
+# before the module reads cmd.txt at all): wait for phase=sync on both clients,
+# up to 150 s, instead of trusting the fixed boot wait.
+# (Get-SyncValue is defined further down, so this reads sync.txt itself.)
+function Get-SyncPhase([string]$coopDir) {
+    $f = Join-Path $coopDir 'sync.txt'
+    if (-not (Test-Path $f)) { return $null }
+    foreach ($line in Get-Content $f) { if ($line -match '^phase=(.*)$') { return $matches[1] } }
+    return $null
+}
+$syncEnd = (Get-Date).AddSeconds(150)
+while ((Get-Date) -lt $syncEnd) {
+    $pa = Get-SyncPhase $coopA
+    $pb = Get-SyncPhase $coopB
+    if ($pa -eq 'sync' -and $pb -eq 'sync') { break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 700
+}
+Write-Host "=== FIXRESET: phase A=$(Get-SyncPhase $coopA) B=$(Get-SyncPhase $coopB) after the boot wait"
+foreach ($d in @($coopA, $coopB)) {
+    [System.IO.File]::WriteAllText((Join-Path $d 'cmd.txt'), "fixreset`nwiretest`n")
+}
+$fixEnd = (Get-Date).AddSeconds(40)
+while ((Get-Date) -lt $fixEnd -and -not ((Test-Path $fixA) -and (Test-Path $fixB))) {
+    Hide-GameWindow; Start-Sleep -Milliseconds 500
+}
+$fixTextA = if (Test-Path $fixA) { (Get-Content $fixA -Raw).Trim() } else { 'missing' }
+$fixTextB = if (Test-Path $fixB) { (Get-Content $fixB -Raw).Trim() } else { 'missing' }
+$wireTestA = if (Test-Path $wireT) { (Get-Content $wireT -Raw).Trim() } else { 'missing' }
+$wireTestB = if (Test-Path $wireTB) { (Get-Content $wireTB -Raw).Trim() } else { 'missing' }
+$fixOk = ($fixTextA -match '^PASS') -and ($fixTextB -match '^PASS')
+$wireTestOk = ($wireTestA -match '^PASS') -and ($wireTestB -match '^PASS')
+Write-Host "=== FIXRESET: A $fixTextA"
+Write-Host "=== FIXRESET: B $fixTextB"
+Write-Host "=== FIXRESET: $(if ($fixOk) { 'PASS' } else { 'FAIL' })"
+Write-Host "=== WIRETEST: A $wireTestA"
+Write-Host "=== WIRETEST: B $wireTestB"
+Write-Host "=== WIRETEST: $(if ($wireTestOk) { 'PASS' } else { 'FAIL' })"
+
+if ($MoveNpc) {
+    [System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "npctp $MoveNpc`n")
+    Write-Host "host moving nearest NPC to $MoveNpc"
+    Start-Sleep -Seconds 6
+}
+
+if ($TeleportB) {
+    [System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "tp $TeleportB`n")
+    Write-Host "teleported B to $TeleportB"
+}
+
+# a client that disappears is the most valuable signal there is - report it loudly
+function Test-ClientsAlive {
+    return @(Get-Process | Where-Object ProcessName -match 'MortalShell2-Win64').Count
+}
+
+$deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+$aliveWarned = $false
+$resA = $null; $resB = $null
+while ((Get-Date) -lt $deadline) {
+    Hide-GameWindow
+    $pa = Join-Path $coopA 'result.txt'; $pb = Join-Path $coopB 'result.txt'
+    if (Test-Path $pa) { $t = (Get-Content $pa -Raw); if ($t -match '^(PASS|FAIL)') { $resA = $t.Trim() } }
+    if (Test-Path $pb) { $t = (Get-Content $pb -Raw); if ($t -match '^(PASS|FAIL)') { $resB = $t.Trim() } }
+    if ($resA -and $resB) { break }
+    if (-not $aliveWarned) {
+        $n = Test-ClientsAlive
+        if ($n -lt 2) { Write-Host "=== WARNING: only $n game client(s) alive"; $aliveWarned = $true }
+    }
+    Start-Sleep -Milliseconds 700
+}
+
+# --- co-op feature checks -----------------------------------------------------
+function Get-SyncValue([string]$coopDir, [string]$key) {
+    $f = Join-Path $coopDir 'sync.txt'
+    if (-not (Test-Path $f)) { return $null }
+    foreach ($line in Get-Content $f) { if ($line -match "^$key=(.*)$") { return $matches[1] } }
+    return $null
+}
+
+# [R7-FLAKE] Wait for the body lane to be LIVE again.
+#
+# A cutscene end raises the game's loading screen for 1-3 s.  That makes the client
+# that owns the cinematic go NOT READY (it then publishes the tiny {"rdy":0} packet
+# instead of a body) and makes the other client skip ApplyPeer during a 3 s local
+# hold, so anything measured inside that window sees the LAST body sample.  That is
+# exactly how PEERHP failed 4 of 6 runs in wt\r7-store: A read `peer:hp5.100/75.000
+# (0.068) age:3.9` right after the CINE block although B had just written 0.37.
+# The fix is ORDERING, not a wider tolerance: the body checks below wait until both
+# clients report `ready=1`/`peerready=1` (sync.txt) AND the host is applying a fresh
+# peer body (`bh ... age:` <= 1.5 s) again.
+function Get-SyncFlag([string]$coopDir, [string]$key) {
+    $v = Get-SyncValue $coopDir $key
+    if ($v -and ($v -match '^\s*(-?\d+)\s*$')) { return [int]$matches[1] }
+    return -1
+}
+function Get-BodyAge([string]$coopDir) {
+    $bh = Get-SyncValue $coopDir 'bh'
+    if ($bh -and ($bh -match 'age:([\d.]+)')) { return [double]$matches[1] }
+    return 99.0
+}
+function Wait-BodyFlow([string]$ca, [string]$cb, [int]$secs) {
+    $deadline = (Get-Date).AddSeconds($secs)
+    while ((Get-Date) -lt $deadline) {
+        $ra = Get-SyncFlag $ca 'ready'; $pa = Get-SyncFlag $ca 'peerready'
+        $rb = Get-SyncFlag $cb 'ready'; $pb = Get-SyncFlag $cb 'peerready'
+        $age = Get-BodyAge $ca
+        if ($ra -eq 1 -and $pa -eq 1 -and $rb -eq 1 -and $pb -eq 1 -and $age -le 1.5) {
+            return $true
+        }
+        Hide-GameWindow; Start-Sleep -Milliseconds 300
+    }
+    return $false
+}
+# [R7-FLAKE] Write a command and wait for the module to CONSUME it: the module
+# deletes cmd.txt when it reads it, so the file disappearing is the acknowledgement.
+# Without this a write can be lost (the PEERHP write was still pending when the next
+# block overwrote it, and the verdict then "passed" only because the guest happened
+# to sit at 0.38 by itself).
+function Write-Cmd([string]$coopDir, [string]$text, [int]$tries = 4) {
+    $cf = Join-Path $coopDir 'cmd.txt'
+    for ($i = 1; $i -le $tries; $i++) {
+        # never overwrite a command the module has not read yet (that is how the
+        # PEERHP write got lost): wait for the slot, then write, then wait for the
+        # module to delete it -- the consume acknowledgement.
+        $pre = (Get-Date).AddSeconds(2)
+        while ((Test-Path $cf) -and ((Get-Date) -lt $pre)) { Start-Sleep -Milliseconds 80 }
+        [System.IO.File]::WriteAllText($cf, $text)
+        $deadline = (Get-Date).AddSeconds(2)
+        while ((Get-Date) -lt $deadline) {
+            if (-not (Test-Path $cf)) { return $true }
+            Hide-GameWindow; Start-Sleep -Milliseconds 80
+        }
+    }
+    return $false
+}
+# The receiver's own `bh` line: is its LOCAL body at `frac` of its max?
+function Test-OwnBodyFrac([string]$coopDir, [double]$frac, [double]$tol) {
+    $bh = Get-SyncValue $coopDir 'bh'
+    if ($bh -and ($bh -match 'me:hp([\d.]+)/([\d.]+)')) {
+        $hp = [double]$matches[1]; $max = [double]$matches[2]
+        if ($max -gt 0) { return ([Math]::Abs($hp / $max - $frac) -le $tol) }
+    }
+    return $false
+}
+function Wait-OwnBodyFrac([string]$coopDir, [double]$frac, [double]$tol, [int]$secs) {
+    $deadline = (Get-Date).AddSeconds($secs)
+    while ((Get-Date) -lt $deadline) {
+        if (Test-OwnBodyFrac $coopDir $frac $tol) { return $true }
+        Hide-GameWindow; Start-Sleep -Milliseconds 200
+    }
+    return $false
+}
+
+# [R7-MAPS] gap G2 count, part 1: what store B holds BEFORE this session does
+# anything (the float/name maps are the question).  Part 2 is the same command
+# after the door/pickup/kill/chest block below -- the diff is the answer.
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "mapsdump`n")
+Start-Sleep -Seconds 3
+
+$bodyA = Get-SyncValue $coopA 'body'
+$bodyB = Get-SyncValue $coopB 'body'
+$peerA = Get-SyncValue $coopA 'peerbody'
+$peerB = Get-SyncValue $coopB 'peerbody'
+$shellOk = ($bodyA) -and ($bodyB) -and ($peerA -eq $bodyB) -and ($peerB -eq $bodyA)
+Write-Host "=== SHELL: A body=$bodyA ; B sees '$peerB' ; B body=$bodyB ; A sees '$peerA'"
+Write-Host "=== SHELL: $(if ($shellOk) { 'PASS' } else { 'FAIL' })"
+
+$wpnA = Get-SyncValue $coopA 'wpn'
+$wpnB = Get-SyncValue $coopB 'wpn'
+$peerWpnA = Get-SyncValue $coopA 'peerwpn'
+$appliedA = Get-SyncValue $coopA 'wpnapplied'
+$appliedB = Get-SyncValue $coopB 'wpnapplied'
+$weaponOk = ($wpnA) -and ($peerWpnA -eq $wpnB) -and ($appliedA -and $appliedA.Contains($wpnB))
+Write-Host "=== WEAPON: A wpn=$wpnA ; B wpn=$wpnB ; A sees peerwpn=$peerWpnA applied=$appliedA ; B applied=$appliedB"
+Write-Host "=== WEAPON: $(if ($weaponOk) { 'PASS' } else { 'FAIL' })"
+
+# PUPVIS: what the puppet RENDERS (not what was sent): visible, single-node anim
+# mode with a live anim instance, every weapon mesh present and not flattened.
+# Round 5: SHELL/WEAPON/ANIM passed while the puppet stood in its reference pose
+# with zero-scale weapons. Each client checks its own puppet (= the other player).
+foreach ($d in @($coopA, $coopB)) {
+    Remove-Item (Join-Path $d 'result_pupvis.txt') -Force -ErrorAction SilentlyContinue
+    [System.IO.File]::WriteAllText((Join-Path $d 'cmd.txt'), "pupcheck`n")
+}
+$pvEnd = (Get-Date).AddSeconds(12)
+while ((Get-Date) -lt $pvEnd -and -not ((Test-Path (Join-Path $coopA 'result_pupvis.txt')) -and (Test-Path (Join-Path $coopB 'result_pupvis.txt')))) { Hide-GameWindow; Start-Sleep -Milliseconds 500 }
+$pvA = if (Test-Path (Join-Path $coopA 'result_pupvis.txt')) { (Get-Content (Join-Path $coopA 'result_pupvis.txt') -Raw).Trim() } else { 'missing' }
+$pvB = if (Test-Path (Join-Path $coopB 'result_pupvis.txt')) { (Get-Content (Join-Path $coopB 'result_pupvis.txt') -Raw).Trim() } else { 'missing' }
+$pupVisOk = ($pvA -match '^PASS') -and ($pvB -match '^PASS')
+Write-Host "=== PUPVIS: A $pvA ; B $pvB"
+Write-Host "=== PUPVIS: $(if ($pupVisOk) { 'PASS' } else { 'FAIL' })"
+
+# look: B puts a mask on (the game's own BPC_AttachableItems:AddItem), A has to
+# show it on B's body; then B takes it off and A has to follow
+function Wait-Look([int]$secs, [scriptblock]$cond) {
+    $end = (Get-Date).AddSeconds($secs)
+    while ((Get-Date) -lt $end) { Hide-GameWindow; if (& $cond) { return $true }; Start-Sleep -Milliseconds 700 }
+    return $false
+}
+$lookPartsB0 = [int](Get-SyncValue $coopB 'lookparts')
+$lookB0 = Get-SyncValue $coopB 'look'
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "lookadd /Game/Sparta/Items/Pickups/BP_AIM_FlowerCrown.BP_AIM_FlowerCrown_C`n")
+$lookOn = Wait-Look 40 {
+    $lb = Get-SyncValue $coopB 'look'
+    ([int](Get-SyncValue $coopB 'lookparts') -gt $lookPartsB0) -and $lb -and ($lb -ne $lookB0) -and ((Get-SyncValue $coopA 'lookapplied') -eq $lb) -and ([int](Get-SyncValue $coopA 'peerlookparts') -gt $lookPartsB0)
+}
+Write-Host "=== LOOK on: B look=$(Get-SyncValue $coopB 'look') parts=$(Get-SyncValue $coopB 'lookparts') (was $lookPartsB0) ; A peerlook=$(Get-SyncValue $coopA 'peerlook') applied=$(Get-SyncValue $coopA 'lookapplied') parts=$(Get-SyncValue $coopA 'peerlookparts') missing=$(Get-SyncValue $coopA 'lookmissing') loads=$(Get-SyncValue $coopA 'gameloads')"
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "lookdel`n")
+$lookOff = Wait-Look 30 {
+    $lb = Get-SyncValue $coopB 'look'
+    ($lb -eq $lookB0) -and ((Get-SyncValue $coopA 'lookapplied') -eq $lb) -and ([int](Get-SyncValue $coopA 'peerlookparts') -eq $lookPartsB0)
+}
+Write-Host "=== LOOK off: B parts=$(Get-SyncValue $coopB 'lookparts') ; A applied=$(Get-SyncValue $coopA 'lookapplied') parts=$(Get-SyncValue $coopA 'peerlookparts')"
+$lookOk = $lookOn -and $lookOff
+Write-Host "=== LOOK: $(if ($lookOk) { 'PASS' } else { 'FAIL' }) (on=$lookOn off=$lookOff)"
+
+
+
+if (-not $StreamOnly) {
+# animation: make the host's player walk a small circle, so the guest's puppet
+# really moves and the guest can measure idle vs moving pose amplitude
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "patrol 14`n")
+$animFile = Join-Path $coopB 'result_anim.txt'
+$animDeadline = (Get-Date).AddSeconds(45)
+while (-not (Test-Path $animFile) -and (Get-Date) -lt $animDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resAnim = if (Test-Path $animFile) { (Get-Content $animFile -Raw).Trim() } else { $null }
+Write-Host "=== ANIM: $resAnim"
+
+# combat 1: the guest damages its copy, the host has to adopt that health
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "hurt 0.5`n")
+$damageOk = $false
+$damageDeadline = (Get-Date).AddSeconds(30)
+while ((Get-Date) -lt $damageDeadline) {
+    Hide-GameWindow
+    $hpA = Get-SyncValue $coopA 'hp'
+    if ($hpA -and $hpA -match '=0\.[0-6]\d{2}') { $damageOk = $true; Write-Host "host hp now: $hpA"; break }
+    Start-Sleep -Milliseconds 600
+}
+Write-Host "=== DAMAGE: $(if ($damageOk) { 'PASS' } else { 'FAIL' })"
+
+# combat 2: the host kills an enemy, the guest's copy has to die through
+# SpartaHealthComponent:StartDeath (native death animation)
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "kill`n")
+$deathOk = $false
+$deathDeadline = (Get-Date).AddSeconds(30)
+while ((Get-Date) -lt $deathDeadline) {
+    Hide-GameWindow
+    $deadB = Get-SyncValue $coopB 'dead'
+    if ($deadB -and $deadB.Length -gt 4) { $deathOk = $true; Write-Host "guest dead list: $deadB"; break }
+    Start-Sleep -Milliseconds 600
+}
+Write-Host "=== DEATH: $(if ($deathOk) { 'PASS' } else { 'FAIL' })"
+
+# ===========================================================================
+# [R7b] G6 -- enemy drops are shared, in BOTH directions.
+#
+# The owner of an enemy (the client whose copy died) rolls the loot and publishes
+# it; the other client vetoes its own roll for that death and grants a copy to its
+# own player.  Two measured facts shape this block:
+#   * GA_Death_AI_C (the ability that owns DropCurrency) is only activated from the
+#     damage/ASC path, so a co-op kill -- the mod pushing the health attribute --
+#     never rolls: 15 traced ability steps, none of them ran, for a hub cultist AND
+#     a real BP_Horde_Brigand.  The owner therefore rolls from the enemy's OWN
+#     CharacterDeathData (gold = GoldOnDeath with probability GoldDropChance,
+#     gloom = GloomOnDeath), which is the distribution the ability would produce;
+#     the ability's own hook still wins whenever the game does roll.
+#   * the currency balance is an item STACK: one grant moves
+#     GetTotalItemCountByDefinition by 1 (not by its value), so the amounts are
+#     asserted on the two result files and the HUD is checked visually.
+#
+# Direction 1: the host kills   (A owner) -> the guest must grant A's numbers.
+# Direction 2: the guest kills  (B owner) -> the host must grant B's numbers.
+# A receiver that rolled for the OTHER client's enemy would overwrite its claim file
+# with that enemy's key, so "keys differ" is the no-double-roll proof.
+# ===========================================================================
+# Wait for a drops file and -- when -wantPass is set -- keep waiting until it says
+# PASS: the killer writes a provisional "NONE" the moment a death starts and the real
+# roll overwrites it ~1 s later, so "the file exists" is NOT the answer.
+function Wait-DropsFile([string]$f, [int]$secs, [switch]$wantPass) {
+    $dl = (Get-Date).AddSeconds($secs)
+    while ((Get-Date) -lt $dl) {
+        if (Test-Path $f) {
+            $t = (Get-Content $f -Raw).Trim()
+            if (-not $wantPass.IsPresent -or $t.StartsWith('PASS')) { return $t }
+        }
+        Hide-GameWindow; Start-Sleep -Milliseconds 400
+    }
+    if (Test-Path $f) { return (Get-Content $f -Raw).Trim() } else { return $null }
+}
+function Get-DropsField([string]$line, [string]$field) {
+    if ($line -and ($line -match ($field + ':(-?\d+)'))) { return [int]$matches[1] }
+    return 0
+}
+function Parse-Drops([string]$t) {
+    $o = @{ ok = $false; key = '-'; gold = 0; gloom = 0 }
+    if (-not $t) { return $o }
+    if ($t -match '^PASS') { $o.ok = $true }
+    if ($t -match 'enemy (\S+?):') { $o.key = $matches[1] }
+    if ($t -match 'gold=(-?\d+)') { $o.gold = [int]$matches[1] }
+    if ($t -match 'gloom=(-?\d+)') { $o.gloom = [int]$matches[1] }
+    return $o
+}
+$dropsClaimA = Join-Path $coopA 'result_drops_a.txt'
+$dropsGrantA = Join-Path $coopA 'result_drops.txt'
+$dropsClaimB = Join-Path $coopB 'result_drops_a.txt'
+$dropsGrantB = Join-Path $coopB 'result_drops.txt'
+
+# --- direction 1: the HOST kills, the guest grants ---
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "dropswallet`ndropskill nearest`n")
+$d1ClaimA = Wait-DropsFile $dropsClaimA 25 -wantPass
+$d1GrantB = Wait-DropsFile $dropsGrantB 25
+Start-Sleep -Seconds 2
+
+# --- direction 2: the GUEST kills a different enemy, the host grants ---
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dropswallet`ndropskill nearest`n")
+$d2ClaimB = Wait-DropsFile $dropsClaimB 25 -wantPass
+$d2GrantA = Wait-DropsFile $dropsGrantA 25
+Start-Sleep -Seconds 2
+
+# both wallets again, after both grants (the game's own currency read)
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "dropswallet`n")
+Start-Sleep -Seconds 1
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dropswallet`n")
+Start-Sleep -Seconds 2
+
+$dropsLineA = Get-SyncValue $coopA 'drops'
+$dropsLineB = Get-SyncValue $coopB 'drops'
+$hooksA = Get-DropsField $dropsLineA 'hooks'
+$hooksB = Get-DropsField $dropsLineB 'hooks'
+$c1 = Parse-Drops $d1ClaimA
+$g1 = Parse-Drops $d1GrantB
+$c2 = Parse-Drops $d2ClaimB
+$g2 = Parse-Drops $d2GrantA
+$dir1 = $c1.ok -and $g1.ok -and ($c1.key -eq $g1.key) -and ($c1.gold -eq $g1.gold) -and ($c1.gloom -eq $g1.gloom)
+$dir2 = $c2.ok -and $g2.ok -and ($c2.key -eq $g2.key) -and ($c2.gold -eq $g2.gold) -and ($c2.gloom -eq $g2.gloom)
+$dropsDistinct = ($c1.key -ne '-') -and ($c2.key -ne '-') -and ($c1.key -ne $c2.key)
+$dropsNoOwnRoll = ($c2.key -ne $g1.key) -and ($c1.key -ne $g2.key)
+# WARN only when there was no enemy to kill (the harness says so); anything else is red
+$dropsNoEnemy = (-not $c1.ok -and -not $c2.ok) -or ($d1ClaimA -match '^NONE') -or ($d2ClaimB -match '^NONE')
+$dropsOk = $dir1 -and $dir2 -and $dropsDistinct -and $dropsNoOwnRoll -and ($hooksA -eq 5) -and ($hooksB -eq 5)
+$dropsWarn = (-not $dropsOk) -and $dropsNoEnemy -and (($g1.ok) -or ($g2.ok))
+Write-Host "=== DROPS: A $dropsLineA"
+Write-Host "=== DROPS: B $dropsLineB"
+Write-Host "=== DROPS: dir1 (A owns) A rolled [$($c1.key)] $($c1.gold)/$($c1.gloom) -> B granted [$($g1.key)] $($g1.gold)/$($g1.gloom)"
+Write-Host "=== DROPS: dir2 (B owns) B rolled [$($c2.key)] $($c2.gold)/$($c2.gloom) -> A granted [$($g2.key)] $($g2.gold)/$($g2.gloom)"
+Write-Host "=== DROPS: A claim: $d1ClaimA"
+Write-Host "=== DROPS: B grant: $d1GrantB"
+Write-Host "=== DROPS: B claim: $d2ClaimB"
+Write-Host "=== DROPS: A grant: $d2GrantA"
+Write-Host "=== DROPS: $(if ($dropsOk) { "PASS both directions: each owner rolled and the other client granted the same (" + $c1.gold + "/" + $c1.gloom + " and " + $c2.gold + "/" + $c2.gloom + "), no double roll, hooks " + $hooksA + "/" + $hooksB } elseif ($dropsWarn) { 'WARN no live enemy to kill in this run -- the shared drop was not exercised' } else { 'FAIL dir1=' + $dir1 + ' dir2=' + $dir2 + ' distinct=' + $dropsDistinct + ' noOwnRoll=' + $dropsNoOwnRoll + ' (A claim "' + $d1ClaimA + '", B grant "' + $d1GrantB + '")' })"
+
+# world state: the host opens the nearest closed door and picks up the nearest
+# pickup through the game's own functions; the guest has to replay both
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wstest`n")
+$wsFile = Join-Path $coopB 'result_ws.txt'
+$wsDeadline = (Get-Date).AddSeconds(45)
+while (-not (Test-Path $wsFile) -and (Get-Date) -lt $wsDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resWs = if (Test-Path $wsFile) { (Get-Content $wsFile -Raw).Trim() } else { $null }
+Write-Host "=== WORLD: A $(Get-SyncValue $coopA 'ws') ; B $(Get-SyncValue $coopB 'ws')"
+Write-Host "=== WORLD: $resWs"
+
+# world progression: the host marks the nearest chest opened in store B, drops a
+# narrative tag and restores it 12 s later, and flips an audio data layer; the
+# guest has to write the chest value, remove and re-add the tag (and follow the layer)
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wptest`n")
+$wpFile = Join-Path $coopB 'result_wp.txt'
+$wpDeadline = (Get-Date).AddSeconds(60)
+while (-not (Test-Path $wpFile) -and (Get-Date) -lt $wpDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resWp = if (Test-Path $wpFile) { (Get-Content $wpFile -Raw).Trim() } else { $null }
+Write-Host "=== PROGRESS: A $(Get-SyncValue $coopA 'wp') ; B $(Get-SyncValue $coopB 'wp')"
+Write-Host "=== PROGRESS: $resWp"
+
+# quests: the host starts a quest from DT_QuestData1 and completes it 12 s later;
+# the guest has to add it and then complete it in its own quest log
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "qstest`n")
+$qsFile = Join-Path $coopB 'result_qs.txt'
+$qsDeadline = (Get-Date).AddSeconds(45)
+while (-not (Test-Path $qsFile) -and (Get-Date) -lt $qsDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resQs = if (Test-Path $qsFile) { (Get-Content $qsFile -Raw).Trim() } else { $null }
+Write-Host "=== QUEST: $resQs"
+
+# quest state: the host starts a hub NPC quest, tracks it, raises the NPC
+# relationship, hears an objective, moves a stage on, then completes and turns it
+# in; the guest has to mirror each step
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "qs2test`n")
+$qs2File = Join-Path $coopB 'result_qs2.txt'
+$qs2Deadline = (Get-Date).AddSeconds(60)
+while (-not (Test-Path $qs2File) -and (Get-Date) -lt $qs2Deadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resQs2 = if (Test-Path $qs2File) { (Get-Content $qs2File -Raw).Trim() } else { $null }
+Write-Host "=== QUEST2: $resQs2"
+
+# lift: the host starts the hub lift the way its lever does; the guest has to
+# replay it and see its own cabin travel to the same floor
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "lifttest`n")
+$liftFile = Join-Path $coopB 'result_lift.txt'
+$liftDeadline = (Get-Date).AddSeconds(40)
+while (-not (Test-Path $liftFile) -and (Get-Date) -lt $liftDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resLift = if (Test-Path $liftFile) { (Get-Content $liftFile -Raw).Trim() } else { $null }
+Write-Host "=== LIFT: A $(Get-SyncValue $coopA 'lift') ; B $(Get-SyncValue $coopB 'lift')"
+Write-Host "=== LIFT: $resLift"
+
+# chest: the host opens the nearest unopened chest (TimesUsed + store B), its lid
+# plays and one item lands in its inventory as the stand-in reward; the guest has
+# to play the lid and receive the same item
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "cstest`n")
+$chestFile = Join-Path $coopB 'result_chest.txt'
+$chestDeadline = (Get-Date).AddSeconds(40)
+while (-not (Test-Path $chestFile) -and (Get-Date) -lt $chestDeadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resChest = if (Test-Path $chestFile) { (Get-Content $chestFile -Raw).Trim() } else { $null }
+Write-Host "=== CHEST: A $(Get-SyncValue $coopA 'chest') ; B $(Get-SyncValue $coopB 'chest')"
+Write-Host "=== CHEST: $resChest"
+
+# [R7-MAPS] gap G2 count, part 2: the SAME dump after a door was opened, a bag
+# picked up, an enemy killed and a chest looted -- i.e. after the game's own
+# WriteAn* calls have had every chance to touch the float and the name map.
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "mapsdump`n")
+Start-Sleep -Seconds 3
+
+# store A2 (gap G1 + G1b): the host first resets its fixtures through the save
+# subsystem's own API (ResetSaveObjectByGuid, falling back to ResetSaveObjectByClass)
+# so the verb is re-runnable, then sets one boolean per new save-object class, bumps
+# one int per typed class and appends one string-array element; the guest has to
+# replay the boolean through "ws", apply the ints and union the array through "wt".
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wa2selftest`n")
+Start-Sleep -Seconds 2
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wa2census`n")
+Start-Sleep -Seconds 3
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wa2test`n")
+$ws2File = Join-Path $coopB 'result_ws2.txt'
+$ws2Deadline = (Get-Date).AddSeconds(130)
+while (-not (Test-Path $ws2File) -and (Get-Date) -lt $ws2Deadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+$resWs2 = if (Test-Path $ws2File) { (Get-Content $ws2File -Raw).Trim() } else { $null }
+Write-Host "=== STORE_A2: A $(Get-SyncValue $coopA 'ws2') ; B $(Get-SyncValue $coopB 'ws2')"
+Write-Host "=== STORE_A2: $resWs2"
+$stFile = Join-Path $coopA 'result_ws2selftest.txt'
+Write-Host "=== STORE_A2SELFTEST: $(if (Test-Path $stFile) { (Get-Content $stFile | Select-Object -First 1) } else { '-' })"
+$censusFile = Join-Path $coopA 'ws2_census.txt'
+Write-Host "=== STORE_A2CENSUS: $(if (Test-Path $censusFile) { (Get-Content $censusFile | Select-String -Pattern 'instances=' | Measure-Object).Count } else { 0 }) census rows (ws2_census.txt)"
+
+}
+
+function Wait-File([string]$f, [int]$secs) {
+    $dl = (Get-Date).AddSeconds($secs)
+    while (-not (Test-Path $f) -and (Get-Date) -lt $dl) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+    if (Test-Path $f) { return (Get-Content $f -Raw).Trim() } else { return $null }
+}
+function Get-Taken([string]$coopDir) {
+    $e = Get-SyncValue $coopDir 'enemy'
+    if ($e -match 'taken:(\d+)') { return [int]$matches[1] } else { return 0 }
+}
+function Get-WS { $p = Get-Process | Where-Object ProcessName -match 'MortalShell2-Win64' | Sort-Object StartTime | Select-Object -First 1; if ($p) { [int]($p.WorkingSet64 / 1MB) } else { 0 } }
+
+# spawn: the guest walks into a proximity spawner the host has not triggered;
+# its enemy must appear on the host too and be driven by the guest
+#
+# [R6-SPAWN] windows measured, not guessed.  The guest's own spawn needs the
+# self-trigger hold (1.5 s inside the sphere) plus its 2 Hz scan, then the claim
+# travels and the host replays it on its next 2 Hz tick, and coop_combat's 15 Hz
+# claim watch names the enemy the moment it exists -- so SPAWN lands 5-10 s after
+# the tp and MIRROR (a take on the next peer packet) within ~1 s of that.  The old
+# 45 s/45 s pair hid a real defect for two rounds: a replayed enemy on the client
+# with no player near it is destroyed by the GAME ~1 s after it spawns, and a 2 Hz
+# scan usually lost that race.  If SPAWN needs more than 30 s now, something is
+# wrong again and the run has to say FAIL.
+# [R8-WALL] remember the gap while the hub is still streamed in on the guest: the
+# (main r8 merge: moved BEFORE the spawn tp -- 3 s next to the spawned enemies got the
+# guest killed before the long travel, which voided STREAM/NPCFAR.)  The WALLANIM block at the end teleports there after the run has travelled 90k uu.
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "wallstage cache`n")
+Start-Sleep -Seconds 3
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "tp $SpawnPoint`n")
+$resSpawn = Wait-File (Join-Path $coopA 'result_spawn.txt') 30
+Write-Host "=== SPAWN: $resSpawn (A $(Get-SyncValue $coopA 'enemy'))"
+$mirrorOk = $false
+$mDeadline = (Get-Date).AddSeconds(20)   # measured: the take follows the spawn within ~1 s
+while ((Get-Date) -lt $mDeadline) {
+    if ((Get-Taken $coopA) -gt 0) { $mirrorOk = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 700
+}
+Write-Host "=== MIRROR: $(if ($mirrorOk) { 'PASS host copy driven by the guest (AI paused, owner motion/facing/montage)' } else { 'FAIL' }) (A $(Get-SyncValue $coopA 'enemy') ; B $(Get-SyncValue $coopB 'enemy'))"
+
+# a hit on the guest's body in the host world must land on the guest
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "pdtest`n")
+$resPd = Wait-File (Join-Path $coopB 'result_pd.txt') 20
+Write-Host "=== PEERHIT: $resPd"
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "aitest`n")
+$resAi = Wait-File (Join-Path $coopA 'result_ai.txt') 15
+Write-Host "=== AITARGET: $resAi"
+
+
+
+
+# long travel: the guest crosses the map in a straight line (60 s) to a landing
+# area ~90k away; the host must keep streaming around the moving body
+# (main r8 merge) the guest stands among the spawned brigands for ~20 s above and can be
+# killed there (co-op death, 10 s respawn); a travel sent while it is down is cancelled
+# ('travel cancelled: pawn gone') and voids STREAM/NPCFAR.  Wait until it is back up.
+$aliveDeadline = (Get-Date).AddSeconds(40)
+while ((Get-Date) -lt $aliveDeadline) {
+    Hide-GameWindow
+    if ((Get-SyncValue $coopB 'deathstate') -eq '0' -and (Get-SyncValue $coopB 'death') -match '\(alive\)') { break }
+    Start-Sleep -Milliseconds 500
+}
+if ((Get-Date) -ge $aliveDeadline) { Write-Host "=== STREAM: guest not alive before the travel ($(Get-SyncValue $coopB 'death'))" }
+Start-Sleep -Seconds 2
+$wsBefore = Get-WS
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "travel $FarPoint 60`n")
+$resStream = Wait-File (Join-Path $coopA 'result_stream.txt') 130
+$wsAfter = Get-WS
+Write-Host "=== STREAM: A $(Get-SyncValue $coopA 'stream') ; B $(Get-SyncValue $coopB 'stream')"
+Write-Host "=== STREAM: $resStream"
+
+# pull one host-side enemy over to the far guest (on the guest only): the host
+# must hand it over and move its own copy to the guest
+$fp = @($FarPoint -split '\s+' | ForEach-Object { [double]$_ })
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "npctp $($fp[0] + 600) $($fp[1]) $($fp[2])`n")
+$farOk = $false
+$farTail = $null
+$farDeadline = (Get-Date).AddSeconds(20)
+while ((Get-Date) -lt $farDeadline) {
+    $m = Select-String -Path (Join-Path $coopB 'probe.log') -Pattern 'npctp -> (\S+)' | Select-Object -Last 1
+    if ($m) {
+        $farTail = $m.Matches[0].Groups[1].Value
+        if (Select-String -Path (Join-Path $coopA 'probe.log') -SimpleMatch "mirroring peer-owned enemy $farTail" -Quiet) { $farOk = $true; break }
+    }
+    Hide-GameWindow; Start-Sleep -Milliseconds 700
+}
+Write-Host "=== NPCFAR: $(if ($farOk) { "PASS host hands $farTail to the far guest and moves its copy there" } else { "FAIL ($farTail)" })"
+Write-Host "=== PERF: host working set ${wsBefore} MB -> ${wsAfter} MB with the far area loaded; A $(Get-SyncValue $coopA 'perf') ; B $(Get-SyncValue $coopB 'perf')"
+
+# ledger: keys known true from earlier sessions are re-applied when their actor
+# loads (only reports when a ledger from an earlier run exists)
+$ledA = Join-Path $coopA 'result_ledger.txt'; $ledB = Join-Path $coopB 'result_ledger.txt'
+Write-Host "=== LEDGER: A $(Get-SyncValue $coopA 'ledger') ; B $(Get-SyncValue $coopB 'ledger')"
+Write-Host "=== LEDGER: A $(if (Test-Path $ledA) { (Get-Content $ledA -Raw).Trim() } else { '-' }) ; B $(if (Test-Path $ledB) { (Get-Content $ledB -Raw).Trim() } else { '-' })"
+
+# ===========================================================================
+# [R7-BREAK] live breakables (HANDOFF-REMAINING-SYNC G3, data mine section 19)
+#
+# Barrels/pots/carts/barriers are BP_VFX_Breakable_C actors with no save object at
+# all, so no store can carry them; the host breaks one through the game's own
+# TriggerDamage and the guest's copy has to break from the "wx" event alone.
+#
+# Placed HERE on purpose: it must run before the ZONE test (zonefake changes the
+# guest's map identity, which pauses every world-key dispatch) and before the
+# PEERDEAD test (a player death can take the guest's world down).
+#
+# The verdict is written by the RECEIVING client (B): coop\result_break.txt carries
+# "PASS peer break <key> <class> <owner>" only after B's own copy of that actor reads
+# IsBroken=true (and/or is hidden with collision off).
+# ===========================================================================
+$breakFile = Join-Path $coopB 'result_break.txt'
+Remove-Item $breakFile -Force -ErrorAction SilentlyContinue
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "breakdump all`n")
+Start-Sleep -Seconds 2
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "brkbreak nearest`n")
+$resBreak = Wait-File $breakFile 45
+Write-Host "=== BREAK: A $(Get-SyncValue $coopA 'brk')"
+Write-Host "=== BREAK: B $(Get-SyncValue $coopB 'brk')"
+Write-Host "=== BREAK: $resBreak"
+$breakOk = ($resBreak -match '^PASS')
+Write-Host "=== BREAK: $(if ($breakOk) { 'PASS' } else { 'FAIL' })"
+# [R7-WIRE] WIRE: every datagram under the MTU, the packet really split, and the
+# parts reassembled.  "wire=" on sync.txt is the mod's own counter (tx = the parts
+# it cut, rx = what it merged back); the relay's "wire:" log line adds the
+# datagram sizes it actually sent and the parts it never received.
+# ===========================================================================
+function Get-WireField([string]$text, [string]$field) {
+    if ($text -and ($text -match ($field + ':(-?\d+)'))) { return [int]$matches[1] }
+    return -1
+}
+$wireA = Get-SyncValue $coopA 'wire'
+$wireB = Get-SyncValue $coopB 'wire'
+$relayWire = @()
+foreach ($f in @((Join-Path $coopA 'relay_A.log'), (Join-Path $coopB 'relay_B.log'))) {
+    if (Test-Path $f) {
+        $last = Select-String -Path $f -Pattern '^\[.*\] wire: ' | Select-Object -Last 1
+        if ($last) { $relayWire += $last.Line }
+    }
+}
+$relayMax = 0
+$relaySent = 0
+$relayLost = 0
+foreach ($l in $relayWire) {
+    if ($l -match 'max=(\d+)') { if ([int]$matches[1] -gt $relayMax) { $relayMax = [int]$matches[1] } }
+    if ($l -match 'sent=(\d+)') { $relaySent += [int]$matches[1] }
+    if ($l -match 'parts_lost=(\d+)') { $relayLost += [int]$matches[1] }
+}
+$wirePartsA = Get-WireField $wireA 'txp'
+$wirePartsB = Get-WireField $wireB 'txp'
+$wireMax = [Math]::Max((Get-WireField $wireA 'txmax'), (Get-WireField $wireB 'txmax'))
+$wireRxMax = [Math]::Max((Get-WireField $wireA 'rxmax'), (Get-WireField $wireB 'rxmax'))
+$wireRxA = Get-WireField $wireA 'rxp'
+$wireRxB = Get-WireField $wireB 'rxp'
+$wireLost = (Get-WireField $wireA 'lost') + (Get-WireField $wireB 'lost')
+$wireOk = ($wireMax -gt 0) -and ($wireMax -le 1200) -and ($wireRxMax -gt 0) -and ($wireRxMax -le 1200) -and
+          ($wirePartsA -ge 2) -and ($wirePartsB -ge 2) -and ($wireRxA -ge 1) -and ($wireRxB -ge 1) -and
+          ($relayMax -gt 0) -and ($relayMax -le 1200) -and $wireTestOk
+Write-Host "=== WIRE: A $wireA"
+Write-Host "=== WIRE: B $wireB"
+Write-Host "=== WIRE: relay $($relayWire -join ' | ') (sent=$relaySent parts_lost=$relayLost)"
+Write-Host "=== WIRE: $(if ($wireOk) { 'PASS' } else { 'FAIL' }) (packet split into $wirePartsA/$wirePartsB part(s), largest datagram $([Math]::Max($wireMax, $relayMax)) B <= 1200, reassembled $wireRxA/$wireRxB, parts lost $wireLost)"
+
+# ===========================================================================
+# [R5-BODY] run-two verdicts -- paste this block into run-two.ps1 immediately
+# after the LEDGER block (after the two "=== LEDGER:" Write-Hosts) and add
+#   $zoneOk -and $peerHpOk -and $peerDeadOk
+# to the $pass expression.  Nothing above it changes.
+#
+# Depends on helpers defined earlier in run-two.ps1: Get-SyncValue (line ~216)
+# and Wait-File (line ~362), plus $coopA / $coopB / Hide-GameWindow.
+#
+# The three verdicts are written by the RECEIVING client (A):
+#   coop\result_zone.txt    a mismatch paused the world-state dispatch and it
+#                           resumed when the maps agreed again (ZONE)
+#   coop\result_bh.txt      the friend's body state arrived and the puppet's own
+#                           health set reports it (PEERHP)
+#   coop\result_bhdead.txt  the friend's death played a DeathsLibrary clip on the
+#                           puppet (PEERDEAD)
+# ===========================================================================
+
+function Get-ZoneField([string]$coopDir, [string]$field) {
+    $z = Get-SyncValue $coopDir 'zone'
+    if ($z -and ($z -match ($field + ':(\S+)'))) { return $matches[1] }
+    return $null
+}
+
+# --- ZONE: force a map mismatch on the guest; the host must stop applying the
+# guest's world state (and say so) and resume when the maps agree again.
+$zoneFile = Join-Path $coopA 'result_zone.txt'
+Remove-Item $zoneFile -Force -ErrorAction SilentlyContinue
+$zoneBefore = Get-SyncValue $coopA 'zone'
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "zonefake /Game/Sparta/Maps/R5/Fake_ZoneTest`n")
+$zoneMismatch = $false
+$zmDeadline = (Get-Date).AddSeconds(12)
+while ((Get-Date) -lt $zmDeadline) {
+    $z = Get-SyncValue $coopA 'zone'
+    if ($z -and $z.Contains('same:0') -and $z.Contains('paused:1')) { $zoneMismatch = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 700
+}
+$zoneAp0 = Get-ZoneField $coopA 'ap'
+$zoneSk0 = Get-ZoneField $coopA 'sk'
+Start-Sleep -Seconds 4
+$zoneAp1 = Get-ZoneField $coopA 'ap'
+$zoneSk1 = Get-ZoneField $coopA 'sk'
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "zonefake off`n")
+$zoneResumed = $false
+$zrDeadline = (Get-Date).AddSeconds(12)
+while ((Get-Date) -lt $zrDeadline) {
+    $z = Get-SyncValue $coopA 'zone'
+    if ($z -and $z.Contains('same:1') -and $z.Contains('paused:0')) { $zoneResumed = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 700
+}
+Start-Sleep -Seconds 3
+$zoneAp2 = Get-ZoneField $coopA 'ap'
+$resZone = Wait-File $zoneFile 15
+$zoneFrozen = ($null -ne $zoneAp0) -and ($zoneAp0 -eq $zoneAp1) -and ([int]$zoneSk1 -gt [int]$zoneSk0)
+$zoneMoving = ($null -ne $zoneAp2) -and ([int]$zoneAp2 -gt [int]$zoneAp1)
+$zoneOk = $zoneMismatch -and $zoneResumed -and $zoneFrozen -and $zoneMoving -and ($resZone -match '^PASS')
+Write-Host "=== ZONE: before '$zoneBefore'"
+Write-Host "=== ZONE: mismatch=$zoneMismatch (applies $zoneAp0 -> $zoneAp1 and skips $zoneSk0 -> $zoneSk1 while paused) resumed=$zoneResumed (applies -> $zoneAp2)"
+Write-Host "=== ZONE: A $(Get-SyncValue $coopA 'zone')"
+Write-Host "=== ZONE: B $(Get-SyncValue $coopB 'zone')"
+Write-Host "=== ZONE: $resZone"
+Write-Host "=== ZONE: $(if ($zoneOk) { 'PASS' } else { 'FAIL' })"
+
+# ===========================================================================
+# [R7-DIALOG] DIALOG + CINE -- dialogue / cinematic state on the wire
+#
+# Both verdicts are written by the RECEIVING client (A, the host).  B puts itself
+# into the "player is busy" state the game puts it into when it talks to an NPC
+# or watches a cutscene, and A has to
+#   (a) see it in sync.txt                  (`dlg=` / `cine=` -> peer:1),
+#   (b) hold the puppet in its idle clip    (`idle:` > 0, not a stale montage),
+#   (c) NOT charge the friend for damage OUR world did to the stand-in body:
+#       `pdtest` drops the puppet's health to 0.9, which without the suppression
+#       becomes a "pd" charge (`enemy=...pdsent:` grows) -- a player locked into a
+#       conversation or a cutscene cannot dodge, so it must not arrive.
+# `dlgfake` / `cinefake` are STATE INJECTORS in the same spirit as `zonefake`:
+# they let the wire + receiver half be tested without a human clicking an NPC.
+# The detectors themselves also run always-on and log every REAL episode
+# ("dlg: DIALOGUE ACTIVE ..." / "cine: sequence PLAYING ...") -- REPORT.md.
+# ===========================================================================
+function Get-PdSent([string]$coopDir) {
+    $e = Get-SyncValue $coopDir 'enemy'
+    if ($e -match 'pdsent:([\d.]+)') { return [double]$matches[1] }
+    return -1.0
+}
+
+# --- DIALOG (round 7b): B starts a REAL conversation with a hub NPC through the
+# game's own BPC_DialogueInstigator_C::StartDialogue.  A must
+#   (a) see it on the wire                 (`dlg=` -> peer:1, a real asset path),
+#   (b) REPLAY the line on its own client   (`lines:` grows: subtitle + voice read
+#       from the same dialogue asset's node),
+#   (c) hold the puppet idle and charge no damage to it (`idle:` grows, `pdsent:` flat
+#       while `pdtest` drops the stand-in body's health),
+#   (d) resolve the vote the way the rule says (`dlgvotesim`: six cases).
+# The vote engine is the shipped resolver, so this is not a self-fulfilling check.
+function Get-DlgField([string]$coopDir, [string]$field) {
+    $d = Get-SyncValue $coopDir 'dlg'
+    if ($d -and ($d -match ($field + ':(\d+)'))) { return [int]$matches[1] }
+    return 0
+}
+$dlgFile = Join-Path $coopA 'result_dialog.txt'
+Remove-Item $dlgFile -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $coopA 'result_dialogvote.txt'), (Join-Path $coopB 'result_dialogvote.txt') -Force -ErrorAction SilentlyContinue
+$pdD0 = Get-PdSent $coopA
+$idleD0 = Get-DlgField $coopA 'idle'
+$linesD0 = Get-DlgField $coopA 'lines'
+# the REAL asset, so the listener replays genuine lines (text + voice) from it
+$dlgAsset = '/Game/Sparta/Dialogue/Dialogues/HUB/TunnelCultist/DLG_HubCultist02_Greeting.DLG_HubCultist02_Greeting'
+# first the game's own start (a hub NPC); it is content-gated in this save, so its
+# result is logged and NOT required -- see REPORT round 7b
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgstart`n")
+$dlgSeen = $false
+$dlgDeadline = (Get-Date).AddSeconds(10)
+while ((Get-Date) -lt $dlgDeadline) {
+    if ((Get-SyncValue $coopA 'dlg') -match 'peer:1') { $dlgSeen = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 400
+}
+$dlgReal = $dlgSeen
+if (-not $dlgSeen) {
+    # no conversation could be started in this save: drive the same wire with the
+    # REAL dialogue asset, so the listener still replays real lines and the vote
+    # window still opens on real nodes
+    [System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgfake on $dlgAsset`n")
+    $dlgDeadline = (Get-Date).AddSeconds(10)
+    while ((Get-Date) -lt $dlgDeadline) {
+        if ((Get-SyncValue $coopA 'dlg') -match 'peer:1') { $dlgSeen = $true; break }
+        Hide-GameWindow; Start-Sleep -Milliseconds 400
+    }
+}
+Write-Host "=== DIALOG: realConversation=$dlgReal (dlgstart content-gated in this save; see REPORT)"
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "pdtest`n")
+Start-Sleep -Seconds 3
+$dlgLine = if (Get-SyncValue $coopA 'dlg') { Get-SyncValue $coopA 'dlg' } else { '-' }
+$dlgIdle = ((Get-DlgField $coopA 'idle') -gt $idleD0)
+$dlgLines = ((Get-DlgField $coopA 'lines') -gt $linesD0)
+$pdD1 = Get-PdSent $coopA
+$resDialog = Wait-File $dlgFile 15
+# the vote resolver's own cases, on both clients
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "dlgvotesim`n")
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgvotesim`n")
+$voteA = Wait-File (Join-Path $coopA 'result_dialogvote.txt') 8
+$voteB = Wait-File (Join-Path $coopB 'result_dialogvote.txt') 8
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgstop`n")
+Start-Sleep -Milliseconds 600
+# a FAKE trigger has no game dialogue behind it, so turn it off explicitly
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgfake off`n")
+$dlgEnded = $false
+$dlgEndDeadline = (Get-Date).AddSeconds(10)
+while ((Get-Date) -lt $dlgEndDeadline) {
+    if ((Get-SyncValue $coopA 'dlg') -match 'peer:0') { $dlgEnded = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 400
+}
+$dlgPdOk = ($pdD0 -ge 0) -and ($pdD1 -ge 0) -and ([Math]::Abs($pdD1 - $pdD0) -lt 0.001)
+$voteOk = ($voteA -match '^PASS') -and ($voteB -match '^PASS')
+$dlgOk = $dlgSeen -and $dlgIdle -and $dlgPdOk -and $dlgLines -and $voteOk -and $dlgEnded -and ($resDialog -match '^PASS')
+Write-Host "=== DIALOG: A $dlgLine"
+Write-Host "=== DIALOG: B $(Get-SyncValue $coopB 'dlg')"
+Write-Host "=== DIALOG: $resDialog"
+Write-Host "=== DIALOGVOTE: A $voteA ; B $voteB"
+Write-Host "=== DIALOG: $(if ($dlgOk) { 'PASS' } else { 'FAIL' }) (peerBusySeen=$dlgSeen realConversation=$dlgReal idlePuppet=$dlgIdle listenLines=$dlgLines pdNotCharged=$dlgPdOk [$pdD0 -> $pdD1] votes=$voteOk lockEnded=$dlgEnded)"
+# leave the stand-in body and any hold the way we found them: the PEERHP check that
+# follows sets the peer's body deliberately and must not see our `pdtest` leftovers
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "pdreset`nholdclear`n")
+
+# --- CINE (round 7b): A starts a REAL level sequence through the game's own
+# BP_CinematicPlayer_C::PlayCutscene; B must play the SAME sequence (its `replay:`
+# counter and its own cine=me:1 while A is playing), the puppet must stay idle and
+# B must not be charged for damage, and A's stop must end it on both sides.
+function Get-CineField([string]$coopDir, [string]$field) {
+    $c = Get-SyncValue $coopDir 'cine'
+    if ($c -and ($c -match ($field + ':(\d+)'))) { return [int]$matches[1] }
+    return 0
+}
+$cineFile = Join-Path $coopA 'result_cine.txt'
+Remove-Item $cineFile -Force -ErrorAction SilentlyContinue
+$pdC0 = Get-PdSent $coopB
+$idleC0 = Get-DlgField $coopB 'idle'
+$replayC0 = Get-CineField $coopB 'replay'
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "cineplay`n")
+$cineA = $false
+$cineB = $false
+$cinePeerB = $false
+$cineDeadline = (Get-Date).AddSeconds(15)
+while ((Get-Date) -lt $cineDeadline) {
+    if ((Get-SyncValue $coopA 'cine') -match 'me:1') { $cineA = $true }
+    if ((Get-SyncValue $coopB 'cine') -match 'me:1') { $cineB = $true }
+    if ((Get-SyncValue $coopB 'cine') -match 'peer:1') { $cinePeerB = $true }
+    # the damage charge has to land INSIDE the sequence (the hub intro is ~2 s)
+    if ($cineA -and ($cineB -or $cinePeerB)) {
+        [System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "pdtest`n")
+        break
+    }
+    Hide-GameWindow; Start-Sleep -Milliseconds 150
+}
+Start-Sleep -Seconds 2
+$cineIdle = ((Get-DlgField $coopB 'idle') -gt $idleC0)
+$replayOk = ((Get-CineField $coopB 'replay') -gt $replayC0)
+$pdC1 = Get-PdSent $coopB
+$resCine = Wait-File $cineFile 15
+$cineStopSent = Write-Cmd $coopA "cinestop`n"
+Write-Host "=== CINE: cinestop consumed=$cineStopSent"
+# [R7-FLAKE] the same ordering problem as PEERHP: the stop is one event repeated for
+# a few seconds, and the peer skips ApplyPeer during the 3 s hold its own loading
+# screen arms.  Wait until both clients are live again before judging `endedBoth`,
+# and if the peer still did not end, publish the stop once more (an identical
+# re-assert of the command, not a relaxed verdict -- both clients must read me:0).
+$cineFlow = Wait-BodyFlow $coopA $coopB 20
+Write-Host "=== CINE: stopped; both clients ready again=$cineFlow"
+$cineEnded = $false
+for ($cineTry = 1; $cineTry -le 2 -and (-not $cineEnded); $cineTry++) {
+    if ($cineTry -gt 1) {
+        Write-Host "=== CINE: the peer's replay did not end in the first window -- re-issuing cinestop"
+        [void](Write-Cmd $coopA "cinestop`n")
+    }
+    $cineEndDeadline = (Get-Date).AddSeconds(12)
+    while ((Get-Date) -lt $cineEndDeadline) {
+        if (((Get-SyncValue $coopA 'cine') -match 'me:0') -and ((Get-SyncValue $coopB 'cine') -match 'me:0')) { $cineEnded = $true; break }
+        Hide-GameWindow; Start-Sleep -Milliseconds 500
+    }
+}
+$cinePdOk = ($pdC0 -ge 0) -and ($pdC1 -ge 0) -and ([Math]::Abs($pdC1 - $pdC0) -lt 0.001)
+$cineOk = $cineA -and ($cineB -or $cinePeerB) -and $replayOk -and $cineIdle -and $cinePdOk -and $cineEnded -and ($resCine -match '^PASS')
+Write-Host "=== CINE: A $(Get-SyncValue $coopA 'cine')"
+Write-Host "=== CINE: B $(Get-SyncValue $coopB 'cine')"
+Write-Host "=== CINE: $resCine"
+Write-Host "=== CINE: $(if ($cineOk) { 'PASS' } else { 'FAIL' }) (aPlaying=$cineA bReplays=$cineB replayCounter=$replayOk idlePuppet=$cineIdle pdNotCharged=$cinePdOk [$pdC0 -> $pdC1] endedBoth=$cineEnded)"
+
+
+# --- PEERHP: the guest writes its own body state; the host must receive it
+# within 3 s and put it into the puppet's own health set.  The wire carries
+# ABSOLUTE attribute values, so compare FRACTIONS, never the raw numbers.
+$bhFile = Join-Path $coopA 'result_bh.txt'
+$bhFlow = Wait-BodyFlow $coopA $coopB 25
+Write-Host "=== PEERHP: body lane live again before the check (ready/peerready=1 on both, peer body age<=1.5s): $bhFlow"
+$peerHpSeen = $false
+# Two attempts of the SAME action: the value written is identical, so this is not a
+# wider tolerance -- the first window can be swallowed whole by the cutscene-end
+# hold, and a second write after the lane is live is the only way to measure the
+# thing the verdict is about (the receiver getting the new body within 3 s).
+for ($bhTry = 1; $bhTry -le 2 -and (-not $peerHpSeen); $bhTry++) {
+    if ($bhTry -gt 1) {
+        $again = Wait-BodyFlow $coopA $coopB 20
+        Write-Host "=== PEERHP: first window produced no fresh sample -- re-arming the bodyset (lane live again=$again)"
+    }
+    # The write must really take: wait for the module to consume it AND for the
+    # guest's own body to read 0.37.  Without that the check can "pass" on a guest
+    # that happens to sit near 0.37 by itself.
+    $consumed = Write-Cmd $coopB "bodyset hp 0.37`nbodyset res 0.5`nbodyset heal 1`n"
+    $written = Wait-OwnBodyFrac $coopB 0.37 0.02 4
+    Write-Host "=== PEERHP: bodyset consumed=$consumed, guest body now 0.37=$written (try $bhTry)"
+    $bhDeadline = (Get-Date).AddSeconds(3)
+    while ((Get-Date) -lt $bhDeadline) {
+        $bh = Get-SyncValue $coopA 'bh'
+        if ($bh -and ($bh -match 'peer:hp([\d.]+)/([\d.]+)')) {
+            $php = [double]$matches[1]; $pmax = [double]$matches[2]
+            if (($pmax -gt 0) -and ([Math]::Abs($php / $pmax - 0.37) -le 0.05)) { $peerHpSeen = $true; break }
+        }
+        Hide-GameWindow; Start-Sleep -Milliseconds 300
+    }
+}
+$resBh = Wait-File $bhFile 12
+$bhFracOk = $false
+if ($resBh -and ($resBh -match 'hp=([\d.]+)/([\d.]+)')) {
+    $rhp = [double]$matches[1]; $rmax = [double]$matches[2]
+    if (($rmax -gt 0) -and ([Math]::Abs($rhp / $rmax - 0.37) -le 0.05)) { $bhFracOk = $true }
+}
+$peerHpOk = $peerHpSeen -and $bhFracOk -and ($resBh -match '^PASS')
+Write-Host "=== PEERHP: A $(Get-SyncValue $coopA 'bh')"
+Write-Host "=== PEERHP: B $(Get-SyncValue $coopB 'bh')"
+Write-Host "=== PEERHP: $resBh"
+Write-Host "=== PEERHP: $(if ($peerHpOk) { 'PASS' } else { 'FAIL' }) (received=$peerHpSeen puppetMatches=$bhFracOk)"
+
+# --- PEERDEAD: the guest dies through the game's own StartDeath; the host's
+# puppet has to play the death clip (and hold it).  This is the LAST check on
+# purpose: a player death may take the guest's world down with it.
+# The receiver rewrites its verdict file for EVERY death episode (a peer can die
+# and be revived several times in a run), so a write that happened AFTER this
+# test triggered one is required -- an earlier, spontaneous death must not count.
+$deadFile = Join-Path $coopA 'result_bhdead.txt'
+$deadT0 = Get-Date
+$deadFlow = Wait-BodyFlow $coopA $coopB 20
+Write-Host "=== PEERDEAD: body lane live again before the death sample: $deadFlow"
+$dsConsumed = Write-Cmd $coopB "bodyset ds 1`n"
+Write-Host "=== PEERDEAD: bodyset ds 1 consumed=$dsConsumed"
+$peerDeadSeen = $false
+$pdDeadline = (Get-Date).AddSeconds(20)
+while ((Get-Date) -lt $pdDeadline) {
+    $bh = Get-SyncValue $coopA 'bh'
+    if ($bh -and $bh.Contains('pdf:1')) { $peerDeadSeen = $true; break }
+    Hide-GameWindow; Start-Sleep -Milliseconds 500
+}
+$resDead = $null
+$deadDeadline = (Get-Date).AddSeconds(15)
+while ((Get-Date) -lt $deadDeadline) {
+    if ((Test-Path $deadFile) -and ((Get-Item $deadFile).LastWriteTime -gt $deadT0)) {
+        $resDead = (Get-Content $deadFile -Raw).Trim(); break
+    }
+    Hide-GameWindow; Start-Sleep -Milliseconds 400
+}
+$peerDeadOk = $peerDeadSeen -and ($resDead -match '^PASS')
+Write-Host "=== PEERDEAD: A $(Get-SyncValue $coopA 'bh')"
+Write-Host "=== PEERDEAD: B $(Get-SyncValue $coopB 'bh')"
+Write-Host "=== PEERDEAD: $resDead"
+Write-Host "=== PEERDEAD: $(if ($peerDeadOk) { 'PASS' } else { 'FAIL' }) (clipOnPuppet=$peerDeadSeen)"
+
+# ===========================================================================
+# [R7-BOSS] BOSSPHASE verdict (gap G7: boss phases)
+#
+# The owner forces a real phase transition through the GAME'S OWN function
+# (BPC_BossAI_C.ShouldStartSecondPhase) with `bossphase force 2`; the phase must
+# then reach the peer as a `"bsp"` event and be replayed there by the same game
+# function, i.e. the peer's own sync line must report phase 2 and applied>=1.
+#
+# The hub save this harness enters has NO boss in it (measured: `bossdump: no
+# BPC_BossAI_C in this world`) and `summon` cannot load an unloaded boss package
+# (measured: `class in memory after: no`), so the block attaches a REAL
+# BPC_BossAI_C to each client's own player character with `bossphase mkcomp` --
+# AActor::AddComponentByClass, the same call the equipment code already uses.  The
+# component's flags, thresholds (t2=0.5, t3=0.3) and phase functions are the real
+# ones, which is what makes the replay provable here; the class the two clients
+# attach to is the same on both sides, so the event's key matches exactly.
+# When neither client can produce a component (a build without the component class)
+# the verdict prints SKIP and does NOT gate RESULT: a check that cannot run must
+# never be reported as a pass, and it must not turn a healthy run red either.
+#
+# Read it as: PASS = a boss component existed on both sides and the peer's copy
+# reached the published phase; FAIL = it existed and the phase did not arrive;
+# SKIP = no component was reachable (see REPORT.md for the standalone boss-lab run).
+# ===========================================================================
+function Get-BossField([string]$coopDir, [string]$field) {
+    $b = Get-SyncValue $coopDir 'boss'
+    if ($b -and ($b -match ("(^|\s)" + [regex]::Escape($field) + ":(\S+)"))) { return $matches[2] }
+    return $null
+}
+function Get-BossCount([string]$coopDir) {
+    $n = Get-BossField $coopDir 'n'
+    if ($n) { return [int]$n }
+    return 0
+}
+$bossA0 = Get-SyncValue $coopA 'boss'
+$bossB0 = Get-SyncValue $coopB 'boss'
+foreach ($d in @($coopA, $coopB)) { [System.IO.File]::WriteAllText((Join-Path $d 'cmd.txt'), "bossphase mkcomp`n") }
+$bossSpawnA = $false; $bossSpawnB = $false
+$bsDeadline = (Get-Date).AddSeconds(20)
+while ((Get-Date) -lt $bsDeadline) {
+    Hide-GameWindow
+    if ((Get-BossCount $coopA) -gt 0) { $bossSpawnA = $true }
+    if ((Get-BossCount $coopB) -gt 0) { $bossSpawnB = $true }
+    if ($bossSpawnA -and $bossSpawnB) { break }
+    Start-Sleep -Milliseconds 700
+}
+$bossPhaseOk = $false
+$bossPhaseSkip = -not ($bossSpawnA -and $bossSpawnB)
+if (-not $bossPhaseSkip) {
+    [System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "bossphase force 2`n")
+    $bpDeadline = (Get-Date).AddSeconds(15)
+    while ((Get-Date) -lt $bpDeadline) {
+        Hide-GameWindow
+        $pa = Get-BossField $coopA 'phase'
+        $pb = Get-BossField $coopB 'phase'
+        $apB = [int](Get-BossField $coopB 'applied')
+        if ($pa -and $pa.EndsWith(':2') -and $pb -and $pb.EndsWith(':2') -and $apB -ge 1) {
+            $bossPhaseOk = $true; break
+        }
+        Start-Sleep -Milliseconds 700
+    }
+}
+Write-Host "=== BOSSPHASE: A before '$bossA0'"
+Write-Host "=== BOSSPHASE: spawn h=$bossSpawnA g=$bossSpawnB ; A $(Get-SyncValue $coopA 'boss')"
+Write-Host "=== BOSSPHASE: B $(Get-SyncValue $coopB 'boss')"
+if ($bossPhaseSkip) {
+    Write-Host "=== BOSSPHASE: SKIP (no boss reachable in this save; not gating RESULT -- see REPORT.md)"
+} else {
+    Write-Host "=== BOSSPHASE: $(if ($bossPhaseOk) { 'PASS' } else { 'FAIL' }) (owner phase 2 + peer applied>=1)"
+}
+# --- MEASURE (not a verdict): the REAL detectors, on the game's own path.
+# `dlgstart` calls the NPC's own BPC_DialogueInstigator_C::StartDialogue, so the
+# conversation, the input lock and the subsystem's ActiveDialogues are the game's,
+# not the mod's.  Its only purpose is the log evidence in REPORT.md (REPORT section 4): with no
+# dialogue actor in the save it says so instead of pretending.
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgstart`n")
+Start-Sleep -Seconds 6
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgdump`n")
+Start-Sleep -Seconds 3
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgstop`n")
+Start-Sleep -Milliseconds 600
+# a FAKE trigger has no game dialogue behind it, so turn it off explicitly
+[System.IO.File]::WriteAllText((Join-Path $coopB 'cmd.txt'), "dlgfake off`n")
+Start-Sleep -Seconds 2
+Write-Host "=== DIALOGREAL: A $(Get-SyncValue $coopA 'dlg')"
+Write-Host "=== DIALOGREAL: B $(Get-SyncValue $coopB 'dlg')"
+# the wire CODEC alone (no engine call): the one place a parser bug would hide
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "dlgselftest`n")
+$resDlgSt = Wait-File (Join-Path $coopA 'result_dialogselftest.txt') 10
+Write-Host "=== DIALOGCODEC: $resDlgSt"
+
+
+$resNpc = $null
+$npcFile = Join-Path $coopB 'result_npc.txt'
+if (Test-Path $npcFile) { $resNpc = (Get-Content $npcFile -Raw).Trim() }
+Write-Host "=== NPC: $resNpc"
+Write-Host "=== A: $resA"
+Write-Host "=== B: $resB"
+foreach ($d in @($coopA, $coopB)) {
+    Write-Host "--- $d ---"
+    $lg = Join-Path $d 'probe.log'
+    if (Test-Path $lg) { Get-Content $lg | Select-Object -Last 15 } else { Write-Host "(no log)" }
+}
+# native loader log next to the exe (ms2coop-native.log, rotated to .1/.2); the coop
+# probe.log above is coop_net.cpp's Log() and only exists once coop::Start() ran
+foreach ($g in @($GameA, $GameB)) {
+    $w64 = Join-Path $g 'MortalShell2\Binaries\Win64'
+    $nl = Join-Path $w64 'ms2coop-native.log'
+    Write-Host "--- $nl ---"
+    if (Test-Path $nl) {
+        $nativeText = Get-Content $nl -Raw
+        $init = if ($nativeText -match 'init: READY') { 'READY' } elseif ($nativeText -match 'init: NOT READY|worker: init FAILED') { 'NOT READY' } else { 'no init verdict' }
+        $coopState = if ($nativeText -match 'CoopMod start') { 'coop started' } else { 'coop did NOT start' }
+        Write-Host "=== NATIVE: $g -> $init ; $coopState"
+        Get-Content $nl | Select-Object -Last 20
+    } else {
+        Write-Host "=== NATIVE: $g -> no ms2coop-native.log (the DLL never ran)"
+    }
+}
+
+# ===========================================================================
+# [R8-DEATHS] DEATHCHAIN -- the camera stack, measured at the end of the run.
+#
+# WHY: the co-op death REMOVES CameraState_Death_C from the camera stack (that is how
+# the spectate camera and the post-respawn picture work), and a club of earlier rounds
+# only ever ran ONE death per session, so "is the death camera still there for a LATER
+# real death?" was never asked.  `death-chain.ps1` is the run that chains three deaths
+# and a wipe; THIS line is the cheap regression guard on every ordinary run.
+#
+# MEASURED (round 8, 20261026-162554-deathchain): CameraState_Death_C is on
+# BP_PlayerCameraManager_C.CameraStack from SESSION START -- a pristine stack is n=8 with
+# the death state in it (`[Debug(2) Death(10) PhotoMode(15) ... Exploration(255)]`), it is
+# not pushed per death.  So "no death camera while alive" is the WRONG invariant (an
+# untouched session has one); the invariant is:
+#   * both stacks exist (n>=1);
+#   * the module never logged that it could not put the death camera back;
+#   * in a session where nothing was removed (no death happened here), the death camera is
+#     STILL on the stack -- i.e. this module did not silently eat it;
+#   * in a session where one was removed (a co-op death ran), removals - restores <= 1
+#     (the one the current respawn took off is allowed to be off the stack).
+# ===========================================================================
+$stackA = $null; $stackB = $null
+foreach ($pair in @(@($coopA, 'A'), @($coopB, 'B'))) {
+    $target = Join-Path $pair[0] 'result_camstack.txt'
+    Remove-Item $target -Force -ErrorAction SilentlyContinue
+}
+foreach ($pair in @(@($coopA, 'A'), @($coopB, 'B'))) {
+    [System.IO.File]::WriteAllText((Join-Path $pair[0] 'cmd.txt'), "camstack alive`n")
+}
+$camDeadline = (Get-Date).AddSeconds(12)
+while ((Get-Date) -lt $camDeadline) {
+    Hide-GameWindow
+    if ((Test-Path (Join-Path $coopA 'result_camstack.txt')) -and (Test-Path (Join-Path $coopB 'result_camstack.txt'))) { break }
+    Start-Sleep -Milliseconds 400
+}
+$stackA = if (Test-Path (Join-Path $coopA 'result_camstack.txt')) { (Get-Content (Join-Path $coopA 'result_camstack.txt') -Raw).Trim() } else { $null }
+$stackB = if (Test-Path (Join-Path $coopB 'result_camstack.txt')) { (Get-Content (Join-Path $coopB 'result_camstack.txt') -Raw).Trim() } else { $null }
+$camWarnA = 0; $camWarnB = 0; $camRemA = 0; $camRemB = 0; $camResA = 0; $camResB = 0
+foreach ($pair in @(@($coopA, 'A'), @($coopB, 'B'))) {
+    $lg = Join-Path $pair[0] 'probe.log'
+    if (Test-Path $lg) {
+        $w = @(Select-String -Path $lg -Pattern 'NO death camera on the stack').Count
+        $rm = @(Select-String -Path $lg -Pattern 'COOP DEATH camera: removed CameraState').Count
+        $rs = @(Select-String -Path $lg -Pattern 'COOP DEATH camera restore \(').Count
+        if ($pair[1] -eq 'A') { $camWarnA = $w; $camRemA = $rm; $camResA = $rs }
+        else { $camWarnB = $w; $camRemB = $rm; $camResB = $rs }
+    }
+}
+function Test-CamStack([string]$stack, [int]$warn, [int]$removed, [int]$restored) {
+    if (-not ($stack -match 'n=[1-9]')) { return $false }          # no stack at all
+    if ($warn -gt 0) { return $false }                              # could not restore
+    if ($removed -eq 0) { return ($stack -match 'death=[1-9]') }    # pristine: still there
+    return (($removed - $restored) -le 1)                           # one may be off, not more
+}
+$camOkA = Test-CamStack $stackA $camWarnA $camRemA $camResA
+$camOkB = Test-CamStack $stackB $camWarnB $camRemB $camResB
+$deathChainOk = $camOkA -and $camOkB
+Write-Host "=== DEATHCHAIN: A $stackA"
+Write-Host "=== DEATHCHAIN: B $stackB"
+Write-Host "=== DEATHCHAIN: A removals=$camRemA restores=$camResA warnings=$camWarnA ; B removals=$camRemB restores=$camResB warnings=$camWarnB"
+Write-Host "=== DEATHCHAIN: $(if ($deathChainOk) { 'PASS both camera stacks intact, the game keeps its death camera for a later real death, no un-restorable removal' } else { 'FAIL (stacks + counts above)' })"
+# APPEAR_SKIP.txt (in the HOST's coop dir) is the A/B switch: with it the whole block
+# is skipped and the verdict is a SKIP (which, like BOSSPHASE's, does not gate $pass).
+# It exists so "is this lane responsible for a red suite?" can be answered without
+# editing the script between runs.
+if (Test-Path (Join-Path $coopA 'APPEAR_SKIP.txt')) {
+    Write-Host "=== APPEAR: SKIP (APPEAR_SKIP.txt present: the equipment round trip was not run)"
+    $appearOk = $true
+} else {
+# [R8-APPEAR] THE PEER'S REAL LOOK.  LOOK above only ever tested an attachable that
+# `lookadd` put on the pawn by hand.  A player's look is the shell, its skin, the
+# mask and the clothing, and those come from the game's own writers
+# (BPFL_Player_Equipment_C via `equip ...`, coop_equip.cpp).  The guest changes its
+# own equipment; the host has to show it on the puppet -- including the case round 7
+# could not handle at all: a mask/shell mesh this PC never loaded, which is what
+# coop_load.cpp loads on demand (APPEAR_OFF.txt turns that off again).
+function Equip-State([string]$coopDir) {
+    $f = Join-Path $coopDir 'result_equip.txt'
+    $h = @{}
+    if (Test-Path $f) {
+        foreach ($kv in ((Get-Content $f -Raw) -split '\s+')) {
+            $p = $kv -split '=', 2
+            if ($p.Count -eq 2) { $h[$p[0]] = $p[1] }
+        }
+    }
+    return $h
+}
+function Send-Cmd([string]$coopDir, [string]$text) {
+    # the mod deletes cmd.txt when it reads it: the file disappearing is the ack
+    $cf = Join-Path $coopDir 'cmd.txt'
+    $due = (Get-Date).AddSeconds(8)
+    while ((Test-Path $cf) -and ((Get-Date) -lt $due)) { Hide-GameWindow; Start-Sleep -Milliseconds 80 }
+    [System.IO.File]::WriteAllText($cf, $text + "`n")
+}
+function Wait-Appear([int]$secs, [scriptblock]$cond) {
+    $end = (Get-Date).AddSeconds($secs)
+    while ((Get-Date) -lt $end) { Hide-GameWindow; if (& $cond) { return $true }; Start-Sleep -Milliseconds 600 }
+    return $false
+}
+# One field of B's own equipment: the tag changed AND A applied exactly B's new look
+# signature with nothing missing (lookmissing == 0 is the loader's own verdict).
+function Test-AppearField([string]$field, [string]$was, [string]$lookWas, [int]$secs) {
+    return Wait-Appear $secs {
+        $eq = Equip-State $coopB
+        $lb = Get-SyncValue $coopB 'look'
+        ($eq[$field]) -and ($eq[$field] -ne $was) -and $lb -and ($lb -ne $lookWas) -and
+        ((Get-SyncValue $coopA 'lookapplied') -eq $lb) -and
+        ([int](Get-SyncValue $coopA 'lookmissing') -eq 0)
+    }
+}
+# One attachable: the guest's look changes AND the host's part count on the puppet
+# grows, AND the host applied exactly that signature with nothing missing.  The
+# tag-level census is NOT usable as the signal: ChangeMask REPLACES the mask in its
+# slot, so the count can stay 1 while the mask on screen changes completely.
+function Test-AppearParts([string]$lookWas, [int]$partsWas, [int]$secs) {
+    return Wait-Appear $secs {
+        $lb = Get-SyncValue $coopB 'look'
+        $la = Get-SyncValue $coopA 'lookapplied'
+        $lb -and ($lb -ne $lookWas) -and ($la -eq $lb) -and
+        ([int](Get-SyncValue $coopA 'lookmissing') -eq 0) -and
+        ([int](Get-SyncValue $coopA 'peerlookparts') -gt $partsWas)
+    }
+}
+Remove-Item (Join-Path $coopB 'result_equip.txt') -Force -ErrorAction SilentlyContinue
+Send-Cmd $coopB 'equip state'
+Start-Sleep 2
+$eq0 = Equip-State $coopB
+$loads0 = [int](Get-SyncValue $coopA 'gameloads')
+Write-Host "=== APPEAR: B before shell=$($eq0['shell']) skin=$($eq0['skin']) mask=$($eq0['mask']) clothing=$($eq0['clothing']) dfmask=$($eq0['dfmask']) unlocks=$($eq0['unlocks'])"
+$appearMask = $appearCloth = $appearSkin = $appearShell = $false
+# The tag literals below are from `equip catalogue` in this build (lab run 2):
+#   masks Sparta.Item.Mask.{FlowerCrown,Shell.Gragu.Helmet,BagHead,Mango,Frog}
+#   clothing Sparta.Item.Clothing.Robe
+#   skins Sparta.Item.Skin.Harbinger.{Skeleton,Obsidian,Red,Cosmic}
+# They are explicit rather than `next` because `next` picks the FIRST candidate and
+# that is the *default* skin (Skeleton), which changes nothing on screen.
+# Also: the writers alone do nothing -- the mask/clothing actor is spawned by the
+# pawn's BPC_AttachableItems component (coop_equip.cpp does both).
+Send-Cmd $coopB 'equip popup'
+$parts0 = [int](Get-SyncValue $coopA 'peerlookparts')
+Send-Cmd $coopB 'equip mask Sparta.Item.Mask.BagHead'
+$appearMask = Test-AppearParts (Get-SyncValue $coopB 'look') $parts0 50
+if (-not $appearMask) {
+    Send-Cmd $coopB 'equip dfmask Sparta.Item.Mask.BagHead'
+    $appearMask = Test-AppearParts (Get-SyncValue $coopB 'look') $parts0 50
+}
+Write-Host "=== APPEAR mask: B amasks=$($eq0['amasks'])->$((Equip-State $coopB)['amasks']) ; A applied=$(Get-SyncValue $coopA 'lookapplied') parts=$parts0->$(Get-SyncValue $coopA 'peerlookparts') missing=$(Get-SyncValue $coopA 'lookmissing') loads=$loads0->$(Get-SyncValue $coopA 'gameloads') on=$appearMask"
+# clothing (a separate attachable, skeletal leader-pose)
+$parts1 = [int](Get-SyncValue $coopA 'peerlookparts')
+Send-Cmd $coopB 'equip clothing Sparta.Item.Clothing.Robe'
+$appearCloth = Test-AppearParts (Get-SyncValue $coopB 'look') $parts1 50
+Write-Host "=== APPEAR clothing: B aclothing=$($eq0['aclothing'])->$((Equip-State $coopB)['aclothing']) ; A applied=$(Get-SyncValue $coopA 'lookapplied') parts=$parts1->$(Get-SyncValue $coopA 'peerlookparts') missing=$(Get-SyncValue $coopA 'lookmissing') on=$appearCloth"
+# skin: a real material swap on the body (the look signature carries bm=<body mats>).
+# dfskin is the dark form's own skin store: ChangeShellSkin does not move it, and the
+# test character IS a dark form.
+Send-Cmd $coopB 'equip skin Sparta.Item.Skin.Harbinger.Obsidian'
+$appearSkin = Test-AppearField 'dfskin' $eq0['dfskin'] (Get-SyncValue $coopB 'look') 45
+Write-Host "=== APPEAR skin: B dfskin=$($eq0['dfskin'])->$((Equip-State $coopB)['dfskin']) ; A applied=$(Get-SyncValue $coopA 'lookapplied') missing=$(Get-SyncValue $coopA 'lookmissing') on=$appearSkin"
+# shell: a different CHARACTER, i.e. a different body mesh.  This is the one the
+# round-7 code could not show at all when the peer's shell mesh was not in memory.
+$bodyB0 = Get-SyncValue $coopB 'body'
+Send-Cmd $coopB 'equip shell next'
+$appearShell = Wait-Appear 60 {
+    $bodyB = Get-SyncValue $coopB 'body'
+    $eq = Equip-State $coopB
+    $bodyB -and ($bodyB -ne $bodyB0) -and ((Get-SyncValue $coopA 'peerbody') -eq $bodyB) -and
+    ((Get-SyncValue $coopA 'lookapplied') -eq (Get-SyncValue $coopB 'look')) -and
+    ([int](Get-SyncValue $coopA 'lookmissing') -eq 0)
+}
+Write-Host "=== APPEAR shell: B body=$bodyB0 -> $(Get-SyncValue $coopB 'body') shell=$((Equip-State $coopB)['shell']) ; A peerbody=$(Get-SyncValue $coopA 'peerbody') applied=$(Get-SyncValue $coopA 'lookapplied') missing=$(Get-SyncValue $coopA 'lookmissing') loads=$loads0->$(Get-SyncValue $coopA 'gameloads')"
+Write-Host "=== APPEAR shell: on=$appearShell"
+# The shell change raises a tutorial card on the guest; close it so the rest of the
+# suite (and any screenshot) sees the character, not a popup.
+Send-Cmd $coopB 'equip popup'
+# Back to the dark form the rest of the suite expects (ActivateDarkForm is the game's
+# own transformation, and this leaves the guest on the same body it started with).
+Send-Cmd $coopB 'equip darkform'
+Send-Cmd $coopB 'equip popup'
+$backAt = (Get-Date).AddSeconds(45)
+while ((Get-Date) -lt $backAt) {
+    Hide-GameWindow
+    $b = Get-SyncValue $coopB 'body'
+    if ($b -and $b -eq $bodyB0 -and (Get-SyncValue $coopA 'peerbody') -eq $b) { break }
+    Start-Sleep -Milliseconds 700
+}
+Write-Host "=== APPEAR back: B body=$(Get-SyncValue $coopB 'body') ; A peerbody=$(Get-SyncValue $coopA 'peerbody') applied=$(Get-SyncValue $coopA 'lookapplied') missing=$(Get-SyncValue $coopA 'lookmissing')"
+Start-Sleep 2
+$appearOk = $appearMask -and $appearCloth -and $appearSkin -and $appearShell
+Write-Host "=== APPEAR: $(if ($appearOk) { 'PASS' } else { 'FAIL' }) (mask=$appearMask clothing=$appearCloth skin=$appearSkin shell=$appearShell)"
+}
+
+
+$pass = ($resA -match '^PASS') -and ($resB -match '^PASS') -and $shellOk -and $weaponOk -and $pupVisOk -and $lookOk -and ($resStream -match '^PASS') -and $farOk -and ($resSpawn -match '^PASS') -and $mirrorOk -and ($resPd -match '^PASS')
+# [R8-APPEAR] the peer's real look: mask / clothing / skin / shell, and the on-demand
+# asset load behind a mesh this PC never had.
+$pass = $pass -and $appearOk
+
+# ===========================================================================
+# [R8-WALL] WALLANIM verdict -- going through the broken wall (squeeze traversal)
+#
+# Runs LAST, after every other test, on purpose: WALLANIM stages itself, so it does not
+# depend on where the run left the players -- `wallstage actor` puts the guest 2.2 m
+# before WT_Entrance (which also loads the squeeze montage in that area; the old block
+# could only report WARN once the guest was 90k uu away) and `wallreal` then enters the
+# game's own chain (AddWarpReferences + the interaction's GrantTraversalAbility, measured
+# to start the real montage and to carry the capsule past WT_Exit).  Measuring this
+# anywhere earlier teleported the guest in the middle of the run and poisoned the STREAM
+# check (n0:0 static meshes around the peer), so it sits here.
+# Three log facts make it checkable:
+#   B  "wall: traversal start #n"          the acting client is in the traversal
+#   A  "wall: peer traversal #n"           the "wa" key arrived and was accepted
+#   A  "wall: puppet traversal #n ..."     the puppet really plays the pose
+# A run where the gap is not reachable reports WARN and does not redden the suite --
+# same convention as DHOLDCAM and the DROPS warn; "started but never arrived" is a FAIL.
+# ===========================================================================
+$wallAct = $false; $wallPeer = $false; $wallPose = $false
+# The HOST is the actor and the GUEST the observer: by this point in the run the guest
+# has travelled ~90k uu and its client no longer has the squeeze actor streamed in,
+# while the host has been in the hub all along.  Swapping the roles keeps the real
+# chain available and still proves the sync (the guest must receive "wa" and play the
+# pose on the puppet, wherever its world is).
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wallstage actor`n")
+Start-Sleep -Seconds 3
+[System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wallreal`n")
+$wallDeadline = (Get-Date).AddSeconds(16)
+while ((Get-Date) -lt $wallDeadline) {
+    Hide-GameWindow
+    $la = if (Test-Path (Join-Path $coopA 'probe.log')) { Get-Content (Join-Path $coopA 'probe.log') -Raw } else { '' }
+    $lb = if (Test-Path (Join-Path $coopB 'probe.log')) { Get-Content (Join-Path $coopB 'probe.log') -Raw } else { '' }
+    if ($la -match 'wall: traversal start #') { $wallAct = $true }
+    if ($lb -match 'wall: peer traversal #') { $wallPeer = $true }
+    if ($lb -match 'wall: puppet traversal #') { $wallPose = $true }
+    if ($wallAct -and $wallPeer -and $wallPose) { break }
+    Start-Sleep -Milliseconds 500
+}
+$wallWarn = $false
+if ($wallAct -and -not ($wallPeer -and $wallPose)) {
+    # a second squeeze: the first may have started before the peer was live
+    Start-Sleep -Milliseconds 800
+    [System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wallstage actor`n")
+    Start-Sleep -Seconds 3
+    [System.IO.File]::WriteAllText((Join-Path $coopA 'cmd.txt'), "wallreal`n")
+    $wallDeadline = (Get-Date).AddSeconds(14)
+    while ((Get-Date) -lt $wallDeadline) {
+        Hide-GameWindow
+        $lb = if (Test-Path (Join-Path $coopB 'probe.log')) { Get-Content (Join-Path $coopB 'probe.log') -Raw } else { '' }
+        if ($lb -match 'wall: peer traversal #') { $wallPeer = $true }
+        if ($lb -match 'wall: puppet traversal #') { $wallPose = $true }
+        if ($wallPeer -and $wallPose) { break }
+        Start-Sleep -Milliseconds 500
+    }
+}
+if (-not $wallAct) { $wallWarn = $true }
+$wallOk = $wallAct -and $wallPeer -and $wallPose
+Write-Host "=== WALLANIM: A $(Get-SyncValue $coopA 'wall')"
+Write-Host "=== WALLANIM: B $(Get-SyncValue $coopB 'wall')"
+Write-Host "=== WALLANIM: $(if ($wallOk) { 'PASS' } elseif ($wallWarn) { 'WARN' } else { 'FAIL' }) (actor=$wallAct peer=$wallPeer pose=$wallPose)"
+
+# [R8-WALL] the traversal lane (see the WALLANIM block)
+$pass = $pass -and ($wallOk -or $wallWarn)
+# [R7-BREAK] the live-breakables verdict (BREAK, written by the receiving client)
+$pass = $pass -and $breakOk
+# [R5-BODY] the three body-lane verdicts (ZONE / PEERHP / PEERDEAD)
+$pass = $pass -and $zoneOk -and $peerHpOk -and $peerDeadOk
+# [R7-WIRE] the fixture reset (PART 2) and the split transport (PART 1)
+$pass = $pass -and $fixOk -and $wireOk
+# [R7-BOSS] the boss-phase verdict gates ONLY when a boss existed on both sides
+# (see the BOSSPHASE block: a SKIP must neither hide a defect nor redden a run).
+if (-not $bossPhaseSkip) { $pass = $pass -and $bossPhaseOk }
+# [R7-DIALOG] the dialogue / cinematic lane (DIALOG / CINE)
+$pass = $pass -and $dlgOk -and $cineOk
+# [R7-DROPS] G6.  A WARN (the forced-event fallback: this run's enemy carried no
+# drop data) is reported but does not fail the suite -- same convention as
+# DHOLDCAM in run-two-death.ps1; only a real FAIL is fatal.
+if (-not $StreamOnly) { $pass = $pass -and ($dropsOk -or $dropsWarn) }
+if (-not $StreamOnly) { $pass = $pass -and $damageOk -and $deathOk -and ($resAnim -match '^PASS') -and ($resWs -match '^PASS') -and ($resWp -match '^PASS') -and ($resWs2 -match '^PASS') }
+# [R8-DEATHS] the camera-stack guard (see the DEATHCHAIN block)
+$pass = $pass -and $deathChainOk
+Stop-ReporterKiller
+Stop-All
+# restore the owner's saves exactly: put the snapshot back, remove anything new
+if (Test-Path $saveSnap) {
+    Get-ChildItem $realSaveDir -Filter *.sav | Where-Object { $saveNamesBefore -notcontains $_.Name } | ForEach-Object {
+        Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
+    }
+    Copy-Item (Join-Path $saveSnap "*.sav") $realSaveDir -Force
+    Write-Host "saves restored from snapshot"
+}
+
+Write-Host "owner saves restored from snapshot (the game ignores overridden LOCALAPPDATA)"
+if ($pass) { Write-Host "RESULT: PASS" } else { Write-Host "RESULT: FAIL" }

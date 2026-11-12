@@ -1,0 +1,331 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.SpartaCinematicAudioHandler	/Script/Sparta.SpartaCinematicAudioHandler	m_CurrentAudioData	ObjectProperty of /Script/Sparta.SpartaCinematicAudioData	0x28	55671
+/Script/Sparta.SpartaCinematicAudioHandler	/Script/Sparta.SpartaCinematicAudioHandler	m_AudioComponent	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x30	55672
+/Script/Sparta.SpartaCinematicAudioHandler	/Script/Sparta.SpartaCinematicAudioHandler	m_MusicBlocker	ObjectProperty of /Script/Sparta.SpartaMusicBlockerHandle	0x38	55673
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	SoundBanks	SetProperty	0x30	55659
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	bStopGameplayMusic	BoolProperty	0x80	55660
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	bStopAudioAtEnd	BoolProperty	0x81	55661
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	AudioStopFadeTime	FloatProperty	0x84	55662
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	AudioStopFadeCurve	EnumProperty of /Script/Engine.EAudioFaderCurve	0x88	55663
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	SetStateOnCompletion	ClassProperty	0x90	55664
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	SetStateOnCompletionContext	ObjectProperty of /Script/Sparta.SpartaMusicStateContext	0x98	55665
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	Stems	ArrayProperty of Stems./Script/Sparta.SpartaCinematicAudioData:Stems	0xA0	55666
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	StartTime	FloatProperty	0xB0	55668
+/Script/Sparta.SpartaCinematicAudioData	/Script/Sparta.SpartaCinematicAudioData	FadeInTime	FloatProperty	0xB4	55669
+/Script/Engine.DataAsset	/Script/Sparta.SpartaCinematicAudioData	NativeClass	ClassProperty	0x28	13635
+/Script/CommonGame.GameUIManagerSubsystem	/Script/Sparta.SpartaUIManagerSubsystem	CurrentPolicy	ObjectProperty of /Script/CommonGame.GameUIPolicy	0x30	49264
+/Script/CommonGame.GameUIManagerSubsystem	/Script/Sparta.SpartaUIManagerSubsystem	DefaultUIPolicyClass	SoftClassProperty	0x38	49265
+/Script/Sparta.SpartaGameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	PreloadedCues	SetProperty	0x318	60514
+/Script/Sparta.SpartaGameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	AlwaysLoadedCues	SetProperty	0x3B8	60515
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	RuntimeGameplayCueObjectLibrary	StructProperty of /Script/GameplayAbilities.GameplayCueObjectLibrary	0x48	37285
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	EditorGameplayCueObjectLibrary	StructProperty of /Script/GameplayAbilities.GameplayCueObjectLibrary	0x98	37286
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	LoadedGameplayCueNotifyClasses	ArrayProperty of LoadedGameplayCueNotifyClasses./Script/GameplayAbilities.GameplayCueManager:LoadedGameplayCueNotifyClasses	0x260	37287
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	GameplayCueClassesForPreallocation	ArrayProperty of GameplayCueClassesForPreallocation./Script/GameplayAbilities.GameplayCueManager:GameplayCueClassesForPreallocation	0x270	37289
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	PendingExecuteCues	ArrayProperty of PendingExecuteCues./Script/GameplayAbilities.GameplayCueManager:PendingExecuteCues	0x280	37291
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	GameplayCueSendContextCount	IntProperty	0x290	37293
+/Script/GameplayAbilities.GameplayCueManager	/Script/Sparta.SpartaGameplayCueManager	PreallocationInfoList_Internal	ArrayProperty of PreallocationInfoList_Internal./Script/GameplayAbilities.GameplayCueManager:PreallocationInfoList_Internal	0x298	37294
+/Script/Engine.DataAsset	/Script/Sparta.SpartaGameplayCueManager	NativeClass	ClassProperty	0x28	13635
+/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	CinematicFired	BoolProperty	0xB8	199887
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	266925
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	TriggerArea	ObjectProperty of /Script/Engine.BoxComponent	0x2B0	266926
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2B8	266927
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	CutsceneActor	ObjectProperty of /Script/LevelSequence.LevelSequenceActor	0x2C0	266928
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	LevelSequenceToPlay	ObjectProperty of /Script/LevelSequence.LevelSequence	0x2C8	266929
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	SpawnedEnemyAtEnd	ObjectProperty of /Game/Sparta/Characters/SpawnSystem/BP_Spawner.BP_Spawner_C	0x2D0	266930
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	PlayCinematicOnSpawn	BoolProperty	0x2D8	266931
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	HidePlayerDuringCinematic	BoolProperty	0x2D9	266932
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	UseTriggerToPlay	BoolProperty	0x2DA	266933
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	PlayerPositionAfterCinematic	ObjectProperty of /Script/Engine.TargetPoint	0x2E0	266934
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	CinematicEndReached	MulticastInlineDelegateProperty	0x2E8	266935
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	BroadcastEventAfterCinematic	BoolProperty	0x2F8	266936
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	EventToBroadcast	ClassProperty	0x300	266937
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	StartOnBroadcastEvent	ClassProperty	0x308	266938
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	SaveFileCheckForPlayOnSpawn	NameProperty	0x310	266939
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ForceCinematic	BoolProperty	0x318	266940
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ShowHudOnEnd	BoolProperty	0x319	266941
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	FadePlayerCameraAtStart	BoolProperty	0x31A	266942
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	UnFadePlayerCameraAtEnd	BoolProperty	0x31B	266943
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	SetPlayerMovementModeAtEnd	BoolProperty	0x31C	266944
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	CheckForNarrativeBool	BoolProperty	0x31D	266945
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnlyPlayOnce	BoolProperty	0x31E	266946
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ThisCinematicTag	StructProperty of /Script/GameplayTags.GameplayTag	0x320	266947
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	AlreadyPlayedBehaviors	ArrayProperty of AlreadyPlayedBehaviors./Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C:AlreadyPlayedBehaviors	0x328	266948
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	PlayerBoolToCheck	NameProperty	0x338	266950
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	StartBehaviors	ArrayProperty of StartBehaviors./Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C:StartBehaviors	0x340	266951
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	EndBehaviors	ArrayProperty of EndBehaviors./Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C:EndBehaviors	0x350	266953
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	FireEventsOnSkip	BoolProperty	0x360	266955
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	SpawnTriggerToEnableWhenSequenceDisabled	SoftObjectProperty of /Game/Sparta/Characters/SpawnSystem/BP_SpawnTrigger.BP_SpawnTrigger_C	0x368	266956
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	TriggerActivated	BoolProperty	0x390	266957
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	WBP_SkipInput	ObjectProperty of /Game/Sparta/UI/Core/WBP_SkipInput.WBP_SkipInput_C	0x398	266958
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	StateGE	StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectHandle	0x3A0	266959
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	AudioData	ObjectProperty of /Script/Sparta.SpartaCinematicAudioData	0x3A8	266960
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Skippable	BoolProperty	0x3B0	266961
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ResetDoOnce	BoolProperty	0x3B1	266962
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	FadeInDuration	FloatProperty	0x3B4	266963
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	FadeOutDuration	FloatProperty	0x3B8	266964
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	WeatherId	Int64Property	0x3C0	266965
+/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Weather	ObjectProperty of /Script/Sparta.SpartaWeatherPreset	0x3C8	266966
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/FogArea/BP_CinematicPlayer.BP_CinematicPlayer_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	419724
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	SpartaSkeletalMesh	ObjectProperty of /Script/Sparta.SpartaSkeletalMeshComponent	0x2B0	419725
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2B8	419726
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	WeaponsToEquip	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x2C0	419727
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	WeaponsToHide	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x2E0	419728
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	PreviewSkeletalMesh	ObjectProperty of /Script/Engine.SkeletalMesh	0x300	419729
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	HideAllWeapons	BoolProperty	0x308	419730
+/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	CachedPlayer	ObjectProperty of /Script/Sparta.SpartaPlayerCharacter	0x310	419731
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/Player/BP_CinematicPlayerProxy.BP_CinematicPlayerProxy_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Script/Sparta.SpartaCinematicAudioHandler	/Game/Sparta/Core/Audio/BP_CinematicAudioHandler.BP_CinematicAudioHandler_C	m_CurrentAudioData	ObjectProperty of /Script/Sparta.SpartaCinematicAudioData	0x28	55671
+/Script/Sparta.SpartaCinematicAudioHandler	/Game/Sparta/Core/Audio/BP_CinematicAudioHandler.BP_CinematicAudioHandler_C	m_AudioComponent	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x30	55672
+/Script/Sparta.SpartaCinematicAudioHandler	/Game/Sparta/Core/Audio/BP_CinematicAudioHandler.BP_CinematicAudioHandler_C	m_MusicBlocker	ObjectProperty of /Script/Sparta.SpartaMusicBlockerHandle	0x38	55673
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	660236
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	SpartaSave	ObjectProperty of /Script/Sparta.SpartaSaveComponent	0x2B0	660237
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Icon	ObjectProperty of /Script/Engine.BillboardComponent	0x2B8	660238
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2C0	660239
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Event	ClassProperty	0x2C8	660240
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	As	ObjectProperty of /Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	0x2D0	660241
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	BeforeDataLayer	ObjectProperty of /Script/Engine.DataLayerAsset	0x2D8	660242
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	BeforeState	EnumProperty of /Script/Engine.EDataLayerRuntimeState	0x2E0	660243
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	AfterDataaLayer	ObjectProperty of /Script/Engine.DataLayerAsset	0x2E8	660244
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	AfterState	EnumProperty of /Script/Engine.EDataLayerRuntimeState	0x2F0	660245
+/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	ListenForPrologueFinnished	BoolProperty	0x2F1	660246
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_LS_CinematicDLManager.BP_LS_CinematicDLManager_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/Levels/Behavior/BP_CinematicBehavior_StartCredits.BP_CinematicBehavior_StartCredits_C	/Game/Sparta/Core/World/Levels/Behavior/BP_CinematicBehavior_StartCredits.BP_CinematicBehavior_StartCredits_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x30	721633
+/Script/Sparta.ExecutableBehavior	/Game/Sparta/Core/World/Levels/Behavior/BP_CinematicBehavior_StartCredits.BP_CinematicBehavior_StartCredits_C	WorldContextObject	WeakObjectProperty of /Script/CoreUObject.Object	0x28	53544

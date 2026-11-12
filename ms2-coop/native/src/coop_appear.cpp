@@ -1,0 +1,1661 @@
+// coop_appear.cpp -- module 4: the peer's weapons + the whole "look".
+//
+// Ported from ms2-coop\mod\CoopMod\Scripts\main.lua (READ-ONLY reference):
+//   652-671   WEAPON table, WPN_LOGGED, WEAPON_SPAWN_ENABLED / WS_ENABLED toggles
+//   673-700   engineClass / iterArray / assetPath  (shared helpers; the real ones
+//             live in coop_net: net::EngineClass / net::AssetPath)
+//   702-785   localWeaponInfo -- SENDER half only (coop_local::WeaponInfo); the
+//             RECEIVER parser lives here (ApplyWeapons)
+//   787-792   clearPeerWeapons            -> ClearWeapons
+//   794-835   applyPeerWeapons             -> ApplyWeapons
+//   836-1191  the look module            -> CaptureLook / OwnLookTick / Hash /
+//             ApplyLook / ClearLook / SilencePuppet / LookTestTick / LookDel
+//   4102-4119 the 2 Hz driver            -> Tick2
+//    991-994  (lookadd/lookdel plumbing)  -> LookAddPending / SetLookAdded / LookDel
+//
+// Everything this module does is "create/destroy plain engine mesh components on
+// the puppet".  The hard-won constraints from docs/NATIVE-PORT.md section 4 are
+// preserved verbatim:
+//   13  own look is published only after TWO consecutive equal captures (2 Hz)
+//   14  weapon apply retries at 5 s, look apply at 3 s -- never tighter
+//   30  caps: 24 parts, 16 materials per component
+//   39  the part keys are the wire text and are compared as strings, so an
+//       identical state must format to an identical string
+//   40  LOOK.hash is djb2 and is in sync.txt
+//
+// -----------------------------------------------------------------------------
+// CONTRACT-REQUESTs (all resolved by the integrator; kept for the reasoning)
+//
+// 1. RESOLVED: ue::MakeFName / ue::ToString(FName) are declared in ms2_ue.h and
+//    defined in ms2_ue.cpp (Conv_StringToName / FName::AppendString).
+//
+// 2. RESOLVED: the coop:: math adapter (ToVec3 / FromVec3 / ToRot / FromRot /
+//    FromQuat / RotQuat / QuatMul / Compose) is implemented in coop_math.cpp.
+//    The header wins: the quaternion helpers are the ue adapter's, not this
+//    module's, and this file only ever calls the coop:: names.
+//
+// 3. ue::UObject* ResolveWeakPtr(const void*) -- still not provided.  LeaderPoseComponent
+//    is a TWeakObjectPtr<USkinnedMeshComponent> in this build (Dumper-7 @0x598:
+//    {int32 ObjectIndex, int32 ObjectSerialNumber}), and the boolean the Lua reads
+//    ("set and live") is ObjectIndex != INDEX_NONE, which is what HasLeader() tests.
+//    A real resolver would additionally reject a stale serial number.
+//
+// 4. No way to release the TArray K2_GetComponentsByClass allocates.  The Lua
+//    leaked it too (UE4SS never ran the destructor), so read-and-drop is a faithful
+//    port; the native layer has no verified pair for this build's allocator, and
+//    freeing with the wrong one is a crash.  Documented as a known leak.
+//
+// 5. net::Fmt() uses _vsnprintf_s, i.e. the process C locale -- exactly what the
+//    Lua's string.format did (it calls the C library too), and UE never calls
+//    setlocale to a comma-decimal locale.  A "." decimal separator is required
+//    because every part key of the look signature is compared as a string on the
+//    receiving side (main.lua:1013, docs/NATIVE-PORT.md section 4 item 39); if a
+//    future build ever printed "1,50" the wire would break on both clients at once.
+//
+// 6. RESOLVED: coop_state.h opens `struct ue::UObject`, matching ms2_ue.h (the C4099
+//    class-key mismatch is gone).
+// -----------------------------------------------------------------------------
+
+#include <atomic>
+#include <cctype>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <locale.h>
+#include <string>
+#include <vector>
+
+#include <algorithm>
+
+// (The ms2_ue.h Get/Set-before-ReadMem workaround that used to live here is gone:
+// the integrator moved the guarded-memory declarations above the templates.)
+#include "ms2_ue.h"
+#include "coop_state.h"
+
+namespace coop {
+namespace appear {
+
+namespace {
+
+// =============================================================================
+// constants
+// =============================================================================
+
+// The two booleans the look code reads are *bitfields* in this build, and both
+// sit on bit 7 of their byte (Dumper-7, SDK dumped from this exe):
+//   /Script/Engine.Actor.bHidden            @0x058 BitIndex:0x07
+//   /Script/Engine.SceneComponent.bHiddenInGame @0x1A2 BitIndex:0x07
+// so the byte read through FProperty::Offset_Internal has to be masked, not
+// tested for non-zero (the same byte carries six other flags).
+constexpr uint8_t kBit7 = 0x80;
+
+// main.lua:859 LOOK.ATTACH_CLASSES
+const char* const kAttachClasses[] = {
+    "BP_Attachable_Item_C",
+    "BP_Attachable_Item_Mask_C",
+    "BP_Attachable_Item_Clothing_C",
+    "BP_Attachable_Item_Heart_C",
+    "BP_AIM_Frog_C",
+    "BP_AIM_BagHead_C",
+    "BP_AIM_Mango_C",
+    "BP_AIM_FlowerCrown_C",
+    "BP_Gragu_Helmet_C",
+    "BP_AIC_Robe_C",
+};
+
+// lookadd is abandoned after this many wall seconds (main.lua:2064)
+constexpr int64_t kLookAddGiveUp = 40;
+
+// =============================================================================
+// module-local state (things the Lua kept in plain globals that coop_state.h
+// does not model; they are only ever touched by this module)
+// =============================================================================
+struct LookAddReq {
+    bool active = false;
+    std::string path;
+    int64_t at = 0;
+    // The AddItem spawn is DEFERRED: the new attachable is not in the attachables
+    // list in the tick that asked for it.  probe.log 2026-10-25 03:29:33:
+    //   `lookadd AddItem(...) param=ActorClass size=8 ok=true`
+    //   ... and the crown's first `look survey` one second later at 03:29:34.
+    // net::LookTestTick diffed once, in that same tick, found nothing, and reset
+    // LOOK_ADD -- so `lookadd spawned` never appeared, appear::g_lookAdded stayed
+    // empty, and `lookdel` matched no actor at all: the crown was never removed,
+    // B's look hash never changed, and LOOK's off half could not pass.  The Lua
+    // relied on the spawn being immediate; polling for it is the faithful port.
+    bool polling = false;
+    int64_t until = 0;
+    std::vector<std::string> before;
+};
+
+// how long the deferred AddItem spawn is waited for (wall seconds)
+constexpr int64_t kLookAddPollSecs = 5;
+
+LookAddReq g_lookAdd;          // LOOK_ADD
+std::string g_lookAdded;       // LOOK_ADDED (full name of the actor lookadd made)
+// The attachable whose first survey ran most recently.  `lookadd` is the only
+// thing in this module that creates one, so when LOOK_ADDED never got filled in
+// (the deferred-spawn bug above) this is the actor the test hook means.
+std::string g_lastNewAtt;
+int64_t g_lastNewAttAt = 0;
+std::string g_why;             // LOOK.why (why the last component was skipped)
+
+// =============================================================================
+// locale-safe number parsing (Lua's tonumber() ignores the process locale;
+// strtod does not, and a comma-decimal locale would silently truncate every
+// "1.50" on the wire to 1.0)
+// =============================================================================
+_locale_t CLocale() {
+    static _locale_t loc = _create_locale(LC_NUMERIC, "C");
+    return loc;
+}
+
+double Num(const std::string& s) {
+    if (s.empty()) return 0.0;
+    return _strtod_l(s.c_str(), nullptr, CLocale());
+}
+
+// =============================================================================
+// tiny string helpers
+// =============================================================================
+
+// last dotted/coloned component of a full name ("...:Bar" -> "Bar")
+std::string LeafName(const std::string& full) {
+    size_t dot = full.find_last_of('.');
+    size_t colon = full.find_last_of(':');
+    size_t cut = std::string::npos;
+    if (dot != std::string::npos) cut = dot;
+    if (colon != std::string::npos && (cut == std::string::npos || colon > cut)) cut = colon;
+    if (cut == std::string::npos) return full;
+    return full.substr(cut + 1);
+}
+
+bool HasPrefix(const std::string& s, const char* p) {
+    const size_t n = std::strlen(p);
+    return s.size() >= n && std::memcmp(s.data(), p, n) == 0;
+}
+
+// main.lua:994/745  name:match("^%a*SkeletalMeshComponent")
+//                   name:match("^%a*StaticMeshComponent")
+// "%a*" is "any run of letters", so the class name may be prefixed
+// ("SpartaSkeletalMeshComponent"); returns 'K', 'S' or 0.
+//
+// Lua's %a* BACKTRACKS: "StaticMeshComponent /Game/..." matches with an EMPTY
+// prefix.  The original C port skipped the leading letters and then compared the
+// rest, which eats the class name too and can never match -- so every look part
+// was skipped as "kind" and the LOOK verdict could never carry a mask, skin or
+// clothing part.  The class token is the first word of GetFullName, so "%a*<Name>"
+// is exactly "the token ends with <Name>".
+char MeshKind(const std::string& fullname) {
+    const size_t end = fullname.find(' ');
+    const std::string cls = fullname.substr(0, end == std::string::npos ? fullname.size() : end);
+    static const char kSkeletal[] = "SkeletalMeshComponent";
+    static const char kStatic[] = "StaticMeshComponent";
+    const size_t sk = sizeof(kSkeletal) - 1;
+    const size_t st = sizeof(kStatic) - 1;
+    if (cls.size() >= sk && cls.compare(cls.size() - sk, sk, kSkeletal) == 0) return 'K';
+    if (cls.size() >= st && cls.compare(cls.size() - st, st, kStatic) == 0) return 'S';
+    return 0;
+}
+
+bool Contains(const std::vector<std::string>& v, const std::string& k) {
+    for (const auto& it : v) {
+        if (it == k) return true;
+    }
+    return false;
+}
+
+// main.lua:1086  parseVec: split on ',', tonumber or 0, pad with 0 to n
+std::vector<double> ParseVec(const std::string& s, int n) {
+    std::vector<double> out;
+    size_t i = 0;
+    while (i <= s.size()) {
+        size_t comma = s.find(',', i);
+        if (comma == std::string::npos) comma = s.size();
+        out.push_back(Num(s.substr(i, comma - i)));
+        if (comma == s.size()) break;
+        i = comma + 1;
+    }
+    while ((int)out.size() < n) out.push_back(0.0);
+    if ((int)out.size() > n) out.resize((size_t)n);
+    return out;
+}
+
+// =============================================================================
+// ue::Params helpers
+//
+// Every engine call in this module is a UFunction invoked through
+// ue::FindFunction + ue::Params + ue::Call.  Parameter names below are the
+// *reflected* names from the SDK dumped out of this exact build
+// (research\raw\Dumper7\SDK\Engine_parameters.hpp), so name-based access is
+// correct; the one exception is AActor::AddComponentByClass whose first
+// parameter the dumper had to rename ("Class" -> "Class_0"), so it is written by
+// its SDK offset (0x0000) as well.  Struct-by-value parameters (FTransform,
+// FVector, FRotator, FName) are memcpy'd into the block; out parameters
+// (FHitResult, ReturnValue, TArray) are already zeroed by ue::Params' ctor.
+// =============================================================================
+
+// Raw write at an SDK offset, bounds-checked against the block the UFunction
+// declared (ParmsSize).
+template <class T>
+void PutOff(ue::Params& p, int32_t off, const T& v) {
+    if (off < 0 || off + (int32_t)sizeof(T) > p.size()) return;
+    std::memcpy(reinterpret_cast<uint8_t*>(p.data()) + off, &v, sizeof(T));
+}
+
+// =============================================================================
+// engine calls (one small function per UFunction this module touches)
+// =============================================================================
+
+bool Live(ue::UObject* o) { return o && net::Valid(o); }
+
+bool CallNoArgs(ue::UObject* o, const char* fn) {
+    if (!Live(o)) return false;
+    ue::UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(o, f, p.data());
+}
+
+// AActor::AddComponentByClass(TSubclassOf<UActorComponent> Class,
+//                             bool bManualAttachment,
+//                             const FTransform& RelativeTransform,
+//                             bool bDeferredFinish) -> UActorComponent*
+// (SDK: Class_0 @0x00, bManualAttachment @0x08, RelativeTransform @0x10(0x60),
+//  bDeferredFinish @0x70, ReturnValue @0x78)
+ue::UObject* AddComponent(ue::UObject* actor, ue::UObject* cls, bool manualAttachment,
+                          const ue::FTransform& relXform, bool deferredFinish) {
+    if (!Live(actor) || !cls) return nullptr;
+    ue::UFunction* f = ue::FindFunction(actor, "AddComponentByClass");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("Class", cls);
+    PutOff<ue::UObject*>(p, 0x00, cls);          // the dumper's "Class_0" fallback
+    p.Set<bool>("bManualAttachment", manualAttachment);
+    p.Set<ue::FTransform>("RelativeTransform", relXform);
+    p.Set<bool>("bDeferredFinish", deferredFinish);
+    if (!ue::Call(actor, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// UActorComponent::K2_DestroyComponent(UObject* Object)
+bool DestroyComponent(ue::UObject* comp) {
+    if (!Live(comp)) return false;
+    ue::UFunction* f = ue::FindFunction(comp, "K2_DestroyComponent");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("Object", comp);
+    return ue::Call(comp, f, p.data());
+}
+
+// AActor::K2_GetRootComponent() -> USceneComponent*
+ue::UObject* RootComponent(ue::UObject* actor) {
+    if (!Live(actor)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(actor, "K2_GetRootComponent");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(actor, f, p.data())) return nullptr;
+    ue::UObject* r = p.Get<ue::UObject*>("ReturnValue");
+    return Live(r) ? r : nullptr;
+}
+
+// AActor::K2_GetComponentsByClass(TSubclassOf<UActorComponent>) -> TArray<UActorComponent*>
+// The returned TArray is engine-allocated and not released (CONTRACT-REQUEST 3);
+// it is read through guarded copies so a half-freed array cannot fault.
+bool ComponentsByClass(ue::UObject* actor, ue::UObject* cls, std::vector<ue::UObject*>* out) {
+    if (out) out->clear();
+    if (!Live(actor) || !cls || !out) return false;
+    ue::UFunction* f = ue::FindFunction(actor, "K2_GetComponentsByClass");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("ComponentClass", cls);
+    if (!ue::Call(actor, f, p.data())) return false;
+    ue::TArray<ue::UObject*> arr = p.Get<ue::TArray<ue::UObject*>>("ReturnValue");
+    if (arr.Num <= 0 || arr.Max < arr.Num || !arr.Data) return true;
+    if (arr.Num > 4096) return true;                          // nonsense, drop it
+    if (!ue::PlausiblePtr(arr.Data)) return true;
+    out->reserve((size_t)arr.Num);
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        ue::UObject* e = nullptr;
+        if (!ue::ReadMem(arr.Data + i, &e, sizeof(e))) break;
+        out->push_back(e);
+    }
+    return true;
+}
+
+// AActorComponent::GetOwner() -> AActor*   (main.lua:232 "mesh owner")
+//
+// PERF: this is a ProcessEvent (measured 10-15 us), and SkinnedMeshesOf runs it
+// for EVERY skinned mesh in the world; the look tick was 7-9 ms of game thread,
+// most of it here.  A UActorComponent's Owner IS its Outer (PostInitProperties sets
+// OwnerPrivate from GetTypedOuter<AActor>()), so comparing the Outer answers the
+// same question with one property read, and the call stays as the fallback.
+ue::UObject* ComponentOwner(ue::UObject* comp) {
+    if (!Live(comp)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(comp, "GetOwner");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(comp, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// "is |comp| owned by |actor|" -- the cheap form of `ComponentOwner(comp) == actor`.
+bool OwnedBy(ue::UObject* comp, ue::UObject* actor) {
+    if (!comp || !actor) return false;
+    if (ue::GetOuter(comp) == actor) return true;
+    return ComponentOwner(comp) == actor;
+}
+
+// USceneComponent::GetAttachParent() -> USceneComponent*
+ue::UObject* AttachParent(ue::UObject* c) {
+    if (!Live(c)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(c, "GetAttachParent");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// USceneComponent::GetAttachSocketName() -> FName (main.lua:970)
+bool AttachSocketName(ue::UObject* c, ue::FName* out) {
+    if (!Live(c) || !out) return false;
+    ue::UFunction* f = ue::FindFunction(c, "GetAttachSocketName");
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return false;
+    *out = p.Get<ue::FName>("ReturnValue");
+    return true;
+}
+
+// AActor::GetAttachParentActor() -> AActor* (main.lua:947)
+ue::UObject* AttachParentActor(ue::UObject* a) {
+    if (!Live(a)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(a, "GetAttachParentActor");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(a, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// USceneComponent::IsVisible() -> bool (main.lua:996)
+bool IsVisible(ue::UObject* c, bool* out) {
+    if (!Live(c) || !out) return false;
+    ue::UFunction* f = ue::FindFunction(c, "IsVisible");
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return false;
+    *out = p.Get<bool>("ReturnValue");
+    return true;
+}
+
+// USkinnedMeshComponent::GetNumBones() -> int32 (main.lua:985)
+bool NumBones(ue::UObject* c, int32_t* out) {
+    if (!Live(c) || !out) return false;
+    ue::UFunction* f = ue::FindFunction(c, "GetNumBones");
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return false;
+    *out = p.Get<int32_t>("ReturnValue");
+    return true;
+}
+
+// USkeletalMeshComponent::GetSkeletalMeshAsset() -> USkeletalMesh* (main.lua:1000)
+ue::UObject* SkeletalMeshAssetOf(ue::UObject* c) {
+    if (!Live(c)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(c, "GetSkeletalMeshAsset");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// UPrimitiveComponent::GetNumMaterials() -> int32 (main.lua:917)
+int32_t NumMaterials(ue::UObject* c) {
+    if (!Live(c)) return 0;
+    ue::UFunction* f = ue::FindFunction(c, "GetNumMaterials");
+    if (!f) return 0;
+    ue::Params p(f);
+    if (!ue::Call(c, f, p.data())) return 0;
+    return p.Get<int32_t>("ReturnValue");
+}
+
+// UPrimitiveComponent::GetMaterial(int32 ElementIndex) -> UMaterialInterface* (main.lua:920)
+ue::UObject* MaterialAt(ue::UObject* c, int32_t index) {
+    if (!Live(c)) return nullptr;
+    ue::UFunction* f = ue::FindFunction(c, "GetMaterial");
+    if (!f) return nullptr;
+    ue::Params p(f);
+    p.Set<int32_t>("ElementIndex", index);
+    if (!ue::Call(c, f, p.data())) return nullptr;
+    return p.Get<ue::UObject*>("ReturnValue");
+}
+
+// UPrimitiveComponent::SetMaterial(int32 ElementIndex, UMaterialInterface*) (main.lua:1096)
+bool SetMaterialAt(ue::UObject* c, int32_t index, ue::UObject* mat) {
+    if (!Live(c) || !Live(mat)) return false;
+    ue::UFunction* f = ue::FindFunction(c, "SetMaterial");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<int32_t>("ElementIndex", index);
+    p.Set<ue::UObject*>("Material", mat);
+    return ue::Call(c, f, p.data());
+}
+
+// USceneComponent::SetVisibility(bool bNewVisibility, bool bPropagateToChildren)
+bool SetVisible(ue::UObject* c, bool visible, bool propagate) {
+    if (!Live(c)) return false;
+    ue::UFunction* f = ue::FindFunction(c, "SetVisibility");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<bool>("bNewVisibility", visible);
+    p.Set<bool>("bPropagateToChildren", propagate);
+    return ue::Call(c, f, p.data());
+}
+
+// UPrimitiveComponent::SetCollisionEnabled(ECollisionEnabled NewType)
+// (main.lua passes 0 == NoCollision)
+bool SetCollisionEnabled(ue::UObject* c, uint8_t type) {
+    if (!Live(c)) return false;
+    ue::UFunction* f = ue::FindFunction(c, "SetCollisionEnabled");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<uint8_t>("NewType", type);
+    return ue::Call(c, f, p.data());
+}
+
+// USkeletalMeshComponent::SetSkeletalMeshAsset(USkeletalMesh* NewMesh)
+bool SetSkeletalMesh(ue::UObject* c, ue::UObject* mesh) {
+    if (!Live(c) || !mesh) return false;
+    ue::UFunction* f = ue::FindFunction(c, "SetSkeletalMeshAsset");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("NewMesh", mesh);
+    return ue::Call(c, f, p.data());
+}
+
+// UStaticMeshComponent::SetStaticMesh(UStaticMesh* NewMesh)
+bool SetStaticMesh(ue::UObject* c, ue::UObject* mesh) {
+    if (!Live(c) || !mesh) return false;
+    ue::UFunction* f = ue::FindFunction(c, "SetStaticMesh");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("NewMesh", mesh);
+    return ue::Call(c, f, p.data());
+}
+
+// USceneComponent::K2_AttachToComponent(USceneComponent* Parent, FName SocketName,
+//     EAttachmentRule LocationRule, EAttachmentRule RotationRule,
+//     EAttachmentRule ScaleRule, bool bWeldSimulatedBodies) -> bool
+// main.lua:823 / :1165 always pass (0,0,0,false): keep the relative transform.
+bool AttachToComponent(ue::UObject* comp, ue::UObject* parent, const std::string& socket) {
+    if (!Live(comp) || !Live(parent)) return false;
+    ue::UFunction* f = ue::FindFunction(comp, "K2_AttachToComponent");
+    if (!f) return false;
+    const ue::FName sock = ue::MakeFName(socket.c_str());
+    ue::Params p(f);
+    p.Set<ue::UObject*>("Parent", parent);
+    p.Set<ue::FName>("SocketName", sock);
+    p.Set<uint8_t>("LocationRule", 0);
+    p.Set<uint8_t>("RotationRule", 0);
+    p.Set<uint8_t>("ScaleRule", 0);
+    p.Set<bool>("bWeldSimulatedBodies", false);
+    if (!ue::Call(comp, f, p.data())) return false;
+    return p.Get<bool>("ReturnValue");
+}
+
+// USceneComponent::K2_SetRelativeLocationAndRotation(FVector NewLocation,
+//     FRotator NewRotation, bool bSweep, FHitResult& , bool bTeleport)
+// main.lua:827 passes bSweep=false, FHitResult{}, bTeleport=true.
+bool SetRelativeLocationAndRotation(ue::UObject* comp, const ue::FVector& loc,
+                                    const ue::FRotator& rot) {
+    if (!Live(comp)) return false;
+    ue::UFunction* f = ue::FindFunction(comp, "K2_SetRelativeLocationAndRotation");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FVector>("NewLocation", loc);
+    p.Set<ue::FRotator>("NewRotation", rot);
+    p.Set<bool>("bSweep", false);
+    p.Set<bool>("bTeleport", true);
+    return ue::Call(comp, f, p.data());
+}
+
+// USceneComponent::K2_SetRelativeTransform(const FTransform&, bool bSweep,
+//     FHitResult&, bool bTeleport)  -- main.lua:1169
+bool SetRelativeTransform(ue::UObject* comp, const ue::FTransform& xf) {
+    if (!Live(comp)) return false;
+    ue::UFunction* f = ue::FindFunction(comp, "K2_SetRelativeTransform");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FTransform>("NewTransform", xf);
+    p.Set<bool>("bSweep", false);
+    p.Set<bool>("bTeleport", true);
+    return ue::Call(comp, f, p.data());
+}
+
+// USkinnedMeshComponent::SetLeaderPoseComponent(USkinnedMeshComponent* Leader,
+//     bool bForceUpdate, bool bInFollowerShouldTickPose)  -- main.lua:1174-1176
+// The Lua tried the 3-argument form and fell back to the 2-argument one; do the
+// same by asking for the function and checking whether the third param exists
+// (ue::Params::Set silently ignores an unknown name, so both forms are attempted).
+bool SetLeaderPose(ue::UObject* comp, ue::UObject* leader) {
+    if (!Live(comp) || !Live(leader)) return false;
+    ue::UFunction* f = ue::FindFunction(comp, "SetLeaderPoseComponent");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("NewLeaderBoneComponent", leader);
+    p.Set<bool>("bForceUpdate", true);
+    p.Set<bool>("bInFollowerShouldTickPose", false);
+    return ue::Call(comp, f, p.data());
+}
+
+// AActor::SetActorHiddenInGame(bool bNewHidden)
+bool SetActorHidden(ue::UObject* actor, bool hidden) {
+    if (!Live(actor)) return false;
+    ue::UFunction* f = ue::FindFunction(actor, "SetActorHiddenInGame");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<bool>("bNewHidden", hidden);
+    return ue::Call(actor, f, p.data());
+}
+
+// UBPC_AttachableItems_C::UnsubscribeFromGlobalEvents()  -- main.lua:1071
+bool UnsubscribeAttachables(ue::UObject* bpc) {
+    return CallNoArgs(bpc, "UnsubscribeFromGlobalEvents");
+}
+
+// UBPC_AttachableItems_C::AddItem(UClass* ActorClass)  -- main.lua:2072
+bool AddAttachableItem(ue::UObject* bpc, ue::UObject* cls) {
+    static std::atomic<int> logs{0};
+    if (!Live(bpc) || !cls) {
+        if (logs.fetch_add(1) < 4)
+            net::Log("additem: refused -- bpc=%s live=%d cls=%s", net::FullName(bpc).c_str(),
+                     Live(bpc) ? 1 : 0, net::FullName(cls).c_str());
+        return false;
+    }
+    ue::UFunction* f = ue::FindFunction(bpc, "AddItem");
+    if (!f) {
+        if (logs.fetch_add(1) < 8)
+            net::Log("additem: FindFunction(AddItem) is null on %s (class %s)",
+                     net::FullName(bpc).c_str(), ue::GetClassName(bpc).c_str());
+        return false;
+    }
+    ue::Params p(f);
+    p.Set<ue::UObject*>("ActorClass", cls);
+    PutOff<ue::UObject*>(p, 0x00, cls);          // first param, in case of a rename
+    const bool ok = ue::Call(bpc, f, p.data());
+    if (!ok && logs.fetch_add(1) < 12)
+        net::Log("additem: Call(%s) failed", net::FullName((ue::UObject*)f).c_str());
+    return ok;
+}
+
+// ABP_Attachable_Item_C::RemoveMe()  -- main.lua:2108
+bool RemoveMe(ue::UObject* actor) { return CallNoArgs(actor, "RemoveMe"); }
+
+// =============================================================================
+// property reads
+// =============================================================================
+
+// bitfield read: |mask| is the bit the reflected property lives on
+bool BoolBit(ue::UObject* o, const char* prop, uint8_t mask) {
+    uint8_t byte = 0;
+    if (!o || !ue::Get<uint8_t>(o, prop, byte)) return false;
+    return (byte & mask) != 0;
+}
+
+bool HiddenInGame(ue::UObject* comp) { return BoolBit(comp, "bHiddenInGame", kBit7); } // main.lua:997
+bool ActorHidden(ue::UObject* actor) { return BoolBit(actor, "bHidden", kBit7); }      // main.lua:1021
+
+ue::UObject* ObjProp(ue::UObject* o, const char* prop) {
+    ue::UObject* v = nullptr;
+    if (!o) return nullptr;
+    if (!ue::Get<ue::UObject*>(o, prop, v)) return nullptr;
+    return v;
+}
+
+// main.lua:892 relXf: the component's transform relative to its parent
+Xform RelXf(ue::UObject* c) {
+    Xform x;
+    ue::FVector l, s;
+    ue::FRotator r;
+    if (ue::Get<ue::FVector>(c, "RelativeLocation", l)) x.T = ToVec3(l);
+    Rot rot;
+    if (ue::Get<ue::FRotator>(c, "RelativeRotation", r)) rot = ToRot(r);
+    x.R = RotQuat(rot);
+    if (ue::Get<ue::FVector>(c, "RelativeScale3D", s)) {
+        const Vec3 sv = ToVec3(s);
+        x.S.X = sv.X;
+        x.S.Y = sv.Y;
+        x.S.Z = sv.Z;
+    } else {
+        x.S.X = x.S.Y = x.S.Z = 1.0;
+    }
+    return x;
+}
+
+// =============================================================================
+// look helpers (main.lua:907-978)
+// =============================================================================
+
+// main.lua:907  a dynamic instance is sent as its parent material
+std::string MatPath(ue::UObject* m) {
+    if (!m) return "";
+    const std::string fn = net::FullName(m);
+    if (HasPrefix(fn, "MaterialInstanceDynamic")) {
+        ue::UObject* parent = ObjProp(m, "Parent");
+        return parent ? net::AssetPath(parent) : std::string();
+    }
+    return net::AssetPath(m);
+}
+
+// main.lua:916  every material on the component, capped at 16
+std::string MatsOf(ue::UObject* c) {
+    const int32_t n = NumMaterials(c);
+    std::string out;
+    const int32_t lim = n < kLookMaxMats ? n : kLookMaxMats;
+    for (int32_t i = 0; i < lim; ++i) {
+        if (i) out += ",";
+        out += MatPath(MaterialAt(c, i));
+    }
+    return out;
+}
+
+// main.lua:957  two wrappers of one UObject do not always compare equal: compare
+// names (in C++ the pointer test is the fast path and the name test the fallback)
+bool SameObj(ue::UObject* a, ue::UObject* b) {
+    if (!a || !b) return false;
+    if (a == b) return true;
+    const std::string fa = net::FullName(a);
+    if (HasPrefix(fa, "UObject")) return false;
+    return fa == net::FullName(b);
+}
+
+// main.lua:925  does the component follow another component's pose?
+//
+// LeaderPoseComponent is a TWeakObjectPtr<USkinnedMeshComponent> in this build
+// (Dumper-7: /Script/Engine.SkinnedMeshComponent.LeaderPoseComponent @0x598,
+// 8 bytes = {int32 ObjectIndex, int32 ObjectSerialNumber}), so the *test* the Lua
+// performs -- "is it set, and is it live" -- is "ObjectIndex is not INDEX_NONE".
+// Resolving the weak pointer to a UObject* would need GObjects indexing, which
+// ue:: does not expose (CONTRACT-REQUEST 2); only the boolean is needed here.
+bool HasLeader(ue::UObject* c) {
+    int32_t index = -1;
+    if (!c || !ue::Get<int32_t>(c, "LeaderPoseComponent", index)) return false;
+    return index >= 0;
+}
+
+// main.lua:964  walk a component's attach chain up to the body mesh (or the actor
+// root), composing the relative transforms on the way
+bool ChainToBody(ue::UObject* c, ue::UObject* body, ue::UObject* root,
+                 Xform* outXf, std::string* outSock) {
+    if (!c || !body || !outXf || !outSock) return false;
+    Xform xf = RelXf(c);
+    ue::UObject* cur = c;
+    const std::string bodyName = net::FullName(body);
+    const std::string rootName = root ? net::FullName(root) : std::string("-");
+    for (int i = 0; i < 8; ++i) {
+        ue::UObject* parent = AttachParent(cur);
+        if (!parent || !Live(parent)) return false;
+        std::string sock = "None";
+        ue::FName fname;
+        if (AttachSocketName(cur, &fname)) {
+            sock = ue::ToString(fname);
+            if (sock.empty()) sock = "None";      // an FName of index 0 is "None"
+        }
+        const std::string pn = net::FullName(parent);
+        if (pn == bodyName) {
+            *outXf = xf;
+            *outSock = sock;
+            return true;
+        }
+        if (pn == rootName) {
+            *outXf = xf;
+            *outSock = "@root";
+            return true;
+        }
+        xf = Compose(RelXf(parent), xf);
+        cur = parent;
+    }
+    return false;
+}
+
+// main.lua:228  every skeletal mesh component owned by |actor|
+std::vector<ue::UObject*> SkinnedMeshesOf(ue::UObject* actor) {
+    std::vector<ue::UObject*> out;
+    if (!actor) return out;
+    for (ue::UObject* m : ue::FindAllOf("SkeletalMeshComponent")) {
+        if (OwnedBy(m, actor)) out.push_back(m);
+    }
+    return out;
+}
+
+// main.lua:937  every attachable actor that belongs to |who|
+std::vector<ue::UObject*> AttachablesOf(ue::UObject* who) {
+    std::vector<ue::UObject*> out;
+    if (!who) return out;
+    StrSet seen;
+    for (const char* cn : kAttachClasses) {
+        for (ue::UObject* a : ue::FindAllOf(cn)) {
+            const std::string key = net::FullName(a);
+            if (seen.Has(key) || !Live(a)) continue;
+            seen.Add(key);
+            ue::UObject* p1 = ObjProp(a, "Pawn");
+            ue::UObject* p2 = ObjProp(a, "OwnerSpartaCharacter");
+            ue::UObject* p3 = AttachParentActor(a);
+            if (SameObj(p1, who) || SameObj(p2, who) || SameObj(p3, who)) out.push_back(a);
+        }
+    }
+    return out;
+}
+
+// main.lua:1091  apply a comma separated material list; returns how many assets
+// are not loaded here yet (an empty field still advances the slot index, exactly
+// like the Lua's for p in (mats .. ","):gmatch("([^,]*),"))
+int ApplyMats(ue::UObject* comp, const std::string& mats) {
+    if (!comp) return 0;
+    int missing = 0;
+    int32_t index = 0;
+    size_t i = 0;
+    for (;;) {
+        size_t comma = mats.find(',', i);
+        const bool last = (comma == std::string::npos);
+        const std::string p = mats.substr(i, last ? std::string::npos : comma - i);
+        if (!p.empty()) {
+            ue::UObject* m = net::Find(p, true);
+            if (m) {
+                SetMaterialAt(comp, index, m);
+            } else {
+                ++missing;
+            }
+        }
+        ++index;
+        if (last) break;
+        i = comma + 1;
+    }
+    return missing;
+}
+
+// =============================================================================
+// the "p=..." wire part (main.lua:1145 parse / :1013 emit)
+// =============================================================================
+
+// Parse the text after "p=" (exactly the 8 '|' separated fields of the Lua
+// pattern; the 8th field may itself contain '|' because the Lua's last capture is
+// (.*)).
+bool ParsePart(const std::string& key, LookPart* out) {
+    if (!out) return false;
+    std::string f[8];
+    size_t i = 0;
+    for (int n = 0; n < 7; ++n) {
+        size_t bar = key.find('|', i);
+        if (bar == std::string::npos) return false;
+        f[n] = key.substr(i, bar - i);
+        i = bar + 1;
+    }
+    f[7] = key.substr(i);
+    if (f[0].size() != 1 || (f[0][0] != 'K' && f[0][0] != 'S')) return false;
+    if (f[6].size() != 1 || !std::isdigit((unsigned char)f[6][0])) return false;
+    out->kind = f[0][0];
+    out->asset = f[1];
+    out->socket = f[2];
+    const std::vector<double> l = ParseVec(f[3], 3);
+    const std::vector<double> q = ParseVec(f[4], 4);
+    const std::vector<double> s = ParseVec(f[5], 3);
+    out->loc = Vec3{l[0], l[1], l[2]};
+    out->quat = Quat{q[0], q[1], q[2], q[3]};
+    out->scale = Scale3{s[0], s[1], s[2]};
+    out->leader = f[6] == "1";
+    out->mats = f[7];
+    out->key = key;
+    return true;
+}
+
+// =============================================================================
+// component bookkeeping (LOOK.comps / LOOK.pendMats are keyed by the raw part
+// text; coop_state.h cannot use std::map, so they are two parallel vectors)
+// =============================================================================
+
+int FindKey(const std::vector<std::string>& keys, const std::string& k) {
+    for (size_t i = 0; i < keys.size(); ++i) {
+        if (keys[i] == k) return (int)i;
+    }
+    return -1;
+}
+
+ue::UObject* GetComp(const std::string& key) {
+    AppearState& a = state().appear;
+    const int i = FindKey(a.compKeys, key);
+    return i < 0 ? nullptr : a.comps[(size_t)i];
+}
+
+void SetComp(const std::string& key, ue::UObject* comp) {
+    AppearState& a = state().appear;
+    const int i = FindKey(a.compKeys, key);
+    if (i >= 0) {
+        a.comps[(size_t)i] = comp;
+        return;
+    }
+    a.compKeys.push_back(key);
+    a.comps.push_back(comp);
+}
+
+void ErasePend(const std::string& key) {
+    AppearState& a = state().appear;
+    const int p = FindKey(a.pendKeys, key);
+    if (p < 0) return;
+    a.pendKeys[(size_t)p] = a.pendKeys.back();
+    a.pendKeys.pop_back();
+    a.pendMats[(size_t)p] = a.pendMats.back();
+    a.pendMats.pop_back();
+}
+
+bool GetPendMats(const std::string& key, std::string* out) {
+    AppearState& a = state().appear;
+    const int i = FindKey(a.pendKeys, key);
+    if (i < 0) return false;
+    if (out) *out = a.pendMats[(size_t)i];
+    return true;
+}
+
+void SetPendMats(const std::string& key, const std::string& mats) {
+    AppearState& a = state().appear;
+    const int i = FindKey(a.pendKeys, key);
+    if (i >= 0) {
+        a.pendMats[(size_t)i] = mats;
+        return;
+    }
+    a.pendKeys.push_back(key);
+    a.pendMats.push_back(mats);
+}
+
+// Destroy a component we created, if it is still alive (the Lua's isLive gate --
+// the crash defence that matters here: a stale pointer after a map load is never
+// dereferenced, it is simply dropped).
+void DestroyIfLive(ue::UObject* c) {
+    if (c && net::Valid(c)) DestroyComponent(c);
+}
+
+// =============================================================================
+// weapon array normalisation
+//
+// state().peer.weapons / lastPeerWeapons is the raw `"wpns":[...]` section; the
+// contract also allows the caller to hand us the body without brackets.  Both
+// normalise to the bracketed form, because WEAPON.applied is printed verbatim in
+// sync.txt (`wpnapplied=`) and compared against the peer's raw section.
+// =============================================================================
+std::string NormWeapons(const std::string& raw) {
+    std::string s = raw;
+    if (s.empty()) return s;
+    if (s.front() != '[') s.insert(s.begin(), '[');
+    if (s.back() != ']') s.push_back(']');
+    return s;
+}
+
+// =============================================================================
+// guard helper: the Lua's step() skips a label when it is in HOLD_SKIP *or*
+// SETTLE_SKIP (main.lua:4004-4013).  myLook / lookSilence / lookTest are in both
+// lists, and Guard only carries one of the two, so test both here and let
+// net::Step do the exception guard + the "ERR <label>:" log.
+// =============================================================================
+bool StepGuarded(const char* label, const std::function<void()>& fn) {
+    if (net::LocalHold()) return true;
+    if (net::WorldSettle()) return true;
+    return net::Step(label, Guard::None, fn);
+}
+
+ue::FTransform IdentityXform() {
+    ue::FTransform xf{};
+    xf.Rotation.W = 1.0;
+    xf.Scale3D.X = 1.0;
+    xf.Scale3D.Y = 1.0;
+    xf.Scale3D.Z = 1.0;
+    return xf;
+}
+
+} // namespace
+
+// =============================================================================
+// appear::Hash -- main.lua:863  djb2, must stay bit-identical (it is in sync.txt)
+// =============================================================================
+std::string Hash(const std::string& s) {
+    uint32_t h = 5381u;
+    for (unsigned char c : s) h = (uint32_t)((uint64_t)h * 33u + (uint64_t)c);
+    return net::Fmt("%08x", (unsigned)h);
+}
+
+const std::string& Mine() { return state().appear.mine; }
+
+// =============================================================================
+// appear::CaptureLook -- main.lua:980  (the look sender)
+//
+// What is rendered, not what the save says: per-slot body materials plus every
+// visible mesh component of the pawn and of its attachables, each with the socket
+// on the body it hangs from, the transform relative to that socket, the
+// leader-pose flag and its materials.
+// =============================================================================
+bool CaptureLook(std::string* out) {
+    if (out) out->clear();
+    ue::UObject* pawn = net::Pawn();
+    if (!Live(pawn)) return false;
+
+    // main.lua:984  the body is the skinned mesh that actually has bones
+    ue::UObject* body = nullptr;
+    for (ue::UObject* m : SkinnedMeshesOf(pawn)) {
+        int32_t n = 0;
+        if (NumBones(m, &n) && n > 0) {
+            body = m;
+            break;
+        }
+    }
+    if (!body) return false;
+
+    ue::UObject* root = RootComponent(pawn);
+    ue::UObject* meshCls = net::EngineClass("MeshComponent");
+    std::vector<std::string> parts;
+    parts.reserve((size_t)kLookMaxParts);
+
+    auto addComp = [&](ue::UObject* c) {
+        if ((int)parts.size() >= kLookMaxParts || !Live(c) || SameObj(c, body)) {
+            g_why = "dup/dead";
+            return;
+        }
+        const std::string name = net::FullName(c);
+        const char kind = MeshKind(name);
+        if (!kind) {
+            g_why = "kind";
+            return;
+        }
+        bool visible = true;
+        if (IsVisible(c, &visible) && !visible) {   // only skip when the call succeeded
+            g_why = "invisible";
+            return;
+        }
+        if (HiddenInGame(c)) {
+            g_why = "hidden";
+            return;
+        }
+        std::string assetPath;
+        if (kind == 'K') {
+            // main.lua:1000  the source tries four accessors in this order
+            ue::UObject* a = SkeletalMeshAssetOf(c);
+            if (a) assetPath = net::AssetPath(a);
+            if (assetPath.empty()) {                 // SkeletalMeshAsset (not reflected here)
+                a = ObjProp(c, "SkeletalMeshAsset");
+                if (a) assetPath = net::AssetPath(a);
+            }
+            if (assetPath.empty()) {
+                a = ObjProp(c, "SkinnedAsset");
+                if (a) assetPath = net::AssetPath(a);
+            }
+            if (assetPath.empty()) {
+                a = ObjProp(c, "SkeletalMesh");
+                if (a) assetPath = net::AssetPath(a);
+            }
+        } else {
+            ue::UObject* a = ObjProp(c, "StaticMesh");
+            if (a) assetPath = net::AssetPath(a);
+        }
+        if (assetPath.empty()) {
+            g_why = "noasset";
+            return;
+        }
+        Xform xf;
+        std::string sock;
+        if (!ChainToBody(c, body, root, &xf, &sock)) {
+            g_why = "nochain";
+            return;
+        }
+        const int leader = (kind == 'K' && (HasLeader(c) || sock == "None")) ? 1 : 0;
+        // main.lua:1013 -- the exact wire text; note the sort below makes the
+        // order of this list, not the order of the components, the stable part
+        parts.push_back(net::Fmt(
+            "p=%c|%s|%s|%.2f,%.2f,%.2f|%.5f,%.5f,%.5f,%.5f|%.3f,%.3f,%.3f|%d|%s",
+            kind, assetPath.c_str(), sock.c_str(),
+            xf.T.X, xf.T.Y, xf.T.Z,
+            xf.R.X, xf.R.Y, xf.R.Z, xf.R.W,
+            xf.S.X, xf.S.Y, xf.S.Z, leader, MatsOf(c).c_str()));
+    };
+
+    // main.lua:1018  extra meshes the game put on the pawn itself
+    if (meshCls) {
+        std::vector<ue::UObject*> comps;
+        if (ComponentsByClass(pawn, meshCls, &comps)) {
+            for (ue::UObject* c : comps) addComp(c);
+        }
+    }
+
+    // main.lua:1019  masks, clothing, heart
+    for (ue::UObject* a : AttachablesOf(pawn)) {
+        const bool hidden = ActorHidden(a);
+        const std::string an = net::FullName(a);
+        const bool logIt = !state().appear.logged.Has(an);
+        if (logIt) {
+            state().appear.logged.Add(an);
+            g_lastNewAtt = an;
+            g_lastNewAttAt = net::Wall();
+            std::vector<ue::UObject*> all;
+            ue::UObject* sceneCls = net::EngineClass("SceneComponent");
+            if (sceneCls && ComponentsByClass(a, sceneCls, &all)) {
+                for (ue::UObject* c : all) {
+                    ue::UObject* par = AttachParent(c);
+                    ue::FName sn;
+                    const std::string sockStr = AttachSocketName(c, &sn) ? ue::ToString(sn) : std::string("?");
+                    bool vis = false;
+                    const bool haveVis = IsVisible(c, &vis);
+                    net::Log("look survey %s: %s vis=%s hid=%s parent=%s sock=%s body=%s actorHidden=%s",
+                             LeafName(an).c_str(),
+                             (net::FullName(c) + ":" + LeafName(net::FullName(c))).c_str(),
+                             haveVis ? (vis ? "true" : "false") : "nil",
+                             HiddenInGame(c) ? "true" : "false",
+                             par ? LeafName(net::FullName(par)).c_str() : "nil",
+                             sockStr.c_str(), LeafName(net::FullName(body)).c_str(),
+                             hidden ? "true" : "false");
+                }
+            }
+        }
+        if (!hidden) {
+            int seenN = 0;
+            g_why.clear();
+            std::vector<ue::UObject*> comps;
+            if (meshCls && ComponentsByClass(a, meshCls, &comps)) {
+                for (ue::UObject* c : comps) {
+                    ++seenN;
+                    addComp(c);
+                }
+            }
+            if (logIt) {
+                net::Log("look survey result: comps=%d parts=%d last skip=%s", seenN,
+                         (int)parts.size(), g_why.empty() ? "nil" : g_why.c_str());
+            }
+        }
+    }
+
+    std::sort(parts.begin(), parts.end());   // main.lua:1043 -- the key order must be stable
+    state().appear.nparts = (int)parts.size();
+
+    std::string sig = "bm=" + MatsOf(body);
+    if (!parts.empty()) {
+        sig += ";";
+        for (size_t i = 0; i < parts.size(); ++i) {
+            if (i) sig += ";";
+            sig += parts[i];
+        }
+    }
+    if (out) *out = sig;
+    return true;
+}
+
+// =============================================================================
+// appear::OwnLookTick -- main.lua:1050
+// A change is published only once it has held for two samples, so a one-frame
+// state during a shell swap is never broadcast (docs/NATIVE-PORT.md 4 item 13).
+// =============================================================================
+void OwnLookTick() {
+    AppearState& a = state().appear;
+    if (!toggles().lookEnabled) return;
+    std::string s;
+    if (!CaptureLook(&s) || s.empty()) return;
+    if (s == a.mine) {
+        a.cand.clear();
+        a.candN = 0;
+        return;
+    }
+    if (a.mine.empty() || (a.cand == s && a.candN >= 1)) {
+        a.mine = s;
+        a.cand.clear();
+        a.candN = 0;
+        net::Log("own look -> %s (%d parts, %d bytes)", Hash(s).c_str(), a.nparts, (int)s.size());
+        return;
+    }
+    if (a.cand == s) {
+        a.candN += 1;
+    } else {
+        a.cand = s;
+        a.candN = 1;
+    }
+}
+
+// =============================================================================
+// appear::SilencePuppet -- main.lua:1065
+// The puppet is a BP_PlayerCharacter_C: its own BPC_AttachableItems would dress it
+// from the LOCAL save and follow the local player's mask/clothing events.
+// =============================================================================
+void SilencePuppet() {
+    AppearState& a = state().appear;
+    ue::UObject* pup = puppet::Actor();
+    if (!Live(pup)) return;
+    if (a.silenced != pup) {
+        a.silenced = pup;
+        ue::UObject* bpc = ObjProp(pup, "BPC_AttachableItems");
+        if (bpc && net::Valid(bpc)) {
+            if (UnsubscribeAttachables(bpc)) {
+                net::Log("puppet attachables unsubscribed from global events");
+            }
+        }
+    }
+    for (ue::UObject* att : AttachablesOf(pup)) {
+        if (!ActorHidden(att)) {
+            SetActorHidden(att, true);
+            a.hiddenOwn += 1;
+            net::Log("hid puppet's own attachable %s", LeafName(net::FullName(att)).c_str());
+        }
+    }
+}
+
+// =============================================================================
+// appear::ClearWeapons -- main.lua:787
+// =============================================================================
+void ClearWeapons() {
+    AppearState& a = state().appear;
+    for (ue::UObject* c : a.weaponComps) DestroyIfLive(c);
+    a.weaponComps.clear();
+    a.weaponSockets.clear();
+}
+
+// =============================================================================
+// appear::ApplyWeapons -- main.lua:797
+// Rebuild the peer's weapon meshes as plain engine mesh components on the puppet,
+// attached to the same socket.  The game's weapon actors carry gameplay logic
+// (abilities, hit detection), so only their visuals are replicated.
+// =============================================================================
+// =============================================================================
+// Pins -- keep everything we attached to the puppet attached.
+//
+// The game's own death logic on THIS client (the local player dying) detaches
+// components from every player-character mesh, the puppet's included -- measured
+// round 5: after a local death the puppet's weapons sat at its feet with
+// AttachSocketName=None, and nothing re-applied them because the peer's weapon
+// list had not changed.  So right after weapons or look parts (masks, attachables,
+// leader-pose clothing) are applied, the parent / socket / leader-pose component
+// each one ended up with is recorded, and Tick2 puts back whatever the game moved.
+// =============================================================================
+struct Pin {
+    ue::UObject* comp = nullptr;
+    ue::UObject* parent = nullptr;
+    ue::FName sock{};
+    ue::UObject* leader = nullptr;
+};
+std::vector<Pin> g_pins;
+
+void RecordPins() {
+    AppearState& a = state().appear;
+    g_pins.clear();
+    std::vector<ue::UObject*> all(a.weaponComps.begin(), a.weaponComps.end());
+    all.insert(all.end(), a.comps.begin(), a.comps.end());
+    for (ue::UObject* c : all) {
+        if (!Live(c)) continue;
+        Pin p;
+        p.comp = c;
+        ue::Get(c, "AttachParent", p.parent);
+        ue::Get(c, "AttachSocketName", p.sock);
+        ue::Get(c, "LeaderPoseComponent", p.leader);
+        if (!p.parent) continue;   // never attached: nothing to keep
+        g_pins.push_back(p);
+    }
+    net::Log("puppet gear: pinned %d part(s) (first: parent=%s socket=%s)", (int)g_pins.size(),
+             g_pins.empty() ? "-" : ue::GetName(g_pins[0].parent).c_str(),
+             g_pins.empty() ? "-" : ue::ToString(g_pins[0].sock).c_str());
+}
+
+void VerifyPins() {
+    int fixed = 0;
+    static double nextDiag = 0.0;
+    if (!g_pins.empty() && net::Now() >= nextDiag) {
+        nextDiag = net::Now() + 10.0;
+        ue::UObject* parent = nullptr;
+        ue::FName sock{};
+        ue::Get(g_pins[0].comp, "AttachParent", parent);
+        ue::Get(g_pins[0].comp, "AttachSocketName", sock);
+        net::Log("puppet gear: check %d pin(s); first now parent=%s socket=%s live=%d",
+                 (int)g_pins.size(), parent ? ue::GetName(parent).c_str() : "-",
+                 ue::ToString(sock).c_str(), Live(g_pins[0].comp) ? 1 : 0);
+    }
+    for (const Pin& p : g_pins) {
+        if (!Live(p.comp) || !Live(p.parent)) continue;
+        ue::UObject* parent = nullptr;
+        ue::FName sock{};
+        ue::Get(p.comp, "AttachParent", parent);
+        ue::Get(p.comp, "AttachSocketName", sock);
+        bool did = false;
+        if (parent != p.parent || sock.ComparisonIndex != p.sock.ComparisonIndex ||
+            sock.Number != p.sock.Number) {
+            const std::string s = p.sock.ComparisonIndex ? ue::ToString(p.sock) : std::string("None");
+            did = AttachToComponent(p.comp, p.parent, s) || did;
+        }
+        if (p.leader && Live(p.leader)) {
+            ue::UObject* leader = nullptr;
+            ue::Get(p.comp, "LeaderPoseComponent", leader);
+            if (leader != p.leader) did = SetLeaderPose(p.comp, p.leader) || did;
+        }
+        if (did) ++fixed;
+    }
+    if (fixed > 0) {
+        static int logs = 0;
+        if (logs++ < 10) net::Log("puppet gear: re-attached %d part(s) the game had detached", fixed);
+    }
+}
+
+bool ApplyWeapons(const std::string& arr) {
+    AppearState& a = state().appear;
+    ue::UObject* pup = puppet::Actor();
+    ue::UObject* mesh = puppet::Mesh();
+    if (!Live(pup) || !Live(mesh)) return false;   // main.lua:798 -- before any parsing
+
+    const std::string sig = NormWeapons(arr);
+
+    struct Entry {
+        std::string path;
+        char kind = 'K';
+        std::string sock;
+        Vec3 l;
+        Rot r;
+    };
+
+    // main.lua:800  gmatch over ["<path>","<S|K>","<socket>",x,y,z,pitch,yaw,roll]
+    std::vector<Entry> entries;
+    size_t i = 0;
+    while (true) {
+        const size_t start = sig.find("[\"", i);
+        if (start == std::string::npos) break;
+        size_t p = start + 2;
+        const size_t pathEnd = sig.find("\",\"", p);
+        if (pathEnd == std::string::npos) break;
+        Entry en;
+        en.path = sig.substr(p, pathEnd - p);
+        p = pathEnd + 3;
+        if (p + 2 > sig.size()) break;
+        en.kind = sig[p];
+        if (en.kind != 'K' && en.kind != 'S') break;
+        if (sig.compare(p + 1, 3, "\",\"") != 0) break;
+        p += 4;
+        const size_t sockEnd = sig.find('"', p);
+        if (sockEnd == std::string::npos) break;
+        en.sock = sig.substr(p, sockEnd - p);
+        p = sockEnd + 1;
+        // six comma separated numbers, then ']'
+        double vals[6] = {0, 0, 0, 0, 0, 0};
+        bool ok = true;
+        for (int n = 0; n < 6; ++n) {
+            if (p >= sig.size() || sig[p] != ',') { ok = false; break; }
+            ++p;
+            const size_t numStart = p;
+            while (p < sig.size() && (std::isdigit((unsigned char)sig[p]) || sig[p] == '-' ||
+                                      sig[p] == '+' || sig[p] == '.' || sig[p] == 'e' || sig[p] == 'E')) {
+                ++p;
+            }
+            if (p == numStart) { ok = false; break; }
+            vals[n] = Num(sig.substr(numStart, p - numStart));
+        }
+        if (!ok) break;
+        if (p >= sig.size() || sig[p] != ']') break;
+        i = p + 1;
+        en.l = Vec3{vals[0], vals[1], vals[2]};
+        en.r = Rot{vals[3], vals[4], vals[5]};
+        entries.push_back(en);
+    }
+
+    // main.lua:803  an asset we have not loaded yet aborts the WHOLE apply, and the
+    // components already on the puppet are left alone (never cleared on failure).
+    // The resolved asset is kept so the second pass does not re-walk GObjects.
+    std::vector<ue::UObject*> assets(entries.size(), nullptr);
+    for (size_t e = 0; e < entries.size(); ++e) {
+        assets[e] = net::Find(entries[e].path, true);
+        if (!assets[e]) return false;
+    }
+
+    ClearWeapons();
+    const ue::FTransform xf = IdentityXform();
+    for (size_t e = 0; e < entries.size(); ++e) {
+        const Entry& en = entries[e];
+        ue::UObject* cls = net::EngineClass(en.kind == 'K' ? "SkeletalMeshComponent" : "StaticMeshComponent");
+        if (!cls) continue;
+        ue::UObject* comp = AddComponent(pup, cls, true, xf, false);
+        if (!Live(comp)) continue;
+        a.weaponComps.push_back(comp);
+        a.weaponSockets.push_back(en.sock);
+        SetCollisionEnabled(comp, 0);
+        ue::UObject* asset = assets[e];
+        if (!asset) continue;
+        if (en.kind == 'K') {
+            SetSkeletalMesh(comp, asset);
+        } else {
+            SetStaticMesh(comp, asset);
+        }        if (!AttachToComponent(comp, mesh, en.sock)) {
+            net::Log("weapon attach failed (%s): %s", en.sock.c_str(), "attach call failed");
+        }
+        SetRelativeLocationAndRotation(comp, FromVec3(en.l), FromRot(en.r));
+        SetVisible(comp, true, true);
+    }
+    a.weaponsApplied = sig;
+    RecordPins();
+    net::Log("peer weapons -> %d mesh(es): %s", (int)a.weaponComps.size(), sig.c_str());
+    return true;
+}
+
+// =============================================================================
+// appear::ClearLook -- main.lua:1103
+// =============================================================================
+void ClearLook() {
+    AppearState& a = state().appear;
+    for (ue::UObject* c : a.comps) DestroyIfLive(c);
+    a.compKeys.clear();
+    a.comps.clear();
+    a.pendKeys.clear();
+    a.pendMats.clear();
+    a.applied.clear();
+    a.bodyKey.clear();
+}
+
+// =============================================================================
+// appear::ApplyLook -- main.lua:1113
+// Diff the peer's parts against what is on the puppet; a part whose asset is not
+// loaded here yet is requested from the loader and picked up on a later pass.
+// Returns true only when nothing was missing (which is what the caller's 3 s
+// retry hangs off).
+// =============================================================================
+bool ApplyLook(const std::string& sig) {
+    AppearState& a = state().appear;
+    ue::UObject* pup = puppet::Actor();
+    ue::UObject* mesh = puppet::Mesh();
+    if (!Live(pup) || !Live(mesh)) return false;   // main.lua:1114
+
+    if (a.owner != pup) {
+        a.compKeys.clear();
+        a.comps.clear();
+        a.pendKeys.clear();
+        a.pendMats.clear();
+        a.owner = pup;
+        a.applied.clear();
+        a.bodyKey.clear();
+    }
+
+    int missing = 0;
+
+    // --- body materials: "bm=<mat>,<mat>" (main.lua:1117) ---
+    std::string bm;
+    if (HasPrefix(sig, "bm=")) {
+        const size_t semi = sig.find(';', 3);
+        bm = sig.substr(3, semi == std::string::npos ? std::string::npos : semi - 3);
+    }
+    const std::string bodyKey = state().puppet.appliedBody + "#" + bm;
+    if (a.bodyKey != bodyKey) {
+        const int miss = ApplyMats(mesh, bm);
+        if (miss == 0) a.bodyKey = bodyKey;
+        missing += miss;
+    }
+
+    // --- the wanted part keys (main.lua:1124 `for part in sig:gmatch("p=([^;]+)")`) ---
+    std::vector<std::string> want;
+    {
+        size_t pos = 0;
+        while (true) {
+            pos = sig.find("p=", pos);
+            if (pos == std::string::npos) break;
+            const size_t start = pos + 2;
+            const size_t end = sig.find(';', start);
+            const std::string key =
+                sig.substr(start, end == std::string::npos ? std::string::npos : end - start);
+            if (!key.empty() && !Contains(want, key)) want.push_back(key);
+            pos = (end == std::string::npos) ? sig.size() : end;
+        }
+    }
+
+    // --- drop every component that is no longer wanted (main.lua:1126) ---
+    {
+        std::vector<std::string> keepKeys;
+        std::vector<ue::UObject*> keepComps;
+        keepKeys.reserve(a.compKeys.size());
+        keepComps.reserve(a.comps.size());
+        for (size_t i = 0; i < a.compKeys.size(); ++i) {
+            const std::string key = a.compKeys[i];
+            ue::UObject* c = a.comps[i];
+            if (!Contains(want, key) || !Live(c)) {
+                DestroyIfLive(c);
+                ErasePend(key);
+                continue;
+            }
+            keepKeys.push_back(key);
+            keepComps.push_back(c);
+        }
+        a.compKeys.swap(keepKeys);
+        a.comps.swap(keepComps);
+    }
+
+    // --- add / re-material the wanted parts (main.lua:1136) ---
+    const ue::FTransform xf0 = IdentityXform();
+    int n = 0;
+    for (const std::string& key : want) {
+        ++n;
+        ue::UObject* have = GetComp(key);
+        if (have) {
+            std::string pend;
+            if (GetPendMats(key, &pend)) {
+                const int miss = ApplyMats(have, pend);
+                if (miss == 0) {
+                    ErasePend(key);              // materials landed: stop retrying them
+                } else {
+                    missing += miss;
+                }
+            }
+            continue;
+        }
+        LookPart part;
+        if (!ParsePart(key, &part)) continue;
+        ue::UObject* asset = net::Find(part.asset, true);
+        if (!asset) {
+            ++missing;
+            continue;
+        }
+        ue::UObject* cls =
+            net::EngineClass(part.kind == 'K' ? "SkeletalMeshComponent" : "StaticMeshComponent");
+        ue::UObject* comp = cls ? AddComponent(pup, cls, true, xf0, false) : nullptr;
+        if (!Live(comp)) {
+            ++missing;
+            continue;
+        }
+        SetComp(key, comp);
+        SetCollisionEnabled(comp, 0);
+        if (part.kind == 'K') {
+            SetSkeletalMesh(comp, asset);
+        } else {
+            SetStaticMesh(comp, asset);
+        }
+        // main.lua:1159  "@root" means the actor root with socket "None"
+        ue::UObject* parent = mesh;
+        std::string sockName = part.socket;
+        if (part.socket == "@root") {
+            ue::UObject* r = RootComponent(pup);
+            parent = Live(r) ? r : mesh;
+            sockName = "None";
+        }
+        if (!AttachToComponent(comp, parent, sockName)) {
+            net::Log("look attach failed (%s): %s", sockName.c_str(), "attach call failed");
+        }
+        ue::FTransform xf{};
+        xf.Rotation = FromQuat(part.quat);
+        xf.Translation = FromVec3(part.loc);
+        xf.Scale3D = FromVec3(Vec3{part.scale.X, part.scale.Y, part.scale.Z});
+        SetRelativeTransform(comp, xf);
+        if (part.kind == 'K' && part.leader) SetLeaderPose(comp, mesh);
+        const int mmiss = ApplyMats(comp, part.mats);
+        if (mmiss > 0) {
+            SetPendMats(key, part.mats);
+            missing += mmiss;
+        }
+        SetVisible(comp, true, true);
+        net::Log("look part on puppet: %s @%s", LeafName(part.asset).c_str(), part.socket.c_str());
+    }
+
+    a.peerParts = n;
+    a.missing = missing;
+    if (missing == 0) {
+        if (a.applied != sig) net::Log("peer look applied %s (%d parts)", Hash(sig).c_str(), n);
+        a.applied = sig;
+        RecordPins();
+        return true;
+    }
+    return false;
+}
+
+// =============================================================================
+// lookadd / lookdel test hooks -- main.lua:2061-2078, 2100-2112
+// =============================================================================
+
+bool LookAddPending() { return g_lookAdd.active; }
+
+void SetLookAdded(const std::string& fullName) { g_lookAdded = fullName; }
+
+void LookTestTick() {
+    if (!g_lookAdd.active) return;
+    const int64_t now = net::Wall();
+    if (now - g_lookAdd.at > kLookAddGiveUp) {
+        net::Log("lookadd gave up: %s", g_lookAdd.path.c_str());
+        g_lookAdd = LookAddReq{};
+        return;
+    }
+    ue::UObject* pawn = net::Pawn();
+    if (!Live(pawn)) return;
+
+    // Phase 2: AddItem was already called; wait for the deferred spawn to show up
+    // in the attachables list and then remember it as LOOK_ADDED (main.lua:2074-2076).
+    if (g_lookAdd.polling) {
+        for (ue::UObject* a : AttachablesOf(pawn)) {
+            const std::string fn = net::FullName(a);
+            if (!Contains(g_lookAdd.before, fn)) {
+                g_lookAdded = fn;
+                net::Log("lookadd spawned %s (polled, %ds after AddItem)", fn.c_str(),
+                         (int)(now - g_lookAdd.at));
+                g_lookAdd = LookAddReq{};
+                return;
+            }
+        }
+        if (now > g_lookAdd.until) {
+            net::Log("lookadd: AddItem made no new attachable within %ds -- lookdel will have"
+                     " nothing to remove (%s)",
+                     (int)kLookAddPollSecs, g_lookAdd.path.c_str());
+            g_lookAdd = LookAddReq{};
+        }
+        return;
+    }
+
+    // Phase 1: resolve the class, snapshot the attachables, AddItem.
+    ue::UObject* cls = net::Find(g_lookAdd.path, true);
+    if (!cls) return;
+    ue::UObject* bpc = ObjProp(pawn, "BPC_AttachableItems");
+    if (!bpc || !net::Valid(bpc)) return;
+
+    std::vector<std::string> before;
+    for (ue::UObject* a : AttachablesOf(pawn)) before.push_back(net::FullName(a));
+
+    g_lookAdd.before = before;
+    g_lookAdd.polling = true;
+    g_lookAdd.until = now + kLookAddPollSecs;
+    const std::string path = g_lookAdd.path;
+    const bool ok = AddAttachableItem(bpc, cls);
+    net::Log("lookadd AddItem(%s) ok=%s %s (%d attachables before)", path.c_str(),
+             ok ? "true" : "false", ok ? "" : "add item call failed", (int)before.size());
+}
+
+// main.lua:2105-2112.  LOOK_ADDED is the actor `lookadd` made; when the poll above
+// could not fill it in, the attachable the capture saw appear last is the same
+// actor (nothing else in this module creates one) -- use it and say so, so the log
+// shows which path ran.
+void LookDel() {
+    const std::vector<ue::UObject*> list = AttachablesOf(net::Pawn());
+    std::string want = g_lookAdded;
+    const char* how = "LOOK_ADDED";
+    if (want.empty() && !g_lastNewAtt.empty() && net::Wall() - g_lastNewAttAt <= 600) {
+        want = g_lastNewAtt;
+        how = "the attachable that appeared last";
+    }
+    int matched = 0;
+    for (ue::UObject* a : list) {
+        if (want.empty() || net::FullName(a) != want) continue;
+        ++matched;
+        const bool ok = RemoveMe(a);
+        SetActorHidden(a, true);
+        net::Log("lookdel %s (RemoveMe ok=%s, from %s) hidden=%s", want.c_str(),
+                 ok ? "true" : "false", how, ActorHidden(a) ? "true" : "false");
+    }
+    if (matched == 0) {
+        net::Log("lookdel: nothing matched '%s' (%d attachables on the pawn, %s)", want.c_str(),
+                 (int)list.size(), want.empty() ? "no LOOK_ADDED recorded" : how);
+    }
+}
+
+// =============================================================================
+// appear::Tick2 -- main.lua:4102-4119  (the 2 Hz driver)
+//
+// Order matters and is the Lua's: weapons, then own look, then puppet silencing,
+// then the peer look apply, then the lookadd probe.
+// =============================================================================
+void Tick2() {
+    AppearState& a = state().appear;
+    const Toggles& tg = toggles();
+    const PeerState& pr = state().peer;
+    if (state().puppet.phase != Phase::Sync) return;   // the Lua's block is inside "if S.phase == sync"
+
+    // --- peer weapons (main.lua:4102) --------------------------------------
+    VerifyPins();   // weapons AND look parts -- see Pins
+    if (!tg.weaponOff) {
+        const std::string want = NormWeapons(pr.weapons);
+        if (!want.empty() && puppet::BodyReady() && !net::LocalHold() && !net::WorldSettle() &&
+            a.weaponsApplied != want && (double)net::Wall() >= a.weaponRetryAt) {
+            bool res = false;
+            const bool ok = net::Step("peerWeapon", Guard::None, [&] { res = ApplyWeapons(pr.weapons); });
+            if (!(ok && res)) a.weaponRetryAt = (double)net::Wall() + kWeaponRetry;
+        }
+    }
+
+    // --- the rest of the look (main.lua:4109) ------------------------------
+    if (tg.lookEnabled) {
+        StepGuarded("myLook", [] { OwnLookTick(); });
+        if (puppet::BodyReady()) StepGuarded("lookSilence", [] { SilencePuppet(); });
+
+        ue::UObject* pup = puppet::Actor();
+        // main.lua:4112  only dress a puppet whose shell already matches the peer's
+        const bool bodyMatches = pr.body.empty() || state().puppet.appliedBody == pr.body;
+        if (pr.look.size() > 3 && puppet::BodyReady() && !net::LocalHold() && !net::WorldSettle() &&
+            net::Valid(pup) && bodyMatches &&
+            (a.applied != pr.look || a.owner != pup) &&
+            (double)net::Wall() >= a.retryAt) {
+            bool res = false;
+            const bool ok = net::Step("peerLook", Guard::None, [&] { res = ApplyLook(pr.look); });
+            if (!(ok && res)) a.retryAt = (double)net::Wall() + kLookRetry;
+        }
+    }
+
+    // main.lua:4119  the lookadd probe runs even with LOOK_OFF.txt
+    if (LookAddPending()) StepGuarded("lookTest", [] { LookTestTick(); });
+}
+
+// =============================================================================
+// appear::Reset -- drop every cached ue::UObject* on a world change.
+//
+// This is the crash defence docs/HANDOFF.md section 18 is about: the components
+// we created belong to the old world and their pointers are dead, so they are
+// dropped, never destroyed.  The sender-side strings are kept (the Lua kept
+// LOOK.mine in a global across map loads).
+// =============================================================================
+void Reset() {
+    AppearState& a = state().appear;
+    a.compKeys.clear();
+    a.comps.clear();
+    a.pendKeys.clear();
+    a.pendMats.clear();
+    a.owner = nullptr;
+    a.silenced = nullptr;
+    a.applied.clear();
+    a.bodyKey.clear();
+    a.peerParts = 0;
+    a.missing = 0;
+    a.retryAt = 0.0;
+    a.weaponComps.clear();
+    a.weaponSockets.clear();
+    a.weaponsApplied.clear();
+    a.weaponRetryAt = 0.0;
+    a.logged.Clear();
+}
+
+} // namespace appear
+} // namespace coop

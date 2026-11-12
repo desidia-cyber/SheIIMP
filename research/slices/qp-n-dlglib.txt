@@ -1,0 +1,28 @@
+﻿### ArrayProperty /Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:StringTableIds  [000001F4ACD5BB80]
+    1 members:
+      PRP StringTableIds : NameProperty [o:0x0]
+
+### BoolProperty /Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:bOverwriteExistingSubtitleSpeakerText  [000001F4ACD5BC00]
+
+### Class /Script/Sparta.DlgBlueprintLibrary  [00007FF46F032938]
+    super: /Script/Engine.BlueprintFunctionLibrary
+    1 members:
+      FUN MigrateSubtitleSpeakerNamesToStringTables 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param StringTableIds : ArrayProperty of StringTableIds./Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:StringTableIds [o:0x8]
+          param bOverwriteExistingSubtitleSpeakerText : BoolProperty [o:0x18]
+          param ReturnValue : IntProperty [o:0x1c]
+
+### Function /Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables  [00007FF46F6E5098]
+    4 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP StringTableIds : ArrayProperty of StringTableIds./Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:StringTableIds [o:0x8]
+      PRP bOverwriteExistingSubtitleSpeakerText : BoolProperty [o:0x18]
+      PRP ReturnValue : IntProperty [o:0x1c]
+
+### IntProperty /Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:ReturnValue  [000001F4ACD0FBA0]
+
+### NameProperty StringTableIds./Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:StringTableIds  [000001F4ACD0FB30]
+
+### ObjectProperty /Script/Sparta.DlgBlueprintLibrary:MigrateSubtitleSpeakerNamesToStringTables:Dialogue  [000001F4ACD5BB00]
+

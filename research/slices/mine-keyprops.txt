@@ -1,0 +1,736 @@
+﻿=== /Script/Sparta.SpartaHealthComponent  [00007FF46F066538]  super=/Script/ModularGameplay.GameFrameworkComponent
+  0xB8      OnDamageReceived : MulticastInlineDelegateProperty
+  0xC8      OnHealingReceived : MulticastInlineDelegateProperty
+  0xD8      OnMaxHealthChanged : MulticastInlineDelegateProperty
+  0xE8      OnShellHealthDepleted : MulticastInlineDelegateProperty
+  0xF8      OnDeathStarted : MulticastInlineDelegateProperty
+  0x108     OnDeathFinished : MulticastInlineDelegateProperty
+  0x118     AbilitySystemComponent : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent
+  0x120     HealthSet : ObjectProperty of /Script/Sparta.SpartaHealthSet
+  0x128     DeathState : EnumProperty of /Script/Sparta.ESpartaDeathState
+  0x130     LastDamageTimeMap : MapProperty
+  FUN  UninitializeFromAbilitySystem()
+  FUN  StartDeath()
+  FUN  OnRep_DeathState(EnumProperty of /Script/Sparta.ESpartaDeathState OldDeathState)
+  FUN  IsDeadOrDying(BoolProperty ReturnValue)
+  FUN  InitializeWithAbilitySystem(ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent InASC)
+  FUN  GetShellHealthNormalized(FloatProperty ReturnValue)
+  FUN  GetShellHealth(FloatProperty ReturnValue)
+  FUN  GetMaxShellHealth(FloatProperty ReturnValue)
+  FUN  GetMaxHealth(FloatProperty ReturnValue)
+  FUN  GetHealthNormalized(FloatProperty ReturnValue)
+  FUN  GetHealth(FloatProperty ReturnValue)
+  FUN  GetDeathState(EnumProperty of /Script/Sparta.ESpartaDeathState ReturnValue)
+  FUN  GetCurrentMaxHealth(FloatProperty ReturnValue)
+  FUN  GetCurrentHealthNormalized(FloatProperty ReturnValue)
+  FUN  FindHealthComponent(ObjectProperty of /Script/Engine.Actor Actor, ObjectProperty of /Script/Sparta.SpartaHealthComponent ReturnValue)
+=== /Script/Sparta.SpartaHealthSet  [00007FF46F065D38]  super=/Script/Sparta.SpartaAttributeSet
+  0x60      Health : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x70      MaxHealth : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x80      ShellHealth : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x90      MaxShellHealth : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xA0      MinHealth : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xB0      MinShellHealth : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xC0      Armor : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xD0      Resolve : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xE0      MaxResolve : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xF0      Poise : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x100     MaxPoise : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x110     BleedResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x120     BleedResistanceMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x130     FrostResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x140     FrostResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x150     ShockResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x160     ShockResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x170     WaspsResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x180     WaspsResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x190     CurseResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1A0     CurseResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1B0     ConfusionResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1C0     ConfusionResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1D0     ConfusionBreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1E0     CosmicDiseaseResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1F0     CosmicDiseaseResistanceIncrement : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x200     StasisWeakness : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x210     BreakResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x220     MaxBreakResistance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x230     RiposteWeakness : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x240     StoneStunTime : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x258     Healing : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x268     Damage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x278     PoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x288     BreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x298     ResolveModify : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  FUN  OnRep_MaxHealth(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+  FUN  OnRep_Health(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+=== /Script/Sparta.SpartaCombatSet  [00007FF46F065938]  super=/Script/Sparta.SpartaAttributeSet
+  0x30      BaseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x40      BaseHeal : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x50      BasePoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x60      BaseBreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x70      AttackSpeedBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x80      BaseWindedCounters : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x90      BasePoisonDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xA0      BasePoisonDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xB0      BaseBleedDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xC0      BaseBurnDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xD0      BaseBurnDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xE0      BaseFrostDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xF0      BaseFreezeDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x100     BaseLightningDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x110     BaseLightningDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x120     BaseShockDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x130     BaseShockRadius : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x140     BaseWaspsDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x150     BaseWaspsDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x160     BaseFragileDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x170     BasePerforationDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x180     BasePhantomDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x190     BasePhantomHealthDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1A0     BasePhantomPoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1B0     BaseChaosDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1C0     BaseChaosDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1D0     BaseCurseStackDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1E0     BaseCursedStateDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1F0     BaseTraumaDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x200     BaseTraumaDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x210     BaseConfusionDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x220     BaseKnockbackMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x230     BaseKnockbackStrength : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x240     PoisonMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x250     BleedMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x260     LightningMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x270     BurnMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x280     FrostMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x290     CurseMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2A0     StasisMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2B0     PhantomMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2C0     ChaosMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2D0     WaspsMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2E0     ConfusionMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x2F0     BaseCosmicDiseaseDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x300     CosmicDiseaseMitigation : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x310     RiposteDamageMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x320     BaseDamageReduction : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x330     BaseBreakDamageReduction : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x340     IncomingDamageMultiplayer : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  FUN  OnRep_BaseHeal(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+  FUN  OnRep_BaseDamageReduction(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+  FUN  OnRep_BaseDamage(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+  FUN  OnRep_BaseBreakDamageReduction(StructProperty of /Script/GameplayAbilities.GameplayAttributeData OldValue)
+=== /Script/Sparta.PlayerAttributeSet  [00007FF46F037B38]  super=/Script/Sparta.SpartaAttributeSet
+  0x30      CurrentEXP : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x40      ModifyEXP : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x50      CriticalChance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x60      CriticalBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x70      BaseSynergyGain : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x80      BaseSynergyDrain : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x90      BaseSynergyDetachCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xA0      BaseResolveGain : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xB0      BaseResolveLost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xC0      PrimaryMeleeAbilityCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xD0      SecondaryMeleeAbilityCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xE0      HealCurrentCharges : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xF0      HealMaxCharges : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x100     HealAmountPerCharge : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x110     GloomMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x120     GloomBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x130     GoldMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x140     GoldBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x150     ShellReviveCurrentProgress : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x160     ShellReviveMaxProgress : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x170     ShellReviveProgressGain : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x180     ShellReviveMaxProgressMultiplier : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x190     PPItemResource : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1A0     PPItemMaxResource : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1B0     PPItemCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1C0     ItemMaxHealthBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1D0     ItemMaxResolveBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1E0     ItemPoisonMitigationBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1F0     ItemBleedMitigationBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x200     ItemBurnMitigationBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x210     ItemLightningMitigationBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x220     ItemFrostMitigationBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+=== /Script/Sparta.ShellAbilityAttributeSet  [00007FF46F03A538]  super=/Script/Sparta.SpartaAttributeSet
+  0x30      PrimaryEnergyCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x40      SecondaryEnergyCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x50      duration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x60      Cooldown : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x70      Damage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x80      DamageBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x90      DamageReduction : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xA0      MinAmount : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xB0      MaxAmount : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xC0      CurrentAmount : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xD0      Stacks : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xE0      CriticalHitChanceBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xF0      CriticalHitDamageBonus : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x100     AttacksNumber : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x110     PoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x120     CustomDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x130     MaxDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x140     MaxPoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x150     Cost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x160     Radius : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x170     CustomCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x180     HealingMeter : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x190     MaxHealingMeter : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1A0     CustomHealingFactor : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1B0     Chance : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1C0     Threshold : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1D0     ResolveGainBoost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1E0     BreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x1F0     MaxBreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x200     SecondaryDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x210     SecondaryPoiseDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x220     SecondaryBreakDamage : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+=== /Script/Sparta.SidearmAttributeSet  [00007FF46F03A938]  super=/Script/Sparta.SpartaAttributeSet
+  0x30      CurrentAmmo : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x40      MaxAmmo : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x50      ReloadDuration : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x60      ActivationCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x70      PrimaryEnergyCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x80      MinRequiredEnergy : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0x90      SecondaryEnergyCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+  0xA0      BuffEnergyCost : StructProperty of /Script/GameplayAbilities.GameplayAttributeData
+=== /Script/Sparta.PlayerInventoryComponent  [00007FF46F037F38]  super=/Script/Engine.ActorComponent
+=== /Script/Sparta.PlayerProgressionComponent  [00007FF46F038538]  super=/Script/Sparta.SpartaSaveComponent
+  0x120     ShellBuilds : MapProperty
+  0x170     TierBuilds : MapProperty
+  0x1C0     SkillLevels : MapProperty
+  0x210     EquippedSkillInstances : MapProperty
+  0x260     OnSkillEquipped : MulticastInlineDelegateProperty
+  0x270     OnSkillUnequipped : MulticastInlineDelegateProperty
+  0x280     OnSkillLevelChanged : MulticastInlineDelegateProperty
+  FUN  UnequipSkill(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, SoftClassProperty SkillClass, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  UnequipAllSkills(StructProperty of /Script/GameplayTags.GameplayTag ShellTag)
+  FUN  SetSkillLevel(SoftClassProperty SkillClass, IntProperty NewLevel)
+  FUN  RemoveTierSkill(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, SoftClassProperty SkillClass, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  RefundAllSkills()
+  FUN  OnChangeShellItem(ClassProperty OldShell, ClassProperty NewShell)
+  FUN  IsSkillAtMaxLevel(SoftClassProperty SkillClass, BoolProperty ReturnValue)
+  FUN  HasTierSkill(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, SoftClassProperty SkillClass, BoolProperty ReturnValue)
+  FUN  HasSkill(SoftClassProperty SkillClass, BoolProperty ReturnValue)
+  FUN  GetTierSkills(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, ArrayProperty of ReturnValue./Script/Sparta.PlayerProgressionComponent:GetTierSkills:ReturnValue ReturnValue)
+  FUN  GetSkillLevel(SoftClassProperty SkillClass, IntProperty ReturnValue)
+  FUN  FindSkillMaximumLevel(SoftClassProperty SkillClass, IntProperty ReturnValue)
+  FUN  EquipSkill(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, SoftClassProperty SkillClass, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  CanLevelUp(SoftClassProperty SkillClass, BoolProperty ReturnValue)
+  FUN  AddToSkillLevel(SoftClassProperty SkillClass, IntProperty Delta)
+  FUN  AddTierSkill(StructProperty of /Script/GameplayTags.GameplayTag ShellTag, SoftClassProperty SkillClass, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+=== /Script/Sparta.PlayerExpComponent  [00007FF46F037D38]  super=/Script/Engine.ActorComponent
+  0xB8      OnCurrentEXPChanged : MulticastInlineDelegateProperty
+  0xC8      OnUpgradeSelected : MulticastInlineDelegateProperty
+  0xD8      PlayerUpgrades : ArrayProperty of PlayerUpgrades./Script/Sparta.PlayerExpComponent:PlayerUpgrades
+  0xE8      PlayerMetaUpgrades : ArrayProperty of PlayerMetaUpgrades./Script/Sparta.PlayerExpComponent:PlayerMetaUpgrades
+  0xF8      OwnedUpgradeStats : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x118     PlayerLevel : IntProperty
+  0x120     UpgradeLevels : MapProperty
+  0x1A0     PlayerLevelUpdated : MulticastInlineDelegateProperty
+  FUN  UpgradeStatChanged(StructProperty of /Script/GameplayTags.GameplayTag Tag, FloatProperty NewLevel)
+  FUN  SetUpgradeLevel(SoftClassProperty Upgrade, IntProperty Level)
+  FUN  RemoveUpgradeData(SoftClassProperty Upgrade)
+  FUN  OnWeaponStatChanged(ObjectProperty of /Script/CoreUObject.Object GlobalEvent)
+  FUN  OnWeaponEquipped(ObjectProperty of /Script/Sparta.SpartaWeapon Weapon)
+  FUN  OnShellStatChanged(ObjectProperty of /Script/CoreUObject.Object GlobalEvent)
+  FUN  OnSetCharacterData(ObjectProperty of /Script/Sparta.SpartaCharacterData CharacterData)
+  FUN  OnActiveWeaponChanged()
+  FUN  IsUpgradeAtMaxLevel(SoftClassProperty Upgrade, BoolProperty ReturnValue)
+  FUN  HasUpgrade(SoftClassProperty Upgrade, BoolProperty ReturnValue)
+  FUN  HasAnyUpgrade(ArrayProperty of Upgrades./Script/Sparta.PlayerExpComponent:HasAnyUpgrade:Upgrades Upgrades, BoolProperty ReturnValue)
+  FUN  HasAllUpgrades(ArrayProperty of Upgrades./Script/Sparta.PlayerExpComponent:HasAllUpgrades:Upgrades Upgrades, BoolProperty ReturnValue)
+  FUN  GetUpgradeLevel(SoftClassProperty Upgrade, IntProperty ReturnValue)
+  FUN  GetAvailableUpgradePoints(IntProperty ReturnValue)
+  FUN  CurrentEXPChanged(FloatProperty CurrentEXP)
+  FUN  AddUpgradeLevel(SoftClassProperty Upgrade)
+=== /Script/Sparta.UpgradesComponent  [00007FF46F063738]  super=/Script/Engine.ActorComponent
+  0xB8      UpgradeTable : ObjectProperty of /Script/Engine.DataTable
+  FUN  IsUpgradeAtMaxLevel(NameProperty Upgrade, BoolProperty ReturnValue)
+  FUN  GetUpgradeLevel(NameProperty Upgrade, IntProperty ReturnValue)
+  FUN  AddUpgradeLevel(NameProperty Upgrade)
+=== /Script/Sparta.WeaponsComponent  [00007FF46F063938]  super=/Script/Engine.ActorComponent
+  0xB8      DefaultWeapons : ArrayProperty of DefaultWeapons./Script/Sparta.WeaponsComponent:DefaultWeapons
+  0xC8      OnWeaponEquipped : MulticastInlineDelegateProperty
+  0xD8      OnWeaponUnequipped : MulticastInlineDelegateProperty
+  0xE8      OnDefaultWeaponsSpawned : MulticastInlineDelegateProperty
+  0xF8      EquippedWeapons : MapProperty
+  FUN  StowWeaponsInSlots(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots)
+  FUN  SpawnAndEquipWeaponOfClass(ClassProperty WeaponClass, ObjectProperty of /Script/Sparta.SpartaWeapon ReturnValue)
+  FUN  ShowWeaponsInSlots(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots)
+  FUN  RemoveWeaponsFromSlot(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots)
+  FUN  RemoveWeaponFromSlot(StructProperty of /Script/GameplayTags.GameplayTag WeaponSlot)
+  FUN  RemoveAllWeapons()
+  FUN  PutInHandsWeaponsInSlots(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots)
+  FUN  OnWeaponDestroyed(ObjectProperty of /Script/Engine.Actor DestroyedActor)
+  FUN  OnOwnerPossess(ObjectProperty of /Script/Engine.Pawn Pawn, ObjectProperty of /Script/Engine.Controller OldController, ObjectProperty of /Script/Engine.Controller NewController)
+  FUN  HideWeaponsInSlots(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots)
+  FUN  HideAllWeapons(BoolProperty bHide)
+  FUN  GetWeaponTypeFromSlot(StructProperty of /Script/GameplayTags.GameplayTag WeaponSlot, ClassProperty ReturnValue)
+  FUN  GetWeaponsInSlots(StructProperty of /Script/GameplayTags.GameplayTagContainer WeaponSlots, ArrayProperty of ReturnValue./Script/Sparta.WeaponsComponent:GetWeaponsInSlots:ReturnValue ReturnValue)
+  FUN  GetWeaponInSlot(StructProperty of /Script/GameplayTags.GameplayTag WeaponSlot, ObjectProperty of /Script/Sparta.SpartaWeapon ReturnValue)
+  FUN  GetWeaponInHand(ObjectProperty of /Script/Sparta.SpartaWeapon ReturnValue)
+  FUN  GetAllWeapons(ArrayProperty of ReturnValue./Script/Sparta.WeaponsComponent:GetAllWeapons:ReturnValue ReturnValue)
+  FUN  EquipWeaponToSlot(ObjectProperty of /Script/Sparta.SpartaWeapon Weapon, BoolProperty bGrantAbilities)
+=== /Script/Sparta.TarstoneComponent  [00007FF46F062B38]  super=/Script/Sparta.SpartaSaveComponent
+  0x120     TarcoreItemDefinition : ClassProperty
+  0x128     TarstoneBuilds : MapProperty
+  0x178     TarstoneLevels : MapProperty
+  0x1C8     TarstoneSupportBuild : ArrayProperty of TarstoneSupportBuild./Script/Sparta.TarstoneComponent:TarstoneSupportBuild
+  0x1D8     EquippedTarstoneItemInstances : MapProperty
+  0x228     EquippedSupportTarstoneItemInstances : MapProperty
+  0x278     OnTarstoneLevelUp : MulticastInlineDelegateProperty
+  0x288     OnTarstoneExpUp : MulticastInlineDelegateProperty
+  0x298     OnTarstoneEquip : MulticastInlineDelegateProperty
+  0x2A8     OnTarstoneUnequip : MulticastInlineDelegateProperty
+  0x2B8     OnSupportTarstoneEquip : MulticastInlineDelegateProperty
+  0x2C8     OnSupportTarstoneUnequip : MulticastInlineDelegateProperty
+  0x2D8     OnTarstoneReady : MulticastInlineDelegateProperty
+  0x2E8     OnWeaponTarstonesEquipped : MulticastInlineDelegateProperty
+  0x2F8     OnWeaponTarstonesUnequipped : MulticastInlineDelegateProperty
+  0x308     OnWeaponTarstoneHandlingComplete : MulticastInlineDelegateProperty
+  FUN  UnequipTarstone(StructProperty of /Script/GameplayTags.GameplayTag EquipmentSlot, IntProperty SlotIndex, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  UnequipSupportTarstone(IntProperty SlotIndex, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  SetTarstoneLevel(ObjectProperty of /Script/Sparta.SpartaItemInstance Tarstone, StructProperty of /Script/Sparta.TarstoneLevelData LevelData)
+  FUN  OnWeaponUnequipped(ObjectProperty of /Script/Sparta.SpartaWeapon Weapon)
+  FUN  OnWeaponEquipped(ObjectProperty of /Script/Sparta.SpartaWeapon Weapon)
+  FUN  OnChangeShellItem(ClassProperty OldShell, ClassProperty NewShell)
+  FUN  GetCurrentTarstoneBuildForSlot(StructProperty of /Script/GameplayTags.GameplayTag Slot, ArrayProperty of ReturnValue./Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:ReturnValue ReturnValue)
+  FUN  ForceAddTarstoneLevel(ClassProperty Tarstone)
+  FUN  EquipTarstone(StructProperty of /Script/GameplayTags.GameplayTag EquipmentSlot, IntProperty SlotIndex, ClassProperty TarstoneID, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  EquipSupportTarstone(IntProperty SlotIndex, ClassProperty TarstoneID, ObjectProperty of /Script/Sparta.SpartaItemInstance ReturnValue)
+  FUN  DetermineExpRequirement(IntProperty Level, ObjectProperty of /Script/Sparta.ItemFragment_Tarstone TarstoneExperience, IntProperty ReturnValue)
+  FUN  CanLevelUpTarstone(ClassProperty Tarstone, BoolProperty ReturnValue)
+  FUN  AddTarstoneToInventory(ClassProperty Tarstone, IntProperty Level, IntProperty exp)
+  FUN  AddTarstoneLevel(ClassProperty Tarstone)
+  FUN  AddTarstoneExp(ObjectProperty of /Script/Sparta.SpartaItemInstance Tarstone, IntProperty exp)
+=== /Script/Sparta.PPItemsComponent  [00007FF46F039938]  super=/Script/Sparta.SpartaSaveComponent
+  0x120     ActivePPItem : SoftClassProperty
+  0x148     PassivePPItem : SoftClassProperty
+  0x170     PPItemLevels : MapProperty
+  0x1C0     PPItemFoundAmounts : MapProperty
+  0x210     PPItemFragmentDataBySlot : MapProperty
+  0x260     TrackedPPItems : ArrayProperty of TrackedPPItems./Script/Sparta.PPItemsComponent:TrackedPPItems
+  0x270     bIsTrackingPPItemStacks : BoolProperty
+  0x278     OnPPItemEquipped : MulticastInlineDelegateProperty
+  0x288     OnPPItemUnequipped : MulticastInlineDelegateProperty
+  0x298     OnPPItemLevelChanged : MulticastInlineDelegateProperty
+  0x2A8     OnPPItemStackCountChanged : MulticastInlineDelegateProperty
+  0x2B8     OnPPItemTrackingEvent : MulticastInlineDelegateProperty
+  FUN  UnequipPPItemByClass(SoftClassProperty ItemClass, ObjectProperty of /Script/Sparta.PPItemFragmentData ReturnValue)
+  FUN  UnequipPPItem(EnumProperty of /Script/Sparta.EPPItemSlot Slot, ObjectProperty of /Script/Sparta.PPItemFragmentData ReturnValue)
+  FUN  UnequipAllPPItems()
+  FUN  StopTrackingPPItemStacks()
+  FUN  StartTrackingPPItemStacks()
+  FUN  SetPPItemLevel(SoftClassProperty ItemClass, IntProperty NewLevel)
+  FUN  RefreshTrackedPPItemLevels()
+  FUN  RefreshTrackedPPItemLevel(SoftClassProperty ItemClass)
+  FUN  RefreshEquippedPPItems()
+  FUN  OnTrackedItemStacksUpdated(ClassProperty ItemDef, IntProperty CountDelta)
+  FUN  IsPPItemEquipped(SoftClassProperty ItemClass, EnumProperty of /Script/Sparta.EPPItemSlot OutSlot, BoolProperty ReturnValue)
+  FUN  IsPPItemAtMaxLevel(SoftClassProperty ItemClass, BoolProperty ReturnValue)
+  FUN  HasPPItemLevel(SoftClassProperty ItemClass, BoolProperty ReturnValue)
+  FUN  GetTrackedPPItemStackCount(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  GetRuntimeFragmentData(EnumProperty of /Script/Sparta.EPPItemSlot Slot, ObjectProperty of /Script/Sparta.PPItemFragmentData ReturnValue)
+  FUN  GetPPItemsNeededForNextLevel(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  GetPPItemOverflowScaledValue(SoftClassProperty ItemClass, FloatProperty BaseValue, FloatProperty HitValue, FloatProperty DiminishingReturnStrength, FloatProperty ReturnValue)
+  FUN  GetPPItemNormalizedProgressToMaxLevel(SoftClassProperty ItemClass, FloatProperty ReturnValue)
+  FUN  GetPPItemLevel(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  GetPPItemLastLevelThreshold(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  GetPPItemFragmentData(EnumProperty of /Script/Sparta.EPPItemSlot Slot, ObjectProperty of /Script/Sparta.PPItemFragmentData ReturnValue)
+  FUN  GetPPItemFoundAmount(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  GetEquippedPPItem(EnumProperty of /Script/Sparta.EPPItemSlot Slot, SoftClassProperty ReturnValue)
+  FUN  FindPPItemMaximumLevel(SoftClassProperty ItemClass, IntProperty ReturnValue)
+  FUN  EquipPPItem(EnumProperty of /Script/Sparta.EPPItemSlot Slot, SoftClassProperty ItemClass, ObjectProperty of /Script/Sparta.PPItemFragmentData ReturnValue)
+  FUN  AddToPPItemLevel(SoftClassProperty ItemClass, IntProperty Delta)
+  FUN  AddToPPItemFoundAmount(SoftClassProperty ItemClass, IntProperty Delta)
+=== /Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C  [000001F617E626B0]  super=/Script/Engine.ActorComponent
+  0xB8      UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame
+  0xC0      bTriggeredSecondPhase : BoolProperty
+  0xC1      bTriggeredThirdPhase : BoolProperty
+  0xC2      bIsAggroed : BoolProperty
+  0xC8      BossAICharacter : ObjectProperty of /Game/Sparta/Core/AI/BP_AICharacter.BP_AICharacter_C
+  0xD0      SpartaAIController : ObjectProperty of /Script/Sparta.SpartaAIController
+  0xD8      OnBossDeath : MulticastInlineDelegateProperty
+  0xE8      OnBossAggro : MulticastInlineDelegateProperty
+  0xF8      SecondPhaseHealthPercent : DoubleProperty
+  0x100     ThirdPhaseHealthPercent : DoubleProperty
+  0x108     OnBossDeaggro : MulticastInlineDelegateProperty
+  0x118     OnSecondPhaseStarted : MulticastInlineDelegateProperty
+  0x128     CameraModifierHande : StructProperty of /Script/CameraStateFramework.CSCameraStateModifierHandle
+  0x130     CameraModifier : StructProperty of /Script/CameraStateFramework.CSCameraStateModifier
+  0x238     VestigeItem : ClassProperty
+  0x240     VestigeEffects : ArrayProperty of VestigeEffects./Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C:VestigeEffects
+  0x250     ItemStacks : IntProperty
+  0x254     bIsDead : BoolProperty
+  0x258     TempBossHealthCalc : DoubleProperty
+  0x260     OnThirdPhaseStarted : MulticastInlineDelegateProperty
+  FUN  HandleAggro()
+  FUN  HandleDeaggro()
+  FUN  IsAlreadyAggroed(BoolProperty ReturnValue)
+  FUN  BroadcastFightEndEvent()
+  FUN  BroadcastFightStartEvent()
+  FUN  CacheCharacter(BoolProperty Success)
+  FUN  CacheController(BoolProperty Success, ObjectProperty of /Script/Engine.Controller MyController)
+  FUN  StopFight()
+  FUN  StartFight()
+  FUN  SetTempBossHealth(DoubleProperty InDamage)
+  FUN  ShouldStartThirdPhase()
+  FUN  SetBossAncientVestigesEffects()
+  FUN  RemoveBossFightCameraModifier()
+  FUN  AddBossFightCameraModifier()
+  FUN  ShouldStartSecondPhase()
+  FUN  HideEnemyUI()
+  FUN  CheckAggroState()
+  FUN  BindOnDamageEvent()
+  FUN  BindOnDeathEvent()
+  FUN  OnBossDamageEvent(ObjectProperty of /Script/Sparta.SpartaHealthComponent HealthComponent, FloatProperty Value, ObjectProperty of /Script/Engine.Actor Instigator, StructProperty of /Script/GameplayAbilities.GameplayEffectSpec EffectSpec)
+  FUN  ReceiveEndPlay(ByteProperty EndPlayReason)
+  FUN  OnAggroEvent(StructProperty of /Script/Sparta.SpartaEngagementData in_Payload)
+  FUN  BindOnAggro()
+  FUN  BindOnDeAggro()
+  FUN  OnDeaggroEvent(StructProperty of /Script/Sparta.SpartaEngagementData in_Payload)
+  FUN  StopFightEvent()
+  FUN  StartFightEvent()
+  FUN  OnBossDeathEvent(ObjectProperty of /Script/Engine.Actor OwningActor)
+  FUN  OnBossDestroyedEvent(ObjectProperty of /Script/Engine.Actor DestroyedActor)
+  FUN  BindOnDestroyedEvent()
+  FUN  PostPossess()
+  FUN  ReceiveBeginPlay()
+  FUN  ExecuteUbergraph_BPC_BossAI(IntProperty EntryPoint)
+  FUN  OnThirdPhaseStarted__DelegateSignature()
+  FUN  OnBossDeaggro__DelegateSignature()
+  FUN  OnSecondPhaseStarted__DelegateSignature()
+  FUN  OnBossAggro__DelegateSignature()
+  FUN  OnBossDeath__DelegateSignature()
+=== /Script/Sparta.DialogueSubsystem  [00007FF46F032338]  super=/Script/Engine.WorldSubsystem
+  0x30      OnDlgStarted : MulticastInlineDelegateProperty
+  0x40      OnDlgEnded : MulticastInlineDelegateProperty
+  0x50      SpawnedParticipants : ArrayProperty of SpawnedParticipants./Script/Sparta.DialogueSubsystem:SpawnedParticipants
+  0x60      OnDlgNodeEnterEvent : MulticastInlineDelegateProperty
+  0x70      OnDlgNodeExitEvent : MulticastInlineDelegateProperty
+  0x80      OnAudioEventFinished : MulticastInlineDelegateProperty
+  0x90      OnDlgAudioStarted : MulticastInlineDelegateProperty
+  0xA0      ActiveDialogues : ArrayProperty of ActiveDialogues./Script/Sparta.DialogueSubsystem:ActiveDialogues
+  FUN  StopDialogue(ObjectProperty of /Script/Sparta.DialogueInstigatorComponent Instigator, BoolProperty bStopAudioImmediately)
+  FUN  StopActiveAudioOfContext(ObjectProperty of /Script/DlgSystem.DlgContext Context)
+  FUN  SpartaStartDialogue(ObjectProperty of /Script/DlgSystem.DlgDialogue Dialogue, ArrayProperty of Participants./Script/Sparta.DialogueSubsystem:SpartaStartDialogue:Participants Participants, ObjectProperty of /Script/Sparta.DialogueInstigatorComponent Instigator, StructProperty of /Script/GameplayTags.GameplayTagContainer AdditionalInterruptTags, StructProperty of /Script/GameplayTags.GameplayTagContainer AdditionalTags, StructProperty of /Script/GameplayTags.GameplayTagContainer AdditionalBlockingTags, ObjectProperty of /Script/DlgSystem.DlgContext ReturnValue)
+  FUN  OnWaveWeaverAudioEventFinished(ObjectProperty of /Script/WaveWeaver.AudioEventInstance EventInstance)
+  FUN  OnSoundCompFinished(ObjectProperty of /Script/Engine.AudioComponent AudioComp)
+  FUN  IsDialogueWithTagActive(StructProperty of /Script/GameplayTags.GameplayTag DlgTag, BoolProperty ReturnValue)
+  FUN  IsDialogueCurrentlyActive(ObjectProperty of /Script/DlgSystem.DlgDialogue InDialogue, BoolProperty ReturnValue)
+  FUN  InterruptDialogues(ObjectProperty of /Script/Sparta.DialogueInstigatorComponent Instigator, ObjectProperty of /Script/DlgSystem.DlgDialogue Asset, StructProperty of /Script/GameplayTags.GameplayTagContainer AdditionalInterruptTags)
+  FUN  GetAllActiveDialoguesWithTag(ArrayProperty of Dialogues./Script/Sparta.DialogueSubsystem:GetAllActiveDialoguesWithTag:Dialogues Dialogues, StructProperty of /Script/GameplayTags.GameplayTag InTag, BoolProperty ReturnValue)
+  FUN  FindActiveDialogueForInstigator(ObjectProperty of /Script/Sparta.DialogueInstigatorComponent Instigator, IntProperty ReturnValue)
+  FUN  EndAllDialoguesWithTags(StructProperty of /Script/GameplayTags.GameplayTagContainer Tags)
+  FUN  DialogueStarted(IntProperty ActiveDlgIndex)
+  FUN  DialogueEnded(ObjectProperty of /Script/DlgSystem.DlgContext Context)
+  FUN  CheckTagConditions(ObjectProperty of /Script/Sparta.DialogueInstigatorComponent Component, ObjectProperty of /Script/DlgSystem.DlgDialogue Asset, StructProperty of /Script/GameplayTags.GameplayTagContainer AdditionalTags, BoolProperty ReturnValue)
+=== /Script/Sparta.SpartaWorldGenSubsystem  [00007FF46F060338]  super=/Script/Engine.WorldSubsystem
+  0x30      MapSettings : MapProperty
+  0x80      PresetSeed : IntProperty
+  0x88      WeatherId : Int64Property
+  0x90      CurrentSeed : IntProperty
+  0x98      CurrentWorldState : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0xC0      OnDifficultyChanged : MulticastInlineDelegateProperty
+  FUN  SetDifficulty(StructProperty of /Script/GameplayTags.GameplayTag BiomeTag, IntProperty NewDifficulty)
+  FUN  OnDataLayerRuntimeStateChanged(ObjectProperty of /Script/Engine.DataLayerInstance DataLayer, EnumProperty of /Script/Engine.EDataLayerRuntimeState State)
+  FUN  IncreaseDifficulty(StructProperty of /Script/GameplayTags.GameplayTag BiomeTag, IntProperty IncreaseBy, IntProperty ReturnValue)
+  FUN  GetDifficulty(StructProperty of /Script/GameplayTags.GameplayTag BiomeTag, IntProperty ReturnValue)
+  FUN  BeginWorldReset()
+  FUN  AddTagToCurrentWorldState(StructProperty of /Script/GameplayTags.GameplayTag Tag)
+=== /Script/Sparta.SpartaRunManagerSubsystem  [00007FF46F056F38]  super=/Script/Engine.GameInstanceSubsystem
+  0x30      AlreadySelectedEventInstances : ArrayProperty of AlreadySelectedEventInstances./Script/Sparta.SpartaRunManagerSubsystem:AlreadySelectedEventInstances
+  0x40      RunStateIntegers : MapProperty
+  FUN  RemoveRunStateInteger(StructProperty of /Script/GameplayTags.GameplayTag Key)
+  FUN  LevelInstanceSelected(SoftObjectProperty of /Script/Engine.World SelectedLevel, BoolProperty ReturnValue)
+  FUN  HasLevelInstanceAlreadyBeenStreamed(SoftObjectProperty of /Script/Engine.World Level, BoolProperty ReturnValue)
+  FUN  GetRunStateInteger(StructProperty of /Script/GameplayTags.GameplayTag Key, IntProperty ReturnValue)
+  FUN  GetEventDataForSpace(ObjectProperty of /Script/CSOptionSet.CSOptionSetDataAsset OptionSet, ObjectProperty of /Script/Sparta.SpartaEventSpaceActor EventSpaceActor, StrProperty OutError, ObjectProperty of /Script/Sparta.SpartaEventDataAsset ReturnValue)
+  FUN  AddRunStateInteger(StructProperty of /Script/GameplayTags.GameplayTag Key, IntProperty Value)
+=== /Script/Sparta.SpartaZoneVolumeManager  [00007FF46F060D38]  super=/Script/Engine.GameInstanceSubsystem
+  0x30      HighestPriorityZoneVolumeUpdated : MulticastInlineDelegateProperty
+  0x40      ZoneVolumeStack : ArrayProperty of ZoneVolumeStack./Script/Sparta.SpartaZoneVolumeManager:ZoneVolumeStack
+=== /Script/Sparta.SpartaDataLayerSubsystem  [00007FF46F045538]  super=/Script/Engine.WorldSubsystem
+  0x38      RuntimeData : ObjectProperty of /Script/Sparta.DataLayersSave
+  FUN  SaveDataLayerState(ObjectProperty of /Script/Engine.DataLayerAsset DataLayer, EnumProperty of /Script/Engine.EDataLayerRuntimeState TargetState)
+  FUN  RemoveDataLayerState(ObjectProperty of /Script/Engine.DataLayerAsset DataLayer)
+=== /Script/Sparta.QuestObject  [00007FF46F039D38]  super=/Script/CoreUObject.Object
+  0x28      QuestID : NameProperty
+  0x30      CurrentQuestStage : IntProperty
+  0x38      CurrentQuestObjectiveProgress : MapProperty
+  0x88      CurrentStageDetails : StructProperty of /Script/Sparta.QuestStage
+  0x180     QuestDetails : StructProperty of /Script/Sparta.QuestDetails
+  FUN  InitializeQuest()
+=== /Script/Sparta.SpartaEncounterManager  [00007FF46F046538]  super=/Script/Engine.Actor
+  0x2A8     Billboard : ObjectProperty of /Script/Engine.BillboardComponent
+  0x2B0     TextRender : ObjectProperty of /Script/Engine.TextRenderComponent
+  0x2B8     AssociatedEnemies : ArrayProperty of AssociatedEnemies./Script/Sparta.SpartaEncounterManager:AssociatedEnemies
+  0x2C8     HordeEncounters : ArrayProperty of HordeEncounters./Script/Sparta.SpartaEncounterManager:HordeEncounters
+  0x2D8     SpawnedEncounters : ArrayProperty of SpawnedEncounters./Script/Sparta.SpartaEncounterManager:SpawnedEncounters
+  0x2E8     bStartSpawnedOnAllDead : BoolProperty
+  0x2F0     OnEncounterStart : MulticastInlineDelegateProperty
+  0x300     EncounterStartDistance : FloatProperty
+  0x308     OnEncounterCompleted : MulticastInlineDelegateProperty
+  FUN  OnHordeEncounterCompleted(ObjectProperty of /Script/Engine.Actor CompletedHorde)
+  FUN  OnEnemyDeath(ObjectProperty of /Script/Engine.Actor DeadActor)
+            OnEncounterCompletedDelegate__DelegateSignature : DelegateFunction
+            EncounterStartDelegate__DelegateSignature : DelegateFunction
+=== /Script/Sparta.SpartaEnemySubsystem  [00007FF46F046938]  super=/Script/Engine.TickableWorldSubsystem
+  0x40      OnScreenCheckMethod : EnumProperty of /Script/Sparta.ESpartaOnScreenCheckType
+  0x44      PointCheckRadius : FloatProperty
+  0x48      EngagedEnemies : SetProperty
+  0x98      OnSpawnEffects : ArrayProperty of OnSpawnEffects./Script/Sparta.SpartaEnemySubsystem:OnSpawnEffects
+  0xA8      OnSpawnAbilities : ArrayProperty of OnSpawnAbilities./Script/Sparta.SpartaEnemySubsystem:OnSpawnAbilities
+  0xB8      EnviromentalInstigatorClass : ClassProperty
+  0xC0      TargetableComponents : ArrayProperty of TargetableComponents./Script/Sparta.SpartaEnemySubsystem:TargetableComponents
+  0xD8      OnCharacterDeathEvent : MulticastInlineDelegateProperty
+  0xE8      SpawnedEnemies : ArrayProperty of SpawnedEnemies./Script/Sparta.SpartaEnemySubsystem:SpawnedEnemies
+  0x100     AggressorCount : MapProperty
+  0x150     EnviromentalInstigator : ObjectProperty of /Script/Sparta.SpartaAbilityActor
+  0x158     OnCharacterEngageStateChanged_BP : MulticastInlineDelegateProperty
+  0x370     AggressorRanking : MapProperty
+  0x3C0     TopAggressor : ObjectProperty of /Script/Sparta.SpartaCharacter
+  0x3D0     EnemyHealthWidgets : StructProperty of /Script/UMG.UserWidgetPool
+  FUN  WorldBeginTeardown(ObjectProperty of /Script/Engine.World World)
+  FUN  PopEnemyHealthWidget(ClassProperty WidgetClass, ObjectProperty of /Script/UMG.UserWidget ReturnValue)
+  FUN  OnPlayerTargetedBy(ObjectProperty of /Script/Sparta.SpartaCharacter Targeter)
+  FUN  OnEngagedEnemyTargetChanged(ObjectProperty of /Script/Sparta.SpartaCharacter Source, ObjectProperty of /Script/Engine.Actor OldTarget, ObjectProperty of /Script/Engine.Actor NewTarget)
+  FUN  OnEngagedEnemyDeaggro(StructProperty of /Script/Sparta.SpartaEngagementData in_Payload)
+  FUN  OnCharacterDestroyed(ObjectProperty of /Script/Engine.Actor Actor, ByteProperty EndPlayReason)
+  FUN  OnCharacterDeath(ObjectProperty of /Script/Engine.Actor OwningActor)
+  FUN  OnCharacterAddedToWorld(ObjectProperty of /Script/Sparta.SpartaCharacter Character)
+  FUN  GetSpawnedEnemiesInDist(StructProperty of /Script/CoreUObject.Vector Center, FloatProperty Dist, ArrayProperty of ReturnValue./Script/Sparta.SpartaEnemySubsystem:GetSpawnedEnemiesInDist:ReturnValue ReturnValue)
+  FUN  CacheWidgetFromComponent(ObjectProperty of /Script/UMG.WidgetComponent Component)
+  FUN  CacheEnemyHealthWidget(ObjectProperty of /Script/UMG.UserWidget Widget)
+=== /Script/Sparta.SpartaCharacterData  [00007FF46F043538]  super=/Script/Engine.DataAsset
+  0x30      CharacterName : TextProperty
+  0x40      CharacterId : StructProperty of /Script/GameplayTags.GameplayTag
+  0x48      bIsBoss : BoolProperty
+  0x49      bIsMainBoss : BoolProperty
+  0x4A      bShouldTrackDeath : BoolProperty
+  0x50      DefaultTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x70      MainRegion : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x90      ArmorTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0x98      AITicketCost : IntProperty
+  0xA0      PreAggroBehaviors : ArrayProperty of PreAggroBehaviors./Script/Sparta.SpartaCharacterData:PreAggroBehaviors
+  0xB0      EngagementBehaviors : ArrayProperty of EngagementBehaviors./Script/Sparta.SpartaCharacterData:EngagementBehaviors
+  0xC0      DisengagementBehaviors : ArrayProperty of DisengagementBehaviors./Script/Sparta.SpartaCharacterData:DisengagementBehaviors
+  0xD0      DeathBehaviors : ArrayProperty of DeathBehaviors./Script/Sparta.SpartaCharacterData:DeathBehaviors
+  0xE0      CharacterScaleOverride : StructProperty of /Script/CoreUObject.Vector
+  0xF8      WeaponOverrides : ArrayProperty of WeaponOverrides./Script/Sparta.SpartaCharacterData:WeaponOverrides
+  0x108     UpgradeStatValues : MapProperty
+  0x158     CharacterCurves : MapProperty
+  0x1A8     BehaviorTreeOverride : ObjectProperty of /Script/AIModule.BehaviorTree
+  0x1B0     GrantedAbilitySet : StructProperty of /Script/Sparta.SpartaAbilitySet
+  0x1E0     AttributeData : ArrayProperty of AttributeData./Script/Sparta.SpartaCharacterData:AttributeData
+  0x1F0     Movement : StructProperty of /Script/Sparta.SpartaCharacterMovementData
+  0x340     BaseDamage : StructProperty of /Script/Sparta.SpartaCharacterDamageData
+  0x350     WarpingData : StructProperty of /Script/Sparta.SpartaCharacterWarpingData
+  0x358     DeathResources : StructProperty of /Script/Sparta.SpartaCharacterDeathData
+  0x3B8     Dismemberment : StructProperty of /Script/Sparta.SpartaCharacterDismembermentData
+  0x3C0     PhysicalHitReactionData : ObjectProperty of /Script/Sparta.SpartaPhysicalHitReactionData
+  0x3C8     AudioData : ObjectProperty of /Script/Sparta.SpartaCharacterAudioData
+  0x3D0     VFXData : ObjectProperty of /Script/Sparta.SpartaCharacterVFXData
+  0x3D8     StatusEffectOverlayPolicy : EnumProperty of /Script/Sparta.EStatusEffectOverlayPolicy
+  0x3E0     DefaultMaterials : ArrayProperty of DefaultMaterials./Script/Sparta.SpartaCharacterData:DefaultMaterials
+  0x3F0     EffectMaterials : ArrayProperty of EffectMaterials./Script/Sparta.SpartaCharacterData:EffectMaterials
+  0x400     GhostMaterials : ArrayProperty of GhostMaterials./Script/Sparta.SpartaCharacterData:GhostMaterials
+  0x410     SkinMaterialsMap : MapProperty
+  0x460     MeshVariationData : ObjectProperty of /Script/Sparta.SpartaMeshCustomisation
+  0x468     TypeSpecificData : ArrayProperty of TypeSpecificData./Script/Sparta.SpartaCharacterData:TypeSpecificData
+  0x478     CharacterAnimSet : ObjectProperty of /Script/CSAnimationLibrary.CSAnimSet
+  FUN  InitializeCharacterData(ObjectProperty of /Script/Sparta.SpartaCharacter SpartaCharacter)
+  FUN  GetData(ClassProperty Class, ObjectProperty of /Script/Sparta.TypeSpecificData ReturnValue)
+=== /Script/Sparta.SpartaPlayerController  [00007FF46F055938]  super=/Script/CSGameFramework.CSPlayerController
+  0x740     bDisableForceFeedbackOnMouseAndKeyboard : BoolProperty
+  0x744     FeedbackDeviceAnalogDeadzone : FloatProperty
+  0x758     OnChangeShellItem : MulticastInlineDelegateProperty
+  0x768     InteractionManager : ObjectProperty of /Script/PlayerInteractionFramework.CSPlayerInteractionManager
+  0x770     SpartaPlayerCharacter : ObjectProperty of /Script/Sparta.SpartaPlayerCharacter
+  0x778     Shell : ObjectProperty of /Script/Sparta.SpartaPlayerCharacter
+  0x780     AutoSpawnParticipantClasses : ArrayProperty of AutoSpawnParticipantClasses./Script/Sparta.SpartaPlayerController:AutoSpawnParticipantClasses
+  0x790     ManagedDialogueParticipants : ArrayProperty of ManagedDialogueParticipants./Script/Sparta.SpartaPlayerController:ManagedDialogueParticipants
+  0x7A0     InputConfig : ObjectProperty of /Script/Sparta.SpartaInputConfig
+  0x7A8     ImGuiDebugComponent : ObjectProperty of /Script/Sparta.SpartaImGuiDebugComponent
+  0x7B0     RuntimeLevelEditorComponent : ObjectProperty of /Script/Sparta.SpartaLevelEditorComponent
+  FUN  UnbindInputComponent(ObjectProperty of /Script/Engine.Actor Actor)
+  FUN  UnbindInputActionEvent(StructProperty of /Script/Sparta.InputActionEventHandle Handle)
+  FUN  ToggleDebugWindowVisibility()
+  FUN  ToggleDebugWindowFocus()
+  FUN  SetShouldPerformFullTickWhenPaused(BoolProperty bEnabled)
+  FUN  SetShell(ObjectProperty of /Script/Sparta.SpartaPlayerCharacter Shell)
+  FUN  SetForceFeedbackUserEnabled(BoolProperty bEnabled)
+  FUN  SetActiveShellCharacterData(ObjectProperty of /Script/Sparta.SpartaCharacterData CharacterData)
+  FUN  SetActiveDarkformCharacterData(ObjectProperty of /Script/Sparta.SpartaCharacterData CharacterData)
+  FUN  RefreshForceFeedbackEnabled()
+  FUN  IsUsingGamepadForFeedback(BoolProperty ReturnValue)
+  FUN  IsInputActionEventBound(ObjectProperty of /Script/EnhancedInput.InputAction InputAction, BoolProperty ReturnValue)
+  FUN  IsForceFeedbackUserEnabled(BoolProperty ReturnValue)
+  FUN  IsDebugWindowVisible(BoolProperty ReturnValue)
+  FUN  IsDebugWindowInFocus(BoolProperty ReturnValue)
+  FUN  GetWorldInputDirection(StructProperty of /Script/CoreUObject.Vector2D MoveInput, BoolProperty bDefaultToCameraFacingDirection, BoolProperty bDebug, FloatProperty DebugDuration, BoolProperty bHasInput, StructProperty of /Script/CoreUObject.Vector OutWorldInputDirection)
+  FUN  GetSpartaPlayerCharacter(ObjectProperty of /Script/Sparta.SpartaPlayerCharacter ReturnValue)
+  FUN  GetSpartaCameraManager(ObjectProperty of /Script/CameraStateFramework.CSCameraManager ReturnValue)
+  FUN  GetShouldPerformFullTickWhenPaused(BoolProperty ReturnValue)
+  FUN  GetShell(ObjectProperty of /Script/Sparta.SpartaPlayerCharacter ReturnValue)
+  FUN  GetInteractionManager(ObjectProperty of /Script/PlayerInteractionFramework.CSPlayerInteractionManager ReturnValue)
+  FUN  GetDarkform(ObjectProperty of /Script/Sparta.SpartaPlayerCharacter ReturnValue)
+  FUN  BindInputComponent(ObjectProperty of /Script/Engine.Actor Actor)
+  FUN  BindInputActionEvent(ObjectProperty of /Script/EnhancedInput.InputAction InputAction, EnumProperty of /Script/EnhancedInput.ETriggerEvent TriggerEvent, ObjectProperty of /Script/CoreUObject.Object Object, DelegateProperty Event, StructProperty of /Script/Sparta.InputActionEventHandle ReturnValue)
+=== /Script/Sparta.SpartaHittable  [00007FF46F049738]  super=/Script/CoreUObject.Interface
+  FUN  SpartaApplyHit(StructProperty of /Script/Engine.HitResult HitResult, ObjectProperty of /Script/Sparta.SpartaCharacter Instigator, ObjectProperty of /Script/Sparta.SpartaHitPayload Payload, ObjectProperty of /Script/Engine.Actor DamageCauser)
+  FUN  GetHitResponse(ObjectProperty of /Script/Engine.Actor Source, StructProperty of /Script/Engine.HitResult Hit, ByteProperty ReturnValue)
+=== /Script/Sparta.SpartaHitPayload  [00007FF46F049338]  super=/Script/CoreUObject.Object
+  0x28      HealthDamage : StructProperty of /Script/Sparta.HealthDamageOption
+  0x34      PoiseDamageOption : StructProperty of /Script/Sparta.HealthDamageOption
+  0x40      BreakDamageOption : StructProperty of /Script/Sparta.HealthDamageOption
+  0x50      DamageEffect : ClassProperty
+  0x58      AdditionalEffects : ArrayProperty of AdditionalEffects./Script/Sparta.SpartaHitPayload:AdditionalEffects
+  0x68      DamageDataTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0x70      ReactionTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0x78      StrikeDirection : EnumProperty of /Script/Sparta.ESpartaStrikeDirection
+  0x7C      PoiseDamage : FloatProperty
+  0x80      PoiseDamageEffect : ClassProperty
+  0x88      BreakDamage : FloatProperty
+  0x90      BreakDamageEffect : ClassProperty
+  0x98      PoiseBrokenEffect : ClassProperty
+  0xA0      PoiseDamageDataTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0xA8      BreakDamageDataTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0xB0      ChosenReactionTag : StructProperty of /Script/GameplayTags.GameplayTag
+  0xB8      PayloadTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0xD8      CustomElementalStacks : IntProperty
+  0xDC      DamageDealt : FloatProperty
+  0xE0      CalculatedDamage : FloatProperty
+  0xE4      CalculatedPoiseDamage : FloatProperty
+  0xE8      CalculatedBreakDamage : FloatProperty
+  0xF0      CachedTargetTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x110     CachedSourceTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x130     CachedTargetTagsPostApply : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x150     MergedPayloads : IntProperty
+  0x154     bIsCDO : BoolProperty
+  FUN  SetStrikeDirection(EnumProperty of /Script/Sparta.ESpartaStrikeDirection InStrikeDirection)
+  FUN  SetReactionTag(StructProperty of /Script/GameplayTags.GameplayTag InReactionTag)
+  FUN  SetPoiseDamageOption(StructProperty of /Script/Sparta.HealthDamageOption InPoiseDamage)
+  FUN  SetPoiseDamageEffect(ClassProperty InPoiseDamageEffect)
+  FUN  SetPoiseDamageDataTag(StructProperty of /Script/GameplayTags.GameplayTag InPoiseDamageDataTag)
+  FUN  SetPoiseDamage(FloatProperty InPoiseDamage)
+  FUN  SetPoiseBrokenEffect(ClassProperty InPoiseBrokenEffect)
+  FUN  SetPayloadTags(StructProperty of /Script/GameplayTags.GameplayTagContainer InPayloadTags)
+  FUN  SetHealthDamage(StructProperty of /Script/Sparta.HealthDamageOption InHealthDamage)
+  FUN  SetDamageEffect(ClassProperty InDamageEffect)
+  FUN  SetDamageDealt(FloatProperty InDamageDealt)
+  FUN  SetDamageDataTag(StructProperty of /Script/GameplayTags.GameplayTag InDamageDataTag)
+  FUN  SetCustomElementalStacks(IntProperty InCustomElementalStacks)
+  FUN  SetChosenReactionTag(StructProperty of /Script/GameplayTags.GameplayTag InChosenReactionTag)
+  FUN  SetBreakDamageOption(StructProperty of /Script/Sparta.HealthDamageOption InBreakDamage)
+  FUN  SetBreakDamageEffect(ClassProperty InBreakDamageEffect)
+  FUN  SetBreakDamageDataTag(StructProperty of /Script/GameplayTags.GameplayTag InBreakDamageDataTag)
+  FUN  SetBreakDamage(FloatProperty InBreakDamage)
+  FUN  SetAdditionalEffects(ArrayProperty of InAdditionalEffects./Script/Sparta.SpartaHitPayload:SetAdditionalEffects:InAdditionalEffects InAdditionalEffects)
+  FUN  MergePayloads(ObjectProperty of /Script/CoreUObject.Object OuterForNewPayload, ArrayProperty of Payloads./Script/Sparta.SpartaHitPayload:MergePayloads:Payloads Payloads, ObjectProperty of /Script/Sparta.SpartaHitPayload ReturnValue)
+  FUN  GetDuplicate(ObjectProperty of /Script/CoreUObject.Object Outer, ObjectProperty of /Script/Sparta.SpartaHitPayload ReturnValue)
+  FUN  CreateGameplayEffectContextHandle(ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent SourceASC, ObjectProperty of /Script/Engine.Actor DamageCauser, StructProperty of /Script/Engine.HitResult HitResult, StructProperty of /Script/GameplayAbilities.GameplayEffectContextHandle ReturnValue)
+  FUN  CalculatePoiseDamage(ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent SourceASC, ObjectProperty of /Script/Engine.Actor DamageCauser, FloatProperty ReturnValue)
+  FUN  CalculateDamage(ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent SourceASC, ObjectProperty of /Script/Engine.Actor DamageCauser, FloatProperty ReturnValue)
+  FUN  CalculateBreakDamage(ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent SourceASC, ObjectProperty of /Script/Engine.Actor DamageCauser, FloatProperty ReturnValue)
+  FUN  ApplyPayloadInstigator(ObjectProperty of /Script/Engine.Actor Target, ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent InstigatingASC, StructProperty of /Script/Engine.HitResult HitResult, ObjectProperty of /Script/Engine.Actor DamageCauser, StructProperty of /Script/GameplayAbilities.GameplayEffectContextHandle EffectContext)
+  FUN  ApplyPayload(ObjectProperty of /Script/Engine.Actor Target, ObjectProperty of /Script/Sparta.SpartaGameplayAbility ApplyingAbility, StructProperty of /Script/Engine.HitResult HitResult, ObjectProperty of /Script/Engine.Actor DamageCauser)
+=== /Script/Sparta.UnitSpawner  [00007FF46F04B138]  super=/Script/Engine.Actor
+  0x2A8     SaveComponent : ObjectProperty of /Script/Sparta.SpartaSaveComponent
+  0x2B0     bShouldLoadEnemyClassesOnBeginPlay : BoolProperty
+  0x2B8     OnCharacterSpawned : MulticastInlineDelegateProperty
+  0x2C8     EnemySpawnType : StructProperty of /Script/Engine.DataTableRowHandle
+  0x2D8     SpawnerTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x2F8     LooseGameplayTagsToAdd : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  0x318     SpawnedEnemy : ObjectProperty of /Script/Sparta.SpartaCharacter
+  0x320     CharacterId : StructProperty of /Script/GameplayTags.GameplayTag
+  0x328     ClassReference : ObjectProperty of /Script/CoreUObject.Object
+  FUN  SpawnMe(ObjectProperty of /Script/Sparta.SpawnTrigger SpawnTrigger)
+  FUN  SpawnerLoaded()
+  FUN  LoadClasses()
+  FUN  FinishSpawningEnemy(ClassProperty EnemyClass, StructProperty of /Script/CoreUObject.Transform Transform, ObjectProperty of /Script/Sparta.SpartaCharacter ReturnValue)
+  FUN  ClearLoadedClasses()
+  FUN  CharacterSpawned()
+  FUN  CanSpawn(BoolProperty ReturnValue)
+  FUN  BeginSpawningEnemy(ClassProperty EnemyClass, StructProperty of /Script/CoreUObject.Transform Transform, ObjectProperty of /Script/Sparta.SpartaCharacter ReturnValue)
+=== /Script/Sparta.SpartaHordeSpawner  [00007FF46F04AF38]  super=/Script/Sparta.UnitSpawner
+  0x340     SpawnClass : SoftClassProperty
+  FUN  Spawn(ObjectProperty of /Script/Engine.Character ReturnValue)
+=== /Script/Sparta.SpartaAreaSubsystem  [00007FF46F03F338]  super=/Script/Engine.WorldSubsystem
+  0x30      ActiveArea : ObjectProperty of /Script/Sparta.SpartaAreaId
+  0x38      CompletedAreas : SetProperty
+  0x88      OnAreaActivated : MulticastInlineDelegateProperty
+  0x98      OnAreaDeactivated : MulticastInlineDelegateProperty
+  0xA8      OnAreaComplete : MulticastInlineDelegateProperty
+  FUN  IsCompleteActive(ObjectProperty of /Script/Sparta.SpartaAreaId Area, BoolProperty ReturnValue)
+  FUN  IsAreaActive(ObjectProperty of /Script/Sparta.SpartaAreaId Area, BoolProperty ReturnValue)
+  FUN  GetConnectedAreas(ObjectProperty of /Script/Sparta.SpartaAreaId Area, ArrayProperty of ReturnValue./Script/Sparta.SpartaAreaSubsystem:GetConnectedAreas:ReturnValue ReturnValue)
+  FUN  GetActivityType(ObjectProperty of /Script/Sparta.SpartaAreaId Area, ObjectProperty of /Script/Sparta.SpartaActivityType ReturnValue)
+  FUN  GetActiveArea(ObjectProperty of /Script/Sparta.SpartaAreaId ReturnValue)
+  FUN  CompleteArea(ObjectProperty of /Script/Sparta.SpartaAreaId Area)
+  FUN  ActivateArea(ObjectProperty of /Script/Sparta.SpartaAreaId Area)
+=== /Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C  [00007FF46F9605A0]  super=/Script/Sparta.SpartaSessionSaveObjectBase
+  0xB8      UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame
+  0xC0      Resolve : DoubleProperty
+  0xC8      Health : DoubleProperty
+  0xD0      ShellHealth : DoubleProperty
+  0xD8      HealCurrentCharges : DoubleProperty
+  0xE0      ShellReviveProgress : FloatProperty
+  0xE4      ShellReviveMaxProgress : FloatProperty
+  0xF0      StartTransform : StructProperty of /Script/CoreUObject.Transform
+  0x150     PositionCheckFrequency : FloatProperty
+  0x158     PositionCheckTimerHandle : StructProperty of /Script/Engine.TimerHandle
+  0x160     PlayerPawnCache : ObjectProperty of /Script/Engine.Pawn
+  0x168     IsInDarkform : BoolProperty
+  0x170     AbilitySystemComponent : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent
+  FUN  SaveShellRevive()
+  FUN  SaveIsDarkForm()
+  FUN  SaveHealingCharges()
+  FUN  SaveShellHealth()
+  FUN  SaveHealth()
+  FUN  SaveResolve()
+  FUN  GetSessionStartTransform(StructProperty of /Script/CoreUObject.Transform ReturnValue)
+  FUN  ReceiveSpartaPreSave(StructProperty of /Script/Sparta.SpartaSaveContext SaveContext)
+  FUN  ReceiveOnLoaded()
+  FUN  CheckForValidTransform()
+  FUN  ExecuteUbergraph_BPSO_PlayerSession(IntProperty EntryPoint)
+=== /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C  [000001F4BE037180]  super=/Script/Sparta.PlayerProgressionSaveData
+  0x1A8     CurrentLevel : IntProperty
+  0x1AC     AvailablePoints : IntProperty
+  0x1B0     AssignedPoints : MapProperty
+  0x200     BondingPoints : MapProperty
+  0x250     GoldSpentAtShop : IntProperty
+=== /Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C  [000001F4BE032A40]  super=/Script/Sparta.SpartaSaveObject
+  0xB8      MemoryProgress : MapProperty
+  0x108     MemoriesWatched : SetProperty
+=== /Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C  [000001F4BE032320]  super=/Script/Sparta.SpartaSaveObject
+  0xB8      NarrativeEventTimeTracking : MapProperty
+=== /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C  [000001F61C3586E0]  super=/Script/Sparta.SpartaSaveObject
+  0xB8      UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame
+  0xC0      NarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer
+  FUN  ReceiveApplySkipProloguePreset()
+  FUN  ReceiveSpartaPreSave(StructProperty of /Script/Sparta.SpartaSaveContext SaveContext)
+  FUN  ExecuteUbergraph_BPSO_QuestLogComponent(IntProperty EntryPoint)
+=== /Script/Sparta.SpartaCompletionSubsystem  [00007FF46F044B38]  super=/Script/Engine.GameInstanceSubsystem
+  0x30      CompletionSettings : SoftObjectProperty of /Script/Sparta.SpartaCompletionSettings
+  0x58      ResolvedSettings : ObjectProperty of /Script/Sparta.SpartaCompletionSettings
+  0x60      Snapshot : StructProperty of /Script/Sparta.SpartaCompletionResult
+  0x88      RunTimeSeconds : FloatProperty
+  0x8C      bRunTimerPaused : BoolProperty
+  FUN  SnapshotCompletion(ObjectProperty of /Script/CoreUObject.Object WorldContextObject, StructProperty of /Script/Sparta.SpartaCompletionResult ReturnValue)
+  FUN  SetRunTimeSeconds(FloatProperty InSeconds)
+  FUN  SetRunTimerPaused(BoolProperty bPaused)
+  FUN  SetCompletionSettings(ObjectProperty of /Script/Sparta.SpartaCompletionSettings InSettings)
+  FUN  IsRunTimerPaused(BoolProperty ReturnValue)
+  FUN  HasSnapshot(BoolProperty ReturnValue)
+  FUN  GetSnapshot(StructProperty of /Script/Sparta.SpartaCompletionResult ReturnValue)
+  FUN  GetRunTimeSeconds(FloatProperty ReturnValue)
+  FUN  GetCompletionSettings(ObjectProperty of /Script/Sparta.SpartaCompletionSettings ReturnValue)
+  FUN  ClearSnapshot()
+  FUN  CalculateCompletion(ObjectProperty of /Script/CoreUObject.Object WorldContextObject, StructProperty of /Script/Sparta.SpartaCompletionResult ReturnValue)
+  FUN  ApplySurvivalCurve(FloatProperty OvaFraction, FloatProperty CapabilityFraction, FloatProperty ReturnValue)
+=== /Script/Sparta.SpartaTraversalActor  [00007FF46F05BF38]  super=/Script/Sparta.SpartaTraversalNode
+  FUN  UnlockTraversal(BoolProperty bUsed)
+  FUN  LockTraversal()
+=== /Script/Sparta.SpartaInstancedObject  [00007FF46F04DB38]  super=/Script/CoreUObject.Object
+=== /Script/Sparta.SpartaWorldObject  [00007FF46F060538]  super=/Script/CoreUObject.Object

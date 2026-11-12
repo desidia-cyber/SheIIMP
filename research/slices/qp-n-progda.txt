@@ -1,0 +1,140 @@
+﻿### BoolProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:ReturnValue  [000001F4ACDBFF00]
+
+### Class /Script/Sparta.SpartaProgressionDataAsset  [00007FF46F056138]
+    super: /Script/Engine.DataAsset
+    9 members:
+      PRP ProgressionGameplayEffectClass : ClassProperty [o:0x30]
+      PRP RepeatableAttributeProgression : MapProperty [o:0x38]
+      PRP FAttributeProgressionCyclicalDiminishing : MapProperty [o:0x88]
+      PRP TagToAttributeBinding : MapProperty [o:0xd8]
+      FUN GetPreviewRowForTag 
+          param ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param CurrentLevel : IntProperty [o:0x10]
+          param PreviewLevel : IntProperty [o:0x14]
+          param OutRow : StructProperty of /Script/Sparta.SpartaStatPreviewRow [o:0x18]
+          param ReturnValue : BoolProperty [o:0x30]
+      FUN GetDataAssetValueAtLevel 
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Level : IntProperty [o:0x8]
+          param ReturnValue : FloatProperty [o:0xc]
+      FUN GetDataAssetDeltaBetweenLevels 
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param FromLevel : IntProperty [o:0x8]
+          param ToLevel : IntProperty [o:0xc]
+          param ReturnValue : FloatProperty [o:0x10]
+      FUN BuildLevelPreviewRowsMap 
+          param ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+          param CurrentLevel : IntProperty [o:0x8]
+          param PreviewLevel : IntProperty [o:0xc]
+          param OutRows : MapProperty [o:0x10]
+      FUN ApplyLevel 
+          param ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+          param Level : IntProperty [o:0x8]
+
+### ClassProperty /Script/Sparta.SpartaProgressionDataAsset:ProgressionGameplayEffectClass  [000001F4ACDBFA00]
+
+### FloatProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetDeltaBetweenLevels:ReturnValue  [000001F4ACDE0C50]
+
+### FloatProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetValueAtLevel:ReturnValue  [000001F4ACDE0B00]
+
+### Function /Script/Sparta.SpartaProgressionDataAsset:ApplyLevel  [00007FF46F70D3B8]
+    2 members:
+      PRP ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+      PRP Level : IntProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap  [00007FF46F70D498]
+    4 members:
+      PRP ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+      PRP CurrentLevel : IntProperty [o:0x8]
+      PRP PreviewLevel : IntProperty [o:0xc]
+      PRP OutRows : MapProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetDeltaBetweenLevels  [00007FF46F70D578]
+    4 members:
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP FromLevel : IntProperty [o:0x8]
+      PRP ToLevel : IntProperty [o:0xc]
+      PRP ReturnValue : FloatProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetValueAtLevel  [00007FF46F70D658]
+    3 members:
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Level : IntProperty [o:0x8]
+      PRP ReturnValue : FloatProperty [o:0xc]
+
+### Function /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag  [00007FF46F70D738]
+    6 members:
+      PRP ASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x0]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP CurrentLevel : IntProperty [o:0x10]
+      PRP PreviewLevel : IntProperty [o:0x14]
+      PRP OutRow : StructProperty of /Script/Sparta.SpartaStatPreviewRow [o:0x18]
+      PRP ReturnValue : BoolProperty [o:0x30]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:ApplyLevel:Level  [000001F4ACDE0DA0]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:CurrentLevel  [000001F4ACDE0CC0]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:PreviewLevel  [000001F4ACDE0D30]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetDeltaBetweenLevels:FromLevel  [000001F4ACDE0B70]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetDeltaBetweenLevels:ToLevel  [000001F4ACDE0BE0]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetValueAtLevel:Level  [000001F4ACDE0A90]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:CurrentLevel  [000001F4ACDE09B0]
+
+### IntProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:PreviewLevel  [000001F4ACDE0A20]
+
+### MapProperty /Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:OutRows  [000001F49CD2FA60]
+    2 members:
+      PRP OutRows_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP OutRows : StructProperty of /Script/Sparta.SpartaStatPreviewRow [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaProgressionDataAsset:FAttributeProgressionCyclicalDiminishing  [000001F49CD2F920]
+    2 members:
+      PRP FAttributeProgressionCyclicalDiminishing_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP FAttributeProgressionCyclicalDiminishing : StructProperty of /Script/Sparta.AttributeProgression [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaProgressionDataAsset:RepeatableAttributeProgression  [000001F49CD2F880]
+    2 members:
+      PRP RepeatableAttributeProgression_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP RepeatableAttributeProgression : StructProperty of /Script/Sparta.AttributeProgression [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaProgressionDataAsset:TagToAttributeBinding  [000001F49CD2F9C0]
+    2 members:
+      PRP TagToAttributeBinding_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP TagToAttributeBinding : StructProperty of /Script/Sparta.SpartaAttributeBinding [o:0x8]
+
+### ObjectProperty /Script/Sparta.SpartaProgressionDataAsset:ApplyLevel:ASC  [000001F4ACDBE980]
+
+### ObjectProperty /Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:ASC  [000001F4ACDBE800]
+
+### ObjectProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:ASC  [000001F4ACDBFD80]
+
+### StructProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetDeltaBetweenLevels:StatTag  [000001F4ACDBE780]
+
+### StructProperty /Script/Sparta.SpartaProgressionDataAsset:GetDataAssetValueAtLevel:StatTag  [000001F4ACDBFF80]
+
+### StructProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:OutRow  [000001F4ACDBFE80]
+
+### StructProperty /Script/Sparta.SpartaProgressionDataAsset:GetPreviewRowForTag:StatTag  [000001F4ACDBFE00]
+
+### StructProperty FAttributeProgressionCyclicalDiminishing./Script/Sparta.SpartaProgressionDataAsset:FAttributeProgressionCyclicalDiminishing  [000001F4ACDBFB80]
+
+### StructProperty FAttributeProgressionCyclicalDiminishing./Script/Sparta.SpartaProgressionDataAsset:FAttributeProgressionCyclicalDiminishing_Key  [000001F4ACDBFC00]
+
+### StructProperty OutRows./Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:OutRows  [000001F4ACDBE880]
+
+### StructProperty OutRows./Script/Sparta.SpartaProgressionDataAsset:BuildLevelPreviewRowsMap:OutRows_Key  [000001F4ACDBE900]
+
+### StructProperty RepeatableAttributeProgression./Script/Sparta.SpartaProgressionDataAsset:RepeatableAttributeProgression  [000001F4ACDBFA80]
+
+### StructProperty RepeatableAttributeProgression./Script/Sparta.SpartaProgressionDataAsset:RepeatableAttributeProgression_Key  [000001F4ACDBFB00]
+
+### StructProperty TagToAttributeBinding./Script/Sparta.SpartaProgressionDataAsset:TagToAttributeBinding  [000001F4ACDBFC80]
+
+### StructProperty TagToAttributeBinding./Script/Sparta.SpartaProgressionDataAsset:TagToAttributeBinding_Key  [000001F4ACDBFD00]
+

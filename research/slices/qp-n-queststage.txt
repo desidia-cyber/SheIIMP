@@ -1,0 +1,53 @@
+﻿### ArrayProperty /Script/Sparta.QuestStage:ObjectiveObjects  [000001F4A864F880]
+    1 members:
+      PRP ObjectiveObjects : ObjectProperty of /Script/Sparta.QuestObjective [o:0x0]
+
+### ArrayProperty /Script/Sparta.QuestStage:Objectives  [000001F4A8871080]
+    1 members:
+      PRP Objectives : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+
+### IntProperty /Script/Sparta.QuestStage:CurrencyReward  [000001F4A861AE30]
+
+### IntProperty /Script/Sparta.QuestStage:RelationshipReward  [000001F4A861AF80]
+
+### IntProperty /Script/Sparta.QuestStage:XPReward  [000001F4A861C9C0]
+
+### IntProperty EnemyRewards./Script/Sparta.QuestStage:EnemyRewards  [000001F4A861AEA0]
+
+### IntProperty ItemRewards./Script/Sparta.QuestStage:ItemRewards  [000001F4A861AD50]
+
+### MapProperty /Script/Sparta.QuestStage:EnemyRewards  [000001F495E1FCE0]
+    2 members:
+      PRP EnemyRewards_Key : NameProperty [o:0x0]
+      PRP EnemyRewards : IntProperty [o:0x8]
+
+### MapProperty /Script/Sparta.QuestStage:ItemRewards  [000001F495E1FD80]
+    2 members:
+      PRP ItemRewards_Key : NameProperty [o:0x0]
+      PRP ItemRewards : IntProperty [o:0x8]
+
+### NameProperty EnemyRewards./Script/Sparta.QuestStage:EnemyRewards_Key  [000001F4A861AF10]
+
+### NameProperty ItemRewards./Script/Sparta.QuestStage:ItemRewards_Key  [000001F4A861ADC0]
+
+### ObjectProperty ObjectiveObjects./Script/Sparta.QuestStage:ObjectiveObjects  [000001F4A864F800]
+
+### ScriptStruct /Script/Sparta.QuestStage  [00007FF46F4872F8]
+    super: [n:
+    9 members:
+      PRP StageName : TextProperty [o:0x0]
+      PRP Description : TextProperty [o:0x10]
+      PRP Objectives : ArrayProperty of Objectives./Script/Sparta.QuestStage:Objectives [o:0x20]
+      PRP ObjectiveObjects : ArrayProperty of ObjectiveObjects./Script/Sparta.QuestStage:ObjectiveObjects [o:0x30]
+      PRP XPReward : IntProperty [o:0x40]
+      PRP ItemRewards : MapProperty [o:0x48]
+      PRP CurrencyReward : IntProperty [o:0x98]
+      PRP EnemyRewards : MapProperty [o:0xa0]
+      PRP RelationshipReward : IntProperty [o:0xf0]
+
+### StructProperty Objectives./Script/Sparta.QuestStage:Objectives  [000001F4A8871000]
+
+### TextProperty /Script/Sparta.QuestStage:Description  [000001F4A861C950]
+
+### TextProperty /Script/Sparta.QuestStage:StageName  [000001F4A861C8E0]
+

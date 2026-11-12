@@ -1,0 +1,3388 @@
+// coop_net.cpp -- module 1: session, config, file IO, the wire codec, the
+// cmd.txt harness, sync.txt, the heartbeat, the main loop scheduler
+// (OnTick -> 30/15/2/1 Hz) and the shared base layer every other module leans
+// on (log, coop_dir.txt, the real-time clock, ue:: object helpers).
+//
+// Ported from mod/CoopMod/Scripts/main.lua, READ-ONLY reference:
+//   24-153    config/DIR/ME/ROLE, actorTail, now, log, writeFile, readLine,
+//             safe, fullname, validActor, isLive
+//   154-187   getWorld/getPC/getPawn/locOf/dist/runConsole/playerChars
+//   1409-1451 peerFile, parseKV, section
+//   1566-1606 sendOwn                       (net::Publish)
+//   1936-1983 applyPeer                     (net::ApplyPeer)
+//   2055-2196 lookTestTick, runCommands     (net::RunCommands + LookTestTick)
+//   3957-3988 streamStatus part, writeSyncStatus (net::WriteSyncStatus)
+//   3989-4133 guards, step, heartbeat, onGame/runLoop, the three loops, boot
+//             emit, stale-file cleanup, "=== CoopMod start ==="
+//
+// The wire format is byte-compatible with relay/cooprelay.py: one JSON line per
+// file, field order and number formats frozen (docs/NATIVE-PORT.md section 2.3).
+//
+// ---------------------------------------------------------------------------
+// CONTRACT-REQUESTs (things this module needs that coop_state.h / ms2_ue.h as
+// shipped do not provide; all are worked around here, none blocks a build)
+// ---------------------------------------------------------------------------
+// 1. ms2_ue.h has no ue::GetWorld / GetPlayerController / GetPawn /
+//    ConsoleCommand / MakeFName / GetCDO even though the porting brief lists
+//    them.  net resolves world/PC/pawn itself (GameplayStatics::
+//    GetPlayerController over every live UWorld, cached) and runs
+//    ExecuteConsoleCommand through ue::Call.  When the engine layer grows the
+//    fast path, net::World/PC/Pawn/Console should switch to it -- the caching
+//    and the guard behaviour stay.
+// 2. combat::NearestNpc(&key, &actor) / combat::CollectNpcs(): cmd.txt's
+//    kill / hurt / hp / aitest / npctp need the *sorted* collectNPCs() list
+//    (main.lua:1265-1317).  net keeps a deliberately reduced private copy
+//    (nearest first, same 4000 uu radius, same enemy/turret preference) because
+//    the real ordering needs combat's PEER_CLAIMS / ownership bias.
+// 3. appear::QueueLookAdd(const std::string& path): cmd.txt `lookadd` needs to
+//    hand a path to appear's LOOK_ADD/LOOK_TEST (main.lua:2061-2078).  net uses
+//    appear::SetLookAdded() for the result and diffs FindAllOf(<class>) itself.
+// 4. puppet::RequestGameLoad(const std::string& path): net::Find(path, true)
+//    cannot queue a load (LOAD_ON.txt).  Default is off in Lua too, so this only
+//    matters with LOAD_ON.txt present; net logs once and keeps going.
+// 5. RESOLVED: puppet::StartTp / puppet::StartTravel are declared in
+//    coop_state.h section 10 and this file calls them; PuppetState is written only
+//    by its owner (the header's "owner writes" rule holds).
+// 6. RESOLVED: MontageSig has no `at`, and needs none -- PeerState::at IS the
+//    packet clock, and ApplyPeer sets it on exactly the fresh-packet condition
+//    that sets the montage (main.lua:1963-1972).  coop_puppet reads
+//    state().peer.at for the montage play head.
+// 7. RESOLVED: CombatState::spawnAlias is a string -> string map (StrStrMap), one
+//    table shared by coop_combat (writer) and coop_local (reader).
+// 8. LocalState::wpns is documented as "the section body" while the Lua's
+//    MYWPNS carries the enclosing brackets.  net::Publish normalises both.
+// 9. RESOLVED: `bool coop::net::ReadText(const std::string&, std::string*)`
+//    (whole-file read, coop_world's ledger) is declared in coop_state.h and
+//    defined here.
+// ---------------------------------------------------------------------------
+
+#include "coop_state.h"
+
+#include "ms2_log.h"
+#include "ms2_ue.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX          // std::min/std::max, not the winuser.h macros
+#endif
+#include <windows.h>
+// winuser.h defines GetClassName as a macro; it would eat ue::GetClassName.
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <condition_variable>
+#include <cstdarg>
+#include <cstdio>
+#include <cstring>
+#include <deque>
+#include <mutex>
+#include <string>
+#include <thread>
+#include <vector>
+
+namespace coop {
+
+// ===========================================================================
+// 0. small private utilities (file scope, no linker surface)
+// ===========================================================================
+namespace {
+
+// --- string helpers --------------------------------------------------------
+
+bool StartsWith(const std::string& s, const char* p) {
+    const size_t n = strlen(p);
+    return s.size() >= n && s.compare(0, n, p) == 0;
+}
+
+bool Contains(const std::string& s, const char* p) {
+    return s.find(p) != std::string::npos;
+}
+
+std::string Trim(const std::string& s) {
+    size_t a = 0, b = s.size();
+    while (a < b && (unsigned char)s[a] <= ' ') ++a;
+    while (b > a && (unsigned char)s[b - 1] <= ' ') --b;
+    return s.substr(a, b - a);
+}
+
+// main.lua:66 `p:gsub("%s", "")` -- every whitespace character, not just ends.
+std::string StripAllSpace(const std::string& s) {
+    std::string out;
+    out.reserve(s.size());
+    for (char c : s) {
+        if ((unsigned char)c > ' ') out.push_back(c);
+    }
+    return out;
+}
+
+const char* PhaseName(Phase p) {
+    switch (p) {
+    case Phase::Menu:   return "menu";
+    case Phase::World:  return "world";
+    case Phase::Summon: return "summon";
+    case Phase::Adopt:  return "adopt";
+    case Phase::Sync:   return "sync";
+    }
+    return "menu";
+}
+
+// --- text encoding --------------------------------------------------------
+
+std::wstring Widen(const std::string& s) {
+    if (s.empty()) return std::wstring();
+    // UTF-8 first (a hand-edited config), then the ANSI code page (what
+    // deploy.ps1 -Encoding ASCII and run-two.ps1 actually write).
+    int n = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.c_str(), (int)s.size(), nullptr, 0);
+    UINT cp = CP_UTF8;
+    if (n <= 0) {
+        cp = CP_ACP;
+        n = MultiByteToWideChar(CP_ACP, 0, s.c_str(), (int)s.size(), nullptr, 0);
+    }
+    if (n <= 0) return std::wstring();
+    std::wstring w((size_t)n, L'\0');
+    MultiByteToWideChar(cp, cp == CP_UTF8 ? MB_ERR_INVALID_CHARS : 0, s.c_str(), (int)s.size(), &w[0], n);
+    return w;
+}
+
+std::string Narrow(const std::wstring& w) {
+    if (w.empty()) return std::string();
+    int n = WideCharToMultiByte(CP_ACP, 0, w.c_str(), (int)w.size(), nullptr, 0, nullptr, nullptr);
+    if (n <= 0) return std::string();
+    std::string s((size_t)n, '\0');
+    WideCharToMultiByte(CP_ACP, 0, w.c_str(), (int)w.size(), &s[0], n, nullptr, nullptr);
+    return s;
+}
+
+// --- module / exe directory ----------------------------------------------
+
+std::string ModuleDir() {
+    HMODULE hm = nullptr;
+    if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+                                GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                            (LPCWSTR)(const void*)&ModuleDir, &hm) ||
+        !hm) {
+        return std::string();
+    }
+    wchar_t path[MAX_PATH * 2] = L"";
+    const DWORD n = GetModuleFileNameW(hm, path, (DWORD)(sizeof(path) / sizeof(path[0])));
+    if (n == 0) return std::string();
+    std::wstring w(path, n);
+    const size_t slash = w.find_last_of(L"\\/");
+    if (slash != std::wstring::npos) w.resize(slash);
+    return Narrow(w);
+}
+
+std::string ExeDir() {
+    wchar_t path[MAX_PATH * 2] = L"";
+    const DWORD n = GetModuleFileNameW(nullptr, path, (DWORD)(sizeof(path) / sizeof(path[0])));
+    if (n == 0) return std::string();
+    std::wstring w(path, n);
+    const size_t slash = w.find_last_of(L"\\/");
+    if (slash != std::wstring::npos) w.resize(slash);
+    return Narrow(w);
+}
+
+// --- guarded Win32 file IO ------------------------------------------------
+
+HANDLE OpenForRead(const std::wstring& path) {
+    return CreateFileW(path.c_str(), GENERIC_READ,
+                       FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+}
+
+// Reads the first line of `path` exactly like Lua's f:read("*l") in text mode:
+// up to '\n', no '\n', and no trailing '\r'.  Returns false when the file
+// cannot be opened (Lua returns nil then).
+bool ReadFirstLinePath(const std::string& path, std::string* out) {
+    if (out) out->clear();
+    const std::wstring w = Widen(path);
+    if (w.empty()) return false;
+    HANDLE h = OpenForRead(w);
+    if (h == INVALID_HANDLE_VALUE) return false;
+
+    std::string line;
+    char buf[4096];
+    bool gotAny = false;
+    for (;;) {
+        DWORD got = 0;
+        if (!ReadFile(h, buf, (DWORD)sizeof(buf), &got, nullptr) || got == 0) break;
+        gotAny = true;
+        const char* nl = (const char*)memchr(buf, '\n', got);
+        if (nl) {
+            line.append(buf, (size_t)(nl - buf));
+            break;
+        }
+        line.append(buf, got);
+        if (line.size() > 65536) break;   // a state line is ~4 KB; do not chase a binary
+    }
+    CloseHandle(h);
+    if (!gotAny) return true;             // opened, empty: Lua yields nil here and callers check the length
+    if (!line.empty() && line.back() == '\r') line.pop_back();
+    if (out) *out = line;
+    return true;
+}
+
+// Reads the whole file as bytes.  Used by cmd.txt (every line is a command) and
+// by the world-state ledger through net::ReadText (one key per line), which
+// coop_world declares as its CONTRACT-REQUEST 1.
+bool ReadWholeText(const std::string& path, std::string* out) {
+    if (out) out->clear();
+    const std::wstring w = Widen(path);
+    if (w.empty()) return false;
+    HANDLE h = OpenForRead(w);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    std::string all;
+    char buf[8192];
+    for (;;) {
+        DWORD got = 0;
+        if (!ReadFile(h, buf, (DWORD)sizeof(buf), &got, nullptr) || got == 0) break;
+        all.append(buf, got);
+        if (all.size() > (4u << 20)) break;   // no legitimate file here is that big
+    }
+    CloseHandle(h);
+    if (out) *out = std::move(all);
+    return true;
+}
+
+bool WriteWholeFile(const std::wstring& path, const std::string& text) {
+    if (path.empty()) return false;
+    HANDLE h = CreateFileW(path.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    bool ok = true;
+    size_t off = 0;
+    while (off < text.size()) {
+        DWORD wrote = 0;
+        const DWORD chunk = (DWORD)((text.size() - off) > 0x10000 ? 0x10000 : (text.size() - off));
+        if (!WriteFile(h, text.data() + off, chunk, &wrote, nullptr) || wrote == 0) { ok = false; break; }
+        off += wrote;
+    }
+    CloseHandle(h);
+    return ok;
+}
+
+bool AppendToFile(const std::wstring& path, const std::string& text) {
+    if (path.empty()) return false;
+    HANDLE h = CreateFileW(path.c_str(), FILE_APPEND_DATA,
+                           FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    DWORD wrote = 0;
+    bool ok = true;
+    if (!text.empty()) {
+        ok = WriteFile(h, text.data(), (DWORD)text.size(), &wrote, nullptr) && wrote == text.size();
+        if (ok) FlushFileBuffers(h);      // the harness tails this file live
+    }
+    CloseHandle(h);
+    return ok;
+}
+
+// --- printf-family formatting (C locale: '%f' always uses '.') -------------
+
+// One pass, stack only: every call site here formats a log line or a wire field,
+// never a document.  _vsnprintf_s with _TRUNCATE returns what it wrote, so a
+// too-long line is cut instead of throwing.
+void FormatV(std::string* out, const char* fmt, va_list ap) {
+    if (!fmt || !out) return;
+    char buf[8192];
+    buf[0] = 0;
+    const int n = _vsnprintf_s(buf, sizeof(buf), _TRUNCATE, fmt, ap);
+    if (n > 0) out->append(buf, (size_t)n);
+}
+
+// ===========================================================================
+// guarded ue:: access -- the only place this module touches engine objects
+// ===========================================================================
+namespace uecall {
+
+// UFunction lookup cache: key = "<class name>|<function name>".
+struct FuncSlot {
+    std::string key;
+    ue::UFunction* fn;
+};
+std::vector<FuncSlot> g_fnCache;
+
+ue::UFunction* Func(ue::UObject* o, const char* name) {
+    if (!o || !name) return nullptr;
+    const std::string key = ue::GetClassName(o) + "|" + name;
+    for (const FuncSlot& s : g_fnCache) {
+        if (s.key == key) return s.fn;
+    }
+    ue::UFunction* fn = ue::FindFunction(o, name);
+    FuncSlot slot;
+    slot.key = key;
+    slot.fn = fn;
+    g_fnCache.push_back(slot);   // a null result is cached too: no MISS storms
+    return fn;
+}
+
+bool HasParam(ue::UFunction* fn, const char* name) {
+    if (!fn || !name) return false;
+    return ue::FindProperty((ue::UStruct*)fn, name) != nullptr;
+}
+
+// The first of `names` that the function actually declares.
+const char* PickParam(ue::UFunction* fn, const char* const* names, size_t n) {
+    for (size_t i = 0; i < n; ++i) {
+        if (HasParam(fn, names[i])) return names[i];
+    }
+    return nullptr;
+}
+
+bool CallVoid(ue::UObject* o, const char* fnName) {
+    if (!ue::IsValid(o)) return false;
+    ue::UFunction* fn = Func(o, fnName);
+    if (!fn) return false;
+    ue::Params p(fn);
+    return ue::Call(o, fn, p.data());
+}
+
+bool CallVec(ue::UObject* o, const char* fnName, ue::FVector* out) {
+    if (!ue::IsValid(o) || !out) return false;
+    ue::UFunction* fn = Func(o, fnName);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    *out = p.Get<ue::FVector>("ReturnValue");
+    return true;
+}
+
+bool CallRot(ue::UObject* o, const char* fnName, ue::FRotator* out) {
+    if (!ue::IsValid(o) || !out) return false;
+    ue::UFunction* fn = Func(o, fnName);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    *out = p.Get<ue::FRotator>("ReturnValue");
+    return true;
+}
+
+// Calls o.fn(<one UObject* parameter>) with the parameter named from `names`.
+// Never calls the function when no candidate name exists: a null argument in a
+// BP function is exactly the kind of input that takes this game down.
+bool CallWithObject(ue::UObject* o, const char* fnName, ue::UObject* arg,
+                    const char* const* names, size_t n) {
+    if (!ue::IsValid(o)) return false;
+    ue::UFunction* fn = Func(o, fnName);
+    if (!fn) return false;
+    const char* pname = PickParam(fn, names, n);
+    if (!pname) return false;
+    ue::Params p(fn);
+    p.Set<ue::UObject*>(pname, arg);
+    return ue::Call(o, fn, p.data());
+}
+
+// Read a UObject* out of a property, validated.
+ue::UObject* PropObj(ue::UObject* o, const char* prop) {
+    if (!ue::IsValid(o)) return nullptr;
+    ue::UObject* p = nullptr;
+    if (!ue::Get<ue::UObject*>(o, prop, p)) return nullptr;
+    return ue::IsValid(p) ? p : nullptr;
+}
+
+// Read an integer property whose width the reflection knows (enums are 1 byte).
+bool PropInt(ue::UObject* o, const char* prop, int64_t* out) {
+    if (!ue::IsValid(o) || !out) return false;
+    const int32_t sz = ue::PropSize(o, prop);
+    if (sz == 1) {
+        uint8_t v = 0;
+        if (!ue::Get<uint8_t>(o, prop, v)) return false;
+        *out = (int64_t)v;
+        return true;
+    }
+    if (sz == 2) {
+        int16_t v = 0;
+        if (!ue::Get<int16_t>(o, prop, v)) return false;
+        *out = (int64_t)v;
+        return true;
+    }
+    if (sz == 4) {
+        int32_t v = 0;
+        if (!ue::Get<int32_t>(o, prop, v)) return false;
+        *out = (int64_t)v;
+        return true;
+    }
+    if (sz == 8) {
+        int64_t v = 0;
+        if (!ue::Get<int64_t>(o, prop, v)) return false;
+        *out = v;
+        return true;
+    }
+    return false;
+}
+
+}  // namespace uecall
+
+// A `/Script/Engine.Default__<Class>` helper object (the CDO), cached.
+struct CdoSlot {
+    std::string path;
+    ue::UObject* obj;
+};
+std::vector<CdoSlot> g_cdoCache;
+
+ue::UObject* HelperCdo(const char* path) {
+    if (!path) return nullptr;
+    for (CdoSlot& s : g_cdoCache) {
+        if (s.path != path) continue;
+        // A CDO never dies, so a hit is permanent.  A MISS is retried: the helper
+        // classes belong to packages that can finish loading after this runs, and a
+        // cached nullptr would disable the feature that asked for it for the whole
+        // session (ue::FindObject only remembers a miss for 2 s for the same reason).
+        if (s.obj && ue::PlausiblePtr(s.obj)) return s.obj;
+        s.obj = ue::FindObject(path);
+        return s.obj;
+    }
+    ue::UObject* o = ue::FindObject(path);
+    CdoSlot slot;
+    slot.path = path;
+    slot.obj = o;
+    g_cdoCache.push_back(slot);
+    return o;
+}
+
+ue::UObject* KismetSystemLibrary() {
+    return HelperCdo("/Script/Engine.Default__KismetSystemLibrary");
+}
+
+ue::UObject* GameplayStatics() {
+    return HelperCdo("/Script/Engine.Default__GameplayStatics");
+}
+
+// --- world / player controller / pawn ------------------------------------
+
+ue::UObject* g_world = nullptr;
+ue::UObject* g_pc = nullptr;
+// The CLASS each cache was resolved from.  A UObject address can be RECYCLED: when
+// the menu world and its PlayerController are destroyed on ContinueGame, the engine
+// reuses those addresses, and ue::IsValid(g_world) keeps returning true because the
+// slot points at the new object.  The cache then names a light-preset world and a
+// Niagara component (exactly what the second launch logged), the pawn lookup reads
+// "Pawn" off whatever now lives there, and boot waits for gameplay forever.  Class
+// pointers are stable for the process, so comparing them detects the recycle.
+ue::UClass* g_worldClass = nullptr;
+ue::UClass* g_pcClass = nullptr;
+// The world object net::Frame last saw: a change means a map load (or the death
+// reload) and every cached ue::UObject* has to go.  g_worldSeen keeps the very
+// first resolution (null -> world at boot) out of that path.
+ue::UObject* g_lastWorld = nullptr;
+bool g_worldSeen = false;
+
+bool IsWorldClass(ue::UObject* o) {
+    return o && ue::GetClassName(o) == "World";
+}
+
+// Is the cached pointer still the same KIND of object it was resolved as?
+bool WorldOk() {
+    if (g_world == nullptr || !ue::IsValid(g_world) || g_worldClass == nullptr ||
+        ue::GetClass(g_world) != g_worldClass)
+        return false;
+    // The class pointer itself must be a World class (see ResolveWorldAndPc).
+    // Checked once per resolved class, not per call.
+    static ue::UClass* s_checked = nullptr;
+    static bool s_isWorld = false;
+    if (s_checked != g_worldClass) {
+        ue::UClass* worldCls = ue::FindClass("World");
+        s_isWorld = worldCls && ue::IsA(g_world, worldCls);
+        s_checked = g_worldClass;
+        if (!s_isWorld)
+            ms2::Logf("net: cached world %s is not a World -- re-resolving",
+                      ue::GetFullName(g_world).c_str());
+    }
+    return s_isWorld;
+}
+
+bool PcOk() {
+    return g_pc != nullptr && ue::IsValid(g_pc) &&
+           g_pcClass != nullptr && ue::GetClass(g_pc) == g_pcClass;
+}
+
+// UGameplayStatics::GetPlayerController(world, 0) -- the same object
+// UEHelpers.GetPlayerController() gave the Lua.
+ue::UObject* GetPlayerControllerFor(ue::UObject* world, int32_t index) {
+    ue::UObject* gs = GameplayStatics();
+    if (!gs || !ue::IsValid(world)) return nullptr;
+    ue::UFunction* fn = uecall::Func(gs, "GetPlayerController");
+    if (!fn) return nullptr;
+    static const char* kWorldParams[] = {"WorldContextObject", "WorldContext"};
+    const char* wp = uecall::PickParam(fn, kWorldParams, 2);
+    if (!wp) return nullptr;
+    ue::Params p(fn);
+    p.Set<ue::UObject*>(wp, world);
+    p.Set<int32_t>("PlayerIndex", index);
+    if (!ue::Call(gs, fn, p.data())) return nullptr;
+    ue::UObject* pc = p.Get<ue::UObject*>("ReturnValue");
+    // Which object answered, with which parameter block, is the difference between
+    // "the call is fine and the game has no pawn yet" and "this call returns
+    // nonsense"; three lines at boot settle it.
+    static std::atomic<int> dbg{0};
+    if (dbg.fetch_add(1) < 3) {
+        ms2::Logf("pc-diag: gs=%s fn=%s size=%d worldParam=%s@%d playerIdx@%d ret@%d -> pc=%s",
+                  ue::GetFullName(gs).c_str(), ue::GetFullName((ue::UObject*)fn).c_str(),
+                  (int)p.size(), wp, (int)ue::PropOffsetStruct((ue::UStruct*)fn, wp),
+                  (int)ue::PropOffsetStruct((ue::UStruct*)fn, "PlayerIndex"),
+                  (int)ue::PropOffsetStruct((ue::UStruct*)fn, "ReturnValue"),
+                  ue::GetFullName(pc).c_str());
+    }
+    return ue::IsValid(pc) ? pc : nullptr;
+}
+
+// Every live UWorld, best candidate first: the one that answers
+// GetPlayerController.  Only runs when the cache is cold (boot, map load).
+//
+// The scan walks GObjects, so a *failed* scan is rate limited: at the main menu
+// (or before the engine layer is fully usable) there may be no world yet, and
+// Now() asks for one on every guarded step.  One attempt per second is plenty;
+// a successful result is cached until the object dies.
+uint64_t g_lastWorldScanMs = 0;
+bool g_worldScanTried = false;
+
+void ResolveWorldAndPc() {
+    const uint64_t nowMs = GetTickCount64();
+    if (g_worldScanTried && nowMs - g_lastWorldScanMs < 1000) return;
+    g_worldScanTried = true;
+    g_lastWorldScanMs = nowMs;
+
+    g_world = nullptr;
+    g_pc = nullptr;
+    g_worldClass = nullptr;
+    g_pcClass = nullptr;
+    // FindAllOf goes through the object index, which can still hold a slot that the
+    // engine has re-used for an unrelated object since the last verification sweep.
+    // Accepting such an entry as "the world" poisoned the cache for the whole
+    // session (g_worldClass became e.g. SoundNodeWavePlayer, so WorldOk() kept
+    // agreeing with itself).  Re-check every candidate's class here.
+    std::vector<ue::UObject*> worlds;
+    {
+        ue::UClass* worldCls = ue::FindClass("World");
+        for (ue::UObject* w : ue::FindAllOf("World"))
+            if (ue::IsValid(w) && worldCls && ue::IsA(w, worldCls)) worlds.push_back(w);
+    }
+    ue::UObject* firstWorld = nullptr;
+    ue::UObject* exactWorld = nullptr;
+    for (ue::UObject* w : worlds) {
+        if (!firstWorld) firstWorld = w;
+        if (exactWorld) continue;
+        // This game has more than one UWorld in GObjects: the real gameplay world
+        // and lighting-preset sub-levels (class SpartaLightPreset, also a World
+        // subclass).  Both answer GetPlayerController, so take an object whose own
+        // class is EXACTLY World first -- otherwise the module picks a light
+        // preset as "the world" and every world-change check thrashes.
+        if (IsWorldClass(w)) exactWorld = w;
+    }
+    for (ue::UObject* w : worlds) {
+        if (!IsWorldClass(w)) continue;
+        if (ue::UObject* pc = GetPlayerControllerFor(w, 0)) {
+            g_world = w;
+            g_worldClass = ue::GetClass(w);
+            g_pc = pc;
+            g_pcClass = ue::GetClass(pc);
+            return;
+        }
+    }
+    if (!exactWorld) {
+        for (ue::UObject* w : worlds) {
+            if (ue::UObject* pc = GetPlayerControllerFor(w, 0)) {
+                g_world = w;
+                g_worldClass = ue::GetClass(w);
+                g_pc = pc;
+                g_pcClass = ue::GetClass(pc);
+                return;
+            }
+        }
+    }
+    // No controller yet (main menu before the player exists): keep the world so
+    // the real-time clock works; the PC is retried on the next call.
+    g_world = exactWorld ? exactWorld : firstWorld;
+    g_worldClass = g_world ? ue::GetClass(g_world) : nullptr;
+}
+
+void EnsureWorld() {
+    if (WorldOk()) return;
+    ResolveWorldAndPc();
+}
+
+uint64_t g_lastPcScanMs = 0;
+bool g_pcScanTried = false;
+
+void EnsurePc() {
+    EnsureWorld();
+    if (PcOk()) return;
+    g_pc = nullptr;
+    g_pcClass = nullptr;
+    if (WorldOk()) {
+        if (ue::UObject* pc = GetPlayerControllerFor(g_world, 0)) {
+            g_pc = pc;
+            g_pcClass = ue::GetClass(pc);
+            return;
+        }
+    }
+    // Last resort (rate limited: this walks GObjects): any live PlayerController
+    // whose pawn is our character.
+    const uint64_t nowMs = GetTickCount64();
+    if (g_pcScanTried && nowMs - g_lastPcScanMs < 1000) return;
+    g_pcScanTried = true;
+    g_lastPcScanMs = nowMs;
+
+    const std::vector<ue::UObject*> pcs = ue::FindAllOf("PlayerController");
+    ue::UObject* fallback = nullptr;
+    for (ue::UObject* pc : pcs) {
+        if (!fallback) fallback = pc;
+        ue::UObject* pawn = uecall::PropObj(pc, "Pawn");
+        if (pawn && Contains(ue::GetFullName(pawn), "BP_PlayerCharacter_C")) {
+            g_pc = pc;
+            g_pcClass = ue::GetClass(pc);
+            return;
+        }
+    }
+    g_pc = fallback;
+    g_pcClass = fallback ? ue::GetClass(fallback) : nullptr;
+}
+
+// --- clock ---------------------------------------------------------------
+
+bool g_clockWarned = false;
+bool g_clockWidthWarned = false;
+bool g_clockJumpWarned = false;
+
+// GetRealTimeSeconds(World) through the GameplayStatics CDO -- main.lua:221.
+//
+// WIDTH: this node's "ReturnValue" is a DOUBLE in this UE5.6 build and the port
+// read it as a float.  A float read of an 8-byte double takes the low four bytes
+// (the mantissa tail): a number with nothing to do with seconds, different on
+// every call.  That is measured, not hypothesised -- probe.log carries
+//   spawnscan: clock rewound (stamp 0.0 -> now -0.6)
+//   spawnscan: clock rewound (stamp -0.6 -> now -160.0)
+//   spawnscan: clock rewound (stamp 2.4e32 -> now 0.0)
+// coop_puppet measured 3.7e35 and 2.9e38 on the same build, and every 5 s/10 s
+// diagnostic throttle fired many times a second (Diag::Due re-arms on a rewind).
+//
+// The width is taken from the RETURN PROPERTY itself: FProperty::ElementSize is 8
+// for a DoubleProperty and 4 for a FloatProperty.  ParmsSize cannot answer this --
+// UE pads the parameter block, so a float and a double can both report the same
+// block size (24 here) -- and that is exactly the assumption being removed.
+bool GameRealSeconds(double* out) {
+    if (!out) return false;
+    EnsureWorld();
+    if (!WorldOk()) return false;
+    ue::UObject* gs = GameplayStatics();
+    if (!gs) return false;
+    ue::UFunction* fn = uecall::Func(gs, "GetRealTimeSeconds");
+    if (!fn) return false;
+    static const char* kWorldParams[] = {"WorldContextObject", "WorldContext"};
+    const char* wp = uecall::PickParam(fn, kWorldParams, 2);
+    if (!wp) return false;
+    ue::Params p(fn);
+    p.Set<ue::UObject*>(wp, g_world);
+    if (!ue::Call(gs, fn, p.data())) return false;
+
+    const int32_t width = ue::PropSizeStruct((ue::UStruct*)fn, "ReturnValue");
+    double v = 0.0;
+    if (width == 8) {
+        v = p.Get<double>("ReturnValue");
+    } else if (width == 4) {
+        v = (double)p.Get<float>("ReturnValue");
+    } else {
+        // No readable ReturnValue property (a build whose UFunction layout differs):
+        // decide from the value, which is exact.  A float read through an 8-byte view
+        // can only produce a DENORMAL double (|v| < 2.3e-308), while this accessor's
+        // value is either exactly 0 or a real time far above 1e-300.
+        const double d = p.Get<double>("ReturnValue");
+        if (std::isfinite(d) && (d == 0.0 || std::fabs(d) > 1.0e-300)) {
+            v = d;
+        } else {
+            v = (double)p.Get<float>("ReturnValue");
+            if (!g_clockWidthWarned) {
+                g_clockWidthWarned = true;
+                ms2::Logf("clock: GetRealTimeSeconds read as float (no ReturnValue property; "
+                          "params=%d B, raw=%.6f) -- if the module intervals behave like the "
+                          "2026-10-25 run, this is a double here", (int)p.size(), v);
+            }
+        }
+    }
+    static int widthLogs = 0;
+    if (widthLogs++ < 3) {
+        ms2::Logf("clock: GetRealTimeSeconds ReturnValue width=%d bytes (%s), value %.3f",
+                  width, width == 8 ? "double" : (width == 4 ? "float" : "unknown"), v);
+    }
+    if (!std::isfinite(v)) return false;
+    // A real-time clock cannot be astronomically large; one that is means the read is
+    // still wrong (or the world is a light-preset sub-level).  Refuse it so Now()
+    // keeps its monotone timeline instead of poisoning every timer in the mod.
+    if (v < -1.0e7 || v > 1.0e7) {
+        if (!g_clockJumpWarned) {
+            g_clockJumpWarned = true;
+            ms2::Logf("clock: GetRealTimeSeconds gave %.1f -- rejecting it (sane -1e7..1e7)", v);
+        }
+        return false;
+    }
+    *out = v;
+    return true;
+}
+
+double SteadySeconds() {
+    using namespace std::chrono;
+    static const steady_clock::time_point t0 = steady_clock::now();
+    return duration_cast<duration<double>>(steady_clock::now() - t0).count();
+}
+
+// --- misc shared state ----------------------------------------------------
+
+// The file name of the last parsed peer packet (the `info` command prints it).
+std::string g_lastPeerFile;
+
+// Paths the world/look scanners asked for and the game has not loaded (the Lua
+// `missingAssets` table).  One log line per path, ever.
+StrSet g_missingAssets;
+bool g_loadUnavailableWarned = false;
+
+// cmd.txt `lookadd` queue (main.lua LOOK_ADD / LOOK_TEST).
+struct LookAddJob {
+    bool active = false;
+    std::string path;
+    int64_t at = 0;
+    // The AddItem spawn is DEFERRED: the attachable is not in the object array in
+    // the tick that asked for it (probe.log 2026-10-25 03:29:33 `lookadd AddItem
+    // ok=true`, the crown's first `look survey` at 03:29:34).  The diff below was
+    // taken once, in that tick, found nothing and reset LOOK_ADD -- so
+    // appear::SetLookAdded never ran, `lookdel` matched no actor, the crown was
+    // never removed, B's look hash never changed and LOOK's off half could not
+    // pass.  Polling is the faithful port of the Lua's LOOK_ADDED.
+    bool polling = false;
+    std::string cls;                    // the class the diff is taken on
+    int64_t until = 0;
+    std::vector<std::string> before;    // ClassInstances(cls) at AddItem time
+};
+LookAddJob g_lookAdd;
+
+// Loop liveness counters for heartbeat.txt (main.lua HB).
+int g_hb = 0;
+int g_t30 = 0;
+int g_t15 = 0;
+int g_t2 = 0;
+
+// ---------------------------------------------------------------------------
+// Perf baseline switch.  COOP_OFF.txt in the coop dir keeps every hook installed
+// (ProcessEvent detour, engine-tick detour, the cost table) and skips the co-op
+// ticks entirely, so one run measures the GAME ALONE at the same spot and the
+// difference between two runs is exactly what the module costs.  It is a test
+// instrument, not a feature flag: nothing else reads it, and it is only sampled
+// once, at Start().
+// ---------------------------------------------------------------------------
+bool g_coopOff = false;
+
+}  // namespace
+
+// ===========================================================================
+// 1. the global state
+// ===========================================================================
+
+State& state() {
+    static State s;
+    return s;
+}
+
+const Toggles& toggles() {
+    return state().toggles;
+}
+
+// ===========================================================================
+// 2. Toggles -- main.lua:255, 383, 511, 663, 669, 855, 2304, 2624, 3359,
+//    3514, 3814, 4041.  File presence is the switch; read exactly once.
+// ===========================================================================
+
+void Toggles::Load() {
+    const std::string& dir = state().local.dir;
+    struct Row {
+        bool* field;
+        const char* file;
+        bool onWhenPresent;
+    };
+    const Row rows[] = {
+        {&animOff,       "ANIM_OFF.txt",       true},
+        {&weaponOff,     "WEAPON_OFF.txt",     true},
+        {&wsEnabled,     "WS_OFF.txt",         false},
+        {&streamEnabled, "STREAM_OFF.txt",     false},
+        {&lookEnabled,   "LOOK_OFF.txt",       false},
+        {&loadOn,        "LOAD_ON.txt",        true},
+        {&wsLedgerOn,    "WS_LEDGER_OFF.txt",  false},
+        // [R5-WORLD] store-A2 switch: the 7 extra WS_KINDS classes, the 5 extra
+        // fields on watched classes and the typed "wt" section all disappear.
+        {&ws2Enabled,    "WS2_OFF.txt",        false},
+        {&qsEnabled,     "QS_OFF.txt",         false},
+        {&dlEnabled,     "DL_OFF.txt",         false},
+        {&liftEnabled,   "LIFT_OFF.txt",       false},
+        {&chestEnabled,  "CHEST_OFF.txt",      false},
+        {&mirrorEnabled, "MIRROR_OFF.txt",     false},
+        {&gameThread,    "GAME_THREAD.txt",    true},
+        // [R5-BODY] begin -- the R5 body lane's two kill switches
+        {&zoneGuard,     "ZONE_OFF.txt",       false},
+        {&bodySync,      "BODY_OFF.txt",       false},
+        // [R5-BODY] end
+        // [R7-BREAK] the live-breakables lane: no scan, no "wx", no apply
+        {&breakEnabled,  "BREAK_OFF.txt",      false},
+        // [R7-BREAK] end
+        // [R7-WIRE] the packet split: left ON for every normal run (it is the
+        // feature, not an experiment), off restores one datagram per publish
+        {&wireSplit,     "WIRE_SPLIT_OFF.txt", false},
+        // [R7-WIRE] end
+        // [R7-BOSS] the boss-phase lane: no "bsp" on the wire, no phase call on the
+        // peer, no phase hooks.
+        {&bossSync,      "BOSS_OFF.txt",       false},
+        // [R7-BOSS] end
+        // [R7-DIALOG] begin -- the R7 dialogue / cinematic lane
+        {&dlgEnabled,    "DIALOG_OFF.txt",     false},
+        {&cineEnabled,   "CINE_OFF.txt",       false},
+        // [R7-DIALOG] end
+    };
+    for (const Row& r : rows) {
+        const std::wstring w = Widen(dir + r.file);
+        const bool present = !w.empty() &&
+                             GetFileAttributesW(w.c_str()) != INVALID_FILE_ATTRIBUTES;
+        *r.field = r.onWhenPresent ? present : !present;
+    }
+}
+
+// ===========================================================================
+// 3. the rate router -- docs/NATIVE-PORT.md section 3.8
+// ===========================================================================
+
+Tick& ticks() {
+    static Tick t;
+    return t;
+}
+
+void Tick::Every(double hz, const char* label, Fn fn) {
+    if (hz <= 0.0) return;
+    Slot s;
+    s.hz = hz;
+    s.acc = 0.0;
+    s.label = label;
+    s.fn = std::move(fn);
+    slots_.push_back(std::move(s));
+}
+
+void Tick::Frame(double dt) {
+    if (!(dt > 0.0)) dt = 0.0;                     // NaN-safe
+    if (dt > 1.0) dt = 1.0;                        // a load hitch must not replay 30 steps
+    for (size_t i = 0; i < slots_.size(); ++i) {
+        Slot& s = slots_[i];
+        const double interval = 1.0 / s.hz;
+        s.acc += dt;
+        int steps = 0;
+        while (s.acc >= interval && steps < 4) {
+            s.acc -= interval;
+            ++steps;
+            const Fn fn = s.fn;                    // a slot must not invalidate the vector
+            net::Step(s.label ? s.label : "tick", Guard::None, [&fn, dt]() { fn(dt); });
+        }
+        if (s.acc >= interval) s.acc = 0.0;        // drop the backlog (never spiral)
+    }
+}
+
+void Tick::Reset() {
+    for (Slot& s : slots_) s.acc = 0.0;
+}
+
+// The Lua's step(): HOLD_SKIP/HOLD_SKIP first, then the pcall.  `settleSkip` and
+// `holdSkip` come straight from those two tables (main.lua:3995-4002).
+namespace {
+
+void RunGuardStep(const char* label, bool settleSkip, bool holdSkip,
+                  const std::function<void()>& fn) {
+    if (holdSkip && net::LocalHold()) return;
+    net::Step(label, settleSkip ? Guard::Settle : Guard::None, fn);
+}
+
+}  // namespace
+
+// ===========================================================================
+// 4. Reset
+// ===========================================================================
+
+// "Never throws" (coop_state.h): a module's Reset runs inside its own guard, so
+// one broken Reset cannot stop the others from dropping their caches -- which is
+// the whole point of this call.
+void ResetAll() {
+    // net's own packet store goes too: a stale peer line must not draw a body
+    // after a map load (docs/NATIVE-PORT.md 4, item 34/5).
+    PeerState& P = state().peer;
+    P.present = false;
+    P.hasX = false;
+    P.live = false;
+    P.ready = true;
+    P.sq = -1;
+    P.pos = Vec3();
+    P.vel = Vec3();
+    P.rot = Rot();
+    P.speed = 0.0;
+    P.at = 0.0;
+    P.wallAt = 0;
+    P.body.clear();
+    P.wpn.clear();
+    P.wsock.clear();
+    P.weapons.clear();
+    P.look.clear();
+    P.hasMontage = false;
+    P.montage = MontageSig();
+    P.hasPd = false;
+    P.pd = 0.0;
+
+    net::Step("reset local", Guard::None, []() { local::Reset(); });
+    net::Step("reset puppet", Guard::None, []() { puppet::Reset(); });
+    net::Step("reset appear", Guard::None, []() { appear::Reset(); });
+    net::Step("reset combat", Guard::None, []() { combat::Reset(); });
+    net::Step("reset world", Guard::None, []() { world::Reset(); });
+    net::Step("reset progress", Guard::None, []() { progress::Reset(); });
+    // [R7-BREAK] the breakable actors died with the level; the keys and the echo
+    // latches survive on purpose (a break must never be re-published as news)
+    net::Step("reset breakables", Guard::None, []() { brk::Reset(); });
+    // [R5-BODY] begin
+    net::Step("reset zone", Guard::None, []() { zone::Reset(); });
+    net::Step("reset body", Guard::None, []() { body::Reset(); });
+    // [R5-BODY] end
+    // [R7-DIALOG] begin
+    net::Step("reset dialog", Guard::None, []() { dialog::Reset(); });
+    // [R7-DIALOG] end
+    // [R5-DEATH] begin
+    // Ownership: a world change destroys the pawn/health-component/widget pointers
+    // this module holds, so it drops them -- and it reads the change itself: a
+    // reload while a death is pending IS the game's death reset, which is how a
+    // party wipe resolves.
+    net::Step("reset death", Guard::None, []() { death::Reset(); });
+    // [R5-DEATH] end
+    // [R7-BOSS] begin
+    // A world change destroys every BPC_BossAI_C this module cached, and a boss
+    // that comes back after a reset is a new fight (its flags start at phase 1).
+    net::Step("reset boss", Guard::None, []() { boss::Reset(); });
+    // [R7-BOSS] end
+}
+
+// ===========================================================================
+// 5. coop::net
+// ===========================================================================
+namespace net {
+
+// ---------------------------------------------------------------------------
+// formatting
+// ---------------------------------------------------------------------------
+
+std::string Fmt(const char* fmt, ...) {
+    std::string out;
+    va_list ap;
+    va_start(ap, fmt);
+    FormatV(&out, fmt, ap);
+    va_end(ap);
+    return out;
+}
+
+void AppendFmt(std::string* out, const char* fmt, ...) {
+    if (!out) return;
+    va_list ap;
+    va_start(ap, fmt);
+    FormatV(out, fmt, ap);
+    va_end(ap);
+}
+
+// ---------------------------------------------------------------------------
+// clock -- main.lua:221 `rt()` and os.time()
+// ---------------------------------------------------------------------------
+
+// ONE MONOTONE CLOCK.  This is the root cause of three verdicts in the last run
+// (WORLD, LIFT and CHEST) and it lives in net because every module reads it.
+//
+// Now() used to return the game reading verbatim, with a silent fallback to
+// steady_clock-since-DLL-load whenever it was momentarily unavailable: that is not
+// one clock but three epochs (world seconds, process uptime, and the garbage the
+// float read produced).  Every consumer in the tree is a DIFFERENCE of two
+// readings -- the 8 s WS settle, the 20 s live announce, the 8 s chest loot window,
+// the 40 s chest keep, the 10 s lift prime and the 6 s replay guard -- so one bad
+// reading either expired a window instantly or stalled it forever:
+//   * a chest event stamped by a bad reading completed its loot window and aged
+//     out 40 s past it in the SAME scan, so the done=1 packet that carries the
+//     loot was erased before it was published; the guest replayed the lid, never
+//     received the loot, and result_chest.txt was never written;
+//   * a `born` stamped by a bad reading made the WS settle test false forever,
+//     which delayed the world-state readback to 56 s (harness deadline: 45 s).
+//
+// Now the game clock is accepted only while it is sane and strictly advancing; the
+// steady clock is ANCHORED to the last accepted reading (steadyBase + elapsed),
+// NOT a separate epoch, so a momentary unavailability continues the same timeline.
+// The result never goes backwards, and a world reload (game time restarts at ~0)
+// keeps the steady timeline instead of jumping.
+double Now() {
+    static double last = -1.0e18;    // last value handed out
+    static double steadyBase = 0.0;  // Now() value the steady clock counts from
+    static double steadyAt = 0.0;    // SteadySeconds() at that moment
+    static bool seedLogged = false;
+    static bool fallbackLogged = false;
+
+    const double s = SteadySeconds();
+    double t = 0.0;
+    // A real-time clock advances at real time: a step of more than 300 s between
+    // two calls is not a frame, it is a bad read (or a clock that restarted), and
+    // accepting it would release every window at once.
+    if (GameRealSeconds(&t) && (last < 0.0 || (t > last && t - last <= 300.0))) {
+        if (!seedLogged) {
+            seedLogged = true;
+            Log("clock: world epoch seeded at %.2fs (steady %.2fs) -- now monotone", t, s);
+        }
+        last = t;
+        steadyBase = t;
+        steadyAt = s;
+        return t;
+    }
+    if (!fallbackLogged) {
+        fallbackLogged = true;
+        Log("clock: game clock unavailable/frozen/jumped -- continuing the same timeline "
+            "on the steady clock from %.2fs", last < 0.0 ? 0.0 : last);
+    }
+    double v = steadyBase + (s - steadyAt);
+    if (v < last) v = last;
+    last = v;
+    return v;
+}
+
+int64_t Wall() {
+    using namespace std::chrono;
+    return (int64_t)duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+}
+
+// ---------------------------------------------------------------------------
+// filesystem -- relative to state().local.dir
+// ---------------------------------------------------------------------------
+
+namespace {
+
+std::wstring FullPathW(const std::string& name) {
+    return Widen(state().local.dir + name);
+}
+
+// ---------------------------------------------------------------------------
+// The write thread: every file this module produces on the game thread is handed
+// to one worker thread and written there.
+//
+// WHY.  A `WriteFile` is CreateFile + WriteFile + CloseHandle, and probe.log adds
+// FlushFileBuffers (the harness tails it live).  Measured on the test box, ONE
+// small write costs ~2.2 ms of game-thread time (the 1 Hz heartbeat.txt row in the
+// cost table) and the 6 kB packet ~3 ms; the module writes 15 packets, 2 sync
+// files, 1 heartbeat and ~10 log lines per second, i.e. 300-600 ms of game thread
+// per 30 s window spent waiting for the filesystem -- 10-15% of everything the
+// module costs, and the part that is purely WAITING, not work.
+//
+// The Lua paid this on UE4SS's async thread; this port does it on one of our own.
+// Nothing on the game thread ever waits for it, and the queue is FIFO, so the
+// files appear in exactly the order they were produced.  A whole-file write to a
+// path that still has one pending REPLACES it (a slow disk must not build a
+// backlog of 15 Hz packets), so `out_A.txt` is always the latest packet, never a
+// queue of stale ones.
+struct WriteJob {
+    std::wstring path;
+    std::string text;
+    bool append = false;
+};
+
+std::mutex              g_ioLock;
+std::condition_variable g_ioCv;
+std::deque<WriteJob>    g_ioQueue;
+bool                    g_ioStarted = false;
+bool                    g_ioStop = false;
+
+constexpr size_t kIOMaxQueuedAppends = 512;   // a stuck disk must not eat the heap
+
+void IoWorker() {
+    for (;;) {
+        WriteJob job;
+        {
+            std::unique_lock<std::mutex> lk(g_ioLock);
+            g_ioCv.wait(lk, [] { return g_ioStop || !g_ioQueue.empty(); });
+            if (g_ioQueue.empty()) {
+                if (g_ioStop) return;
+                continue;
+            }
+            job = std::move(g_ioQueue.front());
+            g_ioQueue.pop_front();
+        }
+        if (job.append) {
+            AppendToFile(job.path, job.text);
+        } else {
+            WriteWholeFile(job.path, job.text);
+        }
+    }
+}
+
+void IoStart() {
+    std::lock_guard<std::mutex> lk(g_ioLock);
+    if (g_ioStarted) return;
+    g_ioStarted = true;
+    g_ioStop = false;
+    std::thread(IoWorker).detach();
+}
+
+// Called on the game thread.  Never blocks on the disk: at worst it copies the
+// text once under a mutex the writer holds only while popping a job.
+//
+// `sync` is for the handful of files whose appearance IS the handshake with the
+// harness (result_*.txt, result.txt): those keep the old write-on-this-thread
+// behaviour, so a verdict cannot still be sitting in the queue when the runner
+// looks for it and the process is torn down.
+void IoQueue(std::wstring path, std::string text, bool append, bool sync = false) {
+    if (sync) {
+        if (append) AppendToFile(path, text);
+        else WriteWholeFile(path, text);
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> lk(g_ioLock);
+        if (!g_ioStarted) {   // Start() not reached yet: write it the old way
+            if (append) AppendToFile(path, text);
+            else WriteWholeFile(path, text);
+            return;
+        }
+        if (append) {
+            if (g_ioQueue.size() >= kIOMaxQueuedAppends) return;   // drop, never grow
+        } else {
+            for (auto it = g_ioQueue.rbegin(); it != g_ioQueue.rend(); ++it) {
+                if (!it->append && it->path == path) {   // replace the pending one
+                    it->text = std::move(text);
+                    g_ioCv.notify_one();
+                    return;
+                }
+            }
+        }
+        WriteJob job;
+        job.path = std::move(path);
+        job.text = std::move(text);
+        job.append = append;
+        g_ioQueue.push_back(std::move(job));
+    }
+    g_ioCv.notify_one();
+}
+
+}  // namespace
+
+bool ReadLine(const std::string& name, std::string* out) {
+    return ReadFirstLinePath(state().local.dir + name, out);
+}
+
+// Not in coop_state.h: coop_world.cpp declares it as its CONTRACT-REQUEST 1
+// ("whole-file read -- the ledger is one key per line").  net owns the
+// filesystem, so it lives here.
+bool ReadText(const std::string& name, std::string* out) {
+    return ReadWholeText(state().local.dir + name, out);
+}
+
+// Both of these are asynchronous on purpose (see the write thread above).  The
+// return value means "queued", which is what every caller actually needs: the
+// harness polls the file.  Verdict files are the exception -- see IoQueue's `sync`.
+bool WriteFile(const std::string& name, const std::string& text) {
+    const bool sync = name.compare(0, 6, "result") == 0;
+    IoQueue(FullPathW(name), text, false, sync);
+    return true;
+}
+
+bool AppendLine(const std::string& name, const std::string& text) {
+    IoQueue(FullPathW(name), text + "\n", true);
+    return true;
+}
+
+// Synchronous on purpose: a remove races with a read the harness does on the next
+// line, and it is called a handful of times per session (Start, cmd.txt).
+bool RemoveFile(const std::string& name) {
+    const std::wstring w = FullPathW(name);
+    if (w.empty()) return false;
+    return DeleteFileW(w.c_str()) != 0;
+}
+
+bool FileExists(const std::string& name) {
+    const std::wstring w = FullPathW(name);
+    return !w.empty() && GetFileAttributesW(w.c_str()) != INVALID_FILE_ATTRIBUTES;
+}
+
+// ---------------------------------------------------------------------------
+// log -- main.lua:85-94.  "[HH:MM:SS][<me>] <msg>" on stdout and appended to
+// probe.log, flushed per line (the harness tails it live).
+// ---------------------------------------------------------------------------
+
+void Log(const char* fmt, ...) {
+    char msg[2048];
+    msg[0] = 0;
+    if (fmt) {
+        va_list ap;
+        va_start(ap, fmt);
+        _vsnprintf_s(msg, sizeof(msg), _TRUNCATE, fmt, ap);
+        va_end(ap);
+    }
+
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+    const std::string line = Fmt("[%02d:%02d:%02d][%s] %s", (int)st.wHour, (int)st.wMinute,
+                                 (int)st.wSecond, state().local.me.c_str(), msg);
+
+    // A shipping build has no console; the debugger view is the native `print`.
+    const std::string dbg = "[CoopMod] " + line + "\n";
+    OutputDebugStringA(dbg.c_str());
+
+    // Mirror into the native module log when the loader opened one.
+    ms2::Log(line.c_str());
+
+    AppendLine("probe.log", line);   // pcall'd in Lua: a failing log must not stop a tick
+}
+
+// ---------------------------------------------------------------------------
+// object helpers -- main.lua:117-139, 166-186
+// ---------------------------------------------------------------------------
+
+bool Valid(ue::UObject* o) {
+    return o != nullptr && ue::IsValid(o);
+}
+
+std::string FullName(ue::UObject* o) {
+    if (!o) return "<nil>";
+    if (!ue::IsValid(o)) return "UObject <invalid>";
+    const std::string fn = ue::GetFullName(o);
+    if (fn.empty()) return "UObject (unnamed)";
+    return fn;
+}
+
+std::string NameOf(ue::UObject* o) {
+    if (!Valid(o)) return std::string();
+    return ue::GetName(o);
+}
+
+// main.lua:76-81:
+//   local t = fn:match("([%w_]+_C_%d+)$"); if t then return t end
+//   t = fn:match("([^%.%:]+)$");            return t or fn
+//
+// Both patterns are anchored at the END of the name, and a UObject's own name
+// contains neither '.' nor ':' (those are the path separators GetFullName joins
+// with), so the last path segment IS the object's name: read that one FName
+// instead of building the whole outer chain.  refreshChars does this for every
+// Character twice a tick at 15 Hz, and the measured cost of the old version was
+// 1.7 ms per tick -- 770 ms of game thread per 30 s window.
+std::string Tail(ue::UObject* o) {
+    if (!o) return "<nil>";
+    const std::string fn = ue::GetName(o);
+
+    // Lua's %w is [A-Za-z0-9]; the pattern is anchored at the end, and the
+    // greedy prefix means the smallest start wins.  So: the run of word
+    // characters that reaches the end, if it ends with "_C_<digits>".
+    size_t start = 0;
+    for (size_t i = 0; i < fn.size(); ++i) {
+        const char c = fn[i];
+        const bool wordChar = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') ||
+                              (c >= 'A' && c <= 'Z') || c == '_';
+        if (!wordChar) start = i + 1;
+    }
+    if (start < fn.size()) {
+        const std::string run = fn.substr(start);
+        const size_t at = run.rfind("_C_");
+        if (at != std::string::npos && at > 0 && at + 3 < run.size()) {
+            bool digits = true;
+            for (size_t i = at + 3; i < run.size(); ++i) {
+                if (run[i] < '0' || run[i] > '9') { digits = false; break; }
+            }
+            if (digits) return run;
+        }
+    }
+
+    const size_t sep = fn.find_last_of(".:");
+    if (sep != std::string::npos && sep + 1 < fn.size()) return fn.substr(sep + 1);
+    return fn;
+}
+
+// main.lua:697-700: fullname(o):match("(/Game/[^%s]+)")
+std::string AssetPath(ue::UObject* o) {
+    const std::string fn = FullName(o);
+    const size_t p = fn.find("/Game/");
+    if (p == std::string::npos) return std::string();
+    size_t e = p;
+    while (e < fn.size() && (unsigned char)fn[e] > ' ') ++e;
+    return fn.substr(p, e - p);
+}
+
+ue::UObject* World() {
+    EnsureWorld();
+    return WorldOk() ? g_world : nullptr;
+}
+
+ue::UObject* PC() {
+    EnsurePc();
+    return PcOk() ? g_pc : nullptr;
+}
+
+ue::UObject* Pawn() {
+    ue::UObject* pc = PC();
+    if (!pc) return nullptr;
+    // main.lua:159-165: pc.Pawn first, then K2_GetPawn, then validActor().
+    ue::UObject* p = uecall::PropObj(pc, "Pawn");
+    if (!p) {
+        ue::UFunction* fn = uecall::Func(pc, "K2_GetPawn");
+        if (fn) {
+            ue::Params params(fn);
+            if (ue::Call(pc, fn, params.data())) {
+                ue::UObject* out = params.Get<ue::UObject*>("ReturnValue");
+                if (ue::IsValid(out)) p = out;
+            }
+        }
+    }
+    if (!Valid(p)) return nullptr;
+    return p;
+}
+
+Vec3 Loc(ue::UObject* o) {
+    Vec3 out;
+    if (!Valid(o)) return out;
+    ue::FVector v;
+    if (uecall::CallVec(o, "K2_GetActorLocation", &v)) {
+        out.X = v.X;
+        out.Y = v.Y;
+        out.Z = v.Z;
+    }
+    return out;
+}
+
+ue::UObject* Find(const std::string& path, bool requestLoad) {
+    if (path.size() < 4) return nullptr;   // main.lua:280 (#path < 4)
+
+    // Positive cache: a /Game/ path is a full-name compare, and ue::FindObject
+    // only caches *bare* names, so without this every look/weapon apply would
+    // walk GObjects.  A miss is never cached -- the game may load it later, and
+    // that is exactly what the Lua retried for.
+    static std::vector<NamedActor> hits;
+    for (const NamedActor& n : hits) {
+        if (n.tail == path) {
+            if (n.obj && ue::IsValid(n.obj)) return n.obj;
+            break;                          // died (map unload): fall through
+        }
+    }
+
+    const char* p = path.c_str();
+    ue::UObject* o = ue::FindObject(p);
+    if (o && ue::IsValid(o)) {
+        NamedActor entry;
+        entry.tail = path;
+        entry.obj = o;
+        hits.push_back(entry);
+        return o;
+    }
+
+    if (g_missingAssets.Add(path)) Log("asset not loaded yet: %s", p);
+
+    if (requestLoad) {
+        if (!toggles().loadOn) return nullptr;      // default: no loader (Lua)
+        if (!g_loadUnavailableWarned) {
+            g_loadUnavailableWarned = true;
+            // CONTRACT-REQUEST 4: puppet::RequestGameLoad(path)
+            Log("LOAD_ON.txt is set but the native build has no asset loader; "
+                "assets are found only after the game loads them itself");
+        }
+    }
+    return nullptr;
+}
+
+// main.lua:673-679: StaticFindObject("/Script/Engine." .. name), cached.
+ue::UObject* EngineClass(const char* shortName) {
+    if (!shortName || !*shortName) return nullptr;
+    static std::vector<NamedActor> cache;
+    for (const NamedActor& n : cache) {
+        if (n.tail == shortName) return n.obj;
+    }
+    const std::string full = std::string("/Script/Engine.") + shortName;
+    ue::UObject* o = ue::FindObject(full.c_str());
+    if (!o) o = (ue::UObject*)ue::FindClass(shortName);
+    NamedActor entry;
+    entry.tail = shortName;
+    entry.obj = o;
+    cache.push_back(entry);
+    return o;
+}
+
+// main.lua:176-182 -- ExecuteConsoleCommand(world, text, pc) on the Kismet CDO.
+// This is the ONLY way the puppet gets summoned (docs/DESIGN.md); never
+// replaced by SpawnActor.
+void Console(const std::string& text) {
+    ue::UObject* world = World();
+    ue::UObject* pc = PC();
+    if (!world && !pc) return;
+
+    ue::UObject* ksl = KismetSystemLibrary();
+    if (!ksl) {
+        Log("console [%s]: KismetSystemLibrary not found", text.c_str());
+        return;
+    }
+    ue::UFunction* fn = uecall::Func(ksl, "ExecuteConsoleCommand");
+    if (!fn) {
+        Log("console [%s]: ExecuteConsoleCommand not found", text.c_str());
+        return;
+    }
+    static const char* kWorldParams[] = {"WorldContextObject", "WorldContext"};
+    const char* wp = uecall::PickParam(fn, kWorldParams, 2);
+    if (!wp || !uecall::HasParam(fn, "Command")) {
+        Log("console [%s]: ExecuteConsoleCommand parameters unknown", text.c_str());
+        return;
+    }
+
+    ue::Params params(fn);
+    params.Set<ue::UObject*>(wp, world ? world : pc);
+    // FString is TArray<TCHAR>: a view over our buffer is enough, the parameter
+    // is const ref and the engine copies out of it.
+    std::wstring wide = Widen(text);
+    if (wide.empty()) wide = L" ";
+    ue::FString fstr;
+    fstr.Data = &wide[0];
+    fstr.Num = (int32_t)wide.size() + 1;
+    fstr.Max = (int32_t)wide.size() + 1;
+    params.Set<ue::FString>("Command", fstr);
+    if (uecall::HasParam(fn, "SpecificPlayer")) params.Set<ue::UObject*>("SpecificPlayer", pc);
+
+    if (!ue::Call(ksl, fn, params.data())) {
+        Log("console [%s]: ExecuteConsoleCommand failed", text.c_str());
+        return;
+    }
+    Log("console [%s]", text.c_str());
+}
+
+// ---------------------------------------------------------------------------
+// the wire codec -- main.lua:1426-1451
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// '"<key>"' -> position just past it.
+bool FindKey(const std::string& line, const char* key, size_t* after) {
+    if (!key) return false;
+    const std::string pat = std::string("\"") + key + "\"";
+    const size_t p = line.find(pat);
+    if (p == std::string::npos) return false;
+    if (after) *after = p + pat.size();
+    return true;
+}
+
+// skip %s* ':' %s* ; returns the position of the value.
+bool SkipToValue(const std::string& line, size_t pos, size_t* value) {
+    while (pos < line.size() && (unsigned char)line[pos] <= ' ') ++pos;
+    if (pos >= line.size() || line[pos] != ':') return false;
+    ++pos;
+    while (pos < line.size() && (unsigned char)line[pos] <= ' ') ++pos;
+    if (value) *value = pos;
+    return true;
+}
+
+bool IsNumChar(char c) {
+    return (c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E';
+}
+
+}  // namespace
+
+bool Section(const std::string& line, const char* key, std::string* out) {
+    if (out) out->clear();
+    if (!key) return false;
+    const std::string pat = std::string("\"") + key + "\":";
+    const size_t i = line.find(pat);
+    if (i == std::string::npos) return false;
+    const size_t start = line.find('[', i);
+    if (start == std::string::npos) return false;
+    int depth = 0;
+    for (size_t j = start; j < line.size(); ++j) {
+        const char c = line[j];
+        if (c == '[') {
+            ++depth;
+        } else if (c == ']') {
+            --depth;
+            if (depth == 0) {
+                if (out) *out = line.substr(start, j - start + 1);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool KvNum(const std::string& line, const char* key, double* out) {
+    size_t pos = 0, val = 0;
+    if (!FindKey(line, key, &pos) || !SkipToValue(line, pos, &val)) return false;
+    size_t end = val;
+    while (end < line.size() && IsNumChar(line[end])) ++end;
+    if (end == val) return false;                 // `"x":` with no number
+    const std::string num = line.substr(val, end - val);
+    char* stop = nullptr;
+    const double v = strtod(num.c_str(), &stop);
+    if (stop == num.c_str()) return false;        // tonumber() -> nil (e.g. a lone "-")
+    if (out) *out = v;
+    return true;
+}
+
+bool KvInt(const std::string& line, const char* key, int64_t* out) {
+    double v = 0.0;
+    if (!KvNum(line, key, &v)) return false;
+    if (out) *out = (int64_t)v;
+    return true;
+}
+
+bool KvStr(const std::string& line, const char* key, std::string* out) {
+    if (out) out->clear();
+    size_t pos = 0, val = 0;
+    if (!FindKey(line, key, &pos) || !SkipToValue(line, pos, &val)) return false;
+    if (val >= line.size() || line[val] != '"') return false;
+    const size_t close = line.find('"', val + 1);
+    if (close == std::string::npos) return false;
+    if (out) *out = line.substr(val + 1, close - val - 1);
+    return true;
+}
+
+bool KvHas(const std::string& line, const char* key) {
+    size_t pos = 0, val = 0;
+    return FindKey(line, key, &pos) && SkipToValue(line, pos, &val);
+}
+
+// main.lua:1942 -- a *substring* test, deliberately not a parse.
+bool HasRdy0(const std::string& line) {
+    return line.find("\"rdy\":0") != std::string::npos;
+}
+
+// ---------------------------------------------------------------------------
+// phases -- main.lua:497-499
+// ---------------------------------------------------------------------------
+
+void EnterPhase(Phase p) {
+    PuppetState& P = state().puppet;
+    P.phase = p;
+    P.phaseEntered = Wall();
+    P.phaseNoted = 0;
+    Log("phase -> %s", PhaseName(p));
+}
+
+double PhaseSeconds() {
+    const int64_t entered = state().puppet.phaseEntered;
+    if (entered == 0) return 0.0;
+    return (double)(Wall() - entered);
+}
+
+// ---------------------------------------------------------------------------
+// guards -- main.lua:3995-4017
+// ---------------------------------------------------------------------------
+
+bool LocalHold() {
+    const int64_t until = state().localHoldUntil;
+    return until != 0 && Wall() < until;
+}
+
+void SetLocalHold(double secondsFromNow) {
+    state().localHoldUntil = Wall() + (int64_t)secondsFromNow;
+}
+
+bool WorldSettle() {
+    const double until = state().worldSettleUntil;
+    return until != 0.0 && Now() < until;
+}
+
+void SetWorldSettle(double secondsFromNow) {
+    state().worldSettleUntil = Now() + secondsFromNow;
+}
+
+namespace {
+
+// Instruments one guarded step.  Two rows come out of it:
+//   * the always-on cost table (ue::CostStepRecord): EVERY call, so a step that
+//     costs 3 ms sixty times a second is visible, which the slow-only table
+//     cannot show;
+//   * the slow table (ue::ProfRecord): only >= 30 ms, carrying the object-array
+//     slots and name resolutions the step consumed, which is what tells a linear
+//     scan apart from a scan nested inside a per-actor loop.
+struct StepProf {
+    const char* tag;
+    uint64_t t0;
+    uint32_t o0;
+    uint32_t n0;
+    explicit StepProf(const char* t)
+        : tag(t), t0(ue::ProfTicks()), o0(ue::ProfObjs()), n0(ue::ProfNames()) {}
+    ~StepProf() {
+        const uint64_t dt = ue::ProfTicks() - t0;
+        ue::CostStepRecord(tag, dt);
+        if (!ue::ProfEnabled()) return;
+        ue::ProfRecord(tag, nullptr, dt, ue::ProfObjs() - o0, ue::ProfNames() - n0);
+    }
+};
+
+}  // namespace
+
+bool Step(const char* label, Guard guard, const std::function<void()>& fn) {
+    const char* tag = label ? label : "step";
+    if (guard == Guard::Hold && LocalHold()) return false;
+    if (guard == Guard::Settle && WorldSettle()) return false;
+    StepProf _prof(tag);
+    try {
+        fn();
+        return true;
+    } catch (const std::exception& e) {
+        Log("ERR %s: %s", tag, e.what());
+        return false;
+    } catch (...) {
+        Log("ERR %s: unknown C++ exception", tag);
+        return false;
+    }
+}
+
+// ===========================================================================
+// [R7-WIRE] the packet split
+//
+// One publish was ONE JSON line of several KB (out_B was 4 157 B) and the relay
+// put the line into one UDP datagram: above the 1 472-byte path MTU the kernel
+// fragments it and a single lost fragment loses the whole tick -- the transform
+// included.  So the line is cut into self-contained parts, each its own
+// datagram:
+//
+//   {"t":"p","id":"A","sq":7,"v":2,"p":0,"n":3,<the base block>}
+//   {"t":"p","id":"A","sq":7,"v":2,"p":1,"n":3,<more top-level members>}
+//   {"t":"p","id":"A","sq":7,"v":2,"p":2,"n":3,"r":"<raw text piece>","c":0}
+//
+//   * part 0 is exactly the block Publish() already builds (transform, anim,
+//     montage, body/weapon/look identity): the fast lane never waits behind a
+//     slow one, and it is the only part ApplyPeer needs to move the puppet;
+//   * every remaining top-level member is packed in the order the packet has,
+//     so a key another module adds is carried with NO code here -- the split is
+//     by member, never by name;
+//   * one member can be bigger than the budget on its own (measured: "npc" is
+//     1 335 B with 16 enemies nearby).  Such a member is cut into raw text
+//     pieces ("r", "c" = "this piece continues the previous one"), which merge
+//     back into exactly the same text;
+//   * a lost part only loses its own keys for that tick.  The receiver merges
+//     whatever arrived (ReadPeerPacket) and the rotating windows re-send a lost
+//     key on the next publish, which is the loss policy the wire already had.
+//
+// "v" is the version flag of this header; WIRE_SPLIT_OFF.txt (or a peer that
+// only understands the old shape) keeps one datagram per publish, and the
+// receiver reads both -- a single line is simply a one-part packet.
+// ===========================================================================
+
+namespace {
+
+// Every part must stay under the 1 472-byte IPv4 path MTU with room to spare
+// for the relay's own framing; 1 150 leaves ~300 B of headroom.
+constexpr std::size_t kPartBudget = 1150;
+
+// Counters for the "wire=" line in sync.txt, which is what the WIRE verdict in
+// run-two.ps1 reads.  tx = what this client sent, rx = what it reassembled.
+std::size_t gWireTxBytes = 0, gWireTxMax = 0, gWireTxHot = 0;
+int gWireTxParts = 0;
+std::size_t gWireRxBytes = 0, gWireRxMax = 0;
+int gWireRxParts = 0, gWireRxLost = 0;
+long long gWireRxSeq = -1;
+long long gWirePublishes = 0, gWireReads = 0;
+bool gWireOversizeLogged = false;
+double gWireLogAt = -1.0e9;
+
+// Split a comma-separated list of top-level JSON members into the members
+// themselves: a ',' inside a string, an array or a nested object is not a
+// separator, and an escaped quote does not end a string.
+void SplitMembers(const std::string& members, std::vector<std::string>* out) {
+    out->clear();
+    std::size_t start = 0;
+    int depth = 0;
+    bool inStr = false;
+    for (std::size_t i = 0; i < members.size(); ++i) {
+        const char c = members[i];
+        if (inStr) {
+            if (c == '\\') {
+                ++i;
+                continue;
+            }
+            if (c == '"') inStr = false;
+            continue;
+        }
+        if (c == '"') {
+            inStr = true;
+        } else if (c == '[' || c == '{') {
+            ++depth;
+        } else if (c == ']' || c == '}') {
+            --depth;
+        } else if (c == ',' && depth == 0) {
+            out->push_back(members.substr(start, i - start));
+            start = i + 1;
+        }
+    }
+    if (start < members.size()) out->push_back(members.substr(start));
+}
+
+// A raw text piece travels inside a JSON string, so `"` and `\` have to be
+// escaped; nothing else can appear in a member (the writers never put a control
+// character in the line, which is one line by contract).
+std::string EscapePiece(const std::string& s) {
+    std::string out;
+    out.reserve(s.size() + 8);
+    for (char c : s) {
+        if (c == '"' || c == '\\') out += '\\';
+        out += c;
+    }
+    return out;
+}
+
+// `"r":"<text>"` -- a raw piece of an oversized member.  KvStr cannot be used
+// here: it stops at the first `"` and a piece is full of `\"` escapes (that is
+// what a member like "lk" or "npc" looks like inside the line).  Scan the JSON
+// string the way SplitMembers does and unescape in the same pass.
+bool RawPiece(const std::string& ln, std::string* out) {
+    out->clear();
+    static const char kPat[] = "\"r\":\"";
+    const std::size_t p = ln.find(kPat);
+    if (p == std::string::npos) return false;
+    std::size_t i = p + sizeof(kPat) - 1;
+    while (i < ln.size()) {
+        const char c = ln[i];
+        if (c == '\\' && i + 1 < ln.size()) {
+            *out += ln[i + 1];
+            i += 2;
+            continue;
+        }
+        if (c == '"') break;
+        *out += c;
+        ++i;
+    }
+    return true;
+}
+
+// The fixed header every part of this packet carries.  `v` is the split
+// protocol's version, `p`/`n` are the part index and count.
+std::string PartHeader(const std::string& id, long long seq, int p, int n) {
+    return Fmt("{\"t\":\"p\",\"id\":\"%s\",\"sq\":%lld,\"v\":2,\"p\":%d,\"n\":%d,",
+               id.c_str(), seq, p, n);
+}
+
+// Cut one oversized member into raw pieces that each fit in a part.  The cut
+// never lands inside a UTF-8 sequence (a continuation byte starts with 10xxxxxx)
+// -- done inline in BuildPartLines, because the payload has to be measured after
+// escaping.
+
+// ---------------------------------------------------------------------------
+// Round trip: build the parts of one publish and merge them back.  The merge is
+// the receiver's side of the same contract, which is how the self test below
+// (and the harness) can prove the split without two game clients.
+// ---------------------------------------------------------------------------
+std::vector<std::string> BuildPartLines(const std::string& id, long long seq,
+                                        const std::string& hot, const std::string& rest);
+
+std::string MergePartLines(const std::vector<std::string>& lines, int* partsOut,
+                           std::size_t* maxOut, int* expectedOut);
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+// Publish -- main.lua:1566-1606 sendOwn
+//
+// Frozen order (coop_state.h rule 2, docs/NATIVE-PORT.md 2.3):
+//   base fields, then npc, pd, nhp, dead, [ws, wb, wq, wd, wl, wc].
+// ---------------------------------------------------------------------------
+
+void Publish() {
+    LocalState& L = state().local;
+
+    // local::Capture() owns the ONE increment of "sq" per publish (main.lua:1567 /
+    // 1583 both bump SEND_SEQ exactly once, whichever branch they take).  It returns
+    // false only for the not-ready shape; a ready-but-unusable pawn returns true with
+    // the hot fields untouched, and the line below is then byte-identical with an
+    // unchanged "sq" -- what the peer observes when the Lua writes nothing.
+    uint64_t captureT0 = ue::CostNow();
+    const bool ready = local::Capture();
+    ue::CostStepRecord("pubCapture", ue::CostNow() - captureT0);
+
+    // main.lua:1567-1571 -- not ready: the peer hides our body, still at 15 Hz.
+    if (!ready) {
+        const std::string text =
+            Fmt("{\"t\":\"p\",\"id\":\"%s\",\"sq\":%lld,\"rdy\":0}\n", L.me.c_str(),
+                (long long)L.seq);
+        WriteFile("out_" + L.me + ".txt", text);
+        return;
+    }
+
+    // "wpns" carries the brackets on the wire.  LocalState documents the body
+    // without them; accept either form so a module convention slip cannot
+    // corrupt the packet (CONTRACT-REQUEST 8).
+    std::string wpns = L.wpns;
+    if (wpns.empty()) {
+        wpns = "[]";
+    } else if (!(wpns.front() == '[' && wpns.back() == ']')) {
+        wpns = "[" + wpns + "]";
+    }
+
+    const bool hasMontage = !L.montage.path.empty();
+    const double mpos = hasMontage ? L.montage.pos : 0.0;
+    const double mrate = hasMontage ? L.montage.rate : 1.0;
+    const int mid = hasMontage ? L.montage.id : 0;
+
+    std::string line;
+    line.reserve(4096);
+    const uint64_t jsonT0 = ue::CostNow();
+    AppendFmt(&line,
+              "{\"t\":\"p\",\"id\":\"%s\",\"sq\":%lld,"
+              "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,"
+              "\"vx\":%.1f,\"vy\":%.1f,\"vz\":%.1f,"
+              "\"yaw\":%.1f,\"pitch\":%.1f,"
+              "\"anim\":\"%s\",\"spd\":%.1f,"
+              "\"mseq\":\"%s\",\"mpos\":%.3f,\"mrate\":%.3f,\"mid\":%d,"
+              "\"body\":\"%s\",\"apart\":\"%s\",\"wpn\":\"%s\",\"wsock\":\"%s\","
+              "\"wpns\":%s,\"lk\":\"%s\"",
+              L.me.c_str(), (long long)L.seq, L.pos.X, L.pos.Y, L.pos.Z, L.vel.X, L.vel.Y,
+              L.vel.Z, L.rot.Yaw, L.rot.Pitch, L.anim.c_str(), L.speed,
+              L.montage.path.c_str(), mpos, mrate, mid, L.body.c_str(), L.apart.c_str(),
+              L.wpn.c_str(), L.wsock.c_str(), wpns.c_str(), appear::Mine().c_str());
+
+    // [R7-WIRE] the transform/animation/body/weapon block AppendFmt wrote above is
+    // part 0 of the split packet.  "lk" (the whole look signature: every
+    // attachable's mesh, socket, transform and materials) is NOT part of the fast
+    // lane -- with a mask on it alone is 1 180 B, so it is packed like any other
+    // member and can sit in its own datagram or be cut in two.
+    std::size_t hotEnd = line.size();
+    {
+        const std::size_t lk = line.rfind(",\"lk\":");
+        if (lk != std::string::npos && lk > 1) hotEnd = lk;
+    }
+
+    // Frozen writer order.  Each writer appends its own `,"key":...` or nothing.
+    combat::SerializeNpc(&line);
+    combat::SerializePd(&line);
+    combat::SerializeNhp(&line);
+    combat::SerializeDead(&line);
+
+    // [R5-DEATH] begin
+    // The death keys ("lv","bs","dstk", and the host's "wr"/"rul") sit OUTSIDE the
+    // world block on purpose: a death must be visible to the peer even when the
+    // world section is off (WS_OFF.txt).  Append after combat so the frozen order
+    // of every existing key is untouched.
+    death::Publish(&line);
+    // [R5-DEATH] end
+
+    // The whole world block disappears when WS_OFF.txt is present
+    // (main.lua:1604).
+    if (toggles().wsEnabled) {
+        world::SerializeWs(&line);
+        progress::Serialize(&line);   // wb, then wq, then wd
+        world::SerializeLift(&line);
+        world::SerializeChest(&line);
+    }
+
+    // [R5-BODY] begin -- zone identity and the friend's body state ride every
+    // publish; their CONTENT is refreshed at 2 Hz (body::SerializeBh also
+    // re-samples the death state, so a death shows up on the next packet).
+    zone::SerializeZn(&line);
+    body::SerializeBh(&line);
+    // [R5-BODY] end
+
+    // [R7-BREAK] the live breakables' one-shot events ("wx").  It sits OUTSIDE the
+    // world block: a barrel is not world SAVE state (it has none), and BREAK_OFF.txt
+    // is its own switch, so WS_OFF.txt does not have to take it away.
+    brk::Serialize(&line);
+    // [R7-BREAK] end
+    // [R7-BOSS] begin -- boss phase events.  Its OWN top-level key, appended after
+    // every existing one so no frozen field order moves; omitted entirely when
+    // there is nothing to say (see coop_boss.cpp).
+    boss::Serialize(&line);
+    // [R7-BOSS] end
+    // [R7-DIALOG] begin -- the dialogue / cinematic lane, LAST so not one existing
+    // key moves (R7 wire rule).  "dl" + "ct" or "ci" are each ~20-50 bytes, and
+    // they are only present while the state is (or was 4 s ago) non-zero.
+    dialog::Serialize(&line);
+    // [R7-DIALOG] end
+
+    line += "}";
+    line += "\n";
+    ue::CostStepRecord("pubJson", ue::CostNow() - jsonT0);
+
+    // [R7-WIRE] one publish -> one or more datagrams.  "hot" is the base block
+    // (members only, no braces), "rest" is every member after it.  WIRE_SPLIT_OFF
+    // keeps the pre-round-7 single line, which the relay sends as it always did.
+    const long long seq = (long long)L.seq;
+    if (!toggles().wireSplit) {
+        WriteFile("out_" + L.me + ".txt", line);
+        gWireTxParts = 1;
+        gWireTxBytes = line.size() - 1;
+        gWireTxMax = gWireTxBytes;
+        gWireTxHot = hotEnd - 1;
+        gWirePublishes += 1;
+        return;
+    }
+    const std::string hot = line.substr(1, hotEnd - 1);
+    const std::string rest =
+        (hotEnd + 1 < line.size() - 1) ? line.substr(hotEnd, line.size() - 2 - hotEnd) : std::string();
+    const std::vector<std::string> parts = BuildPartLines(L.me, seq, hot, rest);
+    std::string text;
+    std::size_t biggest = 0;
+    for (std::size_t i = 0; i < parts.size(); ++i) {
+        text += parts[i];
+        text += '\n';
+        if (parts[i].size() > biggest) biggest = parts[i].size();
+    }
+    gWireTxParts = static_cast<int>(parts.size());
+    gWireTxBytes = line.size() - 1;   // the packet as one line, for the report
+    gWireTxMax = biggest;
+    gWireTxHot = hotEnd - 1;
+    gWirePublishes += 1;
+    if (biggest > kPartBudget + 8 && !gWireOversizeLogged) {
+        gWireOversizeLogged = true;
+        Log("wire: a part is %d B (> %d) -- one member could not be cut small enough",
+            (int)biggest, (int)kPartBudget);
+    }
+    if (Now() - gWireLogAt > 10.0) {
+        gWireLogAt = Now();
+        Log("wire: packet %d B -> %d part(s), max %d B (hot %d B)",
+            (int)(line.size() - 1), (int)parts.size(), (int)biggest, (int)(hotEnd - 1));
+    }
+    WriteFile("out_" + L.me + ".txt", text);
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// [R7-WIRE] the sender's half: group the packet's top-level members into parts,
+// cutting a member that is bigger than a part into raw text pieces.
+// ---------------------------------------------------------------------------
+struct PartUnit {
+    std::string text;     // members, or the `"r":...,"c":...` payload
+    bool raw = false;
+};
+
+std::vector<std::string> BuildPartLines(const std::string& id, long long seq,
+                                        const std::string& hot, const std::string& rest) {
+    // the header is measured with two-digit p/n so the packing is safe for any
+    // part count; the real header is at most as long
+    const std::size_t hdr = PartHeader(id, seq, 98, 98).size();
+    const std::size_t budget = kPartBudget > hdr + 32 ? kPartBudget - hdr : 64;
+
+    std::vector<PartUnit> units;
+    std::string cur;
+    auto flush = [&units, &cur]() {
+        if (!cur.empty()) {
+            units.push_back(PartUnit{cur, false});
+            cur.clear();
+        }
+    };
+    // One member: appended to the part being built, or -- when the member alone is
+    // bigger than a whole datagram ("lk" is 1 180 B with a mask on, "npc" 1 335 B
+    // with 16 enemies near) -- cut into raw text pieces that merge back verbatim.
+    auto addMember = [&](const std::string& m) {
+        if (m.empty()) return;
+        if (m.size() <= budget) {
+            if (cur.empty()) {
+                cur = m;
+            } else if (cur.size() + 1 + m.size() > budget) {
+                flush();
+                cur = m;
+            } else {
+                cur += ',';
+                cur += m;
+            }
+            return;
+        }
+        flush();
+        std::size_t pos = 0;
+        bool firstPiece = true;
+        while (pos < m.size()) {
+            std::size_t take = m.size() - pos;
+            if (take > budget) take = budget;
+            std::string payload;
+            for (int attempt = 0; attempt < 5; ++attempt) {
+                if (pos + take < m.size()) {
+                    int guard = 0;
+                    while (take > 1 && guard < 4 &&
+                           (static_cast<unsigned char>(m[pos + take]) & 0xC0) == 0x80) {
+                        --take;
+                        ++guard;
+                    }
+                }
+                payload = Fmt("\"r\":\"%s\",\"c\":%d", EscapePiece(m.substr(pos, take)).c_str(),
+                              firstPiece ? 0 : 1);
+                if (payload.size() <= budget) break;
+                // the escaped form grew: take proportionally fewer bytes
+                std::size_t nt = take * budget / (payload.size() + 1);
+                if (nt >= take) nt = take - 1;
+                if (nt == 0) nt = 1;
+                take = nt;
+            }
+            units.push_back(PartUnit{payload, true});
+            pos += take;
+            firstPiece = false;
+        }
+    };
+
+    // part 0..k is the base block (transform, anim, montage, body/weapon identity)
+    // and ends on its own part boundary, so the fast lane is never packed together
+    // with a slow section
+    std::vector<std::string> hotMembers;
+    SplitMembers(hot, &hotMembers);
+    for (std::size_t i = 0; i < hotMembers.size(); ++i) addMember(hotMembers[i]);
+    flush();
+
+    std::vector<std::string> members;
+    if (!rest.empty()) SplitMembers(rest, &members);
+    for (std::size_t i = 0; i < members.size(); ++i) addMember(members[i]);
+    flush();
+
+    std::vector<std::string> out;
+    out.reserve(units.size());
+    for (std::size_t i = 0; i < units.size(); ++i) {
+        out.push_back(PartHeader(id, seq, static_cast<int>(i), static_cast<int>(units.size())) +
+                      units[i].text + "}");
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// [R7-WIRE] the receiver's half: merge the parts that arrived back into the one
+// line every reader below already parses.  A part that never arrived leaves its
+// keys out of this tick's line; nothing else is affected.
+// ---------------------------------------------------------------------------
+std::string MergePartLines(const std::vector<std::string>& lines, int* partsOut,
+                           std::size_t* maxOut, int* expectedOut) {
+    if (partsOut) *partsOut = 0;
+    if (maxOut) *maxOut = 0;
+    if (expectedOut) *expectedOut = 0;
+    std::string out = "{";
+    bool first = true;
+    for (std::size_t i = 0; i < lines.size(); ++i) {
+        std::string ln = lines[i];
+        while (!ln.empty() && (ln.back() == '\r' || ln.back() == '\n')) ln.pop_back();
+        if (ln.size() < 2 || ln.front() != '{' || ln.back() != '}') continue;
+        if (maxOut && ln.size() > *maxOut) *maxOut = ln.size();
+        int64_t n = 0;
+        if (KvInt(ln, "n", &n) && expectedOut) *expectedOut = static_cast<int>(n);
+        std::string piece;
+        if (RawPiece(ln, &piece)) {
+            int64_t cont = 0;
+            KvInt(ln, "c", &cont);
+            if (piece.empty()) continue;
+            if (!cont) {
+                if (!first) out += ',';
+                first = false;
+            }
+            out += piece;
+            if (partsOut) *partsOut += 1;
+            continue;
+        }
+        // a member group: skip the part header, take the members after it
+        std::size_t at = std::string::npos;
+        const std::size_t lim = ln.size() < 96 ? ln.size() : 96;
+        const std::size_t v2 = ln.find("\"v\":2,", 0);
+        if (v2 != std::string::npos && v2 < lim) {
+            const std::size_t nn = ln.find(",\"n\":", v2);
+            if (nn != std::string::npos && nn < lim) at = ln.find(',', nn + 1);
+        }
+        std::string payload;
+        if (at != std::string::npos && at + 1 < ln.size() - 1) {
+            payload = ln.substr(at + 1, ln.size() - 1 - (at + 1));
+        } else if (at == std::string::npos) {
+            payload = ln.substr(1, ln.size() - 2);   // not a part: a whole legacy line
+        }
+        std::vector<std::string> ms;
+        if (!payload.empty()) SplitMembers(payload, &ms);
+        for (std::size_t k = 0; k < ms.size(); ++k) {
+            if (ms[k].empty()) continue;
+            if (!first) out += ',';
+            out += ms[k];
+            first = false;
+        }
+        if (partsOut) *partsOut += 1;
+    }
+    out += '}';
+    return out;
+}
+
+}  // namespace
+
+// Reads peer_<id>.txt, which holds one JSON object per part, and hands back the
+// ONE line the rest of this file parses.  A single-line file (an old peer, or
+// WIRE_SPLIT_OFF on the sender) is returned byte-identical.
+bool ReadPeerPacket(const std::string& name, std::string* out, int* parts,
+                    std::size_t* maxBytes, int* expected) {
+    out->clear();
+    if (parts) *parts = 0;
+    if (maxBytes) *maxBytes = 0;
+    if (expected) *expected = 0;
+    std::string text;
+    if (!ReadText(name, &text)) return false;
+
+    std::vector<std::string> lines;
+    std::size_t start = 0;
+    while (start < text.size()) {
+        std::size_t nl = text.find('\n', start);
+        if (nl == std::string::npos) nl = text.size();
+        std::size_t end = nl;
+        if (end > start && text[end - 1] == '\r') --end;
+        if (end > start) lines.push_back(text.substr(start, end - start));
+        start = nl + 1;
+    }
+    if (lines.empty()) return false;
+    if (lines.size() == 1) {
+        *out = lines[0];
+        if (parts) *parts = 1;
+        if (maxBytes) *maxBytes = lines[0].size();
+        int64_t n = 0;
+        if (KvInt(lines[0], "n", &n) && expected) *expected = static_cast<int>(n);
+        return true;
+    }
+    *out = MergePartLines(lines, parts, maxBytes, expected);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// [R7-WIRE] `wiretest` -- the split and the merge, proved without a second client.
+// It builds a packet with the shape Publish() produces (a hot block plus members,
+// one of them bigger than a whole datagram), cuts it, merges the parts back and
+// compares; then it drops a part and checks that only that part's keys are lost.
+// ---------------------------------------------------------------------------
+void WireSelfTest() {
+    std::string hot = "\"t\":\"p\",\"id\":\"A\",\"sq\":42,\"x\":1.00,\"y\":2.00,\"z\":3.00,"
+                      "\"yaw\":0.0,\"pitch\":0.0,\"anim\":\"idle\",\"spd\":0.0,"
+                      "\"mseq\":\"\",\"mpos\":0.000,\"mrate\":1.000,\"mid\":0,"
+                      "\"body\":\"\",\"apart\":\"\",\"wpn\":\"\",\"wsock\":\"\",\"wpns\":[],"
+                      "\"lk\":\"\"";
+    std::string rest;
+    rest += ",\"npc\":[";
+    for (int i = 0; i < 40; ++i) {
+        rest += Fmt("%s[\"BP_Cultist_%d\",1.00,2.00,3.00,100,0,0.0,0.0,0.0,0.0,\"m\"]", i ? "," : "",
+                    i);
+    }
+    rest += "]";
+    rest += ",\"pd\":0,\"nhp\":[\"a\",1],\"dead\":[],\"ws\":[\"00aa11bb\",1],\"wb\":[]";
+    rest += ",\"wq\":[],\"wd\":[],\"wl\":[],\"wc\":[],\"lv\":3,\"bs\":0,\"zn\":\"x\"";
+    const std::string whole = "{" + hot + rest + "}";
+
+    const std::vector<std::string> parts = BuildPartLines("A", 42, hot, rest);
+    std::size_t biggest = 0;
+    for (std::size_t i = 0; i < parts.size(); ++i) {
+        if (parts[i].size() > biggest) biggest = parts[i].size();
+    }
+    int merged = 0, expected = 0;
+    std::size_t maxIn = 0;
+    const std::string back = MergePartLines(parts, &merged, &maxIn, &expected);
+    const bool roundTrip = (back == whole);
+
+    // one part missing: the hot block must survive, the rest of the packet may not
+    bool lostOk = false;
+    int lostParts = 0;
+    std::string lostLine;
+    if (parts.size() >= 3) {
+        std::vector<std::string> cut;
+        for (std::size_t i = 0; i < parts.size(); ++i) {
+            if (i == 1) continue;   // the oversized npc member starts here
+            cut.push_back(parts[i]);
+        }
+        std::size_t maxCut = 0;
+        int exp2 = 0;
+        lostLine = MergePartLines(cut, &lostParts, &maxCut, &exp2);
+        double x = 0.0;
+        lostOk = KvNum(lostLine, "x", &x) && x == 1.0 && lostParts + 1 == (int)parts.size();
+    }
+
+    const bool ok = roundTrip && biggest <= kPartBudget && parts.size() >= 2 && lostOk;
+    const std::string text = Fmt(
+        "%s wire: packet %d B -> %d part(s), max %d B (budget %d); merged back %s (%d B); "
+        "with one part dropped the hot block is %s and %d of %d part(s) arrived\n",
+        ok ? "PASS" : "FAIL", (int)whole.size(), (int)parts.size(), (int)biggest,
+        (int)kPartBudget, roundTrip ? "byte-identical" : "DIFFERENT", (int)back.size(),
+        lostOk ? "intact" : "LOST", (int)parts.size() - 1, (int)parts.size());
+    // result_*.txt is read with -Raw, so it must start with the verdict and not
+    // depend on a trailing newline
+    Log("%s", text.c_str());
+    WriteFile("result_wire.txt", text);
+}
+// ---------------------------------------------------------------------------
+// ApplyPeer -- main.lua:1936-1983
+// ---------------------------------------------------------------------------
+
+// [R5-MAIN] when ApplyPeer last ran (it is a guarded step: skipped during a local
+// teleport hold / world settle).  See DeathPeerKeepAlive.
+double g_applyPeerAt = -1.0e9;
+
+// The partner's liveness must not go stale just because OUR apply step is paused:
+// a local hold longer than the 6 s staleness window made a living partner count as
+// down and turned a boss hold into a party wipe (round 5, measured).  So while
+// ApplyPeer is not running, read the line here only for the death module.
+void DeathPeerKeepAlive() {
+    if (Now() - g_applyPeerAt < 0.5) return;
+    std::string line;
+    // [R7-WIRE] the peer file holds one line per part; the death keys are in one
+    // of them, so merge what arrived just like ApplyPeer does
+    if (!ReadPeerPacket("peer_" + state().local.peer + ".txt", &line, nullptr, nullptr, nullptr) ||
+        line.empty()) {
+        return;
+    }
+    if (HasRdy0(line)) return;
+    death::OnPeerLine(line);
+}
+
+void ApplyPeer() {
+    g_applyPeerAt = Now();
+    PeerState& P = state().peer;
+    const std::string file = "peer_" + state().local.peer + ".txt";
+
+    std::string line;
+    // [R7-WIRE] peer_<id>.txt is one JSON object per part on this build; a single
+    // line (old relay, or WIRE_SPLIT_OFF on the sender) comes back unchanged.
+    int parts = 0;
+    int expected = 0;
+    std::size_t maxBytes = 0;
+    if (!ReadPeerPacket(file, &line, &parts, &maxBytes, &expected)) return;
+    if (line.empty()) return;
+    gWireRxParts = parts;
+    gWireRxMax = maxBytes;
+    gWireRxBytes = line.size();
+    gWireReads += 1;
+    // count a missing part once per publish, not once per tick that re-reads the
+    // same file (ApplyPeer runs faster than the sender publishes)
+    {
+        int64_t seq = -1;
+        if (KvInt(line, "sq", &seq)) {
+            if (seq != gWireRxSeq) {
+                gWireRxSeq = seq;
+                if (expected > 0 && parts < expected) gWireRxLost += expected - parts;
+            }
+        }
+    }
+
+    // main.lua:1942 -- the peer is in the menu / loading / not in control.
+    if (HasRdy0(line)) {
+        if (P.present) P.live = false;
+        P.ready = false;
+        return;
+    }
+
+    // main.lua:1947 -- no "x" means the packet is useless: nothing else updates.
+    double x = 0.0;
+    if (!KvNum(line, "x", &x)) return;
+
+    double num = 0.0;
+    if (KvNum(line, "spd", &num)) P.speed = num;   // `peerSpeed = m.spd or peerSpeed`
+
+    std::string str;
+    if (KvStr(line, "body", &str) && str.size() > 4) P.body = str;
+    if (KvStr(line, "wpn", &str) && str.size() > 4) P.wpn = str;
+    if (KvStr(line, "wsock", &str) && !str.empty()) P.wsock = str;
+    if (Section(line, "wpns", &str)) P.weapons = str;   // raw, brackets included
+    if (KvStr(line, "lk", &str) && str.size() > 3) P.look = str;
+
+    // main.lua:1960 -- damage the peer's world dealt to our body.  Cumulative.
+    if (KvNum(line, "pd", &num)) {
+        P.pd = num;
+        P.hasPd = true;
+    }
+
+    // main.lua:1961-1968 -- only a *fresh* sq moves the clock the extrapolation
+    // and the montage play head run from (docs/NATIVE-PORT.md 4, item 10).
+    int64_t sq = 0;
+    const bool sqValid = KvInt(line, "sq", &sq);
+    const bool fresh = !P.present || !sqValid || sq != P.sq;
+    const double at = (fresh || !P.present) ? Now() : P.at;
+    const bool live = P.present ? (P.live || (fresh && sqValid)) : false;
+
+    double y = 0.0, z = 0.0;
+    KvNum(line, "y", &y);
+    KvNum(line, "z", &z);
+    double yaw = 0.0, pitch = 0.0;
+    KvNum(line, "yaw", &yaw);
+    KvNum(line, "pitch", &pitch);
+    double vx = 0.0, vy = 0.0, vz = 0.0;
+    KvNum(line, "vx", &vx);
+    KvNum(line, "vy", &vy);
+    KvNum(line, "vz", &vz);
+
+    P.pos.X = x;
+    P.pos.Y = y;
+    P.pos.Z = z;
+    P.vel.X = vx;
+    P.vel.Y = vy;
+    P.vel.Z = vz;
+    P.rot.Yaw = yaw;
+    P.rot.Pitch = pitch;
+    if (sqValid) P.sq = sq;
+    P.at = at;
+    P.live = live;
+    P.hasX = true;
+    P.present = true;
+    P.ready = true;
+    P.wallAt = Wall();
+
+    // main.lua:1969-1976 -- a non-empty mseq (>4 chars) sets the montage only on
+    // a fresh packet (or when there is none yet); an empty one clears it.
+    if (KvStr(line, "mseq", &str) && str.size() > 4) {
+        if (fresh || !P.hasMontage) {
+            P.montage.path = str;
+            P.montage.pos = 0.0;
+            P.montage.rate = 1.0;
+            P.montage.id = 0;
+            if (KvNum(line, "mpos", &num)) P.montage.pos = num;
+            if (KvNum(line, "mrate", &num)) P.montage.rate = num;
+            int64_t mid = 0;
+            if (KvInt(line, "mid", &mid)) P.montage.id = (int)mid;
+            P.hasMontage = true;
+            // CONTRACT-REQUEST 6: the packet clock the play head runs from is
+            // P.at (the Lua's PEER_MONTAGE.at was the same value).
+        }
+    } else {
+        P.hasMontage = false;
+        P.montage = MontageSig();
+    }
+
+    g_lastPeerFile = file;
+
+    // [R5-BODY] begin -- zone identity and the friend's body state are parsed on
+    // EVERY packet, before the world-state dispatch below, because the guard that
+    // dispatch asks about is decided by the "zn" this line carries.
+    Step("zoneRead", Guard::None, [&line]() { zone::OnPeerLine(line); });
+    Step("bodyRead", Guard::None, [&line]() { body::OnPeerLine(line); });
+    // [R7-DIALOG] the peer's dialogue/cinematic state and its dialogue outcome.
+    // Before the zone guard on purpose: "is the friend able to fight right now" and
+    // "which side of the story is he on" are not per-map actor names, and the
+    // puppet must stay idle even while the two maps disagree.
+    Step("dlgRead", Guard::None, [&line]() { dialog::OnPeerLine(line); });
+
+    // main.lua:1979-1982.  Frozen dispatch order (coop_state.h rule 3):
+    // combat (npc/nhp/dead/pd) -> progress (wb/wq/wd) -> world (ws/wl/wc).
+    // [R5-DEATH] begin -- before the zone guard: liveness matters even across maps
+    // The peer's liveness word has to be parsed before anything asks "is the
+    // partner alive", and it must be parsed even when the world block is off.
+    Step("applyDeath", Guard::None, [&line]() { death::OnPeerLine(line); });
+    // [R5-DEATH] end
+    //
+    // THE ZONE GUARD (R5-BODY).  Every key in that dispatch is a per-map actor
+    // name, so applying the peer's world state while the two players are in
+    // different maps writes into whichever local actor happens to carry a similar
+    // name -- silently.  Pause all of it (and the counters zone= publishes, so the
+    // ZONE verdict can see the dispatch really stopped), keep publishing, and let
+    // it resume by itself when the maps agree again.
+    const bool zonePaused = zone::Paused();
+    zone::NoteApply(zonePaused);
+    if (!zonePaused) {
+        Step("applyNPCs", Guard::None, [&line]() { combat::OnPeerLine(line); });
+        // [R7-BOSS] begin -- after combat on purpose: the phase gate is the boss
+        // health the "nhp" section of THIS line just wrote.  Inside the zone guard
+        // too, because a boss key is a per-map actor name.
+        Step("bossRead", Guard::None, [&line]() { boss::OnPeerLine(line); });
+        // [R7-BOSS] end
+        if (toggles().wsEnabled) {
+            Step("wpReadPeer", Guard::None, [&line]() { progress::OnPeerLine(line); });
+            Step("wsReadPeer", Guard::None, [&line]() { world::OnPeerLine(line); });
+        }
+        // [R7-BREAK] the breakable events are keyed on per-map actor names, so they
+        // obey the zone guard like every other world key; the apply itself runs on
+        // the 2 Hz tick (brk::Tick2), not here.
+        Step("brkReadPeer", Guard::None, [&line]() { brk::OnPeerLine(line); });
+    }
+    // [R5-BODY] end
+}
+
+// ---------------------------------------------------------------------------
+// WriteSyncStatus -- main.lua:3968-3988.  Every key the harness reads.
+// ---------------------------------------------------------------------------
+
+void WriteSyncStatus() {
+    State& S = state();
+
+    // hp=<tail=0.500,...> sorted, dead=<tail,...> sorted
+    std::vector<std::string> hpParts;
+    hpParts.reserve(S.combat.hpSeen.Size());
+    for (const StrNum& it : S.combat.hpSeen.Items()) {
+        hpParts.push_back(Fmt("%s=%.3f", it.key.c_str(), it.value));
+    }
+    std::sort(hpParts.begin(), hpParts.end());
+
+    std::vector<std::string> deadParts = S.combat.deadTails.Items();
+    std::sort(deadParts.begin(), deadParts.end());
+
+    std::string hp, dead;
+    for (size_t i = 0; i < hpParts.size(); ++i) {
+        if (i) hp += ",";
+        hp += hpParts[i];
+    }
+    for (size_t i = 0; i < deadParts.size(); ++i) {
+        if (i) dead += ",";
+        dead += deadParts[i];
+    }
+
+    const Vec3 pl = Loc(S.puppet.actor);
+    const Vec3 me = Loc(Pawn());
+
+    // tostring(nil) is "nil" in Lua and the key is frozen: keep it.
+    std::string movemode = "nil";
+    if (Valid(S.puppet.actor)) {
+        ue::UObject* mc = uecall::PropObj(S.puppet.actor, "CharacterMovement");
+        int64_t mode = 0;
+        if (mc && uecall::PropInt(mc, "MovementMode", &mode)) movemode = Fmt("%lld", (long long)mode);
+    }
+    const std::string anim = S.puppet.animState.empty() ? "nil" : S.puppet.animState;
+
+    const LocalState& L = S.local;
+    const PeerState& P = S.peer;
+    const AppearState& A = S.appear;
+
+    const std::string lookMine = appear::Hash(appear::Mine());
+    const std::string peerLook = P.look.empty() ? std::string() : appear::Hash(P.look);
+    const std::string lookApplied = A.applied.empty() ? std::string() : appear::Hash(A.applied);
+
+    std::string out;
+    out.reserve(2048);
+    AppendFmt(&out,
+              "t=%s\n"
+              "phase=%s\n"
+              "role=%s\n"
+              "puppet=%s\n"
+              "puppetpos=%.1f %.1f %.1f\n"
+              "selfpos=%.1f %.1f %.1f\n"
+              "movemode=%s\n"
+              "puppetspeed=%.1f\n"
+              "peerspd=%.1f\n"
+              "anim=%s\n"
+              "animidle=%d\n"
+              "animwalk=%d\n"
+              "animsprint=%d\n"
+              "animmoves=%d\n"
+              "body=%s\n"
+              "peerbody=%s\n"
+              "wpn=%s\n"
+              "peerwpn=%s\n"
+              "wpnapplied=%s\n"
+              "look=%s\n"
+              "lookparts=%d\n"
+              "peerlook=%s\n"
+              "lookapplied=%s\n"
+              "peerlookparts=%d\n"
+              "lookmissing=%d\n"
+              "gameloads=%d\n"
+              "hp=%s\n"
+              "dead=%s\n",
+              L.me.c_str(), PhaseName(S.puppet.phase), L.role.c_str(),
+              FullName(S.puppet.actor).c_str(), pl.X, pl.Y, pl.Z, me.X, me.Y, me.Z,
+              movemode.c_str(), S.puppet.puppetSpeed, P.speed, anim.c_str(), L.animIdle,
+              L.animWalk, L.animSprint, L.animMoveTicks, L.body.c_str(), P.body.c_str(),
+              L.wpn.c_str(), P.wpn.c_str(), A.weaponsApplied.c_str(), lookMine.c_str(),
+              A.nparts, peerLook.c_str(), lookApplied.c_str(), A.peerParts, A.missing,
+              S.puppet.loadDone, hp.c_str(), dead.c_str());
+
+    // The module status blocks, in the Lua's tail order (ws, ledger, wp, lift,
+    // chest, stream, enemy, perf) as far as the header's three Status() calls
+    // allow; every line starts at column 0 with its own key, which is what
+    // run-two.ps1's Get-SyncValue needs.
+    out += world::Status();
+    out += progress::Status();
+    out += combat::Status();
+    // [R5-BODY] begin -- "zone=" and "bh=" (chrome keys, each on its own line at
+    // column 0 like every other module's status block)
+    out += zone::Status();
+    out += body::Status();
+    // [R5-BODY] end
+    // [R5-DEATH] begin
+    out += death::Status();
+    // [R5-DEATH] end
+    // [R7-BREAK]
+    out += brk::Status();
+
+    // [R7-WIRE] the transport's own counters: what this client cut into datagrams
+    // ("tx") and what it reassembled ("rx"), plus how many parts never arrived.
+    // run-two.ps1's WIRE verdict reads exactly this line.
+    out += Fmt("wire=txp:%d txmax:%d txb:%d hot:%d rxp:%d rxmax:%d rxb:%d lost:%d v:2\n",
+               gWireTxParts, (int)gWireTxMax, (int)gWireTxBytes, (int)gWireTxHot, gWireRxParts,
+               (int)gWireRxMax, (int)gWireRxBytes, gWireRxLost);
+    // [R7-BOSS] begin -- "boss=" (its own line at column 0, like every other block)
+    out += boss::Status();
+    // [R7-BOSS] end
+    // [R7-DIALOG] begin -- "dlg=" and "cine="
+    out += dialog::Status();
+    // [R7-DIALOG] end
+
+    WriteFile("sync.txt", out);
+}
+
+// ---------------------------------------------------------------------------
+// Heartbeat -- main.lua:4023-4028
+// ---------------------------------------------------------------------------
+
+void Heartbeat() {
+    const std::string text =
+        Fmt("t=%s\nhb=%d\nt30=%d\nt15=%d\nt2=%d\nphase=%s\n", state().local.me.c_str(), g_hb,
+            g_t30, g_t15, g_t2, PhaseName(state().puppet.phase));
+    WriteFile("heartbeat.txt", text);
+}
+
+// ---------------------------------------------------------------------------
+// cmd.txt -- main.lua:2080-2196
+//
+// A deliberately reduced nearest-enemy picker (CONTRACT-REQUEST 2): nearest
+// first, within NPC_RADIUS of this player or of the peer, player characters
+// excluded, classes with "Enemy"/"Turret" preferred for npctp.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+struct NpcPick {
+    ue::UObject* actor = nullptr;
+    std::string tail;
+    std::string cls;
+    double d = 0.0;
+};
+
+// Distinct player characters + anything else that must never be treated as an
+// enemy (main.lua:1276).
+bool IsPlayerCharacter(ue::UObject* a) {
+    // ue::UClass is its own forward-declared type in ms2_ue.h, so the cast is
+    // explicit; GetFullName only wants the object.
+    ue::UClass* cls = ue::GetClass(a);
+    if (!cls) return false;
+    const std::string cfn = ue::GetFullName((ue::UObject*)cls);
+    return Contains(cfn, "BP_PlayerCharacter") || Contains(cfn, "BP_MainMenuCharacter");
+}
+
+std::vector<NpcPick> CollectNpcsNear() {
+    std::vector<NpcPick> out;
+    ue::UObject* pawn = Pawn();
+    if (!pawn) return out;
+    const Vec3 me = Loc(pawn);
+    if (!Valid(pawn)) return out;
+
+    ue::UObject* puppetActor = puppet::Actor();
+    double px = 0.0, py = 0.0, pz = 0.0;
+    bool hasPeer = false;
+    if (state().peer.hasX) {
+        px = state().peer.pos.X;
+        py = state().peer.pos.Y;
+        pz = state().peer.pos.Z;
+        hasPeer = true;
+    }
+    const bool hasPuppet = Valid(puppetActor);
+
+    for (ue::UObject* a : ue::FindAllOf("Character")) {
+        if (!a || a == pawn || a == puppetActor) continue;
+        if (!ue::IsValid(a)) continue;
+        if (IsPlayerCharacter(a)) continue;
+        const Vec3 loc = Loc(a);
+        const double dx = loc.X - me.X, dy = loc.Y - me.Y, dz = loc.Z - me.Z;
+        const double d = std::sqrt(dx * dx + dy * dy + dz * dz);
+        double dp = 1.0e30;
+        if (hasPeer) {
+            const double ex = loc.X - px, ey = loc.Y - py, ez = loc.Z - pz;
+            dp = std::sqrt(ex * ex + ey * ey + ez * ez);
+        } else if (hasPuppet) {
+            const Vec3 pl = Loc(puppetActor);
+            const double ex = loc.X - pl.X, ey = loc.Y - pl.Y, ez = loc.Z - pl.Z;
+            dp = std::sqrt(ex * ex + ey * ey + ez * ez);
+        }
+        if (d > kNpcRadius && dp > kNpcRadius) continue;
+        NpcPick p;
+        p.actor = a;
+        // main.lua:1279 -- SPN_ALIAS[enemy tail] = "SP_<spawner tail>".  The host
+        // sees the LOCAL enemy and names it by its own tail; the guest's copy of
+        // that enemy was spawned by the puppet's spawner, so its tail is the
+        // SPN_* one and "mirroring peer-owned enemy <tail>" would never match a
+        // `npctp` that came in with the enemy's tail.  Publishing the alias makes
+        // the two agree (same rule as the Lua, same map, state().combat.spawnAlias).
+        std::string tl = Tail(a);
+        if (const std::string* alias = state().combat.spawnAlias.Find(tl)) tl = *alias;
+        p.tail = tl;
+        ue::UClass* cls = ue::GetClass(a);
+        p.cls = cls ? ue::GetFullName((ue::UObject*)cls) : std::string();
+        p.d = std::min(d, dp);
+        out.push_back(p);
+    }
+    std::sort(out.begin(), out.end(),
+              [](const NpcPick& a, const NpcPick& b) { return a.d < b.d; });
+    if (out.size() > (size_t)kMaxNpc) out.resize((size_t)kMaxNpc);
+    return out;
+}
+
+// Copies of the "x y z" triple, exactly as Lua's match returns them (the log
+// lines print the matched text, not a reformatted number).
+struct CmdXYZ {
+    bool ok = false;
+    std::string x, y, z;
+    double nx = 0.0, ny = 0.0, nz = 0.0;
+};
+
+bool IsNumTextChar(char c) {
+    return (c >= '0' && c <= '9') || c == '-' || c == '+' || c == '.' || c == 'e' || c == 'E';
+}
+
+bool NextNumberText(const std::string& s, size_t* pos, std::string* out) {
+    size_t i = *pos;
+    while (i < s.size() && !IsNumTextChar(s[i])) ++i;
+    const size_t start = i;
+    while (i < s.size() && IsNumTextChar(s[i])) ++i;
+    if (i == start) return false;
+    if (out) *out = s.substr(start, i - start);
+    *pos = i;
+    return true;
+}
+
+CmdXYZ ParseXYZ(const std::string& rest) {
+    CmdXYZ v;
+    size_t pos = 0;
+    if (!NextNumberText(rest, &pos, &v.x)) return v;
+    if (!NextNumberText(rest, &pos, &v.y)) return v;
+    if (!NextNumberText(rest, &pos, &v.z)) return v;
+    v.nx = strtod(v.x.c_str(), nullptr);
+    v.ny = strtod(v.y.c_str(), nullptr);
+    v.nz = strtod(v.z.c_str(), nullptr);
+    v.ok = true;
+    return v;
+}
+
+// tonumber(rest) or def -- one number and nothing else matters.
+double ParseOptNumber(const std::string& text, double def) {
+    const std::string t = Trim(text);
+    if (t.empty()) return def;
+    char* stop = nullptr;
+    const double v = strtod(t.c_str(), &stop);
+    if (stop == t.c_str()) return def;    // tonumber() -> nil
+    return v;
+}
+
+bool ContainsText(const std::string& hay, const char* needle) {
+    return hay.find(needle) != std::string::npos;
+}
+
+// --- the individual commands ----------------------------------------------
+
+void CmdTp(const std::string& rest) {
+    const CmdXYZ xyz = ParseXYZ(rest);
+    ue::UObject* pawn = Pawn();
+    if (!xyz.ok || !pawn) return;
+
+    // main.lua:2091-2096.  The command's own body lives in coop_puppet (which owns
+    // PuppetState): teleport, hover, TP_HOLD.  Its "tp -> x y z" log line stays here
+    // because this function is the one that has the raw argument text.
+    puppet::StartTp(pawn, xyz.nx, xyz.ny, xyz.nz);
+    state().combat.enemyTrace = 0;
+    Log("tp -> %s %s %s", xyz.x.c_str(), xyz.y.c_str(), xyz.z.c_str());
+}
+
+void CmdTravel(const std::string& rest) {
+    const CmdXYZ xyz = ParseXYZ(rest);
+    ue::UObject* pawn = Pawn();
+    if (!xyz.ok || !pawn) return;
+
+    double secs = 60.0;
+    {
+        // `rest:match("...%s*([%d%.]*)")` -- the 4th number, defaulting to 60
+        size_t pos = 0;
+        std::string a, b, c, d;
+        if (NextNumberText(rest, &pos, &a) && NextNumberText(rest, &pos, &b) &&
+            NextNumberText(rest, &pos, &c) && NextNumberText(rest, &pos, &d)) {
+            char* stop = nullptr;
+            const double v = strtod(d.c_str(), &stop);
+            if (stop != d.c_str()) secs = v;
+        }
+    }
+
+    // main.lua:2148-2152.  coop_puppet owns TRAVEL (and logs the same
+    // "travel %.0f uu over %.0fs" line, so it is not repeated here).
+    puppet::StartTravel(pawn, xyz.nx, xyz.ny, xyz.nz, secs);
+}
+
+void CmdInfo() {
+    const std::string peerFile = g_lastPeerFile.empty() ? std::string("-") : g_lastPeerFile;
+    Log("phase=%s puppet=%s peer=%s drive(input=%d,teleport=%d) dead=%d",
+        PhaseName(state().puppet.phase), FullName(puppet::Actor()).c_str(), peerFile.c_str(),
+        state().puppet.driveInputs, state().puppet.driveTeleports,
+        (int)state().combat.deadTails.Size());
+    // The line above is the Lua's.  These two are the native build's answer to
+    // "why is the phase stuck": they name the world, the local pawn and the menu
+    // widget the boot step is looking for, so one `info` command replaces a run.
+    Log("info: world=%s pawn=%s chars=%d menu=%d",
+        FullName(World()).c_str(), FullName(Pawn()).c_str(),
+        (int)ue::FindAllOf("BP_PlayerCharacter_C").size(),
+        (int)ue::FindAllOf("WBP_MainMenu_C").size());
+}
+
+void CmdKill() {
+    const std::vector<NpcPick> list = CollectNpcsNear();
+    if (list.empty()) return;   // main.lua:2121: `if list[1] then killTail(...) end`
+    const NpcPick& e = list.front();
+    // main.lua:1397-1408 killTail(tail, "cmd")
+    if (state().combat.deadTails.Has(e.tail)) return;
+    state().combat.deadTails.Add(e.tail);
+    const bool ok = combat::StartDeath(e.actor);
+    Log("killTail %s (cmd): startDeath ok=%s %s", e.tail.c_str(), ok ? "true" : "false",
+        ok ? "" : "failed");
+}
+
+void CmdHurt(const std::string& rest) {
+    const double frac = ParseOptNumber(rest, 0.5);
+    const std::vector<NpcPick> list = CollectNpcsNear();
+    if (list.empty()) {
+        Log("hurt: no npc nearby");
+        return;
+    }
+    const NpcPick& e = list.front();
+    const bool ok = combat::SetHealthNorm(e.actor, frac);
+    bool dead = false;
+    const double hp = combat::HealthNorm(e.actor, &dead);
+    Log("hurt %s -> %.2f (ok=%s, now %.3f)", e.tail.c_str(), frac, ok ? "true" : "false", hp);
+}
+
+void CmdHp() {
+    const std::vector<NpcPick> list = CollectNpcsNear();
+    const size_t n = std::min<size_t>(list.size(), 6);
+    for (size_t i = 0; i < n; ++i) {
+        bool dead = false;
+        const double hp = combat::HealthNorm(list[i].actor, &dead);
+        const std::string hps = hp < 0.0 ? std::string("nil") : Fmt("%.3f", hp);
+        Log("hp %s = %s dead=%s d=%.0f", list[i].tail.c_str(), hps.c_str(),
+            dead ? "true" : "false", list[i].d);
+    }
+}
+
+void CmdNpcTp(const std::string& rest) {
+    const CmdXYZ xyz = ParseXYZ(rest);
+    const std::vector<NpcPick> list = CollectNpcsNear();
+    const NpcPick* pick = nullptr;
+    for (const NpcPick& e : list) {
+        if (ContainsText(e.cls, "Enemy") || ContainsText(e.cls, "Turret")) {
+            pick = &e;
+            break;
+        }
+    }
+    if (!pick && !list.empty()) pick = &list.front();
+    if (!xyz.ok || !pick) {
+        Log("npctp: no npc nearby");
+        return;
+    }
+    ue::UObject* a = pick->actor;
+    if (!Valid(a)) {
+        Log("npctp: no npc nearby");
+        return;
+    }
+    ue::UFunction* fn = uecall::Func(a, "K2_SetActorLocation");
+    bool ok = false;
+    if (fn && uecall::HasParam(fn, "NewLocation")) {
+        ue::Params p(fn);
+        ue::FVector dest;
+        dest.X = xyz.nx;
+        dest.Y = xyz.ny;
+        dest.Z = xyz.nz;
+        p.Set<ue::FVector>("NewLocation", dest);
+        if (uecall::HasParam(fn, "bSweep")) p.Set<bool>("bSweep", false);
+        if (uecall::HasParam(fn, "bTeleport")) p.Set<bool>("bTeleport", true);
+        ok = ue::Call(a, fn, p.data());
+    }
+    if (!ok) Log("ERR npctp: K2_SetActorLocation failed");
+    // [R6-WORLD] the move only counts if it STICKS: while this actor is mirrored its
+    // position is re-written from the peer every tick, so a teleport that is not
+    // claimed here is undone before the host can hand the NPC over (measured, see
+    // combat::MirrorClaimLocal).
+    combat::MirrorClaimLocal(pick->tail);
+    // The harness greps `npctp -> (\S+)` and then looks for the host's
+    // "mirroring peer-owned enemy <tail>" (run-two.ps1:374-377).
+    Log("npctp -> %s at %s %s %s", pick->tail.c_str(), xyz.x.c_str(), xyz.y.c_str(),
+        xyz.z.c_str());
+}
+
+void CmdAiTest() {
+    const std::vector<NpcPick> list = CollectNpcsNear();
+    if (list.empty()) {
+        Log("aitest: no enemy controller / puppet");
+        return;
+    }
+    const NpcPick& e = list.front();
+    ue::UObject* puppetActor = puppet::Actor();
+    if (!Valid(puppetActor)) {
+        Log("aitest: no enemy controller / puppet");
+        return;
+    }
+    ue::UObject* ctrl = uecall::PropObj(e.actor, "Controller");
+    ue::UObject* tsc = ctrl ? uecall::PropObj(ctrl, "TargetSelectionComponent") : nullptr;
+    if (!tsc) {
+        Log("aitest: no enemy controller / puppet");
+        return;
+    }
+    ue::UFunction* fn = uecall::Func(tsc, "SetTargetOverride");
+    if (fn) {
+        static const char* kTargetParams[] = {"NewTarget", "Target", "InTarget", "Actor"};
+        const char* tp = uecall::PickParam(fn, kTargetParams, 4);
+        if (tp) {
+            ue::Params p(fn);
+            p.Set<ue::UObject*>(tp, puppetActor);
+            static const char* kSecsParams[] = {"Duration", "Seconds", "InDuration", "OverrideTime"};
+            const char* sp = uecall::PickParam(fn, kSecsParams, 4);
+            if (sp) p.Set<float>(sp, 10.0f);
+            if (!ue::Call(tsc, fn, p.data())) Log("ERR ai override: SetTargetOverride failed");
+        }
+    }
+    const std::string curName = uecall::PropObj(tsc, "CurrentTarget")
+                                    ? FullName(uecall::PropObj(tsc, "CurrentTarget"))
+                                    : std::string("none");
+    const bool targetsPuppet =
+        uecall::PropObj(tsc, "CurrentTarget") == puppetActor;
+    Log("aitest: %s target override -> puppet; current target now %s", e.tail.c_str(),
+        curName.c_str());
+    WriteFile("result_ai.txt",
+              Fmt("%s enemy %s targets the peer's body after SetTargetOverride (current %s)\n",
+                  targetsPuppet ? "PASS" : "FAIL", e.tail.c_str(), curName.c_str()));
+}
+
+// main.lua:2061-2078 -- queued by `lookadd`, run at 2 Hz until it lands.
+// CONTRACT-REQUEST 3: appear::QueueLookAdd(path) would replace this.
+std::vector<std::string> ClassInstances(const std::string& className) {
+    std::vector<std::string> out;
+    if (className.empty()) return out;
+    for (ue::UObject* o : ue::FindAllOf(className.c_str())) {
+        if (ue::IsValid(o)) out.push_back(ue::GetFullName(o));
+    }
+    return out;
+}
+
+bool HasName(const std::vector<std::string>& list, const std::string& name) {
+    for (const std::string& s : list) {
+        if (s == name) return true;
+    }
+    return false;
+}
+
+void LookTestTick() {
+    if (!g_lookAdd.active) return;
+    const int64_t nowWall = Wall();
+    if (nowWall - g_lookAdd.at > 40) {
+        Log("lookadd gave up: %s", g_lookAdd.path.c_str());
+        g_lookAdd = LookAddJob();
+        return;
+    }
+    ue::UObject* pawn = Pawn();
+    if (!Valid(pawn)) return;
+
+    // Phase 2: AddItem already ran; wait for the deferred spawn to show up and
+    // remember it as LOOK_ADDED (main.lua:2074-2076).
+    if (g_lookAdd.polling) {
+        for (const std::string& name : ClassInstances(g_lookAdd.cls)) {
+            if (!HasName(g_lookAdd.before, name)) {
+                appear::SetLookAdded(name);
+                Log("lookadd spawned %s (polled %ds after AddItem)", name.c_str(),
+                    (int)(nowWall - g_lookAdd.at));
+                g_lookAdd = LookAddJob();
+                return;
+            }
+        }
+        if (nowWall > g_lookAdd.until) {
+            Log("lookadd: AddItem made no new attachable within 5s -- lookdel has nothing to"
+                " remove (%s)", g_lookAdd.path.c_str());
+            g_lookAdd = LookAddJob();
+        }
+        return;
+    }
+
+    ue::UObject* cls = Find(g_lookAdd.path, true);
+    if (!cls) return;
+
+    ue::UObject* bpc = uecall::PropObj(pawn, "BPC_AttachableItems");
+    if (!Valid(bpc)) return;
+
+    // The Lua snapshots LOOK.attachablesOf(pawn); the class we were asked to add
+    // is the one that appears, so its own instances are the exact diff and no
+    // class list has to be duplicated here.
+    const std::string clsName = ue::GetName(cls);
+    const std::vector<std::string> before = ClassInstances(clsName);
+    // Arm the retry: the spawn is deferred, so the same-tick diff below is
+    // usually empty and this is what fills LOOK_ADDED in.
+    g_lookAdd.cls = clsName;
+    g_lookAdd.before = before;
+    g_lookAdd.polling = true;
+    g_lookAdd.until = Wall() + 5;
+
+    // main.lua:2072 -- `bpc:AddItem(cls)` with the class as the single argument.
+    // The parameter is called ActorClass on this build (the port's candidate list
+    // did not include that name, so PickParam returned null and the call was
+    // refused without ever reaching the engine -- the LOOK verdict's "AddItem
+    // ok=false").  Names first, then argument 0 as a fallback.
+    bool ok = false;
+    ue::UFunction* addFn = uecall::Func(bpc, "AddItem");
+    if (!addFn) {
+        Log("lookadd: %s has no AddItem UFunction", ue::GetClassName(bpc).c_str());
+    } else {
+        static const char* kAddItemParams[] = {"ActorClass", "Class", "ItemClass", "Item",
+                                               "AttachableClass"};
+        const char* pn = uecall::PickParam(addFn, kAddItemParams, 5);
+        ue::Params ap(addFn);
+        if (pn) {
+            ap.Set<ue::UObject*>(pn, cls);
+        } else {
+            ue::WriteMem(ap.data(), &cls, sizeof(cls));
+            Log("lookadd: AddItem has no known parameter name; wrote argument 0");
+        }
+        ok = ue::Call(bpc, addFn, ap.data());
+        Log("lookadd AddItem(%s) param=%s size=%d ok=%s %s", g_lookAdd.path.c_str(),
+            pn ? pn : "(arg0)", (int)ap.size(), ok ? "true" : "false",
+            ok ? "" : "call failed");
+    }
+
+    // Same-tick diff, kept: when the game does spawn synchronously this is the
+    // answer and the poll above never runs.  Otherwise the job stays armed for up
+    // to 5 s and phase 2 fills LOOK_ADDED in.
+    const std::vector<std::string> after = ClassInstances(clsName);
+    for (const std::string& name : after) {
+        if (!HasName(before, name)) {
+            appear::SetLookAdded(name);
+            Log("lookadd spawned %s", name.c_str());
+            g_lookAdd = LookAddJob();
+            return;
+        }
+    }
+}
+
+}  // namespace
+
+void RunCommands() {
+    // Read every line, then delete the file (main.lua:2081-2085).
+    std::string all;
+    if (!ReadWholeText(state().local.dir + "cmd.txt", &all)) return;
+    RemoveFile("cmd.txt");
+
+    // f:lines() semantics: LF separated, CR stripped, a trailing LF makes no empty line.
+    std::vector<std::string> lines;
+    size_t start = 0;
+    while (start < all.size()) {
+        const size_t nl = all.find('\n', start);
+        if (nl == std::string::npos) {
+            lines.push_back(all.substr(start));
+            break;
+        }
+        std::string l = all.substr(start, nl - start);
+        if (!l.empty() && l.back() == '\r') l.pop_back();
+        lines.push_back(l);
+        start = nl + 1;
+    }
+
+    for (const std::string& line : lines) {
+        // main.lua:2087 -- "^(%S+)%s*(.-)$"
+        size_t sp = 0;
+        while (sp < line.size() && (unsigned char)line[sp] <= ' ') ++sp;
+        size_t e = sp;
+        while (e < line.size() && (unsigned char)line[e] > ' ') ++e;
+        const std::string cmd = line.substr(sp, e - sp);
+        size_t rs = e;
+        while (rs < line.size() && (unsigned char)line[rs] <= ' ') ++rs;
+        const std::string rest = line.substr(rs);
+        if (cmd.empty()) continue;
+
+        if (cmd == "tp") {
+            CmdTp(rest);
+        } else if (cmd == "lookadd") {
+            g_lookAdd = LookAddJob();          // never inherit a previous poll's state
+            g_lookAdd.active = true;
+            g_lookAdd.path = rest;
+            g_lookAdd.at = Wall();
+            Log("lookadd queued: %s", rest.c_str());
+        } else if (cmd == "lookdel") {
+            appear::LookDel();
+            Log("lookdel");
+        } else if (cmd == "info") {
+            CmdInfo();
+        } else if (cmd == "console") {
+            Console(rest);
+        } else if (cmd == "kill") {
+            CmdKill();
+        } else if (cmd == "hurt") {
+            CmdHurt(rest);
+        } else if (cmd == "patrol") {
+            puppet::StartPatrol(ParseOptNumber(rest, 10.0));   // `tonumber(seconds) or 10`
+        } else if (cmd == "wstest") {
+            world::TestWs();
+        } else if (cmd == "wa2test") {
+            // [R5-WORLD] store-A2 fixture test: bools on the appended classes, ints
+            // through the typed section, one string-array element
+            world::TestWs2();
+        } else if (cmd == "wa2census") {
+            // [R5-WORLD] read-only: which store-A2 classes/fields are live here
+            world::Wa2Census();
+        } else if (cmd == "wa2reset") {
+            // [R5-WORLD] fixtures only (ResetSaveObjectByGuid / ByClass), no writes
+            world::Wa2FixtureReset();
+        } else if (cmd == "wa2selftest") {
+            // [R5-WORLD] the wt codec's unit test (no engine calls)
+            world::Wa2SelfTest();
+        } else if (cmd == "wa2arraytest") {
+            // [R5-WORLD] the FString-array write path (ParseIntoArray + property write)
+            world::Wa2ArrayTest();
+        } else if (cmd == "wptest") {
+            progress::TestWp();
+        } else if (cmd == "mapsdump") {
+            // [R7-MAPS] gap G2's count: the store-B float and name maps, read once
+            progress::MapsDump(rest);
+        // [R7-BREAK] begin -- the live-breakables verbs
+        } else if (cmd == "breakdump") {
+            brk::BreakDump(rest);
+        } else if (cmd == "brkbreak") {
+            brk::BreakNow(rest);
+        } else if (cmd == "brkstate") {
+            brk::BreakState(rest);
+        } else if (cmd == "brkcall") {
+            brk::BreakCall(rest);
+        // [R7-BREAK] end
+        } else if (cmd == "qstest") {
+            progress::TestQs();
+        } else if (cmd == "qs2test") {
+            progress::TestQs2();
+        } else if (cmd == "lifttest") {
+            world::TestLift();
+        } else if (cmd == "cstest") {
+            world::TestChest();
+        // [R7-WIRE] begin -- the transport's own round trip, and the harness's
+        // fixture reset (USpartaSaveSubSystem.ResetSaveObjectByGuid instead of
+        // deleting coop\ws_ledger_*.txt by hand)
+        } else if (cmd == "wiretest") {
+            WireSelfTest();
+        } else if (cmd == "fixreset") {
+            world::TestFixReset();
+        // [R7-WIRE] end
+        } else if (cmd == "travel") {
+            CmdTravel(rest);
+        } else if (cmd == "pdtest") {
+            ue::UObject* puppetActor = puppet::Actor();
+            const bool ok = Valid(puppetActor) && combat::SetHealthNorm(puppetActor, 0.9);
+            Log("pdtest: peer body health -> 0.9 (ok=%s)", ok ? "true" : "false");
+        } else if (cmd == "aitest") {
+            CmdAiTest();
+        } else if (cmd == "hp") {
+            CmdHp();
+        } else if (cmd == "npctp") {
+            CmdNpcTp(rest);
+            // [R5-PROBE] begin
+        } else if (cmd == "equipprobe") {
+            probe::Equip(rest);
+        } else if (cmd == "pupdump") {
+            probe::PupDump(rest == "self");
+        } else if (cmd == "pupcheck") {
+            probe::PupCheck();
+            // [R5-PROBE] end
+        // [R5-BODY] begin -- the body lane's test verbs
+        } else if (cmd == "zonefake") {
+            zone::CmdFake(rest);
+        } else if (cmd == "bodyset") {
+            body::CmdSet(rest);
+        } else if (cmd == "bodydump") {
+            body::CmdDump();
+        // [R5-BODY] end
+        // [R6-SPAWN] begin -- the spawn-replay gate probe
+        } else if (cmd == "spawndump") {
+            combat::SpawnDump(rest);
+        } else if (cmd == "spawnfire") {
+            combat::SpawnFire(rest);
+        } else if (cmd == "spawncall") {
+            combat::SpawnCall(rest);
+        } else if (cmd == "spawnprobe") {
+            combat::SpawnProbe(rest);
+        } else if (cmd == "spawnset") {
+            combat::SpawnSet(rest);
+        // [R6-SPAWN] end
+        // [R7-DIALOG] begin -- the dialogue/cinematic lane's verbs
+        } else if (cmd == "dlgfake") {
+            dialog::CmdFake(rest);
+        } else if (cmd == "cinefake") {
+            dialog::CmdCineFake(rest);
+        } else if (cmd == "dlgdump") {
+            dialog::CmdDump(rest);
+        } else if (cmd == "dlgstart") {
+            dialog::CmdStart(rest);
+        } else if (cmd == "dlgstop") {
+            dialog::CmdStop(rest);
+        } else if (cmd == "dlgchoice") {
+            dialog::CmdChoice(rest);
+        } else if (cmd == "dlgselftest") {
+            dialog::CmdSelfTest(rest);
+        } else if (cmd == "dlgvote") {
+            dialog::CmdVote(rest);
+        } else if (cmd == "dlgvotesim") {
+            dialog::CmdVoteSim(rest);
+        } else if (cmd == "cineplay") {
+            dialog::CmdCinePlay(rest);
+        } else if (cmd == "cinestop") {
+            dialog::CmdCineStop(rest);
+        } else if (cmd == "cinehold") {
+            dialog::CmdCineHold(rest);
+        // [R7-DIALOG] end
+        }
+        // [R5-DEATH] begin -- die / bossfake / dstate / deathprobe / dstk
+        else if (death::OnCommand(cmd, rest)) {
+            // handled by the death module (it logged what it did)
+        }
+        // [R5-DEATH] end
+        // [R7-BOSS] begin -- bossphase dump|force <2|3>|sim <2|3>|spawn [class]
+        else if (boss::OnCommand(cmd, rest)) {
+            // handled by the boss module (it logged what it did)
+        }
+        // [R7-BOSS] end
+
+        Log("cmd handled: %s", line.c_str());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Frame / loops
+//
+// Lua registered four LoopAsync timers on UE4SS's async thread.  The native
+// module has one game-thread tick (ue::OnTick -> net::Frame) and a fixed-rate
+// router.  Every callback is wrapped in Step(label) exactly where the Lua's
+// runLoop(key) wrapped it, so a throw logs "ERR <key> loop: ..." and the other
+// loops keep running.
+// ---------------------------------------------------------------------------
+
+namespace {
+
+bool InSync() {
+    return state().puppet.phase == Phase::Sync;
+}
+
+// 30 Hz -- main.lua:4062-4067: patrolTick, driveTick, travelTick.
+// (All three are in HOLD_SKIP and SETTLE_SKIP.)
+void Loop30(double dt) {
+    ++g_t30;
+    RunGuardStep("puppet", true, true, [dt]() { puppet::Tick30(dt); });
+}
+
+// 15 Hz -- main.lua:4070-4079.
+void Loop15(double /*dt*/) {
+    ++g_t15;
+    // [R5-DEATH] begin
+    // Detection runs FIRST, so the liveness this frame publishes is this frame's,
+    // and it is deliberately OUTSIDE the Sync gate: a death can resolve while the
+    // phase machine is still catching up, and the hold camera must keep working
+    // while a local hold is set (so no HOLD_SKIP either).
+    RunGuardStep("death", true, false, []() { death::Tick15(); });
+    // [R5-DEATH] end
+    RunGuardStep("deathPeer", false, false, []() { DeathPeerKeepAlive(); });   // [R5-MAIN]
+    // [R6-SPAWN] before local::Tick15 on purpose: RefreshChars folds a new
+    // spawnAlias into tickTails, so the replayed enemy this step names is
+    // mirrorable in the SAME frame (ApplyPeer below), and a mirrored enemy gets
+    // MOVE_None -- which is what keeps a copy spawned where this client has no
+    // streamed floor from falling out of the world.
+    RunGuardStep("spawnHot", true, true, []() { combat::Tick15(); });
+    if (!InSync()) return;
+
+    // refreshChars + capture transform/montage + judge + peerWatchdog + anim.
+    // refreshChars, judge and animInstrument are in both skip tables; capture is
+    // not, and Publish() re-reads the live pawn below, so the body keeps moving.
+    RunGuardStep("local", true, true, []() { local::Tick15(); });
+
+    // sendOwn -- SETTLE_SKIP only: it is what tells the peer to hide our body
+    // while our own world reloads (docs/NATIVE-PORT.md 4, item 42).
+    RunGuardStep("sendOwn", true, false, []() { Publish(); });
+
+    // applyPeer -- both tables.
+    RunGuardStep("applyPeer", true, true, []() { ApplyPeer(); });
+}
+
+// 2 Hz -- main.lua:4082-4127.
+void Loop2(double /*dt*/) {
+    ++g_t2;
+
+    RunGuardStep("commands", false, false, []() { RunCommands(); });
+
+    // bootTick (the summon state machine) + ensureBody/syncBody + streamTick.
+    // In Lua only the body/stream half is guarded; boot only runs before Sync,
+    // where a hold/settle window cannot be open (readyTick only runs in Sync).
+    RunGuardStep("boot", true, true, []() { puppet::Tick2(); });
+
+    if (!InSync()) return;
+
+    // readyTick + computeMyBody + localWeaponInfo.  readyTick must run *while*
+    // held -- it is what ends the hold -- so this step is unguarded.
+    RunGuardStep("ready", false, false, []() { local::Tick2(); });
+
+    RunGuardStep("appear", true, true, []() { appear::Tick2(); });
+    RunGuardStep("lookTest", true, true, []() { LookTestTick(); });
+    RunGuardStep("combat", true, true, []() { combat::Tick2(); });
+    // [R5-BODY] begin -- zone identity/guard and the friend's body state.  After
+    // `combat` on purpose: PuppetDamage has already looked at the puppet's health
+    // for this tick before the peer's values are written into it (that is what
+    // keeps the PEERHIT/pd chain working), and `zonefake`/`bodyset` -- which run
+    // in the commands step above -- take effect in this tick.
+    RunGuardStep("zone", true, true, []() { zone::Tick2(); });
+    RunGuardStep("body", true, true, []() { body::Tick2(); });
+    // [R5-BODY] end
+    // [R7-DIALOG] begin -- dialogue/cinematic detection, the outcome apply and the
+    // DIALOG/CINE verdict bookkeeping.  Unguarded: a local teleport hold must not
+    // stop the detector, and a conversation is exactly what can be running while
+    // the death machinery holds the loop.
+    RunGuardStep("dialog", false, false, []() { dialog::Tick2(); });
+    // [R7-DIALOG] end
+    // [R5-DEATH] begin -- the death stack's debuff (2 Hz; it re-bases on the game's
+    // own value, so a slower rate cannot drift it).
+    RunGuardStep("deathStack", true, false, []() { death::Tick2(); });
+    // [R5-DEATH] end
+    RunGuardStep("worldState", true, true, []() { world::Tick2(); });
+    RunGuardStep("wp", true, true, []() { progress::Tick2(); });
+    // [R7-BREAK] live breakables: 1 Hz detection, 2 Hz apply/payload
+    RunGuardStep("breakables", true, true, []() { brk::Tick2(); });
+
+    // writeSyncStatus: not in either skip table (main.lua:4125).
+    RunGuardStep("status", false, false, []() { WriteSyncStatus(); });
+}
+
+// 1 Hz -- main.lua:4023-4028.
+void Loop1(double /*dt*/) {
+    ++g_hb;
+    Heartbeat();
+}
+
+}  // namespace
+
+void Frame(double dt) {
+    if (g_coopOff) return;   // COOP_OFF.txt: the game-only baseline (see g_coopOff)
+
+    // A hold is expressed in wall seconds and a settle window in game seconds:
+    // both expire on their own.  The Lua did the settle bookkeeping inside
+    // step() -- the first step after the window ran refreshChars + fillHealthCache
+    // (main.lua:4009-4012).
+    if (state().worldSettleUntil != 0.0 && Now() >= state().worldSettleUntil) {
+        state().worldSettleUntil = 0.0;
+        Step("refreshChars", Guard::None, []() { combat::RefreshChars(); });
+        Step("healthCache", Guard::None, []() { combat::FillHealthCache(); });
+    }
+
+    // The world object is replaced on every map load and on the death reload.
+    // Every cached UObject* is dropped before anything runs against the new one
+    // (coop_state.h rule 5, docs/HANDOFF.md 18).
+    ue::UObject* world = World();
+    if (world != g_lastWorld) {
+        const bool first = !g_worldSeen;
+        g_lastWorld = world;
+        g_worldSeen = true;
+        if (!first) {
+            Log("world changed: dropping every cached object");
+            OnWorldChanged();
+        }
+    }
+
+    ticks().Frame(dt);
+}
+
+void OnWorldChanged() {
+    // The engine layer's lookup caches and class-chain memo hold pointers into the
+    // world that is going away; drop them before anything reads a class again.
+    ue::ResetLookupCaches();
+    ResetAll();
+}
+
+// ---------------------------------------------------------------------------
+// Start -- main.lua:4129-4133 and the boot-time setup of 24-153
+// ---------------------------------------------------------------------------
+
+namespace {
+
+// main.lua:41-54.  Module dir first (the DLL sits next to the exe), then the
+// three legacy relative probes, then "coop/".
+std::string ResolveCoopDir() {
+    std::vector<std::string> probes;
+    const std::string mdir = ModuleDir();
+    const std::string edir = ExeDir();
+    if (!mdir.empty()) probes.push_back(mdir + "/coop_dir.txt");
+    if (!edir.empty() && edir != mdir) probes.push_back(edir + "/coop_dir.txt");
+    probes.push_back("coop_dir.txt");
+    probes.push_back("MortalShell2/Binaries/Win64/coop_dir.txt");
+    probes.push_back("./MortalShell2/Binaries/Win64/coop_dir.txt");
+
+    for (const std::string& p : probes) {
+        std::string line;
+        if (!ReadFirstLinePath(p, &line)) continue;
+        if (line.size() <= 1) continue;                  // `#p > 1`
+        for (char& c : line) {
+            if (c == '\\') c = '/';
+        }
+        if (line.back() != '/') line += '/';
+        return line;
+    }
+    return "coop/";   // main.lua:54
+}
+
+}  // namespace
+
+void Start() {
+    static bool started = false;
+    if (started) return;
+    started = true;
+
+    LocalState& L = state().local;
+
+    L.dir = ResolveCoopDir();
+
+    // The write thread must be up before the first file this module produces (the
+    // stale-state cleanup and result.txt below).  See the long comment on it.
+    IoStart();
+
+    // playerid.txt / role.txt (main.lua:56-67).  Normalise a BOM or CRLF the
+    // harness may have written; run-two.ps1 writes neither.
+    std::string line;
+    if (ReadFirstLinePath(L.dir + "playerid.txt", &line)) {
+        std::string v = Trim(line);
+        if (v.size() >= 3 && (unsigned char)v[0] == 0xEF && (unsigned char)v[1] == 0xBB &&
+            (unsigned char)v[2] == 0xBF) {
+            v = v.substr(3);
+        }
+        if (!v.empty()) L.me = v;
+    }
+    if (L.me.empty()) L.me = "A";
+
+    L.role = "host";
+    if (ReadFirstLinePath(L.dir + "role.txt", &line)) {
+        const std::string v = StripAllSpace(line);
+        if (!v.empty()) L.role = v;
+    }
+
+    // exactly two players for now (main.lua:1421): A <-> B.
+    L.peer = (L.me == "A") ? "B" : "A";
+
+    // Kill switches, read once (main.lua:255, 383, ... 4041).
+    state().toggles.Load();
+    // Baseline switch (see g_coopOff): present -> every hook stays, no co-op work.
+    g_coopOff = FileExists("COOP_OFF.txt");
+    if (g_coopOff) {
+        Log("COOP_OFF.txt present: hooks stay installed, co-op ticks are SKIPPED "
+            "(game-only baseline for the cost table)");
+    }
+    if (toggles().loadOn) {
+        Log("LOAD_ON.txt present: the native build has no asset loader (see Find)");
+    }
+    if (toggles().gameThread) {
+        // main.lua:4036-4043: GAME_THREAD.txt crashed both clients.  The native
+        // loops always run on the game thread, so this switch is informational.
+        Log("GAME_THREAD.txt present: the native module always runs on the game thread");
+    }
+
+    // [R5-DEATH] begin
+    // The death module: DEATH_OFF.txt, the [Rules] ini (written if absent) and the
+    // reset-veto hooks.  Before the loops below, so nothing can tick before the
+    // policy is loaded.
+    death::Start();
+    // [R5-DEATH] end
+
+    // [R7-DIALOG] begin -- DIALOG_OFF.txt / CINE_OFF.txt and the detector's first
+    // look.  Before the loops, so a state sampled in the first Sync tick is right.
+    dialog::Start();
+    // [R7-DIALOG] end
+
+    // Stale state from an earlier session must never draw a body
+    // (main.lua:4129-4131).
+    RemoveFile("out_" + L.me + ".txt");
+    RemoveFile("peer_" + L.peer + ".txt");
+
+    Log("=== CoopMod start (me=%s dir=%s role=%s) ===", L.me.c_str(), L.dir.c_str(),
+        L.role.c_str());
+    WriteFile("result.txt", "RUNNING\n");
+
+    // main.lua's phase clock is running from load time.  EnterPhase() is only
+    // called on a TRANSITION, so without this stamp PhaseSeconds() stays 0 until
+    // the first one, and every boot timeout in puppet::Boot() ("menu timeout",
+    // "waiting for menu (20s)") is dead code -- the first real launch sat in the
+    // menu phase silently for the whole session.
+    if (state().puppet.phaseEntered == 0) state().puppet.phaseEntered = Wall();
+
+    // Register the four loops.  Order matches the Lua's LoopAsync registration
+    // (1 Hz heartbeat first, then 30/15/2).
+    ticks().Every(1.0, "hb loop", &Loop1);
+    ticks().Every(30.0, "t30 loop", &Loop30);
+    ticks().Every(15.0, "t15 loop", &Loop15);
+    ticks().Every(2.0, "t2 loop", &Loop2);
+}
+
+}  // namespace net
+
+}  // namespace coop

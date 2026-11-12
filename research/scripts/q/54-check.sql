@@ -1,0 +1,8 @@
+SELECT 'ActorInts_Key' AS tok, COUNT(*) AS n FROM obj WHERE path LIKE '%SpartaSaveGame:ActorInts_Key%'
+UNION ALL SELECT 'E_ChestRewardtype', COUNT(*) FROM obj WHERE path LIKE '%E_ChestRewardtype%'
+UNION ALL SELECT 'E_DungeonButton_VisualTypes', COUNT(*) FROM obj WHERE path LIKE '%E_DungeonButton_VisualTypes%'
+UNION ALL SELECT 'BP_VFX_Breakable_Battleground_Barrier', COUNT(*) FROM obj WHERE path LIKE '%Breakable_Battleground_Barrier%'
+UNION ALL SELECT 'BP_CraftingItemPickup_Common', COUNT(*) FROM obj WHERE path LIKE '%CraftingItemPickup_Common%'
+UNION ALL SELECT 'GA_SpartaAbility(root)', COUNT(*) FROM obj WHERE path='/Game/Sparta/Core/Ability/GA_SpartaAbility.GA_SpartaAbility_C'
+UNION ALL SELECT 'SpartaHittable', COUNT(*) FROM obj WHERE path='/Script/Sparta.SpartaHittable'
+UNION ALL SELECT 'SaveObjects_Key', COUNT(*) FROM obj WHERE path LIKE '%SaveSubSystem:SaveObjects_Key%'

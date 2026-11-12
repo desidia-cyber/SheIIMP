@@ -1,0 +1,800 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	UpdateAttemptedSpawn	AttemptedSpawn BoolProperty; FailedToSpawn BoolProperty	2	Public, BlueprintCallable, BlueprintEvent	275076
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SetupOwnerForResuming		0	Public, BlueprintCallable, BlueprintEvent	275079
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	CanSpawn	CanSpawn BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	275080
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	DebugPrint		0	Public, BlueprintCallable, BlueprintEvent	275084
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	275105
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SpawnedEnemyKilled	OwningActor ObjectProperty of /Script/Engine.Actor	1	BlueprintCallable, BlueprintEvent	275106
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	EnemySpawned	SpawnedCharacter ObjectProperty of /Game/Sparta/Core/AI/BP_AICharacter.BP_AICharacter_C	1	BlueprintCallable, BlueprintEvent	275108
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	275110
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ExecuteUbergraph_BP_SpawnerSessionSaveObject	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	275112
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IncrementCumulativeCurrency	Class ClassProperty; Amount IntProperty	2	Public, BlueprintCallable, BlueprintEvent	225280
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UnlockDefaultPrologueEquip		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	225292
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ApplyDefaultSeal		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	225299
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	225302
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ResetForNewGamePlus		0	Public, BlueprintCallable, BlueprintEvent	225321
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetLuteTrackPlayed	IndexPlayed IntProperty	1	Public, BlueprintCallable, BlueprintEvent	225336
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetNumberPlayedLuteTracks	TracksPlayed IntProperty; PlayedTracks IntProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225340
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetStoryActivityCompleted		0	Public, BlueprintCallable, BlueprintEvent	225351
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetStoryActivityCompleted	ActivityCompleted BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225352
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveCharges	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225354
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetStoryCompletionActivityStarted		0	Public, BlueprintCallable, BlueprintEvent	225356
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetStoryCompletionActivityStarted	ActivityStarted BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225357
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetSlayerSealLockout	AchievementLockout BoolProperty	1	Public, BlueprintCallable, BlueprintEvent	225359
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetSlayerSealLockout	AchievementsLocked BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225361
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IsAchievementEarned	AcievementID StrProperty; Earned BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225363
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetAchievementEarned	AchievementID StrProperty	1	Public, BlueprintCallable, BlueprintEvent	225369
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetCinematicWatched	Tag StructProperty of /Script/GameplayTags.GameplayTag	1	Public, BlueprintCallable, BlueprintEvent	225372
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CheckIfCinematicWatched	Tag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225374
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveSeal	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225379
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IsLandingAreaCleansed	ID NameProperty; ReturnValue BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225381
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UpdateCleansedLandingAreas	ID NameProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225385
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IncrementTotalDeaths		0	Public, BlueprintCallable, BlueprintEvent	225388
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IsLandingAreaUnlocked	ID NameProperty; ReturnValue BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent, BlueprintPure	225391
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UpdateUnlockedLandingAreas	ID NameProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225395
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UpdateItemPoolState	ItemPoolState MapProperty	1	Public, BlueprintCallable, BlueprintEvent	225398
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetFinishedPrologue	FinishedPrologue BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225402
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetFinishedPrologue	FinishedPrologue BoolProperty	1	Public, BlueprintCallable, BlueprintEvent	225404
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveWeapon	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225406
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveSidearm	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225408
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveShell	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225410
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetActiveDarkForm	ID ClassProperty	1	Public, BlueprintCallable, BlueprintEvent	225412
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetEquipmentUnlockState	ID StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225414
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	AddUnlockedEquipment	ID StructProperty of /Script/GameplayTags.GameplayTag; Unlocked BoolProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	225419
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	RemoveDropItems	ItemDefinition ClassProperty; Stacks IntProperty	2	Public, BlueprintCallable, BlueprintEvent	225422
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	AddDropItems	ItemDefinition ClassProperty; Stacks IntProperty	2	Public, BlueprintCallable, BlueprintEvent	225429
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	EventReceived_76BE5EAA4173162C07E413973AECA999	Payload StructProperty of /Script/GameplayAbilities.GameplayEventData	1	BlueprintCallable, BlueprintEvent	225435
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	225437
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ExecuteUbergraph_BP_SpartaPlayerSaveObject	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	225438
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IncreaseWeaponStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; WeaponTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	4		53995
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IncreaseShellStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; ShellTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	4		54000
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IncreasePlayerStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	3		54005
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetWeaponStat	WeaponTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	3		54009
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetShellStat	ShellTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	3		54013
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetPlayerStat	StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	2		54017
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ClearWeaponStats	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; WeaponTag StructProperty of /Script/GameplayTags.GameplayTag	2		54020
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ClearPlayerStats	WorldContextObject ObjectProperty of /Script/CoreUObject.Object	1		54023
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	173814
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	312654
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	312655
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ExecuteUbergraph_BPSO_QuestLogComponent	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	312657
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	194336
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	205409
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	198178
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	IncreaseWeaponStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; WeaponTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	4	Final, Native, Public, BlueprintCallable	53995
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	IncreaseShellStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; ShellTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	4	Final, Native, Public, BlueprintCallable	54000
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	IncreasePlayerStat	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; StatTag StructProperty of /Script/GameplayTags.GameplayTag; IncreaseBy IntProperty	3	Final, Native, Public, BlueprintCallable	54005
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	GetWeaponStat	WeaponTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	3	Final, Native, Public, BlueprintCallable, BlueprintPure	54009
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	GetShellStat	ShellTag StructProperty of /Script/GameplayTags.GameplayTag; StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	3	Final, Native, Public, BlueprintCallable, BlueprintPure	54013
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	GetPlayerStat	StatTag StructProperty of /Script/GameplayTags.GameplayTag; ReturnValue IntProperty	2	Final, Native, Public, BlueprintCallable, BlueprintPure	54017
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	ClearWeaponStats	WorldContextObject ObjectProperty of /Script/CoreUObject.Object; WeaponTag StructProperty of /Script/GameplayTags.GameplayTag	2	Final, Native, Public, BlueprintCallable	54020
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	ClearPlayerStats	WorldContextObject ObjectProperty of /Script/CoreUObject.Object	1	Final, Native, Public, BlueprintCallable	54023
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.PlayerSaveObject	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.PlayerProgressionSaveData	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.TarstoneSaveData	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.PPItemsSaveData	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.DataLayersSave	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveShellRevive		0	Public, BlueprintCallable, BlueprintEvent	140821
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveIsDarkForm		0	Public, BlueprintCallable, BlueprintEvent	140832
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveHealingCharges		0	Public, BlueprintCallable, BlueprintEvent	140835
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveShellHealth		0	Public, BlueprintCallable, BlueprintEvent	140842
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveHealth		0	Public, BlueprintCallable, BlueprintEvent	140849
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SaveResolve		0	Public, BlueprintCallable, BlueprintEvent	140856
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetSessionStartTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1	Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent, Const	140863
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	140865
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	140867
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	CheckForValidTransform		0	BlueprintCallable, BlueprintEvent	140868
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ExecuteUbergraph_BPSO_PlayerSession	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	140869
+/Script/Sparta.SpartaSessionSaveObjectBase	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetSessionStartTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1	Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent, Const	57988
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ReceiveTick	DeltaTime FloatProperty	1	Event, Public, BlueprintEvent	162020
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ExecuteUbergraph_BPSO_WordMapObjective	EntryPoint IntProperty	1	Final, UbergraphFunction	162022
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ReceiveTick	DeltaTime FloatProperty	1	Event, Public, BlueprintEvent	53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ExecuteUbergraph	EntryPoint IntProperty	1		3

@@ -1,0 +1,1 @@
+SELECT type, path FROM obj WHERE (type LIKE '%ItemDefinition%' OR type = 'SpartaItemDefinition') AND (path LIKE '%Shell%' OR path LIKE '%Weapon%' OR path LIKE '%/ID_%') AND path LIKE '/Game/%' ORDER BY path LIMIT 400

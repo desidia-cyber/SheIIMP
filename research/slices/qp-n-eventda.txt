@@ -1,0 +1,28 @@
+﻿### BoolProperty /Script/Sparta.SpartaEventDataAsset:bIsNarrativeEvent  [000001F4ACDA6F80]
+
+### Class /Script/Sparta.SpartaEventDataAsset  [00007FF46F046D38]
+    super: /Script/Engine.DataAsset
+    8 members:
+      PRP LocationOffset : StructProperty of /Script/CoreUObject.Vector [o:0x30]
+      PRP RotationOffset : StructProperty of /Script/CoreUObject.Rotator [o:0x48]
+      PRP bIsNarrativeEvent : BoolProperty [o:0x60]
+      PRP LevelInstance : SoftObjectProperty of /Script/Engine.World [o:0x68]
+      PRP EventName : TextProperty [o:0x90]
+      PRP EventIcon : SoftObjectProperty of /Script/Engine.Texture2D [o:0xa0]
+      PRP CompletedEventIcon : SoftObjectProperty of /Script/Engine.Texture2D [o:0xc8]
+      PRP EventImage : SoftObjectProperty of /Script/Engine.Texture2D [o:0xf0]
+
+### SoftObjectProperty /Script/Sparta.SpartaEventDataAsset:CompletedEventIcon  [000001F4ACDA7100]
+
+### SoftObjectProperty /Script/Sparta.SpartaEventDataAsset:EventIcon  [000001F4ACDA7080]
+
+### SoftObjectProperty /Script/Sparta.SpartaEventDataAsset:EventImage  [000001F4ACDA7180]
+
+### SoftObjectProperty /Script/Sparta.SpartaEventDataAsset:LevelInstance  [000001F4ACDA7000]
+
+### StructProperty /Script/Sparta.SpartaEventDataAsset:LocationOffset  [000001F4ACDA6E80]
+
+### StructProperty /Script/Sparta.SpartaEventDataAsset:RotationOffset  [000001F4ACDA6F00]
+
+### TextProperty /Script/Sparta.SpartaEventDataAsset:EventName  [000001F4ACD69E00]
+

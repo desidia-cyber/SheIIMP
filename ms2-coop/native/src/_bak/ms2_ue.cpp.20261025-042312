@@ -1,0 +1,3678 @@
+// ms2_ue.cpp -- see ms2_ue.h for the contract.
+//
+// HOUSE RULES, all load-bearing:
+//
+//  1. Every read of game memory goes through ReadMem/WriteMem.  Those are the
+//     ONLY functions containing __try, and they are POD-only, because MSVC
+//     refuses __try in a function that needs object unwinding (C2712).  A wrong
+//     offset therefore returns false and logs; it cannot fault the game.
+//  2. Nothing runs at DllMain time.  Init() is called from the module's worker
+//     thread after the loader has finished with us.
+//  3. A global is used only after being PROVEN readable: the object array is
+//     validated by walking it and checking that every FUObjectItem's object
+//     reports the internal index the array claims for it.
+//  4. Nothing on the ProcessEvent hot path resolves a string.  The detour does
+//     integer FName compares and a mutex test; names are resolved only when
+//     something asks for one.
+#include "ms2_ue.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX          // std::min/std::max, not the winuser.h macros
+#endif
+#include <windows.h>
+// winuser.h defines GetClassName as a macro ("GetClassNameW"), which would eat
+// ue::GetClassName at every call site in this file and in every file that takes
+// the address of it.  windows.h is included here only for the Win32 primitives,
+// never for that API.
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
+#include <algorithm>
+#include <atomic>
+#include <cstdio>
+#include <cstring>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "MinHook.h"
+#include "ms2_log.h"
+#include "ms2_ue_test.h"
+
+namespace ue {
+
+// Defined further down (ue:: scope).  The index helpers that compare a candidate's
+// path against a wanted one are earlier in the file than its definition.
+std::string ObjectPath(UObject* o);
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// Member offsets.  Sources in README.md; every value here appears in the
+// Dumper-7 SDK generated from THIS exe, and the engine globals were recovered
+// independently from UE4SS's probe log cross-checked against the exe's .pdata.
+// ---------------------------------------------------------------------------
+
+// UObject (CoreUObject_classes.hpp: "class alignas(0x08) UObject", size 0x28)
+constexpr uint32 kOffObjectFlags   = 0x08;
+constexpr uint32 kOffInternalIndex = 0x0C;
+constexpr uint32 kOffClass         = 0x10;
+constexpr uint32 kOffName          = 0x18;
+constexpr uint32 kOffOuter         = 0x20;
+
+// UField / UStruct / UClass / UFunction
+constexpr uint32 kOffFieldNext         = 0x28;
+constexpr uint32 kOffStructSuper       = 0x40;
+constexpr uint32 kOffStructChildren    = 0x48;   // UField chain: functions, nested types
+constexpr uint32 kOffStructChildProps  = 0x50;   // FField chain: properties (UE5)
+constexpr uint32 kOffStructSize        = 0x58;
+constexpr uint32 kOffClassCastFlags    = 0xD8;
+constexpr uint32 kOffClassDefaultObj   = 0x110;
+constexpr uint32 kOffFuncFlags         = 0xB0;
+constexpr uint32 kOffFuncNumParms      = 0xB4;   // uint8
+constexpr uint32 kOffFuncParmsSize     = 0xB6;   // uint16
+constexpr uint32 kOffFuncReturnValue   = 0xB8;   // uint16, ReturnValueOffset
+constexpr uint32 kOffFuncExecFunction  = 0xD8;   // native entry point
+
+// FField / FProperty (Basic.hpp "class FProperty : public FField")
+constexpr uint32 kOffFieldName        = 0x20;
+constexpr uint32 kOffFieldNextF       = 0x18;
+constexpr uint32 kOffPropElementSize  = 0x34;
+constexpr uint32 kOffPropFlags        = 0x38;
+constexpr uint32 kOffPropOffset       = 0x44;    // Offset_Internal, UE5 name
+
+// TUObjectArray (Dumper-7's "GObjects"; = &FUObjectArray::ObjObjects)
+constexpr uint32 kOffArrChunks      = 0x00;
+constexpr uint32 kOffArrObjectsAlt  = 0x08;
+constexpr uint32 kOffArrMaxElements = 0x10;
+constexpr uint32 kOffArrNumElements = 0x14;
+constexpr uint32 kOffArrMaxChunks   = 0x18;
+constexpr uint32 kOffArrNumChunks   = 0x1C;
+constexpr uint32 kElementsPerChunk  = 0x10000;
+constexpr uint32 kSizeObjectItem    = 0x18;
+
+// EObjectFlags for this build (Basic.hpp)
+constexpr uint32 kRFClassDefaultObject = 0x00000010;
+constexpr uint32 kRFArchetypeObject    = 0x00000020;
+constexpr uint32 kRFBeginDestroyed     = 0x00008000;
+constexpr uint32 kRFFinishDestroyed    = 0x00010000;
+constexpr uint32 kRFMirroredGarbage    = 0x40000000;
+// EInternalObjectFlags, in FUObjectItem::Flags
+constexpr int32 kIOFGarbage         = 1 << 7;
+constexpr int32 kIOFPendingKill     = 1 << 5;
+constexpr int32 kIOFBeginDestroyed  = 1 << 8;
+constexpr int32 kIOFFinishDestroyed = 1 << 9;
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+Resolved          g_res;
+uint8_t*          g_textLo = nullptr;
+uint8_t*          g_textHi = nullptr;
+std::atomic<bool> g_ready{false};
+std::mutex        g_initLock;
+std::string       g_initReport = "not initialised";
+// Bumped on every world change (ue::ResetLookupCaches): the class-chain memo and
+// the name caches below hold UObject*/UClass* that a map unload can invalidate.
+std::atomic<uint32> g_lookupEpoch{1};
+
+std::atomic<uint64> g_peCount{0};
+std::atomic<uint32> g_gameThreadId{0};
+std::atomic<uint64> g_queueDropped{0};
+thread_local int    tl_inDetour = 0;
+// Set while MakeName runs: MakeName itself needs FindClass, and FindClass's fast
+// path calls MakeName, so without this flag the two recurse forever.
+thread_local int    tl_inMakeName = 0;
+
+uint32_t g_peOrig   = 0;
+uint32_t g_tickOrig = 0;
+bool     g_peHooked = false;
+bool     g_tickHooked = false;
+
+// MinHook hands the trampoline back through a void* out-parameter.
+void*    g_peTrampoline = nullptr;
+void*    g_tickTrampoline = nullptr;
+
+wchar_t g_exeDir[MAX_PATH] = L"";
+wchar_t g_iniPath[MAX_PATH] = L"";
+
+// ---------------------------------------------------------------------------
+// Guarded access -- the only __try in this file.  POD-only by necessity.
+// ---------------------------------------------------------------------------
+bool SafeRead(const void* src, void* dst, size_t n) {
+    if (!src || !dst || n == 0) return false;
+    __try {
+        memcpy(dst, src, n);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool SafeWrite(void* dst, const void* src, size_t n) {
+    if (!dst || !src || n == 0) return false;
+    __try {
+        memcpy(dst, src, n);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+template <class T>
+bool Read(const void* p, T& out) { return SafeRead(p, &out, sizeof(T)); }
+
+// Call helpers: also POD-only, so they can own the __try.
+typedef void (*ProcessEventFn)(UObject* self, UFunction* fn, void* parms);
+typedef void (*EngineTickFn)(void* self, float dt, bool idle);
+
+bool CallProcessEventAt(uintptr_t addr, UObject* self, UFunction* fn, void* parms) {
+    __try {
+        ((ProcessEventFn)addr)(self, fn, parms);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool CallEngineTickAt(uintptr_t addr, void* self, float dt, bool idle) {
+    __try {
+        ((EngineTickFn)addr)(self, dt, idle);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunHookFn(HookFn f, UObject* self, UFunction* fn, void* parms) {
+    __try {
+        f(self, fn, parms);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunTaskFn(std::function<void()>* f) {
+    __try {
+        (*f)();
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunTickFn(std::function<void(float)>* f, float dt) {
+    __try {
+        (*f)(dt);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+}  // namespace
+
+bool ReadMem(const void* src, void* dst, size_t n) { return SafeRead(src, dst, n); }
+bool WriteMem(void* dst, const void* src, size_t n) { return SafeWrite(dst, src, n); }
+
+bool PlausiblePtr(const void* p) {
+    const uintptr_t v = reinterpret_cast<uintptr_t>(p);
+    return v >= 0x10000 && v < 0x00007FFFFFFFFFFFULL && (v & 7) == 0;
+}
+
+// ---------------------------------------------------------------------------
+// Instrumentation: where a step's time actually goes.
+//
+// "the frame took 14 s" says nothing about WHICH loop did it, and every suspicion
+// in the hand-off (FindAllOf, lookup misses, GetFullName in a loop) is a different
+// fix.  So each instrumented entry point records itself only when it is SLOW
+// (>= 30 ms), together with the object-array slots it walked and the name
+// resolutions it performed: "FindObject 8300 ms, 140329 slots, 140329 names" is a
+// nested scan, not a scan.
+//
+// Records are throttled per entry (2 s) so a step that is slow 30x/s still leaves
+// one line, and ue::ProfDump prints the cumulative table so a report can quote
+// before/after numbers instead of an impression.
+// ---------------------------------------------------------------------------
+namespace {
+
+constexpr uint32 kProfSlowUs     = 30000;   // "slow" starts here (the brief's 30 ms)
+constexpr uint32 kProfLogEveryMs = 2000;    // per-entry line throttle
+constexpr int    kProfRows       = 48;
+
+struct ProfRow {
+    const char* what = nullptr;   // a literal: never freed, so a bare pointer is safe
+    uint64      calls = 0;
+    uint64      totalUs = 0;
+    uint64      maxUs = 0;
+    uint32      maxObjs = 0;
+    uint32      maxNames = 0;
+    uint64      lastLogMs = 0;
+    uint64      suppressed = 0;
+    char        arg[72] = {0};
+};
+
+ProfRow           g_profRows[kProfRows];
+int               g_profCount = 0;
+std::mutex        g_profLock;
+std::atomic<bool> g_profOn{true};
+
+// Per-call counters; only meaningful on the thread running a step (the game
+// thread).  Plain thread_local integers: one increment per array slot, which is
+// nothing next to the guarded read that follows it.
+thread_local uint64 tl_profObjs = 0;
+thread_local uint64 tl_profNames = 0;
+
+uint64 ProfFreq() {
+    static const uint64 f = [] {
+        LARGE_INTEGER v;
+        QueryPerformanceFrequency(&v);
+        return (uint64)(v.QuadPart ? v.QuadPart : 1);
+    }();
+    return f;
+}
+
+uint64 ProfSlowTicks() {
+    static const uint64 t = (ProfFreq() * (uint64)kProfSlowUs) / 1000000ull;
+    return t ? t : 1;
+}
+
+void ProfRecordImpl(const char* what, const char* arg, uint64 ticks, uint32 objs,
+                    uint32 names) {
+    if (!what) what = "?";
+    if (ticks < ProfSlowTicks()) return;        // not slow: not worth a row
+    const uint64 us = (ticks * 1000000ull) / ProfFreq();
+    char line[320];
+    {
+        std::lock_guard<std::mutex> lock(g_profLock);
+        ProfRow* row = nullptr;
+        for (int i = 0; i < g_profCount; ++i)
+            if (g_profRows[i].what == what) { row = &g_profRows[i]; break; }
+        if (!row && g_profCount < kProfRows) {
+            row = &g_profRows[g_profCount++];
+            row->what = what;
+        }
+        if (!row) return;
+        ++row->calls;
+        row->totalUs += us;
+        if (us > row->maxUs) {
+            row->maxUs = us;
+            row->maxObjs = objs;
+            row->maxNames = names;
+            if (arg) {
+                size_t n = 0;
+                for (; arg[n] && n + 1 < sizeof(row->arg); ++n) row->arg[n] = arg[n];
+                row->arg[n] = 0;
+            } else {
+                row->arg[0] = 0;
+            }
+        }
+        const uint64 nowMs = GetTickCount64();
+        if (row->lastLogMs != 0 && nowMs - row->lastLogMs < kProfLogEveryMs) {
+            ++row->suppressed;
+            return;
+        }
+        const uint64 suppressed = row->suppressed;
+        row->lastLogMs = nowMs;
+        row->suppressed = 0;
+        _snprintf_s(line, sizeof(line), _TRUNCATE,
+                    "PROF slow %s%s%s%s took %.1f ms (objs=%u names=%u; %llu calls so far, "
+                    "max %.1f ms, %llu suppressed)",
+                    what, row->arg[0] ? "(\"" : "", row->arg[0] ? row->arg : "",
+                    row->arg[0] ? "\")" : "", (double)us / 1000.0, objs, names,
+                    (unsigned long long)row->calls, (double)row->maxUs / 1000.0,
+                    (unsigned long long)suppressed);
+    }
+    ms2::Log(line);
+}
+
+// RAII timer for the lookup entry points.  Costs two QueryPerformanceCounter
+// calls; records only when the call was slow, so instrumenting a per-frame caller
+// does not punish it.
+struct ProfScope {
+    const char* what;
+    const char* arg;
+    uint64 t0;
+    uint64 objs0;
+    uint64 names0;
+    ProfScope(const char* w, const char* a)
+        : what(w), arg(a), t0(0), objs0(0), names0(0) {
+        if (!g_profOn.load(std::memory_order_relaxed)) { what = nullptr; return; }
+        t0 = ProfTicks();
+        objs0 = tl_profObjs;
+        names0 = tl_profNames;
+    }
+    ~ProfScope() {
+        if (!what) return;
+        const uint64 dt = ProfTicks() - t0;
+        if (dt < ProfSlowTicks()) return;
+        ProfRecordImpl(what, arg, dt, (uint32)(tl_profObjs - objs0),
+                       (uint32)(tl_profNames - names0));
+    }
+};
+
+}  // namespace
+
+uint64 ProfTicks() {
+    LARGE_INTEGER v;
+    QueryPerformanceCounter(&v);
+    return (uint64)v.QuadPart;
+}
+
+uint64 ProfSlowThresholdTicks() { return ProfSlowTicks(); }
+
+void ProfRecord(const char* what, const char* arg, uint64 ticks, uint32 objs, uint32 names) {
+    if (!g_profOn.load(std::memory_order_relaxed)) return;
+    ProfRecordImpl(what, arg, ticks, objs, names);
+}
+
+uint32 ProfObjs() { return (uint32)tl_profObjs; }
+uint32 ProfNames() { return (uint32)tl_profNames; }
+void   ProfCountObject() { ++tl_profObjs; }
+void   ProfCountName() { ++tl_profNames; }
+bool   ProfEnabled() { return g_profOn.load(std::memory_order_relaxed); }
+
+// The table, worst first.  Called from the 30 s heartbeat, so the log carries a
+// profile the reader can quote without a debugger.
+void ProfDump(const char* when) {
+    if (!g_profOn.load(std::memory_order_relaxed)) return;
+    ProfRow copy[kProfRows];
+    int n = 0;
+    {
+        std::lock_guard<std::mutex> lock(g_profLock);
+        n = g_profCount;
+        for (int i = 0; i < n; ++i) copy[i] = g_profRows[i];
+    }
+    for (int i = 1; i < n; ++i) {   // insertion sort, worst (maxUs desc) first
+        ProfRow v = copy[i];
+        int j = i - 1;
+        while (j >= 0 && copy[j].maxUs < v.maxUs) { copy[j + 1] = copy[j]; --j; }
+        copy[j + 1] = v;
+    }
+    ms2::Logf("PROF table (%s): %d entries, worst first [max | calls | total]",
+              when ? when : "?", n);
+    for (int i = 0; i < n && i < 14; ++i) {
+        const ProfRow& r = copy[i];
+        ms2::Logf("PROF   %-26s max %9.1f ms  x%llu  total %9.1f ms  objs=%u names=%u %s%s%s",
+                  r.what, (double)r.maxUs / 1000.0, (unsigned long long)r.calls,
+                  (double)r.totalUs / 1000.0, r.maxObjs, r.maxNames,
+                  r.arg[0] ? "arg=\"" : "", r.arg[0] ? r.arg : "", r.arg[0] ? "\"" : "");
+    }
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// PE header walk: where is .text?  (For the AOB scan only.)
+// ---------------------------------------------------------------------------
+bool FindTextRange(uint8_t* base, uint8_t** lo, uint8_t** hi) {
+    __try {
+        const uint8_t* dos = base;
+        if (dos[0] != 'M' || dos[1] != 'Z') return false;
+        const uint32_t e_lfanew = *reinterpret_cast<const uint32_t*>(dos + 0x3C);
+        const uint8_t* nt = dos + e_lfanew;
+        if (nt[0] != 'P' || nt[1] != 'E') return false;
+        const uint16_t nsec = *reinterpret_cast<const uint16_t*>(nt + 6);
+        const uint16_t optsize = *reinterpret_cast<const uint16_t*>(nt + 20);
+        const uint8_t* sect = nt + 24 + optsize;
+        for (uint16_t i = 0; i < nsec; ++i) {
+            const uint8_t* s = sect + i * 40;
+            const uint32_t vsize = *reinterpret_cast<const uint32_t*>(s + 8);
+            const uint32_t vaddr = *reinterpret_cast<const uint32_t*>(s + 12);
+            const uint32_t chars = *reinterpret_cast<const uint32_t*>(s + 36);
+            if ((chars & 0x20000000) && s[0] == '.' && s[1] == 't' && s[2] == 'e') {
+                *lo = base + vaddr;
+                *hi = base + vaddr + vsize;
+                return true;
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// AOB scan: "48 8B 05 ?? ?? ?? ??" -- the same notation as UE4SS's signature
+// files, so a signature can be pasted between the tools without translation.
+// ---------------------------------------------------------------------------
+struct AobPattern {
+    uint8_t bytes[64];
+    uint8_t mask[64];
+    int     len = 0;
+};
+
+int HexDigit(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+bool ParseAob(const char* s, AobPattern& p) {
+    p.len = 0;
+    while (*s) {
+        while (*s == ' ') ++s;
+        if (!*s) break;
+        if (p.len >= 64) return false;
+        if (s[0] == '?' && s[1] == '?') {
+            p.mask[p.len] = 1;
+            p.bytes[p.len] = 0;
+            ++p.len;
+            s += 2;
+            continue;
+        }
+        const int hi = HexDigit(s[0]);
+        const int lo = (s[1] ? HexDigit(s[1]) : -1);
+        if (hi < 0 || lo < 0) return false;
+        p.bytes[p.len] = (uint8_t)((hi << 4) | lo);
+        p.mask[p.len] = 0;
+        ++p.len;
+        s += 2;
+    }
+    return p.len > 0;
+}
+
+bool ScanAob(const AobPattern& p, uint8_t** hit) {
+    if (!g_textLo || !g_textHi || p.len <= 0) return false;
+    int anchor = 0;
+    while (anchor < p.len && p.mask[anchor]) ++anchor;
+    if (anchor >= p.len) return false;
+
+    uint8_t* cur = g_textLo;
+    if ((size_t)(g_textHi - g_textLo) <= (size_t)p.len) return false;
+    uint8_t* end = g_textHi - p.len;
+    while (cur <= end) {
+        uint8_t* found = (uint8_t*)memchr(cur, p.bytes[anchor], (size_t)(end - cur) + 1);
+        if (!found) return false;
+        uint8_t* start = found - anchor;
+        if (start >= g_textLo) {
+            int i = 0;
+            for (; i < p.len; ++i)
+                if (!p.mask[i] && start[i] != p.bytes[i]) break;
+            if (i == p.len) { *hit = start; return true; }
+        }
+        cur = found + 1;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// ini overrides -- the escape hatch for a different game build.
+// ---------------------------------------------------------------------------
+bool ReadIniValue(const wchar_t* iniPath, const char* key, uint64_t* out) {
+    if (!iniPath || !iniPath[0]) return false;
+    HANDLE h = CreateFileW(iniPath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    char buf[4096];
+    DWORD got = 0;
+    const BOOL ok = ReadFile(h, buf, sizeof(buf) - 1, &got, NULL);
+    CloseHandle(h);
+    if (!ok || got == 0) return false;
+    buf[got] = 0;
+
+    const size_t klen = strlen(key);
+    for (char* line = buf; *line; ) {
+        char* e = line;
+        while (*e && *e != '\n' && *e != '\r') ++e;
+        const char save = *e;
+        *e = 0;
+
+        char* p = line;
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p && *p != ';' && *p != '#' && _strnicmp(p, key, klen) == 0) {
+            const char* q = p + klen;
+            while (*q == ' ' || *q == '\t') ++q;
+            if (*q == '=') {
+                ++q;
+                while (*q == ' ' || *q == '\t') ++q;
+                uint64_t v = 0;
+                bool any = false;
+                if (q[0] == '0' && (q[1] == 'x' || q[1] == 'X')) {
+                    for (q += 2; *q; ++q) {
+                        const int d = HexDigit(*q);
+                        if (d < 0) break;
+                        v = (v << 4) | (uint64_t)d;
+                        any = true;
+                    }
+                } else {
+                    for (; *q >= '0' && *q <= '9'; ++q) { v = v * 10 + (uint64_t)(*q - '0'); any = true; }
+                }
+                *e = save;
+                if (any) { *out = v; return true; }
+                return false;
+            }
+        }
+        *e = save;
+        line = save ? e + 1 : e;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Global resolution: ini, then AOB, then this build's RVA (provenance logged).
+// ---------------------------------------------------------------------------
+struct GlobalSpec {
+    const char* name;
+    const char* aob;
+    int         dispOffset;   // -1: the match address IS the answer
+    uint32_t    fallbackRva;
+    uintptr_t*  out;
+    const char** source;
+};
+
+// Each pattern below was verified offline against this exe: it matches exactly
+// once in .text and resolves to the address the recovery pass proved (see
+// tools/gen_patterns.py, whose output is quoted in README.md).
+const char* kSigProcessEvent =
+    "40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC 00 01 00 00 48 8D 6C 24 30";
+// FName::AppendString.  This one is EXACT rather than wildcarded on purpose: the
+// first attempt wildcarded the "cmp byte ptr [rip+X], 0" displacement and matched
+// 27 places in .text (tests/test_scan.cpp caught it, which is why that test
+// exists).  A wildcard that costs uniqueness is not worth having, and the RVA
+// fallback covers a moved build anyway.
+const char* kSigAppendString =
+    "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 80 3D 63 E1 B5 09 00 48 8B";
+const char* kSigEngineTick =
+    "40 55 53 41 54 41 55 41 57 48 8D 6C 24 E0 48 81 EC 20 01 00 00 0F 29 B4";
+// The engine's own object-array accessor: mov rax,[GObjects] / mov rcx,[rax+rcx*8].
+// Anchoring on the USE rather than on a prologue is what makes this survive a
+// rebuild that moves the function.
+const char* kSigGObjects =
+    "48 8B 05 ?? ?? ?? ?? 48 8B 0C C8 48 8D 0C D1 EB 06 45 33 FF 41 8B CF BA";
+
+bool ResolveGlobal(const GlobalSpec& g, const wchar_t* iniPath) {
+    uint64_t rva = 0;
+    if (ReadIniValue(iniPath, g.name, &rva) && rva > 0 && rva < 0x40000000ull) {
+        *g.out = g_res.imageBase + (uintptr_t)rva;
+        *g.source = "ini";
+        return true;
+    }
+    if (g.aob) {
+        AobPattern p;
+        if (ParseAob(g.aob, p)) {
+            uint8_t* hit = nullptr;
+            if (ScanAob(p, &hit)) {
+                if (g.dispOffset < 0) {
+                    *g.out = (uintptr_t)hit;
+                } else {
+                    int32_t disp = 0;
+                    if (SafeRead(hit + g.dispOffset, &disp, sizeof(disp)))
+                        *g.out = (uintptr_t)(hit + g.dispOffset + 4 + disp);
+                }
+                if (*g.out) { *g.source = "aob"; return true; }
+            }
+        }
+    }
+    if (g.fallbackRva) {
+        const uintptr_t cand = g_res.imageBase + g.fallbackRva;
+        const bool inText = g_textLo && (uint8_t*)cand >= g_textLo && (uint8_t*)cand < g_textHi;
+        uint8_t probe = 0;
+        const bool readable = SafeRead((const void*)cand, &probe, 1);
+        if (inText || readable) {
+            *g.out = cand;
+            *g.source = "rva(build-specific)";
+            return true;
+        }
+    }
+    *g.out = 0;
+    *g.source = "UNRESOLVED";
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// The object array.
+//
+// 5.6 stores the CHUNK TABLE in word 0 of GObjects -- proven from the engine's
+// own accessor, which the GObjects pattern matches (a 64-bit load of [GObjects]
+// followed by [chunk]*8).  Pre-5.4 UE put a flat first chunk there instead and
+// the table at +0x08.  Which shape this build has is not assumed: it is decided
+// by ScoreLayout below and recorded in the log.
+// ---------------------------------------------------------------------------
+struct ObjArray {
+    int32_t maxElements = 0;
+    int32_t numElements = 0;
+    int32_t maxChunks = 0;
+    int32_t numChunks = 0;
+    bool    layoutB = true;
+};
+
+ObjArray g_arr;
+
+// ---------------------------------------------------------------------------
+// The object array GROWS, and ValidateArray() is a one-time snapshot.
+//
+// Every actor, component and widget created after Init() (the local pawn, the
+// summoned puppet, everything that streams in with a map) lands at an internal
+// index ABOVE the snapshot's NumElements.  With the stale count:
+//   * IsValid() rejects those objects ("index out of range"),
+//   * FindObject/FindAllOf never reach them,
+// so the whole module would quietly decide nothing exists.  Re-read the four
+// counts on a throttle instead.  Growth only, so the chunk count is published
+// before the element count: a reader that sees the larger NumElements must already
+// see the NumChunks that covers it.
+// ---------------------------------------------------------------------------
+std::atomic<uint64> g_arrCountsAt{0};    // GetTickCount64 of the last re-read
+
+void RefreshArrayCounts() {
+    if (!g_res.objects) return;
+    const uint64 now = GetTickCount64();
+    const uint64 last = g_arrCountsAt.load(std::memory_order_relaxed);
+    if (last != 0 && now - last < 100) return;
+    g_arrCountsAt.store(now, std::memory_order_relaxed);
+
+    int32_t maxElements = 0, numElements = 0, maxChunks = 0, numChunks = 0;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxElements), maxElements)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrNumElements), numElements)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxChunks), maxChunks)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrNumChunks), numChunks)) return;
+    if (numElements < 0 || numElements > 50000000) return;
+    if (numChunks < 0 || numChunks > 4096) return;
+    if (numElements == g_arr.numElements && numChunks == g_arr.numChunks) return;
+
+    g_arr.maxChunks = maxChunks;
+    g_arr.numChunks = numChunks;
+    g_arr.maxElements = maxElements;
+    g_arr.numElements = numElements;
+}
+
+bool ArrayUsable() {
+    if (!g_res.objects) return false;
+    RefreshArrayCounts();
+    return g_arr.numElements > 0;
+}
+
+// The base of chunk N.  TWO indirections, not one: GObjects+0 holds the chunk
+// TABLE and the item array lives at table[chunk].  Reading GObjects+0 and calling
+// that the chunk (the bug this replaces) hands back the table's own first words as
+// "objects": every lookup then returns a heap pointer, names decode as garbage and
+// the array's index invariant scores 0.  The legacy shape keeps chunk 0 inline at
+// +0 and its table at +8, which is why the branches differ.
+//
+// Split out of ItemAt so a whole-array walk reads the table/chunk pointers once per
+// chunk instead of once per object: FindAllOf runs over ~140k objects at 2 Hz, and
+// the per-index table read was most of its cost.
+void* ChunkBase(int32_t chunk) {
+    if (chunk < 0 || chunk >= g_arr.numChunks) return nullptr;
+    void* chunkBase = nullptr;
+    if (g_arr.layoutB) {
+        void** table = nullptr;
+        if (!Read((const void*)(g_res.objects + kOffArrChunks), table)) return nullptr;
+        if (!PlausiblePtr(table)) return nullptr;
+        if (!Read(table + chunk, chunkBase)) return nullptr;
+    } else if (chunk == 0) {
+        if (!Read((const void*)(g_res.objects + kOffArrChunks), chunkBase)) return nullptr;
+    } else {
+        void** table = nullptr;
+        if (!Read((const void*)(g_res.objects + kOffArrObjectsAlt), table)) return nullptr;
+        if (!PlausiblePtr(table)) return nullptr;
+        if (!Read(table + chunk, chunkBase)) return nullptr;
+    }
+    return PlausiblePtr(chunkBase) ? chunkBase : nullptr;
+}
+
+void* ItemAt(int32_t index) {
+    if (index < 0 || index >= g_arr.numElements) return nullptr;
+    const int32_t chunk = index / (int32_t)kElementsPerChunk;
+    const int32_t inChunk = index % (int32_t)kElementsPerChunk;
+    void* chunkBase = ChunkBase(chunk);
+    if (!chunkBase) return nullptr;
+    return (uint8_t*)chunkBase + (size_t)inChunk * kSizeObjectItem;
+}
+
+UObject* ObjectAt(int32_t index) {
+    void* item = ItemAt(index);
+    if (!item) return nullptr;
+    UObject* obj = nullptr;
+    if (!Read(item, obj)) return nullptr;
+    return PlausiblePtr(obj) ? obj : nullptr;
+}
+
+int32_t ItemFlags(int32_t index) {
+    void* item = ItemAt(index);
+    if (!item) return 0;
+    int32_t f = 0;
+    Read((uint8_t*)item + 0x08, f);
+    return f;
+}
+
+// The array's own invariant: object #i must report internal index i.  True for
+// either layout, so a wrong guess is detectable without knowing anything else.
+int ScoreLayout(bool layoutB) {
+    g_arr.layoutB = layoutB;
+    int score = 0, tried = 0;
+    for (int32_t i = 0; i < g_arr.numElements && tried < 64; ++i) {
+        void* item = ItemAt(i);
+        if (!item) continue;
+        UObject* obj = nullptr;
+        if (!Read(item, obj) || !PlausiblePtr(obj)) continue;
+        int32_t idx = -1;
+        if (!Read((uint8_t*)obj + kOffInternalIndex, idx)) continue;
+        UObject* cls = nullptr;
+        if (!Read((uint8_t*)obj + kOffClass, cls) || !PlausiblePtr(cls)) continue;
+        ++tried;
+        if (idx == i) ++score;
+    }
+    // A failing score used to be a dead end ("0 of 64" and nothing else).  Print
+    // what the first items actually decode to, once, so the next reader knows
+    // whether the item pointer, the stride or the index field is the broken one.
+    static std::atomic<int> diagLeft{2};
+    if (score == 0 && diagLeft.load() > 0 && diagLeft.fetch_sub(1) > 0) {
+        ms2::Logf("object array: score-detail (%s): tried=%d score=%d",
+                  layoutB ? "chunk-at-0" : "flat-first-chunk", tried, score);
+        int shown = 0;
+        for (int32_t i = 0; i < g_arr.numElements && shown < 6; ++i) {
+            void* item = ItemAt(i);
+            if (!item) continue;
+            UObject* obj = nullptr;
+            if (!Read(item, obj) || !PlausiblePtr(obj)) continue;
+            int32_t idx = -1;
+            Read((uint8_t*)obj + kOffInternalIndex, idx);
+            UObject* cls = nullptr;
+            const bool cok = Read((uint8_t*)obj + kOffClass, cls) && PlausiblePtr(cls);
+            ms2::Logf("object array:   i=%d item=0x%llX obj=0x%llX idx=%d classOk=%d",
+                      (int)i, (unsigned long long)(uintptr_t)item,
+                      (unsigned long long)(uintptr_t)obj, (int)idx, cok ? 1 : 0);
+            ++shown;
+        }
+    }
+    return tried == 0 ? -1 : score;
+}
+
+bool ValidateArray() {
+    if (!g_res.objects) return false;
+
+    ObjArray a;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxElements), a.maxElements)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrNumElements), a.numElements)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxChunks), a.maxChunks)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrNumChunks), a.numChunks)) return false;
+
+    // This runs up to 60 times while the engine is still creating objects, so the
+    // same two lines used to be 300 lines of log.  Log on a 1 s throttle instead
+    // (and always on the line that decides the layout).
+    static uint64 lastLogMs = 0;
+    static int lastScoreB = -2, lastScoreA = -2;
+    const uint64 nowMs = GetTickCount64();
+    const bool logNow = lastLogMs == 0 || nowMs - lastLogMs > 1000;
+    if (logNow) {
+        ms2::Logf("object array: MaxElements=%d NumElements=%d MaxChunks=%d NumChunks=%d",
+                  (int)a.maxElements, (int)a.numElements, (int)a.maxChunks, (int)a.numChunks);
+        lastLogMs = nowMs;
+    }
+
+    if (a.numElements <= 0 || a.numElements > 50000000) {
+        if (logNow) ms2::Logf("object array: NumElements=%d is not plausible", (int)a.numElements);
+        return false;
+    }
+    if (a.numChunks <= 0 || a.numChunks > 4096 || a.maxElements < a.numElements) {
+        if (logNow)
+            ms2::Logf("object array: chunk counts inconsistent (MaxChunks=%d NumChunks=%d)",
+                      (int)a.maxChunks, (int)a.numChunks);
+        return false;
+    }
+    g_arr = a;
+
+    const int scoreB = ScoreLayout(true);
+    const int scoreA = ScoreLayout(false);
+    if (scoreB != lastScoreB || scoreA != lastScoreA || scoreB > 0) {
+        ms2::Logf("object array: layout check -- chunk-table-at-0 scored %d, flat-first-chunk scored %d (of 64)",
+                  scoreB, scoreA);
+        lastScoreB = scoreB;
+        lastScoreA = scoreA;
+    }
+
+    if (scoreB >= scoreA && scoreB > 0) {
+        g_arr.layoutB = true;
+        g_res.objectArrayLayoutB = true;
+        return true;
+    }
+    if (scoreA > 0) {
+        g_arr.layoutB = false;
+        g_res.objectArrayLayoutB = false;
+        ms2::Log("object array: using the legacy flat-first-chunk layout -- this build is NOT the one "
+                 "the offsets were measured on, expect trouble");
+        return true;
+    }
+    g_arr.layoutB = true;
+    if (logNow)
+        ms2::Log("object array: NEITHER layout validated -- continuing with the 5.6 layout, reads may return nothing");
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Raw shape dump -- the diagnostic that says WHY the array did not validate.
+//
+// The scored check above can only say "0 of 64"; this prints the actual words so
+// the next reader does not have to guess whether the chunk table pointer, the
+// item stride, the internal index or the class pointer is the broken one.
+// ---------------------------------------------------------------------------
+void DumpArrayRaw(const char* when) {
+    if (!g_res.objects) { ms2::Logf("diag(%s): GObjects is unresolved", when); return; }
+
+    uint64_t w[4] = {0, 0, 0, 0};
+    Read((const void*)g_res.objects, w);
+    ms2::Logf("diag(%s): GObjects@0x%llX -> %016llX %016llX %016llX %016llX", when,
+              (unsigned long long)g_res.objects,
+              (unsigned long long)w[0], (unsigned long long)w[1],
+              (unsigned long long)w[2], (unsigned long long)w[3]);
+
+    void* table = nullptr;
+    Read((const void*)(g_res.objects + kOffArrChunks), table);
+    void* chunk0 = nullptr;
+    if (PlausiblePtr(table)) Read(table, chunk0);
+    ms2::Logf("diag(%s): Objects(chunk table)=0x%llX  chunk[0]=0x%llX  plausible(table)=%d plausible(chunk0)=%d",
+              when, (unsigned long long)(uintptr_t)table, (unsigned long long)(uintptr_t)chunk0,
+              PlausiblePtr(table) ? 1 : 0, PlausiblePtr(chunk0) ? 1 : 0);
+    if (!PlausiblePtr(chunk0)) {
+        // Try the legacy shape's table, so one log line settles which is which.
+        void* alt = nullptr;
+        Read((const void*)(g_res.objects + kOffArrObjectsAlt), alt);
+        void* altChunk = nullptr;
+        if (PlausiblePtr(alt)) Read(alt, altChunk);
+        ms2::Logf("diag(%s): legacy table(+0x08)=0x%llX chunk[0]=0x%llX plausible(table)=%d plausible(chunk)=%d",
+                  when, (unsigned long long)(uintptr_t)alt, (unsigned long long)(uintptr_t)altChunk,
+                  PlausiblePtr(alt) ? 1 : 0, PlausiblePtr(altChunk) ? 1 : 0);
+        return;
+    }
+
+    for (int32_t i = 0; i < 4; ++i) {
+        // Go through ItemAt so this dump proves the path every caller uses, not a
+        // second copy of the arithmetic that could be right while ItemAt is wrong.
+        uint8_t* item = (uint8_t*)ItemAt(i);
+        if (!item) { ms2::Logf("diag(%s): ItemAt(%d) = null", when, (int)i); continue; }
+        UObject* obj = nullptr;
+        if (!Read(item, obj)) { ms2::Logf("diag(%s): item[%d] unreadable", when, (int)i); continue; }
+        if (!PlausiblePtr(obj)) {
+            ms2::Logf("diag(%s): item[%d] @0x%llX obj=0x%llX NOT a plausible pointer",
+                      when, (int)i, (unsigned long long)(uintptr_t)item, (unsigned long long)(uintptr_t)obj);
+            continue;
+        }
+        uint32 flags = 0; int32 idx = -1; UClass* cls = nullptr; FName nm{};
+        Read((uint8_t*)obj + kOffObjectFlags, flags);
+        Read((uint8_t*)obj + kOffInternalIndex, idx);
+        Read((uint8_t*)obj + kOffClass, cls);
+        Read((uint8_t*)obj + kOffName, nm);
+        ms2::Logf("diag(%s): item[%d] @0x%llX obj=0x%llX flags=0x%X internalIndex=%d class=0x%llX name=%u:%u classname=\"%s\"",
+                  when, (int)i, (unsigned long long)(uintptr_t)item, (unsigned long long)(uintptr_t)obj,
+                  flags, (int)idx, (unsigned long long)(uintptr_t)cls, nm.ComparisonIndex, nm.Number,
+                  PlausiblePtr(cls) ? GetName((UObject*)cls).c_str() : "<bad class ptr>");
+    }
+}
+
+// ---------------------------------------------------------------------------
+// FName -> string via FName::AppendString(FString&).
+//
+// One FString is kept for the process lifetime and its length is reset before
+// each call, so the engine appends into an existing allocation.  Nothing is ever
+// freed, which is what makes this safe: freeing it would mean calling the game's
+// allocator through its vtable, and a FString leaked per call would be worse.
+// ---------------------------------------------------------------------------
+// FName::AppendString(FString&) is called with a STACK buffer, the way Dumper-7's
+// own SDK calls it (Basic.hpp: `wchar_t buffer[1024]; FString TempString(buffer, 0,
+// 1024);`).  For any name that fits, the engine appends without allocating -- so
+// this neither allocates nor frees game memory, which is exactly what makes it
+// safe to call from a log line.  If a name ever does not fit, the engine grows the
+// FString off our stack; that pointer is then ADOPTED (see g_nameBuf) and reused
+// for every later call, so even that case allocates at most once.
+FString        g_nameBuf;
+wchar_t        g_nameStack[1024];
+bool           g_nameBufSeeded = false;
+std::mutex     g_nameBufLock;
+typedef void (*AppendStringFn)(const FName* self, FString* out);
+AppendStringFn g_appendString = nullptr;
+
+// POD-only: owns the __try, so the CALLER may hold a lock or a std::string.
+bool CallAppendString(const FName* self, FString* out) {
+    __try {
+        g_appendString(self, out);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+std::string Narrow(const wchar_t* w, int32_t num) {
+    std::string out;
+    if (!w || num <= 0) return out;
+    out.reserve((size_t)num);
+    for (int32_t i = 0; i < num; ++i) {
+        const wchar_t c = w[i];
+        if (c == 0) break;          // an FString's buffer is NUL-terminated; Num counts it
+        out.push_back(c > 0 && c < 128 ? (char)c : '?');
+    }
+    return out;
+}
+
+bool AppendNameToString(const FName& name, std::string& out) {
+    if (!g_appendString) return false;
+    std::lock_guard<std::mutex> lock(g_nameBufLock);
+    if (!g_nameBufSeeded) {
+        g_nameBuf.Data = g_nameStack;
+        g_nameBuf.Num = 0;
+        g_nameBuf.Max = (int32)sizeof(g_nameStack) / (int32)sizeof(wchar_t);
+        g_nameStack[0] = 0;
+        g_nameBufSeeded = true;
+    } else if (g_nameBuf.Data) {
+        g_nameBuf.Num = 0;
+        g_nameBuf.Data[0] = 0;
+    }
+    // The engine call itself carries the __try, in a POD-only helper: a __try
+    // here would be illegal (this function holds a lock_guard, so it needs
+    // unwinding) and the compiler says so with C2712 rather than at runtime.
+    if (!CallAppendString(&name, &g_nameBuf)) return false;
+    out = Narrow(g_nameBuf.Data, g_nameBuf.Num);
+    return true;
+}
+
+// FName -> string is IMMUTABLE (the engine's name pool only grows; an index is
+// never re-used for different text), and the co-op modules resolve the same few
+// thousand names over and over: net::FullName builds a path for every actor it
+// looks at, and a single `appear` step was measured resolving 188 664 names for
+// 80 647 objects (745 ms of one frame).  Caching the TEXT per thread turns the
+// engine AppendString call (~2 us, plus this mutex) into a hash lookup (~0.1 us).
+// Per thread, so no lock and no contention; a name pool bound keeps it honest.
+static thread_local std::unordered_map<uint64, std::string> tl_nameCache;
+
+std::string NameToString(const FName& name) {
+    if (name.ComparisonIndex == 0 && name.Number == 0) return "None";
+    const uint64 key = ((uint64)name.ComparisonIndex << 32) | (uint64)name.Number;
+    auto hit = tl_nameCache.find(key);
+    if (hit != tl_nameCache.end()) return hit->second;
+
+    ++tl_profNames;              // one engine AppendString call: the scan-cost unit
+    std::string s;
+    if (!AppendNameToString(name, s)) {
+        char raw[32];
+        _snprintf_s(raw, sizeof(raw), _TRUNCATE, "<fname %u:%u>", name.ComparisonIndex, name.Number);
+        return raw;
+    }
+    if (name.Number > 0) {
+        char suffix[16];
+        _snprintf_s(suffix, sizeof(suffix), _TRUNCATE, "_%d", (int)name.Number);
+        s += suffix;
+    }
+    if (tl_nameCache.size() > 200000) tl_nameCache.clear();
+    tl_nameCache.emplace(key, s);
+    return s;
+}
+
+// ---------------------------------------------------------------------------
+// Object accessors
+// ---------------------------------------------------------------------------
+UClass* ClassOf(UObject* o) {
+    if (!PlausiblePtr(o)) return nullptr;
+    UClass* c = nullptr;
+    if (!Read((uint8_t*)o + kOffClass, c)) return nullptr;
+    return PlausiblePtr(c) ? c : nullptr;
+}
+
+FName NameOf(UObject* o) {
+    FName n;
+    if (!PlausiblePtr(o)) return n;
+    if (!Read((uint8_t*)o + kOffName, n)) return FName();
+    return n;
+}
+
+UObject* OuterOf(UObject* o) {
+    if (!PlausiblePtr(o)) return nullptr;
+    UObject* p = nullptr;
+    if (!Read((uint8_t*)o + kOffOuter, p)) return nullptr;
+    return PlausiblePtr(p) ? p : nullptr;
+}
+
+UClass* SuperOf(UObject* c) {
+    if (!PlausiblePtr(c)) return nullptr;
+    UClass* s = nullptr;
+    if (!Read((uint8_t*)c + kOffStructSuper, s)) return nullptr;
+    return PlausiblePtr(s) ? s : nullptr;
+}
+
+namespace {
+// Memo for IsChildOf -- see its comment.  Per thread because every engine read in
+// this module happens on the game thread; the epoch invalidates it on a map load.
+struct ChildRow {
+    const void* cls = nullptr;
+    const void* base = nullptr;
+    bool        result = false;
+};
+// Linear table, exactly like the original (an open-addressed probe was tried and
+// made FindAllOf report ZERO instances of a widget class that plainly existed on
+// screen -- the linear form is the one that is known to agree with the game).
+// 4096 rows because FindAllOf now asks this once per DISTINCT CLASS when it builds
+// a base class's descendant list (thousands of questions, not a handful); the row
+// is only appended when there is room, so a full table costs re-walks, never a
+// wrong answer.
+constexpr int kChildRows = 4096;
+thread_local ChildRow  tl_childRows[kChildRows];
+thread_local int       tl_childUsed = 0;
+thread_local uint32_t  tl_childEpoch = 0;
+}  // namespace
+
+bool IsChildOf(UClass* c, UClass* base) {
+    if (!PlausiblePtr(c) || !PlausiblePtr(base)) return false;
+    // Memoised per thread: the answer is a pure function of two class pointers,
+    // and the same few thousand (class, base) pairs are asked over and over.
+    const uint32_t epoch = g_lookupEpoch.load(std::memory_order_relaxed);
+    if (tl_childEpoch != epoch) {
+        tl_childEpoch = epoch;
+        tl_childUsed = 0;
+    }
+    const void* wantCls = (const void*)c;
+    const void* wantBase = (const void*)base;
+    for (int i = 0; i < tl_childUsed; ++i) {
+        if (tl_childRows[i].cls == wantCls && tl_childRows[i].base == wantBase)
+            return tl_childRows[i].result;
+    }
+    bool result = false;
+    for (int depth = 0; depth < 256 && PlausiblePtr(c); ++depth) {
+        if (c == base) { result = true; break; }
+        c = SuperOf((UObject*)c);
+    }
+    if (tl_childUsed < kChildRows) {
+        tl_childRows[tl_childUsed].cls = wantCls;
+        tl_childRows[tl_childUsed].base = wantBase;
+        tl_childRows[tl_childUsed].result = result;
+        ++tl_childUsed;
+    }
+    return result;
+}
+
+// ---------------------------------------------------------------------------
+// Cheap "is this object of class X" via the class's FName, discovered once.
+// Comparing FNames is two integer compares; comparing strings would resolve a
+// name for every object in the array.
+// ---------------------------------------------------------------------------
+FName     g_fnameClass{};
+FName     g_fnameFunction{};
+bool      g_classNamesReady = false;
+std::mutex g_classNamesLock;
+
+// A FAILED discovery must not be retried on every call: IsClassObject/IsFunctionObject
+// are called from per-object loops (FindAllOf, hooks, ResolveHookTarget), so an
+// un-throttled retry turns one bad name lookup into an unbounded rescan.  That is
+// exactly what happened on the first real launch: the array did not validate, the
+// names never resolved, and the module logged 12k lines and never left init.
+std::atomic<uint64> g_classNamesRetryAt{0};
+std::atomic<int>    g_classNamesFailLogs{0};
+
+bool DiscoverClassFNames() {
+    ProfScope _prof("DiscoverClassFNames", nullptr);
+    if (g_classNamesReady) return true;
+    const uint64 now = GetTickCount64();
+    if (now < g_classNamesRetryAt.load(std::memory_order_relaxed)) return false;
+    std::lock_guard<std::mutex> lock(g_classNamesLock);
+    if (g_classNamesReady) return true;
+    g_classNamesRetryAt.store(now + 2000, std::memory_order_relaxed);
+
+    int wanted = 0;
+    for (int32_t i = 0; i < g_arr.numElements && wanted < 2 && i < 200000; ++i) {
+        ++tl_profObjs;
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        UClass* c = ClassOf(o);
+        if (!PlausiblePtr(c)) continue;
+        const std::string cn = NameToString(NameOf((UObject*)c));
+        if (cn == "Class" && g_fnameClass.ComparisonIndex == 0) {
+            g_fnameClass = NameOf((UObject*)c);
+            ++wanted;
+        } else if (cn == "Function" && g_fnameFunction.ComparisonIndex == 0) {
+            g_fnameFunction = NameOf((UObject*)c);
+            ++wanted;
+        }
+    }
+    g_classNamesReady = (g_fnameClass.ComparisonIndex != 0);
+    if (g_classNamesReady) {
+        ms2::Logf("init: class FNames discovered -- Class=%u:%u Function=%u:%u",
+                  g_fnameClass.ComparisonIndex, g_fnameClass.Number,
+                  g_fnameFunction.ComparisonIndex, g_fnameFunction.Number);
+    } else if (g_classNamesFailLogs.fetch_add(1, std::memory_order_relaxed) < 3) {
+        ms2::Log("init: class FNames NOT discovered (no object resolved a class name) -- "
+                 "retrying every 2 s; this is the object-array/name layer, not the caller");
+    }
+    return g_classNamesReady;
+}
+
+bool IsClassObject(UObject* o) {
+    if (!g_classNamesReady) DiscoverClassFNames();
+    if (g_fnameClass.ComparisonIndex == 0) return false;
+    // Walk the CLASS's own inheritance chain looking for the class named "Class".
+    // Comparing only ClassOf(o) == "Class" (the old test) silently excluded every
+    // blueprint class -- their class is "BlueprintGeneratedClass" /
+    // "WidgetBlueprintGeneratedClass" -- which is why FindAllOf("WBP_MainMenu_C")
+    // and FindAllOf("BP_PlayerCharacter_C") returned nothing and the module never
+    // left the menu phase.  UObject-derived non-classes (UFunction, UStruct, UEnum)
+    // still fail here: their class chain is Field -> Object, not Class.
+    UClass* c = ClassOf(o);
+    for (int depth = 0; depth < 32 && PlausiblePtr(c); ++depth) {
+        if (NameOf((UObject*)c) == g_fnameClass) return true;
+        c = SuperOf((UObject*)c);
+    }
+    return false;
+}
+
+// The same chain walk, starting at a class pointer: "are this class's instances
+// class objects?".  Split out so the index can answer it ONCE per class pointer
+// (a few thousand) instead of once per object (140k) while it builds its list of
+// the slots that hold a class object.
+bool ChainHasClass(UClass* c) {
+    if (!g_classNamesReady) DiscoverClassFNames();
+    if (g_fnameClass.ComparisonIndex == 0) return false;
+    for (int depth = 0; depth < 32 && PlausiblePtr(c); ++depth) {
+        if (NameOf((UObject*)c) == g_fnameClass) return true;
+        c = SuperOf((UObject*)c);
+    }
+    return false;
+}
+
+bool IsFunctionObject(UObject* o) {
+    if (!g_classNamesReady) DiscoverClassFNames();
+    if (g_fnameFunction.ComparisonIndex != 0) {
+        UClass* c = ClassOf(o);
+        return PlausiblePtr(c) && NameOf((UObject*)c) == g_fnameFunction;
+    }
+    return ClassOf(o) ? NameToString(NameOf((UObject*)ClassOf(o))) == "Function" : false;
+}
+
+// ---------------------------------------------------------------------------
+// Small result caches so a lookup does not rescan the array every call.
+//
+// A MISS is only remembered for a moment (kMissRetryMs): Blueprint classes, CDOs
+// and the save subsystem appear when a map streams in, well AFTER Init(), so a
+// permanently cached "not found" would disable whichever feature asked for it for
+// the rest of the session.  A HIT is kept (callers still re-check IsValid).
+// ---------------------------------------------------------------------------
+constexpr uint64 kMissRetryMs = 2000;
+
+struct LookupRow {
+    UObject* obj = nullptr;
+    uint64   retryAt = 0;      // non-zero only on a miss: no re-scan before this
+};
+
+std::mutex g_lookupLock;
+std::unordered_map<std::string, LookupRow> g_classCache;
+std::unordered_map<std::string, LookupRow> g_objectCache;
+std::atomic<int> g_fastNameMismatch{0};   // one log line about MakeName disagreeing
+
+bool CachedHit(std::unordered_map<std::string, LookupRow>& cache, const std::string& key,
+               uint64 now, UObject** out) {
+    auto it = cache.find(key);
+    if (it == cache.end()) return false;
+    if (it->second.obj) {
+        *out = it->second.obj;
+        return true;
+    }
+    if (now < it->second.retryAt) {
+        *out = nullptr;
+        return true;
+    }
+    return false;                       // a stale miss: let the caller re-scan
+}
+
+void CacheStore(std::unordered_map<std::string, LookupRow>& cache, const std::string& key,
+                UObject* found, uint64 now) {
+    LookupRow& row = cache[key];
+    row.obj = found;
+    row.retryAt = found ? 0 : now + kMissRetryMs;
+}
+
+// ---------------------------------------------------------------------------
+// The object index -- why FindAllOf stopped walking 140k slots per call.
+//
+// Measured on the 2026-10-25 perf run (PROF table in ms2coop-native.log):
+// FindAllOf cost 200-300 ms per call and was called 704 times in 150 s; the 2 Hz
+// tick contains per-actor loops that call it, so one tick reached 6.3 s with
+// 11.2 M slot reads (~80 full walks of the array).  That is the freeze.
+//
+// Two maps, both keyed by SLOT INDEX and never by raw UObject*, because the array
+// recycles slots: a stale entry can therefore only waste a read, never hand back
+// an object that is not there any more.  A query re-reads every candidate slot and
+// re-checks internal index, class, name and the liveness flags -- the same tests
+// IsValid applies -- so the index can drop a live object from a result but cannot
+// invent one.
+//
+//   byClass[class pointer] -> slots, exact class
+//   byName [FName key]     -> slots, exact (ComparisonIndex, Number)
+//
+// Names are compared as integers inside every scan (NameKey below), which is the
+// other half of the fix: the old paths resolved an FName to a string for every
+// object they looked at, i.e. one engine AppendString call per slot.
+// ---------------------------------------------------------------------------
+uint64 NameKey(const FName& n) {
+    return ((uint64)n.ComparisonIndex << 32) | (uint64)n.Number;
+}
+
+struct ObjIndex {
+    std::mutex lock;
+    int32_t    scanned = 0;                                    // slots already indexed
+    std::unordered_map<const void*, std::vector<int32_t>> byClass;
+    std::unordered_map<uint64, std::vector<int32_t>>      byName;
+    std::vector<const void*>                              classes;    // distinct class ptrs
+    std::unordered_map<const void*, std::vector<const void*>> desc;   // base -> descendants
+    size_t descClassCount = 0;                                 // desc valid for this class count
+
+    // ---- slot verification (IndexVerifyLocked) ---------------------------
+    // The object the index believes sits in each slot.  UE RECYCLES freed
+    // GUObjectArray slots, so a new object (a widget, a blueprint class, its CDO)
+    // can be created at an index BELOW the high-water mark.  "Scan only the slots
+    // added since last time" never looks at those again, and the result is an index
+    // that disagrees with the array: measured 2026-10-25, FindClass("WBP_MainMenu_C")
+    // returned the class found at slot ~114034 on the first call and the one at
+    // ~106089 on the second -- i.e. a same-named class object appeared in a recycled
+    // slot -- while FindAllOf("WBP_MainMenu_C") stayed at "no instances" (firstBucket=1,
+    // the CDO only) for 200+ s and boot never left Phase::Menu.  A full walk found
+    // the widget the whole time.
+    std::vector<UObject*> slotObj;      // last object indexed at this slot
+    std::vector<const void*> slotCls;   // class recorded for it (bucket membership)
+    std::vector<uint64>    slotName;    // name key recorded for it
+    std::vector<int32_t>   classSlots;  // slots whose object is a CLASS object
+    std::unordered_map<const void*, bool> meta;   // class ptr -> "its instances are classes"
+    std::unordered_map<const void*, const void*> parentOf;   // class ptr -> SuperStruct
+    uint64   lastVerifyMs = 0;          // throttle for the pointer sweep
+};
+
+ObjIndex g_idx;
+
+// Read one slot's item and the object it names.  |wantClass| filters by exact
+// class, |wantName| by exact FName.  Returns nullptr for a freed/recycled/dead
+// slot, which is what makes a stale index entry harmless.
+UObject* SlotObject(const uint8_t* chunkBase, int32_t chunkFirst, int32_t slot,
+                    const void* wantClass, const FName* wantName, int32_t* outItemFlags) {
+    UObject* o = nullptr;
+    if (!Read(chunkBase + (size_t)(slot - chunkFirst) * kSizeObjectItem, o)) return nullptr;
+    if (!o || !PlausiblePtr(o)) return nullptr;
+    int32_t idx = -1;
+    if (!Read((uint8_t*)o + kOffInternalIndex, idx) || idx != slot) return nullptr;
+    if (wantClass) {
+        UClass* c = nullptr;
+        if (!Read((uint8_t*)o + kOffClass, c) || (const void*)c != wantClass) return nullptr;
+    }
+    if (wantName) {
+        FName n;
+        if (!Read((uint8_t*)o + kOffName, n) || !(n == *wantName)) return nullptr;
+    }
+    int32_t itemFlags = 0;
+    Read(chunkBase + (size_t)(slot - chunkFirst) * kSizeObjectItem + 0x08, itemFlags);
+    if (outItemFlags) *outItemFlags = itemFlags;
+    if (itemFlags & (kIOFGarbage | kIOFPendingKill | kIOFBeginDestroyed | kIOFFinishDestroyed))
+        return nullptr;
+    uint32_t flags = 0;
+    if (!Read((uint8_t*)o + kOffObjectFlags, flags)) return nullptr;
+    if (flags & (kRFMirroredGarbage | kRFBeginDestroyed | kRFFinishDestroyed)) return nullptr;
+    return o;
+}
+
+// "Are this class's instances class objects?" -- cached per class pointer, because
+// the chain walk behind it is the expensive part of indexing a slot.
+bool ClassOfHoldsClasses(const void* c) {
+    auto it = g_idx.meta.find(c);
+    if (it != g_idx.meta.end()) return it->second;
+    const bool v = ChainHasClass((UClass*)c);
+    g_idx.meta.emplace(c, v);
+    return v;
+}
+
+void IndexSlotLocked(const uint8_t* chunkBase, int32_t chunkFirst, int32_t slot) {
+    UObject* o = nullptr;
+    if (!Read(chunkBase + (size_t)(slot - chunkFirst) * kSizeObjectItem, o)) return;
+    if (!o || !PlausiblePtr(o)) return;
+    UClass* c = nullptr;
+    if (!Read((uint8_t*)o + kOffClass, c) || !PlausiblePtr(c)) return;
+    FName n;
+    if (!Read((uint8_t*)o + kOffName, n)) return;
+    const uint64 key = NameKey(n);
+    if ((size_t)slot < g_idx.slotObj.size()) {
+        g_idx.slotObj[slot] = o;
+        g_idx.slotCls[slot] = (const void*)c;
+        g_idx.slotName[slot] = key;
+    }
+    auto it = g_idx.byClass.find((const void*)c);
+    if (it == g_idx.byClass.end()) {
+        it = g_idx.byClass.emplace((const void*)c, std::vector<int32_t>()).first;
+        g_idx.classes.push_back((const void*)c);
+        // Remember the parent pointer: "is this class below that one" is then a walk
+        // in memory instead of two engine reads per step.  The descendant list below
+        // asks it once per class, thousands of times per query.
+        g_idx.parentOf[(const void*)c] = (const void*)SuperOf((UObject*)c);
+    }
+    it->second.push_back(slot);
+    g_idx.byName[key].push_back(slot);
+    // Remember where the CLASS objects are.  FindClass's fallback for a name with no
+    // learned FName key used to resolve a name for every object in the array (one
+    // engine AppendString per slot -- 90-330 ms a call, and a module that asks for a
+    // name that never exists paid it again every few seconds).  ~8.5k class objects
+    // out of 140k is a 16x smaller scan, and the list costs one cached test per slot.
+    if (ClassOfHoldsClasses((const void*)c)) g_idx.classSlots.push_back(slot);
+}
+
+// Throw the index away.  Called from ResetLookupCaches (a map unload recycles
+// addresses en masse) and when the array shrank or the buckets accumulated too
+// many dead slots.
+void IndexResetLocked() {
+    g_idx.byClass.clear();
+    g_idx.byName.clear();
+    // Keep the bucket arrays: a rebuild after a map load then does not rehash
+    // 140k inserts through a growing table (that rehash was a large share of the
+    // one-off ~200 ms rebuild measured at the menu -> world transition).
+    if (g_idx.byClass.bucket_count() < 16384) g_idx.byClass.reserve(16384);
+    if (g_idx.byName.bucket_count() < 65536) g_idx.byName.reserve(65536);
+    g_idx.classes.clear();
+    g_idx.classSlots.clear();
+    g_idx.meta.clear();
+    g_idx.desc.clear();
+    g_idx.descClassCount = 0;
+    g_idx.slotObj.clear();
+    g_idx.slotCls.clear();
+    g_idx.slotName.clear();
+    g_idx.parentOf.clear();
+    g_idx.scanned = 0;
+}
+
+// Grow the per-slot record arrays to cover |n| slots.
+void SlotRecordsReserve(int32_t n) {
+    if ((int32_t)g_idx.slotObj.size() < n) {
+        g_idx.slotObj.resize((size_t)n, nullptr);
+        g_idx.slotCls.resize((size_t)n, nullptr);
+        g_idx.slotName.resize((size_t)n, 0);
+    }
+}
+
+// Re-index every slot whose object pointer no longer matches what the index has:
+// UE recycles freed slots, so this is the ONLY way a new object created below the
+// high-water mark (a menu widget, a recreated blueprint class, its CDO) ever enters
+// the index.  Skipping it is exactly the bug that kept the module in Phase::Menu.
+//
+// Cost: the item table is read ONE chunk at a time (~1.5 MB) and then compared with
+// plain loads -- 140k pointer compares plus one memcpy per chunk, well under a
+// millisecond -- and the sweep is throttled to 10 Hz, so the per-call cost in
+// FindAllOf (which runs 40x per tick) is a clock read.
+void IndexVerifyLocked() {
+    const uint64 now = GetTickCount64();
+    if (g_idx.lastVerifyMs != 0 && now - g_idx.lastVerifyMs < 100) return;
+    g_idx.lastVerifyMs = now;
+
+    const int32_t total = g_idx.scanned;
+    if (total <= 0) return;
+    SlotRecordsReserve(total);
+
+    static thread_local std::vector<uint8_t> items;   // game thread only
+    uint32_t changed = 0;
+    bool sawClass = false;
+    for (int32_t chunk = 0; chunk < g_arr.numChunks; ++chunk) {
+        const int32_t first = chunk * (int32_t)kElementsPerChunk;
+        if (first >= total) break;
+        const uint8_t* base = (const uint8_t*)ChunkBase(chunk);
+        if (!base) continue;
+        int32_t last = first + (int32_t)kElementsPerChunk;
+        if (last > total) last = total;
+        const size_t bytes = (size_t)(last - first) * kSizeObjectItem;
+        items.resize(bytes);
+        if (!SafeRead(base, items.data(), bytes)) continue;   // chunk unreadable: skip it
+        for (int32_t slot = first; slot < last; ++slot) {
+            UObject* cur = nullptr;
+            std::memcpy(&cur, items.data() + (size_t)(slot - first) * kSizeObjectItem,
+                        sizeof(cur));
+            if (cur == g_idx.slotObj[slot]) continue;   // unchanged: the common case
+            // Whatever the index recorded for this slot is now stale: forget it (the
+            // bucket entries it left behind are dropped by the slotCls/slotName test
+            // in every query) and index what is there now.
+            g_idx.slotObj[slot] = nullptr;
+            g_idx.slotCls[slot] = nullptr;
+            g_idx.slotName[slot] = 0;
+            if (cur == nullptr || !PlausiblePtr(cur)) continue;   // free list / garbage
+            IndexSlotLocked(base, first, slot);
+            if (g_idx.slotObj[slot] == nullptr) continue;         // retried next sweep
+            ++changed;
+            // The slot may now hold a CLASS object where the one whose memory it took
+            // used to be.  The class-chain memo is keyed by class pointer, so drop it.
+            if (!sawClass && IsClassObject(cur)) sawClass = true;
+        }
+    }
+    if (changed == 0) return;
+    if (sawClass) {
+        g_idx.desc.clear();
+        g_idx.descClassCount = 0;
+        g_lookupEpoch.fetch_add(1, std::memory_order_relaxed);
+    }
+    static std::atomic<int> logs{0};
+    if (logs.fetch_add(1) < 6)
+        ms2::Logf("index: %u slot(s) re-used by new objects (objects=%d scanned=%d%s)",
+                  changed, (int)g_arr.numElements, (int)g_idx.scanned,
+                  sawClass ? ", a class object re-created" : "");
+}
+
+// Extend the index over the slots added since the last call, then verify the slots
+// already indexed (IndexVerifyLocked): new objects are NOT only appended above the
+// high-water mark, they are also dropped into recycled slots below it.
+void IndexSyncLocked() {
+    ProfScope _prof("indexSync", nullptr);
+    const int32_t total = g_arr.numElements;
+    if (total <= 0) return;
+    if (g_idx.scanned > total) IndexResetLocked();   // the array shrank (map unload)
+    SlotRecordsReserve(total);
+    int32_t i = g_idx.scanned;
+    while (i < total) {
+        const int32_t chunk = i / (int32_t)kElementsPerChunk;
+        const int32_t first = chunk * (int32_t)kElementsPerChunk;
+        int32_t last = first + (int32_t)kElementsPerChunk;
+        if (last > total) last = total;
+        const uint8_t* base = (const uint8_t*)ChunkBase(chunk);
+        if (!base) break;         // chunk not published yet: retry, do not mark it scanned
+        for (int32_t slot = i; slot < last; ++slot) IndexSlotLocked(base, first, slot);
+        i = last;
+    }
+    g_idx.scanned = i;
+    IndexVerifyLocked();
+}
+
+// "Is |c| below |base|", answered from the index's own parent map: no engine reads,
+// no IsChildOf memo.  This matters a lot more than it looks -- IsChildOf's memo is a
+// 4096-row LINEAR table, and it is full after the first few thousand questions, so
+// every miss costs a 4096-entry scan.  Asking it once per class per query (thousands
+// of times) made a FindAllOf that touched 5 slots take 60-100 ms; PROF showed
+// `FindAllOf max 343.7 ms x267` with `objs=5`.
+bool IsChildOfFast(const void* c, const void* base) {
+    for (int depth = 0; depth < 64 && c; ++depth) {
+        if (c == base) return true;
+        auto it = g_idx.parentOf.find(c);
+        if (it == g_idx.parentOf.end()) return false;
+        c = it->second;
+    }
+    return false;
+}
+
+// The classes whose instances a query for |base| must visit: |base| plus every
+// indexed class below it.  Cached per base class and invalidated when the set of
+// classes changes (which is what a map load looks like from here).
+const std::vector<const void*>& DescendantsOfLocked(const void* base) {
+    ProfScope _prof("descendants", nullptr);
+    // A class whose instances are all gone (a blueprint class destroyed by a map
+    // unload) leaves a dangling pointer in |classes|: its bucket was emptied by the
+    // exact compaction in each query, so drop the class here and let a later instance
+    // re-register it.  Without this, |classes| only ever grows.
+    for (size_t i = 0; i < g_idx.classes.size();) {
+        auto b = g_idx.byClass.find(g_idx.classes[i]);
+        if (b == g_idx.byClass.end() || b->second.empty()) {
+            if (b != g_idx.byClass.end()) g_idx.byClass.erase(b);
+            g_idx.classes[i] = g_idx.classes.back();
+            g_idx.classes.pop_back();
+            if (g_idx.descClassCount != g_idx.classes.size()) {
+                g_idx.desc.clear();
+                g_idx.descClassCount = g_idx.classes.size();
+            }
+        } else {
+            ++i;
+        }
+    }
+    if (g_idx.descClassCount != g_idx.classes.size()) {
+        g_idx.desc.clear();
+        g_idx.descClassCount = g_idx.classes.size();
+    }
+    auto it = g_idx.desc.find(base);
+    if (it != g_idx.desc.end()) return it->second;
+    std::vector<const void*> v;
+    for (const void* cc : g_idx.classes) {
+        if (cc == base || IsChildOfFast(cc, base)) v.push_back(cc);
+    }
+    return g_idx.desc.emplace(base, std::move(v)).first->second;
+}
+
+// ARRAY ORDER, not insertion order.  The walk these replace returns the object at
+// the LOWEST internal index, and a bucket does not guarantee that a later entry has
+// a higher slot (a recycled slot is appended after slots above it).  Callers pick
+// "the first" hit -- World(), Pawn(), the menu widget -- so every query sorts.
+//
+// A bucket entry is dropped EXACTLY, using the per-slot record the index keeps: it
+// is stale iff the slot no longer records the class (or name) the bucket was built
+// for.  That is an array compare, so compaction costs no engine reads and can never
+// drop a live entry -- dropping on "the object failed a liveness test" is what a
+// previous version did, and a slot whose object was momentarily unreadable then
+// vanished from the index forever (its cached pointer still matched, so the verify
+// sweep never re-added it).
+void LiveSlotsForClassLocked(std::vector<int32_t>& bucket, const void* cls) {
+    size_t w = 0;
+    for (size_t i = 0; i < bucket.size(); ++i) {
+        const int32_t slot = bucket[i];
+        if ((size_t)slot >= g_idx.slotCls.size() || g_idx.slotCls[slot] != cls) continue;
+        bucket[w++] = slot;
+    }
+    bucket.resize(w);
+}
+
+void LiveSlotsForNameLocked(std::vector<int32_t>& bucket, uint64 key) {
+    size_t w = 0;
+    for (size_t i = 0; i < bucket.size(); ++i) {
+        const int32_t slot = bucket[i];
+        if ((size_t)slot >= g_idx.slotName.size() || g_idx.slotName[slot] != key) continue;
+        bucket[w++] = slot;
+    }
+    bucket.resize(w);
+}
+
+// The first live object whose FName is |name| and, when |wantPath| is given, whose
+// object path equals it.  A path compare is only attempted for a candidate whose
+// immediate outer already names the path's second-to-last segment, so a name with
+// thousands of instances does not build thousands of paths.
+UObject* FindByNameLocked(const FName& name, const char* wantPath, const std::string& wantOuter) {
+    const uint64 key = NameKey(name);
+    auto it = g_idx.byName.find(key);
+    if (it == g_idx.byName.end()) return nullptr;
+    std::vector<int32_t>& bucket = it->second;
+    LiveSlotsForNameLocked(bucket, key);
+    std::sort(bucket.begin(), bucket.end());   // lowest internal index first
+    int32_t curChunk = -1;
+    int32_t chunkFirst = 0;
+    const uint8_t* chunkBase = nullptr;
+    for (size_t k = 0; k < bucket.size(); ++k) {
+        const int32_t slot = bucket[k];
+        const int32_t chunk = slot / (int32_t)kElementsPerChunk;
+        if (chunk != curChunk) {
+            curChunk = chunk;
+            chunkFirst = chunk * (int32_t)kElementsPerChunk;
+            chunkBase = (const uint8_t*)ChunkBase(chunk);
+        }
+        ++tl_profObjs;
+        UObject* o = chunkBase ? SlotObject(chunkBase, chunkFirst, slot, nullptr, &name, nullptr)
+                               : nullptr;
+        if (!o) continue;                       // freed/recycled: skipped, not dropped
+        bool match = true;
+        if (wantPath) {
+            match = false;
+            UObject* outer = OuterOf(o);
+            if (!wantOuter.empty() && outer && NameToString(NameOf(outer)) == wantOuter)
+                match = (ObjectPath(o) == wantPath);
+        }
+        if (!match) continue;
+        return o;
+    }
+    return nullptr;
+}
+
+// First live class object whose FName is |name| and whose class chain reaches
+// "Class".  Verified against the real string, so a bad Conv_StringToName index can
+// never hand a caller an unrelated class.  Lowest slot wins, like the walk.
+UClass* FindClassByFNameLocked(const FName& name, const char* want) {
+    const uint64 key = NameKey(name);
+    auto it = g_idx.byName.find(key);
+    if (it == g_idx.byName.end()) return nullptr;
+    std::vector<int32_t>& bucket = it->second;
+    LiveSlotsForNameLocked(bucket, key);
+    std::sort(bucket.begin(), bucket.end());
+    int32_t curChunk = -1;
+    int32_t chunkFirst = 0;
+    const uint8_t* chunkBase = nullptr;
+    for (size_t k = 0; k < bucket.size(); ++k) {
+        const int32_t slot = bucket[k];
+        const int32_t chunk = slot / (int32_t)kElementsPerChunk;
+        if (chunk != curChunk) {
+            curChunk = chunk;
+            chunkFirst = chunk * (int32_t)kElementsPerChunk;
+            chunkBase = (const uint8_t*)ChunkBase(chunk);
+        }
+        ++tl_profObjs;
+        UObject* o = chunkBase ? SlotObject(chunkBase, chunkFirst, slot, nullptr, &name, nullptr)
+                               : nullptr;
+        if (!o) continue;
+        if (!IsClassObject(o)) continue;
+        if (NameToString(NameOf(o)) != want) continue;
+        return (UClass*)o;
+    }
+    return nullptr;
+}
+
+// Every live CLASS object whose name is |want|, in array order, plus the "_C"
+// variant of the same question.  This is the fallback for a name with no learned
+// FName key, and it walks classSlots (~8.5k) instead of every object in the array
+// (~140k) resolving a name for each: the measured cost of the old full scan was
+// 90-330 ms per call, and a name the module asks about that does not exist paid it
+// again every time the negative cache expired (PROF: FindClass("BPSO_EridrimUnlock
+// Manager_C") 329.7 ms x116, 18.8 s of game thread in one two-client run).
+UClass* ScanClassSlotsLocked(const std::string& want) {
+    std::vector<int32_t> slots = g_idx.classSlots;
+    std::sort(slots.begin(), slots.end());
+    slots.erase(std::unique(slots.begin(), slots.end()), slots.end());
+    int32_t curChunk = -1;
+    int32_t chunkFirst = 0;
+    const uint8_t* chunkBase = nullptr;
+    UClass* suffix = nullptr;
+    for (size_t k = 0; k < slots.size(); ++k) {
+        const int32_t slot = slots[k];
+        const int32_t chunk = slot / (int32_t)kElementsPerChunk;
+        if (chunk != curChunk) {
+            curChunk = chunk;
+            chunkFirst = chunk * (int32_t)kElementsPerChunk;
+            chunkBase = (const uint8_t*)ChunkBase(chunk);
+        }
+        ++tl_profObjs;
+        UObject* o = chunkBase ? SlotObject(chunkBase, chunkFirst, slot, nullptr, nullptr,
+                                            nullptr)
+                               : nullptr;
+        if (!o) continue;
+        const std::string n = NameToString(NameOf(o));
+        if (n == want) return (UClass*)o;                      // exact: lowest slot wins
+        if (!suffix && n.size() > 2 && n.compare(n.size() - 2, 2, "_C") == 0 &&
+            n.compare(0, n.size() - 2, want) == 0)
+            suffix = (UClass*)o;                               // "BP_X" -> "BP_X_C"
+    }
+    return suffix;
+}
+
+// The "every slot" scans, kept as the degradation path for the one case the index
+// cannot serve: MakeName is unavailable, so a wanted name has no FName to look up.
+// Everything else goes through the index.
+UObject* SlowScanObject(const std::string& want, const std::string& leaf, bool fullPath) {
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        ++tl_profObjs;
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        if (NameToString(NameOf(o)) != leaf) continue;
+        if (fullPath && ObjectPath(o) != want) continue;
+        return o;
+    }
+    return nullptr;
+}
+
+UClass* SlowScanClass(const std::string& want) {
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        ++tl_profObjs;
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        if (!(NameToString(NameOf(o)) == want)) continue;
+        if (!IsClassObject(o)) continue;
+        return (UClass*)o;
+    }
+    // Blueprint classes are usually addressed without the "_C" suffix.
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        ++tl_profObjs;
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        if (!IsClassObject(o)) continue;
+        const std::string n = NameToString(NameOf(o));
+        if (n.size() > 2 && n.compare(n.size() - 2, 2, "_C") == 0 &&
+            n.compare(0, n.size() - 2, want) == 0)
+            return (UClass*)o;
+    }
+    return nullptr;
+}
+
+// The ORIGINAL FindAllOf walk (every slot, IsChildOf per object).  It is no longer
+// on any hot path; it exists so the index can be checked against something that
+// cannot be wrong (see the cross-check in FindAllOf).
+std::vector<UObject*> SlowScanAllOf(UClass* c) {
+    std::vector<UObject*> out;
+    if (!PlausiblePtr(c)) return out;
+    const int32_t total = g_arr.numElements;
+    for (int32_t chunk = 0; chunk < g_arr.numChunks; ++chunk) {
+        const uint8_t* base = (const uint8_t*)ChunkBase(chunk);
+        if (!base) continue;
+        const int32_t first = chunk * (int32_t)kElementsPerChunk;
+        if (first >= total) break;
+        int32_t last = first + (int32_t)kElementsPerChunk;
+        if (last > total) last = total;
+        for (int32_t i = first; i < last; ++i) {
+            ++tl_profObjs;
+            UObject* o = nullptr;
+            if (!Read(base + (size_t)(i - first) * kSizeObjectItem, o)) continue;
+            if (!o || !PlausiblePtr(o) || o == (UObject*)c) continue;
+            if (!IsChildOf(ClassOf(o), c)) continue;
+            int32_t idx = -1;
+            if (!Read((uint8_t*)o + kOffInternalIndex, idx) || idx != i) continue;
+            int32_t itemFlags = 0;
+            Read(base + (size_t)(i - first) * kSizeObjectItem + 0x08, itemFlags);
+            if (itemFlags & (kIOFGarbage | kIOFPendingKill | kIOFBeginDestroyed | kIOFFinishDestroyed))
+                continue;
+            uint32_t flags = 0;
+            Read((uint8_t*)o + kOffObjectFlags, flags);
+            if (flags & (kRFClassDefaultObject | kRFArchetypeObject)) continue;
+            if (flags & (kRFMirroredGarbage | kRFBeginDestroyed | kRFFinishDestroyed)) continue;
+            out.push_back(o);
+        }
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// Negative lookup cache: back off exponentially, and do not rescan for a name
+// already proven absent until the object array GROWS (a new class/CDO can only
+// appear together with new objects).  The old 2 s flat TTL made every module that
+// asks for a name that never exists -- "DataLayerManager" is one -- rescan the
+// whole array every 2 s, for the whole session.
+// ---------------------------------------------------------------------------
+struct NegRow {
+    uint64  retryAt = 0;
+    int32_t countAtMiss = 0;
+    uint32_t strikes = 0;
+};
+
+std::unordered_map<std::string, NegRow> g_classNeg;
+std::unordered_map<std::string, NegRow> g_objectNeg;
+
+// ---------------------------------------------------------------------------
+// string -> the object-side FName key, LEARNED.
+//
+// Conv_StringToName does not return the FNameEntryId the object array stores for
+// the same text: measured on this build, "WBP_MainMenu_C" comes back as 6863537
+// from the engine call while every object named WBP_MainMenu_C carries 2449538
+// (UE5 keeps a comparison index and a case-preserving/display index, and the two
+// calls land on different ones).  Comparing the two as integers therefore never
+// matches, which is why the old "fast path" fell through to the string scan on
+// every lookup.
+//
+// So: the first lookup of a name still costs one string scan, and what it LEARNS
+// is the object-side key.  Every later lookup is served by the name index.  These
+// keys are a property of the build's name pool, not of the level, so they survive
+// ResetLookupCaches (a map load) and keep class lookups index-fast after it.
+// ---------------------------------------------------------------------------
+std::unordered_map<std::string, uint64> g_nameKeyOf;
+
+FName FNameFromKey(uint64 k) {
+    FName n;
+    n.ComparisonIndex = (uint32)(k >> 32);
+    n.Number = (uint32)k;
+    return n;
+}
+
+void LearnNameKey(const char* text, const FName& actual) {
+    if (!text || !*text) return;
+    if (actual.ComparisonIndex == 0 && actual.Number == 0) return;
+    std::lock_guard<std::mutex> lock(g_lookupLock);
+    if (g_nameKeyOf.size() > 1024) g_nameKeyOf.clear();
+    g_nameKeyOf[text] = NameKey(actual);
+}
+
+uint64 LearnedNameKey(const char* text) {
+    if (!text || !*text) return 0;
+    std::lock_guard<std::mutex> lock(g_lookupLock);
+    auto it = g_nameKeyOf.find(text);
+    return it == g_nameKeyOf.end() ? 0 : it->second;
+}
+
+constexpr uint32 kNegCapSize = 512;
+
+// True means "do not scan: this name was proven absent and nothing has changed".
+//
+// |growthBypasses| re-allows the scan as soon as the array grew, which is what a
+// class/CDO appearing mid-level looks like.  It is OFF for class misses: while a
+// level streams in the array grows on almost every frame, so the bypass defeated the
+// backoff entirely and a name that never exists (BPSO_EridrimUnlockManager_C) was
+// rescanned to the tune of 18.8 s of game thread in one run.  A class that appears
+// later is now found within the backoff (<= 8 s) or immediately on the world change
+// that resets the negative cache, and the scan itself only walks class objects.
+bool NegBlocked(std::unordered_map<std::string, NegRow>& table, const std::string& key,
+                uint64 now, bool growthBypasses = true) {
+    auto it = table.find(key);
+    if (it == table.end()) return false;
+    const NegRow& r = it->second;
+    if (now >= r.retryAt) return false;                    // backoff elapsed
+    if (growthBypasses && g_arr.numElements > r.countAtMiss) return false;  // array grew
+    return true;
+}
+
+void NegNote(std::unordered_map<std::string, NegRow>& table, const std::string& key,
+             uint64 now) {
+    if (table.size() > kNegCapSize) table.clear();
+    NegRow& r = table[key];
+    ++r.strikes;
+    uint64 backoff = 2000ull << (r.strikes > 5 ? 5 : (r.strikes - 1));   // 2,4,8,16,32,64 s
+    if (backoff > 8000ull) backoff = 8000ull;                            // cap 8 s
+    r.retryAt = now + backoff;
+    r.countAtMiss = g_arr.numElements;
+}
+
+void NegClear(std::unordered_map<std::string, NegRow>& table, const std::string& key) {
+    table.erase(key);
+}
+
+}  // namespace
+
+// Called from the co-op module on every world change (net::OnWorldChanged).  A map
+// unload destroys the level's objects and blueprint classes, so every cached
+// UObject*/UClass* -- and the IsChildOf memo keyed on class pointers -- may now
+// name something else (UObject addresses are recycled; IsValid cannot see that).
+void ResetLookupCaches() {
+    {
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        g_classCache.clear();
+        g_objectCache.clear();
+        // A map unload destroys objects BY THE THOUSAND and recycles their slots, so
+        // every negative row is suspect too: drop them and let the index rebuild
+        // from slot 0 instead of trusting entries that name the old level.
+        g_classNeg.clear();
+        g_objectNeg.clear();
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_idx.lock);
+        IndexResetLocked();
+    }
+    g_lookupEpoch.fetch_add(1, std::memory_order_relaxed);
+}
+
+bool IsValid(UObject* o) {
+    if (!PlausiblePtr(o) || !ArrayUsable()) return false;
+
+    int32_t index = -1;
+    if (!Read((uint8_t*)o + kOffInternalIndex, index)) return false;
+    if (index < 0 || index >= g_arr.numElements) return false;
+    if (ObjectAt(index) != o) return false;
+
+    if (ItemFlags(index) & (kIOFGarbage | kIOFPendingKill | kIOFBeginDestroyed | kIOFFinishDestroyed))
+        return false;
+
+    uint32_t flags = 0;
+    if (!Read((uint8_t*)o + kOffObjectFlags, flags)) return false;
+    if (flags & (kRFMirroredGarbage | kRFBeginDestroyed | kRFFinishDestroyed)) return false;
+    return true;
+}
+
+UClass*  GetClass(UObject* o) { return ClassOf(o); }
+UObject* GetOuter(UObject* o) { return OuterOf(o); }
+
+bool IsA(UObject* o, UClass* c) {
+    if (!PlausiblePtr(c)) return false;
+    return IsChildOf(ClassOf(o), c);
+}
+
+std::string GetName(UObject* o) {
+    if (!PlausiblePtr(o)) return "<null>";
+    return NameToString(NameOf(o));
+}
+
+std::string GetClassName(UObject* o) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return "<no class>";
+    return NameToString(NameOf((UObject*)c));
+}
+
+// The object's path WITHOUT the class prefix: the outer chain joined by dots,
+// then the object's own name ("/Script/Engine.Default__KismetSystemLibrary").
+// FindObject's full-path form compares against this; GetFullName prefixes the
+// class.  Comparing a full path against GetFullName (the old behaviour) could
+// never match, which is why every FindObject("/Script/...") call -- console
+// commands, the Kismet CDOs, puppet body assets -- returned nullptr.
+std::string ObjectPath(UObject* o) {
+    ProfScope _prof("ObjectPath", nullptr);
+    if (!PlausiblePtr(o)) return std::string();
+    const std::string name = NameToString(NameOf(o));
+    std::string path;
+    UObject* it = OuterOf(o);
+    for (int depth = 0; depth < 64 && PlausiblePtr(it); ++depth) {
+        const std::string n = NameToString(NameOf(it));
+        path = n + (path.empty() ? "" : ".") + path;
+        it = OuterOf(it);
+    }
+    return path.empty() ? name : path + "." + name;
+}
+
+std::string GetFullName(UObject* o) {
+    ProfScope _prof("GetFullName", nullptr);
+    if (!PlausiblePtr(o)) return "<null>";
+    return GetClassName(o) + " " + ObjectPath(o);
+}
+
+namespace {
+
+std::string LastSegment(const std::string& s) {
+    const size_t dot = s.rfind('.');
+    return dot == std::string::npos ? s : s.substr(dot + 1);
+}
+
+// The segment just before the last one ("A.B.C" -> "B"): a candidate's immediate
+// outer must name it, which is a one-read reject before building a full path.
+std::string OuterSegment(const std::string& s) {
+    const size_t dot = s.rfind('.');
+    if (dot == std::string::npos) return std::string();
+    const size_t prev = s.rfind('.', dot - 1);
+    return prev == std::string::npos ? s.substr(0, dot) : s.substr(prev + 1, dot - prev - 1);
+}
+
+}  // namespace
+
+// FindObject: a bare name or an object path ("/Script/Engine.Default__X").
+//
+// Used to walk the whole array and resolve an FName to a string per object.  Now:
+// the leaf name becomes an FName (one engine call), the index hands back only the
+// slots that carry that name, and a path compare runs for the few candidates whose
+// outer already matches.
+UObject* FindObject(const char* fullPathOrName) {
+    ProfScope _prof("FindObject", fullPathOrName);
+    if (!ArrayUsable() || !fullPathOrName || !*fullPathOrName) return nullptr;
+    const std::string want(fullPathOrName);
+    const bool fullPath = want.find('/') != std::string::npos;
+    const uint64 now = GetTickCount64();
+    if (!fullPath) {
+        UObject* cached = nullptr;
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        if (CachedHit(g_objectCache, want, now, &cached)) return cached;
+        if (NegBlocked(g_objectNeg, want, now)) return nullptr;
+    }
+
+    const std::string leaf = LastSegment(want);
+    const std::string wantOuter = fullPath ? OuterSegment(want) : std::string();
+
+    UObject* result = nullptr;
+    // The leaf's FName only from a LEARNED key (see g_nameKeyOf): Conv_StringToName
+    // returns an index the object array does not use, and calling it per lookup is a
+    // ProcessEvent plus a name added to the engine's pool for nothing.
+    const uint64 learned = LearnedNameKey(leaf.c_str());
+    if (learned) {
+        std::lock_guard<std::mutex> lock(g_idx.lock);
+        IndexSyncLocked();
+        result = FindByNameLocked(FNameFromKey(learned), fullPath ? want.c_str() : nullptr,
+                                  wantOuter);
+    }
+
+    // No FName for the leaf (Conv_StringToName is unavailable) or nothing under it:
+    // fall back to the one-slot-at-a-time scan, but only after the negative cache
+    // says it is worth doing.  That scan is what used to run on every call.
+    if (!result && !fullPath) {
+        bool scan = false;
+        {
+            std::lock_guard<std::mutex> lock(g_lookupLock);
+            scan = !NegBlocked(g_objectNeg, want, now);
+        }
+        if (scan) result = SlowScanObject(want, leaf, fullPath);
+        // Learn the object-side FName key (see g_nameKeyOf) BEFORE taking the cache
+        // lock: LearnNameKey takes it, and std::mutex is not recursive.
+        if (result) LearnNameKey(leaf.c_str(), NameOf(result));
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        if (result) {
+            CacheStore(g_objectCache, want, result, now);
+            NegClear(g_objectNeg, want);
+        } else {
+            NegNote(g_objectNeg, want, now);
+        }
+        return result;
+    }
+    if (!result && fullPath) {
+        // A full path is never cached, so the one scan per uncached path is the
+        // price of the first lookup; the learn below makes the NEXT one an index
+        // query (and a path that does not exist costs one scan, then backs off).
+        result = SlowScanObject(want, leaf, fullPath);
+        if (result) LearnNameKey(leaf.c_str(), NameOf(result));
+    }
+    return result;
+}
+
+// FindClass: the class object with this name ("BP_PlayerCharacter_C"), or the
+// "_C"-suffixed one when a blueprint is addressed without the suffix.
+UClass* FindClass(const char* name) {
+    ProfScope _prof("FindClass", name);
+    if (!ArrayUsable() || !name || !*name) return nullptr;
+    const std::string want(name);
+    const uint64 now = GetTickCount64();
+    {
+        UObject* cached = nullptr;
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        if (CachedHit(g_classCache, want, now, &cached)) return (UClass*)cached;
+        if (NegBlocked(g_classNeg, want, now, false)) return nullptr;
+    }
+
+    UClass* result = nullptr;
+    // A key learned from an earlier scan of this same name (see g_nameKeyOf) --
+    // no engine call, no MakeName, straight to the index.  Deliberately NOT calling
+    // Conv_StringToName here any more: its FName index does not match the object's
+    // (see the comment on g_nameKeyOf), so it never found anything on its own -- it
+    // only added a ProcessEvent per lookup, and Conv_StringToName ADDS the name to
+    // the engine's pool, which is a real side effect on the game.
+    const uint64 learned = LearnedNameKey(want.c_str());
+    if (learned) {
+        std::lock_guard<std::mutex> lock(g_idx.lock);
+        IndexSyncLocked();
+        result = FindClassByFNameLocked(FNameFromKey(learned), want.c_str());
+    }
+    if (!result) {
+        bool scan = false;
+        {
+            std::lock_guard<std::mutex> lock(g_lookupLock);
+            scan = !NegBlocked(g_classNeg, want, now, false);
+        }
+        if (scan) {
+            // Walk only the slots that hold a CLASS object (g_idx.classSlots): the
+            // string scan of every object in the array is what made a miss cost
+            // 90-330 ms.  SlowScanClass is the last resort for the case where the
+            // index has not classified anything yet (index empty, i.e. before the
+            // first sync).
+            size_t classSlots = 0;
+            {
+                std::lock_guard<std::mutex> lock(g_idx.lock);
+                IndexSyncLocked();
+                classSlots = g_idx.classSlots.size();
+                if (classSlots != 0) result = ScanClassSlotsLocked(want);
+            }
+            if (!result && classSlots == 0) result = SlowScanClass(want);
+        }
+        // Say WHY the index could not answer, without calling Conv_StringToName (it
+        // adds a name to the engine's pool for every probe, which the game can see).
+        static std::atomic<int> diag{0};
+        if (diag.fetch_add(1) < 4) {
+            const FName found = result ? NameOf((UObject*)result) : FName();
+            ms2::Logf("FindClass(\"%s\"): index miss -- learned key=%d, full scan %s%s "
+                      "FName %u:%u (classes indexed=%llu, objects=%d)",
+                      want.c_str(), learned ? 1 : 0, result ? "FOUND" : "found nothing",
+                      result ? ", its" : "", found.ComparisonIndex, found.Number,
+                      (unsigned long long)g_idx.classes.size(), (int)g_arr.numElements);
+        }
+    }
+    // Remember the object-side key for this text: it is what makes the NEXT lookup
+    // (and the next one after a map load) an index query instead of a scan.
+    if (result) LearnNameKey(want.c_str(), NameOf((UObject*)result));
+
+    {
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        CacheStore(g_classCache, want, (UObject*)result, now);
+        if (result) {
+            NegClear(g_classNeg, want);
+        } else {
+            NegNote(g_classNeg, want, now);
+        }
+    }
+    return result;
+}
+
+// FindAllOf: every live, non-CDO instance of a class, INCLUDING subclasses.
+//
+// The instance list comes from the index: the class's own bucket plus the buckets
+// of every indexed class below it (DescendantsOfLocked caches that set).  Cost is
+// now proportional to the number of instances, not to the 140k-object array.
+std::vector<UObject*> FindAllOf(const char* className) {
+    ProfScope _prof("FindAllOf", className);
+    std::vector<UObject*> out;
+    if (!ArrayUsable() || !className) return out;
+    UClass* c = FindClass(className);
+    if (!c) return out;
+
+    size_t bucketSlots = 0;
+    size_t descCount = 0;
+    {
+        std::lock_guard<std::mutex> lock(g_idx.lock);
+        IndexSyncLocked();
+        const std::vector<const void*>& classes = DescendantsOfLocked((const void*)c);
+        descCount = classes.size();
+        // Gather the candidate slots from every matching class bucket, then sort
+        // them: the result must come back in ARRAY ORDER, exactly like the walk it
+        // replaces (callers pick the "first" hit and the module's World()/Pawn()
+        // decisions depend on which object that is).
+        std::vector<int32_t> slots;
+        size_t total = 0;
+        for (const void* cc : classes) {
+            auto it = g_idx.byClass.find(cc);
+            if (it == g_idx.byClass.end()) continue;
+            total += it->second.size();
+        }
+        slots.reserve(total);
+        for (const void* cc : classes) {
+            auto it = g_idx.byClass.find(cc);
+            if (it == g_idx.byClass.end()) continue;
+            std::vector<int32_t>& v = it->second;
+            // Drop entries the slot records say are no longer this class (exact, no
+            // engine reads) so a bucket cannot grow without bound as slots are
+            // recycled through it.
+            LiveSlotsForClassLocked(v, cc);
+            slots.insert(slots.end(), v.begin(), v.end());
+        }
+        bucketSlots = slots.size();
+        std::sort(slots.begin(), slots.end());
+        // A recycled slot that came back to the same class can be listed twice;
+        // duplicates would make the caller see one widget twice.
+        slots.erase(std::unique(slots.begin(), slots.end()), slots.end());
+        // Validate in order, skipping slots that are dead or recycled.
+        int32_t curChunk = -1;
+        int32_t chunkFirst = 0;
+        const uint8_t* chunkBase = nullptr;
+        for (size_t k = 0; k < slots.size(); ++k) {
+            const int32_t slot = slots[k];
+            const int32_t chunk = slot / (int32_t)kElementsPerChunk;
+            if (chunk != curChunk) {
+                curChunk = chunk;
+                chunkFirst = chunk * (int32_t)kElementsPerChunk;
+                chunkBase = (const uint8_t*)ChunkBase(chunk);
+            }
+            ++tl_profObjs;
+            UObject* o = chunkBase ? SlotObject(chunkBase, chunkFirst, slot, nullptr, nullptr,
+                                                nullptr)
+                                   : nullptr;
+            if (!o) continue;
+            if (o == (UObject*)c) continue;
+            uint32_t flags = 0;
+            if (!Read((uint8_t*)o + kOffObjectFlags, flags)) continue;
+            if (flags & (kRFClassDefaultObject | kRFArchetypeObject)) continue;
+            out.push_back(o);
+        }
+    }
+    (void)bucketSlots;
+
+    // An empty result is normal (the game creates objects when the level streams
+    // in) so this only says it a few times per name, with the numbers that make "not
+    // there yet" distinguishable from "the index is broken".  No extra walks: a
+    // full-array cross-check here cost 800 ms per poll and starved the game thread
+    // during boot.  objects=/scanned= is the pair to compare: scanned < objects means
+    // the index has not caught up with the array, and a slot below both means the
+    // object exists but was never indexed (what a stale slotObj entry looks like).
+    static std::atomic<int> emptyLog{0};
+    if (out.empty() && emptyLog.fetch_add(1) < 6) {
+        ms2::Logf("FindAllOf(\"%s\"): no instances yet (classes=%llu descendants=%llu "
+                  "firstBucket=%llu objects=%d scanned=%d)",
+                  className, (unsigned long long)g_idx.classes.size(),
+                  (unsigned long long)descCount, (unsigned long long)bucketSlots,
+                  (int)g_arr.numElements, (int)g_idx.scanned);
+    }
+    return out;
+}
+
+UObject* FindFirstOf(const char* className) {
+    ProfScope _prof("FindFirstOf", className);
+    // Through FindAllOf, so "first" means the same thing it did when this walked the
+    // array: the lowest slot index that matches.
+    std::vector<UObject*> all = FindAllOf(className);
+    return all.empty() ? nullptr : all.front();
+}
+
+
+// ---------------------------------------------------------------------------
+// Properties
+// ---------------------------------------------------------------------------
+namespace {
+
+FProperty* FindPropertyLocal(UObject* st, const char* name) {
+    if (!PlausiblePtr(st) || !name) return nullptr;
+    FField* f = nullptr;
+    if (!Read((uint8_t*)st + kOffStructChildProps, f)) return nullptr;
+    for (int depth = 0; depth < 8192 && PlausiblePtr(f); ++depth) {
+        FName fn;
+        if (!Read((uint8_t*)f + kOffFieldName, fn)) return nullptr;
+        if (NameToString(fn) == name) return (FProperty*)f;
+        FField* next = nullptr;
+        if (!Read((uint8_t*)f + kOffFieldNextF, next)) return nullptr;
+        f = next;
+    }
+    return nullptr;
+}
+
+}  // namespace
+
+FProperty* FindProperty(UStruct* st, const char* name) {
+    UObject* it = (UObject*)st;
+    if (!PlausiblePtr(it) || !name) return nullptr;
+    for (int depth = 0; depth < 256 && PlausiblePtr(it); ++depth) {
+        if (FProperty* p = FindPropertyLocal(it, name)) return p;
+        it = (UObject*)SuperOf(it);
+    }
+    return nullptr;
+}
+
+FProperty* FindProperty(UClass* c, const char* name) {
+    return FindProperty((UStruct*)c, name);
+}
+
+namespace {
+
+std::mutex g_propCacheLock;
+std::unordered_map<std::string, int32_t> g_propOffsetCache;
+
+std::string PropKey(UObject* st, const char* name) {
+    char key[32];
+    _snprintf_s(key, sizeof(key), _TRUNCATE, "%llX:", (unsigned long long)(uintptr_t)st);
+    return std::string(key) + name;
+}
+
+}  // namespace
+
+int32_t PropOffsetStruct(UStruct* st, const char* name) {
+    UObject* s = (UObject*)st;
+    if (!PlausiblePtr(s) || !name) return -1;
+
+    const std::string key = PropKey(s, name);
+    {
+        std::lock_guard<std::mutex> lock(g_propCacheLock);
+        auto it = g_propOffsetCache.find(key);
+        if (it != g_propOffsetCache.end()) return it->second;
+    }
+
+    int32_t result = -1;
+    if (FProperty* p = FindProperty(st, name)) {
+        int32_t off = -1;
+        if (Read((uint8_t*)p + kOffPropOffset, off)) result = off;
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_propCacheLock);
+        g_propOffsetCache[key] = result;
+    }
+    return result;
+}
+
+int32_t PropOffset(UObject* o, const char* name) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return -1;
+    return PropOffsetStruct((UStruct*)c, name);
+}
+
+int32_t PropSize(UObject* o, const char* name) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return -1;
+    FProperty* p = FindProperty((UStruct*)c, name);
+    if (!p) return -1;
+    int32_t sz = -1;
+    Read((uint8_t*)p + kOffPropElementSize, sz);
+    return sz;
+}
+
+// ---------------------------------------------------------------------------
+// Booleans
+//
+// A UE bool property is a MASK, not a bool: FBoolProperty keeps FieldSize,
+// ByteOffset and ByteMask at +0x70..0x73, and the value lives in one bit.  Reading
+// a byte and calling it a bool is how a mod ends up toggling three unrelated flags
+// at once, so this applies the mask.
+// ---------------------------------------------------------------------------
+namespace {
+
+// A UE bool property is a MASK, not a bool -- see GetBool.
+
+}  // namespace
+
+bool GetBool(UObject* o, const char* prop) {
+    if (!IsValid(o)) return false;
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+
+    UClass* c = ClassOf(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    uint8_t fieldSize = 0, byteOffset = 0, byteMask = 0, fieldMask = 0;
+    if (PlausiblePtr(p)) {
+        Read((uint8_t*)p + 0x70, fieldSize);
+        Read((uint8_t*)p + 0x71, byteOffset);
+        Read((uint8_t*)p + 0x72, byteMask);
+        Read((uint8_t*)p + 0x73, fieldMask);
+    }
+    uint8_t byte = 0;
+    if (!Read((uint8_t*)o + off + (int32_t)byteOffset, byte)) return false;
+    const uint8_t mask = fieldMask ? fieldMask : (byteMask ? byteMask : 0xFF);
+    return (byte & mask) != 0;
+}
+
+bool SetBool(UObject* o, const char* prop, bool v) {
+    if (!IsValid(o)) return false;
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+
+    UClass* c = ClassOf(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    uint8_t byteOffset = 0, byteMask = 0, fieldMask = 0;
+    if (PlausiblePtr(p)) {
+        Read((uint8_t*)p + 0x71, byteOffset);
+        Read((uint8_t*)p + 0x72, byteMask);
+        Read((uint8_t*)p + 0x73, fieldMask);
+    }
+    uint8_t* at = (uint8_t*)o + off + (int32_t)byteOffset;
+    uint8_t byte = 0;
+    if (!Read(at, byte)) return false;
+    const uint8_t mask = fieldMask ? fieldMask : (byteMask ? byteMask : 0xFF);
+    byte = v ? (uint8_t)(byte | mask) : (uint8_t)(byte & ~mask);
+    return WriteMem(at, &byte, 1);
+}
+
+UObject* GetCDO(UClass* c) {
+    if (!PlausiblePtr(c)) return nullptr;
+    UObject* cdo = nullptr;
+    if (!Read((uint8_t*)c + kOffClassDefaultObj, cdo)) return nullptr;
+    return PlausiblePtr(cdo) ? cdo : nullptr;
+}
+
+// GWorld: a UWorld* global.  Validated, because this is the one address in the
+// module that comes from the SDK's RVA alone (no signature was recovered for it,
+// and the SDK itself calls it "decoration").  A wrong read yields nullptr.
+UObject* GetWorld() {
+    ProfScope _prof("GetWorld", nullptr);
+    if (!g_res.gworld) return nullptr;
+    UObject* w = nullptr;
+    if (!Read((const void*)g_res.gworld, w)) return nullptr;
+    if (!PlausiblePtr(w) || !IsValid(w)) return nullptr;
+    if (GetClassName(w) != "World") return nullptr;
+    return w;
+}
+
+// ---------------------------------------------------------------------------
+// Functions
+// ---------------------------------------------------------------------------
+namespace {
+
+UFunction* FindFunctionLocal(UObject* st, const char* name) {
+    if (!PlausiblePtr(st) || !name) return nullptr;
+    UField* f = nullptr;
+    if (!Read((uint8_t*)st + kOffStructChildren, f)) return nullptr;
+    for (int depth = 0; depth < 8192 && PlausiblePtr(f); ++depth) {
+        // The Children chain holds nested classes and enums too; the cheap
+        // integer class test keeps the string compare off them.
+        if (IsFunctionObject((UObject*)f) && NameToString(NameOf((UObject*)f)) == name)
+            return (UFunction*)f;
+        UField* next = nullptr;
+        if (!Read((uint8_t*)f + kOffFieldNext, next)) return nullptr;
+        f = next;
+    }
+    return nullptr;
+}
+
+}  // namespace
+
+UFunction* FindFunction(UObject* o, const char* name) {
+    if (!PlausiblePtr(o) || !name) return nullptr;
+    UObject* c = (UObject*)ClassOf(o);
+    for (int depth = 0; depth < 256 && PlausiblePtr(c); ++depth) {
+        if (UFunction* f = FindFunctionLocal(c, name)) return f;
+        c = (UObject*)SuperOf(c);
+    }
+    return nullptr;
+}
+
+bool Call(UObject* o, UFunction* fn, void* params) {
+    if (!IsValid(o) || !PlausiblePtr(fn) || !g_res.processEvent) return false;
+    // A UFunction with parameters needs a parameter block.  Passing nullptr would
+    // have the engine's own thunk read through it; refuse instead of letting an AV
+    // land inside ProcessEvent (SEH would catch it, but the engine is mid-frame).
+    uint16_t parmsSize = 0;
+    if (Read((uint8_t*)fn + kOffFuncParmsSize, parmsSize) && parmsSize > 0 && !params) {
+        ms2::Logf("Call: %s has ParmsSize=%u but no parameter block -- refused",
+                  GetName((UObject*)fn).c_str(), (unsigned)parmsSize);
+        return false;
+    }
+    const bool ok = CallProcessEventAt(g_res.processEvent, o, fn, params);
+    if (!ok) ms2::Log("Call: ProcessEvent faulted -- suppressed (the offset or the function name is wrong)");
+    return ok;
+}
+
+bool Call(UObject* o, const char* fnName, void* params) {
+    UFunction* fn = FindFunction(o, fnName);
+    if (!fn) {
+        ms2::Logf("Call: no UFunction '%s' on %s", fnName ? fnName : "(null)",
+                  GetClassName(o).c_str());
+        return false;
+    }
+    return Call(o, fn, params);
+}
+
+// ---------------------------------------------------------------------------
+// MakeName: FName from a string, using the GAME's own conversion.
+//
+// UKismetStringLibrary::Conv_StringToName(FString InString) -> FName is called
+// through ProcessEvent with a Params block.  That keeps the name-pool layout --
+// which differs between UE versions and is not documented here -- entirely on the
+// engine's side, and it is the one path that is provably right because the game's
+// own Blueprint code uses exactly it.
+//
+// The rejected alternative: calling FName::FName(wchar_t*) at its address.  Its
+// prologue (mov rbx,rcx / mov r11,rdx / mov edi,r8d) takes three registers and the
+// convention could not be settled from the binary alone; guessing wrong means an
+// 8-byte write through a bad pointer, which no SEH guard can undo.
+// ---------------------------------------------------------------------------
+namespace {
+std::atomic<int> g_makeNameState{0};   // 0 = untried, 1 = works, 2 = unavailable
+
+// Conv_StringToName is a full ProcessEvent call, so resolving the same handful of
+// class names twice a second would add engine traffic for nothing.  A small
+// bounded table is enough: callers ask for a fixed set of class/property names.
+struct NameRow {
+    char  key[56];
+    FName name;
+};
+NameRow    g_nameRows[128];
+int        g_nameRowCount = 0;
+std::mutex g_nameRowsLock;
+
+FName CachedName(const char* ascii) {
+    std::lock_guard<std::mutex> lock(g_nameRowsLock);
+    for (int i = 0; i < g_nameRowCount; ++i) {
+        if (strcmp(g_nameRows[i].key, ascii) == 0) return g_nameRows[i].name;
+    }
+    return FName();
+}
+
+void StoreName(const char* ascii, FName n) {
+    std::lock_guard<std::mutex> lock(g_nameRowsLock);
+    if (g_nameRowCount >= (int)(sizeof(g_nameRows) / sizeof(g_nameRows[0]))) return;
+    if (strlen(ascii) >= sizeof(g_nameRows[0].key)) return;
+    strcpy_s(g_nameRows[g_nameRowCount].key, sizeof(g_nameRows[0].key), ascii);
+    g_nameRows[g_nameRowCount].name = n;
+    ++g_nameRowCount;
+}
+}  // namespace
+
+// RAII: every early return below must clear the recursion flag, or FindClass's
+// fast path would stay disabled on this thread after one failed conversion.
+namespace {
+struct MakeNameScope {
+    MakeNameScope() { tl_inMakeName = 1; }
+    ~MakeNameScope() { tl_inMakeName = 0; }
+};
+}  // namespace
+
+FName MakeName(const char* ascii) {
+    ProfScope _prof("MakeName", ascii);
+    if (!ascii || !*ascii) return FName();
+    if (g_makeNameState.load(std::memory_order_acquire) == 2) return FName();
+    if (const FName hit = CachedName(ascii); hit.ComparisonIndex != 0) return hit;
+    if (tl_inMakeName) return FName();          // FindClass -> MakeName -> FindClass
+    MakeNameScope scope;
+
+    UClass* lib = FindClass("KismetStringLibrary");
+    if (!lib) {
+        if (g_makeNameState.exchange(2) != 2)
+            ms2::Log("MakeName: KismetStringLibrary not found -- FName construction is unavailable");
+        return FName();
+    }
+    UObject* cdo = nullptr;
+    if (!Read((uint8_t*)lib + kOffClassDefaultObj, cdo) || !PlausiblePtr(cdo)) {
+        g_makeNameState.store(2);
+        return FName();
+    }
+    UFunction* fn = FindFunction(cdo, "Conv_StringToName");
+    if (!fn) {
+        if (g_makeNameState.exchange(2) != 2)
+            ms2::Log("MakeName: KismetStringLibrary.Conv_StringToName not found");
+        return FName();
+    }
+
+    // The argument lives in a stack buffer: FString is ptr/num/max and the engine
+    // only reads it -- the same shape the Dumper-7 SDK's name helper uses.
+    wchar_t buf[256];
+    int n = 0;
+    for (; ascii[n] && n < 255; ++n) buf[n] = (wchar_t)(unsigned char)ascii[n];
+    buf[n] = 0;
+    FString in;
+    in.Data = buf;
+    in.Num = n;
+    in.Max = 256;
+
+    Params p(fn);
+    if (!p.data()) return FName();
+    // The parameter is "InString" in UE5; older builds spell it "InName".  Ask
+    // rather than assume, and say so if neither is there.
+    if (PropOffsetStruct((UStruct*)fn, "InString") >= 0)
+        p.Set<FString>("InString", in);
+    else if (PropOffsetStruct((UStruct*)fn, "InName") >= 0)
+        p.Set<FString>("InName", in);
+    else {
+        ms2::Log("MakeName: Conv_StringToName has neither an InString nor an InName parameter");
+        g_makeNameState.store(2);
+        return FName();
+    }
+
+    if (!Call(cdo, fn, p.data())) {
+        g_makeNameState.store(2);
+        return FName();
+    }
+    const FName out = p.Get<FName>("ReturnValue");
+    g_makeNameState.store(out.ComparisonIndex ? 1 : 2);
+    if (!out.ComparisonIndex) {
+        ms2::Logf("MakeName: Conv_StringToName(\"%s\") returned None", ascii);
+    } else {
+        StoreName(ascii, out);
+    }
+    return out;
+}
+
+// Alias -- the co-op lanes write ue::MakeFName.
+FName MakeFName(const char* ascii) { return MakeName(ascii); }
+
+// ---------------------------------------------------------------------------
+// Params
+// ---------------------------------------------------------------------------
+Params::Params(UFunction* fn) : fn_(fn) {
+    if (!PlausiblePtr(fn)) return;
+    uint16_t parmsSize = 0;
+    if (!Read((uint8_t*)fn + kOffFuncParmsSize, parmsSize)) return;
+    // A UFunction with parameters must report a block size that covers them.  This
+    // is the offset README.md marks as the one value not measured off this build
+    // (ParmsSize sits between NumParms 0xB4 and ReturnValueOffset 0xB8), so say
+    // what it reads for the first few functions with parameters; a wrong value
+    // shows up here as ReturnValue reading garbage instead of a pointer.
+    static std::atomic<int> sizeLogs{0};
+    if (parmsSize > 0 && sizeLogs.fetch_add(1) < 12) {
+        uint8_t numParms = 0;
+        uint16_t retOff = 0;
+        Read((uint8_t*)fn + kOffFuncNumParms, numParms);
+        Read((uint8_t*)fn + kOffFuncReturnValue, retOff);
+        ms2::Logf("Params: %s -> ParmsSize=%d NumParms=%d ReturnValueOffset=%d",
+                  GetFullName((UObject*)fn).c_str(), (int)parmsSize, (int)numParms, (int)retOff);
+    }
+    size_ = parmsSize > 0 ? parmsSize : 8;
+    if (size_ > 0x4000) {
+        ms2::Logf("Params: %s reports ParmsSize=%d -- refusing", GetName((UObject*)fn).c_str(), (int)size_);
+        size_ = 0;
+        return;
+    }
+    buf_ = (uint8_t*)VirtualAlloc(nullptr, (size_t)size_, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!buf_) { size_ = 0; return; }
+    memset(buf_, 0, (size_t)size_);
+}
+
+Params::~Params() {
+    if (buf_) VirtualFree(buf_, 0, MEM_RELEASE);
+    buf_ = nullptr;
+}
+
+int32_t Params::offset_of(const char* name) const {
+    if (!PlausiblePtr(fn_) || !name) return -1;
+    return PropOffsetStruct((UStruct*)fn_, name);
+}
+
+// ---------------------------------------------------------------------------
+// Hooks, the game-thread queue and per-frame callbacks
+// ---------------------------------------------------------------------------
+namespace {
+
+struct HookSlot {
+    FName    fnName{};
+    HookFn   pre = nullptr;
+    HookFn   post = nullptr;
+    char     name[192] = {0};
+};
+
+std::mutex            g_hookLock;
+std::vector<HookSlot> g_hooks;
+std::atomic<int>      g_hookCount{0};
+
+std::mutex                          g_queueLock;
+std::vector<std::function<void()>>  g_queue;
+
+std::mutex                              g_tickLock;
+std::vector<std::function<void(float)>> g_tickFns;
+
+// FName-only histogram for the self-test: resolving a name here would put an
+// engine call on the ProcessEvent hot path, so the strings are resolved later.
+struct HistEntry { FName name{}; uint32 count = 0; };
+constexpr int kHistMax = 128;
+HistEntry       g_hist[kHistMax];
+int             g_histUsed = 0;
+std::atomic<bool> g_histOn{true};
+
+void HistogramNote(UFunction* fn) {
+    if (!g_histOn.load(std::memory_order_relaxed)) return;
+    const FName n = NameOf((UObject*)fn);
+    for (int i = 0; i < g_histUsed; ++i) {
+        if (g_hist[i].name == n) { ++g_hist[i].count; return; }
+    }
+    if (g_histUsed >= kHistMax) return;
+    g_hist[g_histUsed].name = n;
+    g_hist[g_histUsed].count = 1;
+    ++g_histUsed;
+}
+
+void RunHooksOn(UObject* self, UFunction* fn, void* parms, bool pre) {
+    if (g_hookCount.load(std::memory_order_acquire) == 0) return;
+    const FName n = NameOf((UObject*)fn);
+    for (size_t i = 0; i < g_hooks.size(); ++i) {
+        HookSlot& h = g_hooks[i];
+        if (!(h.fnName == n)) continue;
+        HookFn f = pre ? h.pre : h.post;
+        if (!f) continue;
+        if (!RunHookFn(f, self, fn, parms))
+            ms2::Log("hook faulted -- suppressed (check the hook's own code)");
+    }
+}
+
+void DrainQueue() {
+    std::vector<std::function<void()>> take;
+    {
+        std::lock_guard<std::mutex> lock(g_queueLock);
+        if (g_queue.empty()) return;
+        take.swap(g_queue);
+    }
+    for (auto& f : take) {
+        if (!RunTaskFn(&f)) ms2::Log("game-thread task faulted -- suppressed");
+    }
+}
+
+void FireTick(float dt) {
+    std::vector<std::function<void(float)>> fns;
+    {
+        std::lock_guard<std::mutex> lock(g_tickLock);
+        if (g_tickFns.empty()) return;
+        fns = g_tickFns;
+    }
+    for (auto& f : fns) {
+        if (!RunTickFn(&f, dt)) ms2::Log("tick callback faulted -- suppressed");
+    }
+}
+
+// Wall-clock pacing for the per-frame callbacks when the engine-tick hook could
+// not be installed.  Rate-limited so a busy frame does not fire them per call.
+std::atomic<uint64> g_lastFallbackTickMs{0};
+
+void FallbackTick() {
+    const uint64_t now = GetTickCount64();
+    uint64_t last = g_lastFallbackTickMs.load(std::memory_order_relaxed);
+    if (now - last < 4) return;
+    if (!g_lastFallbackTickMs.compare_exchange_strong(last, now)) return;
+    static uint64_t prev = 0;
+    const float dt = prev ? (float)(now - prev) / 1000.0f : 0.016f;
+    prev = now;
+    FireTick(dt);
+    NoteSelfTestTick(dt);
+}
+
+// The ProcessEvent detour.  Per call: one counter bump, an O(hooks) integer
+// compare, the original, and a mutex test for the queue.
+void DetourProcessEvent(UObject* self, UFunction* fn, void* parms) {
+    ++g_peCount;
+    const uint32 tid = GetCurrentThreadId();
+
+    // Which thread is the game thread?  Latch the first thread that is seen
+    // calling ProcessEvent TWICE IN A ROW, not merely the first one: the async
+    // loading thread calls ProcessEvent too, and latching on a single call from it
+    // would send every EnqueueGameThread task to the wrong thread for the rest of
+    // the session.  The engine-tick detour, once installed, sets this exactly.
+    if (g_gameThreadId.load(std::memory_order_relaxed) == 0) {
+        static std::atomic<uint32> lastTid{0};
+        if (lastTid.load(std::memory_order_relaxed) == tid)
+            g_gameThreadId.store(tid, std::memory_order_relaxed);
+        else
+            lastTid.store(tid, std::memory_order_relaxed);
+    }
+
+    tl_inDetour = 1;
+    HistogramNote(fn);
+    RunHooksOn(self, fn, parms, true);
+
+    if (g_peTrampoline) {
+        if (!CallProcessEventAt((uintptr_t)g_peTrampoline, self, fn, parms))
+            ms2::Log("original ProcessEvent faulted -- swallowed");
+    }
+
+    RunHooksOn(self, fn, parms, false);
+
+    if (tid == g_gameThreadId.load(std::memory_order_relaxed)) {
+        DrainQueue();
+        if (!g_tickHooked) FallbackTick();
+    }
+    tl_inDetour = 0;
+}
+
+void DetourEngineTick(void* self, float dt, bool idle) {
+    g_gameThreadId.store(GetCurrentThreadId(), std::memory_order_relaxed);
+    tl_inDetour = 1;
+    if (g_tickTrampoline) {
+        if (!CallEngineTickAt((uintptr_t)g_tickTrampoline, self, dt, idle))
+            ms2::Log("original UGameEngine::Tick faulted -- swallowed");
+    }
+    DrainQueue();
+    FireTick(dt);
+    NoteSelfTestTick(dt);
+    tl_inDetour = 0;
+}
+
+}  // namespace
+
+namespace {
+
+// One resolver, two entry points: find the UFunction a hook spec names.
+UFunction* ResolveHookTarget(const char* spec) {
+    if (!spec || !*spec) return nullptr;
+    const std::string s(spec);
+
+    // 1. Full object path, e.g. "/Script/Engine.Actor.ReceiveBeginPlay".
+    if (s.find('/') != std::string::npos) {
+        UObject* o = FindObject(s.c_str());
+        if (PlausiblePtr(o) && IsFunctionObject(o)) return (UFunction*)o;
+    }
+
+    // 2. "Class.Function" -- resolve the class, then the function on its CDO.
+    const size_t dot = s.rfind('.');
+    if (dot != std::string::npos) {
+        const std::string cls = s.substr(0, dot);
+        const std::string leaf = s.substr(dot + 1);
+        if (UClass* c = FindClass(cls.c_str())) {
+            UObject* cdo = nullptr;
+            if (Read((uint8_t*)c + kOffClassDefaultObj, cdo) && PlausiblePtr(cdo)) {
+                if (UFunction* f = FindFunction(cdo, leaf.c_str())) return f;
+            }
+            UFunction* f = FindFunctionLocal((UObject*)c, leaf.c_str());
+            if (f) return f;
+        }
+    }
+
+    // 3. Bare function name -- unique in practice for the ones a mod hooks, and
+    //    ambiguity is reported rather than silently picking one.
+    UFunction* found = nullptr;
+    int matches = 0;
+    for (int32_t i = 0; i < g_arr.numElements && matches < 8; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !IsFunctionObject(o)) continue;
+        if (NameToString(NameOf(o)) != s) continue;
+        found = (UFunction*)o;
+        ++matches;
+    }
+    if (matches > 1) {
+        ms2::Logf("hook: '%s' is ambiguous (%d UFunctions) -- using the first", spec, matches);
+    }
+    return found;
+}
+
+bool RegisterHook(const char* spec, HookFn f, bool pre) {
+    if (!f || !spec || !*spec) return false;
+    UFunction* fn = ResolveHookTarget(spec);
+    if (!fn) {
+        ms2::Logf("hook: could not resolve '%s' -- it will NOT fire", spec);
+        return false;
+    }
+    const FName name = NameOf((UObject*)fn);
+
+    std::lock_guard<std::mutex> lock(g_hookLock);
+    for (auto& h : g_hooks) {
+        if (h.fnName == name) {
+            if (pre) h.pre = f; else h.post = f;
+            g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+            ms2::Logf("hook: %s hook replaced on %s", pre ? "pre" : "post", spec);
+            return true;
+        }
+    }
+    HookSlot slot;
+    slot.fnName = name;
+    if (pre) slot.pre = f; else slot.post = f;
+    strncpy_s(slot.name, sizeof(slot.name), spec, _TRUNCATE);
+    g_hooks.push_back(slot);
+    g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+    ms2::Logf("hook: %s hook on %s (FName %u:%u)", pre ? "pre" : "post", spec,
+              name.ComparisonIndex, name.Number);
+    return true;
+}
+
+}  // namespace
+
+bool HookPre(const char* spec, HookFn f)  { return RegisterHook(spec, f, true); }
+bool HookPost(const char* spec, HookFn f) { return RegisterHook(spec, f, false); }
+
+void EnqueueGameThread(std::function<void()> f) {
+    if (!f) return;
+    std::lock_guard<std::mutex> lock(g_queueLock);
+    if (g_queue.size() > 4096) { ++g_queueDropped; return; }
+    g_queue.push_back(std::move(f));
+}
+
+void OnTick(std::function<void(float)> f) {
+    if (!f) return;
+    std::lock_guard<std::mutex> lock(g_tickLock);
+    g_tickFns.push_back(std::move(f));
+}
+
+bool IsGameThread() {
+    const uint32 g = g_gameThreadId.load(std::memory_order_relaxed);
+    return g != 0 && GetCurrentThreadId() == g;
+}
+
+uint64 ProcessEventCount() { return g_peCount.load(); }
+const Resolved& GetResolved() { return g_res; }
+bool IsReady() { return g_ready.load(); }
+const char* InitReport() { return g_initReport.c_str(); }
+
+namespace {
+
+uint32 VerifyProcessEventIndex(UObject* probe) {
+    if (!PlausiblePtr(probe)) return g_res.processEventIndex;
+    void** vt = nullptr;
+    if (!Read(probe, vt) || !PlausiblePtr(vt)) return g_res.processEventIndex;
+
+    for (uint32 i = 0; i < 0x80; ++i) {
+        void* slot = nullptr;
+        if (!Read(vt + i, slot)) break;
+        if ((uintptr_t)slot == g_res.processEvent) {
+            if (i != g_res.processEventIndex) {
+                ms2::Logf("ProcessEvent: vtable index is 0x%X, not the 0x%X the SDK reported -- "
+                          "using the measured one", i, g_res.processEventIndex);
+                g_res.processEventIndex = i;
+            }
+            return i;
+        }
+    }
+    ms2::Log("ProcessEvent: the resolved address is not in the probe object's vtable -- calls use the "
+             "address, but the slot number stays unverified");
+    return g_res.processEventIndex;
+}
+
+void InitPaths() {
+    wchar_t exe[MAX_PATH] = L"";
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    wchar_t* slash = wcsrchr(exe, L'\\');
+    if (slash) *slash = 0;
+    wcscpy_s(g_exeDir, MAX_PATH, exe);
+    _snwprintf_s(g_iniPath, MAX_PATH, _TRUNCATE, L"%s\\ms2coop-native.ini", g_exeDir);
+}
+
+void WriteIniTemplate() {
+    if (GetFileAttributesW(g_iniPath) != INVALID_FILE_ATTRIBUTES) return;
+    HANDLE h = CreateFileW(g_iniPath, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return;
+    const char* text =
+        "; ms2 native module -- optional overrides.\r\n"
+        "; README.md explains these.  Values are RVAs (offsets from the exe image\r\n"
+        "; base) in hex, measured on game build 5.6.1 CL92086.  Leave them\r\n"
+        "; commented out: the AOB scan finds the globals on its own.  Uncomment and\r\n"
+        "; correct a value only if the log says UNRESOLVED for it.\r\n"
+        ";\r\n"
+        "; ProcessEvent=0x1619320\r\n"
+        "; AppendString=0x13F8FA0\r\n"
+        "; GObjects=0xB03AEF0\r\n"
+        "; EngineTick=0x3DA7B30\r\n"
+        "; ProcessEventIdx=76\r\n";
+    DWORD wrote = 0;
+    WriteFile(h, text, (DWORD)strlen(text), &wrote, NULL);
+    CloseHandle(h);
+}
+
+bool InstallProcessEventHook() {
+    if (!g_res.processEvent) return false;
+    if (MH_CreateHook((LPVOID)g_res.processEvent, (LPVOID)&DetourProcessEvent,
+                      (LPVOID*)&g_peTrampoline) != MH_OK) {
+        ms2::Log("MinHook: could not hook ProcessEvent");
+        return false;
+    }
+    if (MH_EnableHook((LPVOID)g_res.processEvent) != MH_OK) {
+        MH_RemoveHook((LPVOID)g_res.processEvent);
+        g_peTrampoline = nullptr;
+        ms2::Log("MinHook: could not ENABLE the ProcessEvent hook");
+        return false;
+    }
+    g_peHooked = true;
+    ms2::Logf("ProcessEvent HOOKED at 0x%llX -- hooks, EnqueueGameThread and the self-test hang off it",
+              (unsigned long long)g_res.processEvent);
+    return true;
+}
+
+bool InstallTickHook() {
+    if (!g_res.engineTick) return false;
+    if (MH_CreateHook((LPVOID)g_res.engineTick, (LPVOID)&DetourEngineTick,
+                      (LPVOID*)&g_tickTrampoline) != MH_OK) {
+        ms2::Log("MinHook: could not hook UGameEngine::Tick");
+        return false;
+    }
+    if (MH_EnableHook((LPVOID)g_res.engineTick) != MH_OK) {
+        MH_RemoveHook((LPVOID)g_res.engineTick);
+        g_tickTrampoline = nullptr;
+        ms2::Log("MinHook: could not enable the UGameEngine::Tick hook");
+        return false;
+    }
+    g_tickHooked = true;
+    ms2::Logf("UGameEngine::Tick HOOKED at 0x%llX -- OnTick runs on the game thread once per frame",
+              (unsigned long long)g_res.engineTick);
+    return true;
+}
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
+bool Init() {
+    if (g_ready.load()) return true;
+    std::lock_guard<std::mutex> lock(g_initLock);
+    if (g_ready.load()) return true;
+
+    InitPaths();
+    ms2::OpenLog(g_exeDir);
+    WriteIniTemplate();
+
+    if (MH_Initialize() != MH_OK) {
+        // MH_ERROR_ALREADY_INITIALIZED is fine (a second Init call), and so is any
+        // other failure: reflection works without hooks, and the log says which.
+        ms2::Log("init: MH_Initialize did not return MH_OK -- hooks may be unavailable, "
+                 "reflection is unaffected");
+    }
+
+    uint8_t* base = (uint8_t*)GetModuleHandleW(nullptr);
+    g_res.imageBase = (uintptr_t)base;
+
+    char exeDirNarrow[MAX_PATH];
+    for (int i = 0; i < MAX_PATH && g_exeDir[i]; ++i) exeDirNarrow[i] = (char)g_exeDir[i];
+    ms2::Logf("init: exe base 0x%llX, dir %s", (unsigned long long)g_res.imageBase, exeDirNarrow);
+
+    if (!FindTextRange(base, &g_textLo, &g_textHi)) {
+        ms2::Log("init: could not find .text -- AOB scanning disabled, only RVA fallbacks are possible");
+        g_textLo = g_textHi = nullptr;
+    } else {
+        ms2::Logf("init: .text 0x%llX .. 0x%llX (%.1f MB)",
+                  (unsigned long long)(uintptr_t)g_textLo, (unsigned long long)(uintptr_t)g_textHi,
+                  (double)(g_textHi - g_textLo) / 1048576.0);
+    }
+
+    GlobalSpec specs[] = {
+        {"ProcessEvent", kSigProcessEvent, -1, 0x01619320, &g_res.processEvent, &g_res.processEventSource},
+        {"AppendString", kSigAppendString, -1, 0x013F8FA0, &g_res.appendString, &g_res.appendStringSource},
+        {"EngineTick",   kSigEngineTick,   -1, 0x03DA7B30, &g_res.engineTick,   &g_res.engineTickSource},
+        {"GObjects",     kSigGObjects,      3, 0x0B03AEF0, &g_res.objects,      &g_res.objectsSource},
+        // GWorld has no recovered signature, so it is RVA-only and validated on
+        // every use (GetWorld).  Recorded rather than omitted so the log names it.
+        {"GWorld",       nullptr,          -1, 0x0AD4E7F0, &g_res.gworld,       &g_res.gworldSource},
+    };
+    int resolvedCount = 0;
+    for (auto& s : specs) {
+        const bool ok = ResolveGlobal(s, g_iniPath);
+        ms2::Logf("init: %-13s = 0x%llX  [%s]%s", s.name, (unsigned long long)*s.out, *s.source,
+                  ok ? "" : "   <<< FAILED");
+        if (ok) ++resolvedCount;
+    }
+
+    g_res.processEventIndex = 0x4C;   // Dumper-7's Offsets::ProcessEventIdx for this build
+    uint64_t idxOverride = 0;
+    if (ReadIniValue(g_iniPath, "ProcessEventIdx", &idxOverride) && idxOverride < 0x1000)
+        g_res.processEventIndex = (uint32)idxOverride;
+
+    g_appendString = (AppendStringFn)g_res.appendString;
+
+    if (!g_res.objects) {
+        g_initReport = "FAILED: GObjects unresolved";
+        ms2::Logf("init: %s", g_initReport.c_str());
+        return false;
+    }
+
+    bool arrayOk = false;
+    // 60 x 250 ms: the module can be mapped before the engine has populated the
+    // object array, and an empty array is not a failure -- it is "too early".
+    for (int attempt = 0; attempt < 60 && !arrayOk; ++attempt) {
+        arrayOk = ValidateArray();
+        if (!arrayOk) Sleep(250);
+    }
+    if (!arrayOk)
+        ms2::Log("init: the object array did not validate -- continuing so the log shows why");
+    DumpArrayRaw(arrayOk ? "init, validated" : "init, NOT validated");
+
+    if (g_appendString) {
+        UObject* probe = ObjectAt(0);
+        uint64_t nameWord = 0;
+        if (probe) Read((uint8_t*)probe + kOffName, nameWord);
+        const FName nm = probe ? NameOf(probe) : FName();
+        ms2::Logf("init: FName::AppendString probe -> obj=0x%llX nameWord=%016llX fname=%u:%u \"%s\"",
+                  (unsigned long long)(uintptr_t)probe, (unsigned long long)nameWord,
+                  nm.ComparisonIndex, nm.Number, probe ? GetName(probe).c_str() : "");
+    } else {
+        ms2::Log("init: FName::AppendString is unresolved -- names will read as <fname i:n>");
+    }
+
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !PlausiblePtr(ClassOf(o))) continue;
+        VerifyProcessEventIndex(o);
+        break;
+    }
+
+    if (!InstallProcessEventHook())
+        ms2::Log("init: ProcessEvent NOT hooked -- HookPre/HookPost and the call count are dead");
+    if (!InstallTickHook())
+        ms2::Log("init: per-frame callbacks will be paced from ProcessEvent (measured dt)");
+
+    g_ready.store(resolvedCount > 0 && g_arr.numElements > 0);
+
+    char report[512];
+    _snprintf_s(report, sizeof(report), _TRUNCATE,
+                "objects=%s pe=%s names=%s tick=%s | %d objects, layout %s, hooked=%s",
+                g_res.objectsSource, g_res.processEventSource,
+                g_res.appendString ? g_res.appendStringSource : "MISSING",
+                g_res.engineTick ? g_res.engineTickSource : "MISSING",
+                (int)g_arr.numElements, g_arr.layoutB ? "5.6(chunk-at-0)" : "legacy(flat-0)",
+                g_peHooked ? "yes" : "NO");
+    g_initReport = report;
+    ms2::Logf("init: %s -> %s", g_ready.load() ? "READY" : "NOT READY", report);
+    return g_ready.load();
+}
+
+// ---------------------------------------------------------------------------
+// Self-test
+// ---------------------------------------------------------------------------
+namespace {
+
+std::atomic<int> g_selfTestStage{0};
+float            g_selfTestElapsed = 0.0f;
+
+int32_t StructSize(UObject* st) {
+    int32_t sz = -1;
+    Read((uint8_t*)st + kOffStructSize, sz);
+    return sz;
+}
+
+void ReportTopFunctions() {
+    // Selection sort of the top few, resolving names only for the winners.
+    for (int r = 0; r < 6 && r < g_histUsed; ++r) {
+        int best = r;
+        for (int i = r + 1; i < g_histUsed; ++i)
+            if (g_hist[i].count > g_hist[best].count) best = i;
+        const HistEntry tmp = g_hist[r];
+        g_hist[r] = g_hist[best];
+        g_hist[best] = tmp;
+        ms2::Logf("  self-test: ProcessEvent #%d  %-46s %u calls", r + 1,
+                  NameToString(g_hist[r].name).c_str(), g_hist[r].count);
+    }
+}
+
+}  // namespace
+
+void NoteSelfTestTick(float dt) {
+    const int stage = g_selfTestStage.load(std::memory_order_relaxed);
+    if (stage != 1) return;
+    g_selfTestElapsed += dt;
+    // 10 s of GAME time, not wall clock: it means the game actually ran frames.
+    if (g_selfTestElapsed >= 10.0f) {
+        g_selfTestStage.store(2);
+        SelfTest("+10s of game time");
+        g_histOn.store(false);
+    }
+}
+
+void SelfTest(const char* when) {
+    ms2::Logf("---- self-test (%s) ----", when ? when : "manual");
+
+    if (!g_ready.load()) {
+        ms2::Logf("  self-test: NOT READY (%s)", g_initReport.c_str());
+        return;
+    }
+
+    ms2::Logf("  self-test: resolution -> %s", g_initReport.c_str());
+    ms2::Logf("  self-test: GUObjectArray at 0x%llX, NumElements=%d NumChunks=%d MaxElements=%d",
+              (unsigned long long)g_res.objects, (int)g_arr.numElements, (int)g_arr.numChunks,
+              (int)g_arr.maxElements);
+    ms2::Logf("  self-test: object count check -- %d objects is %s",
+              (int)g_arr.numElements,
+              (g_arr.numElements > 1000 && g_arr.numElements < 5000000) ? "plausible" : "SUSPICIOUS");
+    DumpArrayRaw("self-test");
+
+    int shown = 0;
+    for (int32_t i = 0; i < g_arr.numElements && shown < 5; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !PlausiblePtr(ClassOf(o))) continue;
+        ms2::Logf("  self-test: object[%d] = %s", (int)i, GetFullName(o).c_str());
+        ++shown;
+    }
+    if (shown == 0) ms2::Log("  self-test: FAILED -- no readable objects in the array");
+
+    UClass* actorClass = FindClass("Actor");
+    if (actorClass) {
+        ms2::Logf("  self-test: FindClass(\"Actor\") OK -> %s, class %s, StructSize=0x%X",
+                  GetFullName((UObject*)actorClass).c_str(),
+                  GetClassName((UObject*)actorClass).c_str(), StructSize((UObject*)actorClass));
+    } else {
+        ms2::Log("  self-test: FindClass(\"Actor\") FAILED -- class lookup is broken");
+    }
+
+    if (actorClass) {
+        UObject* cdo = nullptr;
+        Read((uint8_t*)actorClass + kOffClassDefaultObj, cdo);
+        if (PlausiblePtr(cdo)) {
+            const int32_t root = PropOffset(cdo, "RootComponent");
+            const int32_t tick = PropOffset(cdo, "PrimaryActorTick");
+            ms2::Logf("  self-test: PropOffset(Actor CDO, \"RootComponent\")    = 0x%X  (SDK 0x1B8) %s",
+                      root, root == 0x1B8 ? "MATCH" : "MISMATCH <<<");
+            ms2::Logf("  self-test: PropOffset(Actor CDO, \"PrimaryActorTick\") = 0x%X  (SDK 0x28)  %s",
+                      tick, tick == 0x28 ? "MATCH" : "MISMATCH <<<");
+            if (root != 0x1B8)
+                ms2::Logf("  self-test: if BOTH offsets are wrong the ChildProperties walk is broken; "
+                          "if only one is, the SDK is stale for this build");
+        } else {
+            ms2::Log("  self-test: Actor has no readable class-default-object");
+        }
+    }
+
+    ms2::Logf("  self-test: ProcessEvent hook %s, %llu calls so far, tick hook %s",
+              g_peHooked ? "ACTIVE" : "NOT INSTALLED",
+              (unsigned long long)g_peCount.load(),
+              g_tickHooked ? "ACTIVE" : "not installed");
+    ReportTopFunctions();
+    ms2::Log("---- end self-test ----");
+}
+
+// ---------------------------------------------------------------------------
+// Strings: FName -> string, FString -> utf8, FText -> string
+// ---------------------------------------------------------------------------
+std::string ToString(FName name) { return NameToString(name); }
+
+std::string ToUtf8(const FString& s) {
+    if (!s.Data || s.Num <= 0) return std::string();
+    int32 n = s.Num;
+    if (n > 65536) n = 65536;          // a sane cap: no name or asset path is longer
+    std::wstring w((size_t)n, L'\0');
+    if (!SafeRead(s.Data, &w[0], (size_t)n * sizeof(wchar_t))) return std::string();
+    // The engine always NUL-terminates; trust Num, not a scan.
+    while (!w.empty() && w.back() == 0) w.pop_back();
+    if (w.empty()) return std::string();
+    const int need = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), nullptr, 0, nullptr, nullptr);
+    if (need <= 0) return std::string();
+    std::string out((size_t)need, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), &out[0], need, nullptr, nullptr);
+    return out;
+}
+
+namespace {
+// FText is a shared reference (8-byte pointer) plus a flags word: 16 bytes.  It is
+// passed BY VALUE in a UFunction's parameter block, and the engine's own thunk does
+// the copy-construct -- so all this layer has to do is put the 16 bytes there.
+struct FTextBytes {
+    uint8_t b[16];
+};
+constexpr int32 kFTextBytes = 16;
+
+std::atomic<int> g_textConvState{0};    // 0 = untried, 1 = works, 2 = unavailable
+}  // namespace
+
+std::string TextToString(void* ftext) {
+    if (!ftext) return std::string();
+    if (g_textConvState.load(std::memory_order_acquire) == 2) return std::string();
+
+    UClass* lib = FindClass("KismetTextLibrary");
+    if (!lib) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: KismetTextLibrary not found -- FText conversion is unavailable");
+        return std::string();
+    }
+    UObject* cdo = GetCDO(lib);
+    if (!cdo) {
+        g_textConvState.store(2);
+        return std::string();
+    }
+    UFunction* fn = FindFunction(cdo, "Conv_TextToString");
+    if (!fn) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: KismetTextLibrary.Conv_TextToString not found");
+        return std::string();
+    }
+    if (PropOffsetStruct((UStruct*)fn, "InText") < 0) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: Conv_TextToString has no InText parameter");
+        return std::string();
+    }
+
+    FTextBytes box;
+    memset(&box, 0, sizeof(box));
+    if (!SafeRead(ftext, box.b, sizeof(box.b))) return std::string();
+
+    Params p(fn);
+    if (!p.data()) return std::string();
+    p.Set<FTextBytes>("InText", box);
+    if (!Call(cdo, fn, p.data())) {
+        g_textConvState.store(2);
+        return std::string();
+    }
+    // The returned FString is engine-allocated and is deliberately NOT freed
+    // (there is no verified Free to pair with this build's allocator).
+    const FString ret = p.Get<FString>("ReturnValue");
+    g_textConvState.store(1);
+    return ToUtf8(ret);
+}
+
+// ---------------------------------------------------------------------------
+// TMap / TSet iteration
+//
+// UE5.6's TMap<K,V> is a TSet<TPair<K,V>>, which is:
+//
+//   TSparseArray<TSparseArrayElementOrFreeListLink<TPair<K,V>>>
+//     +0x00 TArray<Element> Data        (ptr, ArrayNum, ArrayMax)
+//     +0x10 TBitArray       AllocationFlags (TArray<uint32> ptr,num,max; NumBits)
+//     +0x28 int32 FirstFreeIndex, +0x2C NumFreeIndices
+//   followed by the hash (int32 HashSize, element ids) which this never touches.
+//
+// One element = the pair, padded to the array's alignment, followed by HashNextId
+// (int32) and HashIndex (int32): stride = Align(sizeof(pair)) + 8.  Key and value
+// sizes come from the FMapProperty's KeyProperty/ValueProperty `ElementSize` and
+// the value's offset inside the pair is derived from them (this build's
+// FMapProperty carries no FScriptMapLayout); for the raw form the caller supplies
+// the two sizes.
+//
+// THE HARD RULE: an element is only ever touched after its slot is proven live
+// (allocation-flag bit) or its key is proven to be a real FName/FString, and every
+// read goes through SafeRead.  A wrong stride or a stale map therefore yields
+// "fewer rows", never a fault.
+// ---------------------------------------------------------------------------
+namespace {
+
+constexpr uint32 kOffMapPairNum   = 0x08;
+constexpr uint32 kOffMapPairMax   = 0x0C;
+constexpr uint32 kOffMapFlagsPtr  = 0x10;
+constexpr uint32 kOffMapFlagsNum  = 0x18;
+constexpr uint32 kOffMapFlagsBits = 0x20;
+constexpr uint32 kOffFieldClass   = 0x08;   // FField::ClassPrivate
+// FMapProperty in THIS build -- research\raw\Dumper7\SDK\Basic.hpp,
+// "Predefined struct FMapProperty // 0x0010 (0x0080 - 0x0070)":
+//   0x70  FProperty* KeyProperty
+//   0x78  FProperty* ValueProperty
+// There is NO FScriptMapLayout member any more (UE5 derives the pair offsets from
+// the two properties), so the previous 0x70/0x74/0x78/0x80 -- the UE4 layout,
+// MapLayout{KeyOffset,ValueOffset} then KeyProp then ValueProp -- read the two
+// int32 HALVES OF THE KeyProperty POINTER as the offsets and then read a
+// "ValueProperty" from the 8 bytes AFTER the property object.  That read either
+// fails PlausiblePtr or yields a nonsense ElementSize, so ReadMapInfo returned
+// false and ue::MapForEach reported "not a map" for EVERY map, without logging:
+// store B published `wp=b:0/0` where the Lua had `b:5/5`.
+constexpr uint32 kOffMapKeyProp   = 0x70;   // FMapProperty::KeyProperty
+constexpr uint32 kOffMapValProp   = 0x78;   // FMapProperty::ValueProperty
+
+int32 AlignUp(int32 v, int32 a) {
+    if (a <= 1) return v;
+    return ((v + a - 1) / a) * a;
+}
+
+// TPair<Key,Value> value offset with no FScriptMapLayout to read it from: the value
+// follows the key, aligned to its own natural alignment (8 for a struct, FString or
+// pointer; 4 for int32/float/FName; 1 for bool/byte).
+int32 DerivedValueOffset(int32 keySize, int32 valueSize) {
+    int32 align = 1;
+    if (valueSize >= 8) align = 8;
+    else if (valueSize >= 4) align = 4;
+    return AlignUp(keySize, align);
+}
+
+// A "plausible address" WITHOUT the 8-byte alignment requirement ue::PlausiblePtr
+// imposes.  It is needed here because a TMap element is only 4-byte aligned once
+// the stride is not a multiple of 8 (TPair<FName,int32> is 20 bytes), and a
+// TArray<uint32> bit-allocation may be 4-aligned too.  Alignment is not evidence of
+// anything for these pointers; the bounds and the SEH calls are.
+bool MapAddrOk(const void* p) {
+    const uintptr_t v = reinterpret_cast<uintptr_t>(p);
+    return v >= 0x10000 && v < 0x00007FFFFFFFFFFFULL;
+}
+
+struct MapInfo {
+    const uint8_t* elem = nullptr;
+    int32 num = 0;
+    int32 stride = 0;
+    int32 keyOff = 0, keySize = 0;
+    int32 valueOff = 0, valueSize = 0;
+    const uint32* flags = nullptr;
+    int32 flagWords = 0;
+    int32 numBits = 0;
+};
+
+// The FField class name of a property ("MapProperty", "StructProperty", ...).
+// FField::ClassPrivate -> FFieldClass, whose first member is an FName.
+std::string FieldClassOf(FProperty* p) {
+    if (!PlausiblePtr(p)) return std::string();
+    void* cls = nullptr;
+    if (!Read((const uint8_t*)p + kOffFieldClass, cls) || !PlausiblePtr(cls)) return std::string();
+    FName n;
+    if (!Read(cls, n)) return std::string();
+    return NameToString(n);
+}
+
+// A key is "believable" when it decodes as the type it claims to be.  Used only on
+// the fallback path (no usable allocation flags) and when picking a stride.
+bool KeyLooksValid(const uint8_t* key, int32 keySize) {
+    if (!key) return false;
+    if (keySize == 8) {                       // FName
+        FName n;
+        if (!SafeRead(key, &n, sizeof(n))) return false;
+        if (n.ComparisonIndex == 0) return false;
+        if (n.ComparisonIndex > 0x08000000u) return false;   // not a plausible name id
+        const std::string s = NameToString(n);
+        return !s.empty() && s[0] != '<';
+    }
+    if (keySize == 16) {                      // FString
+        FString s;
+        if (!SafeRead(key, &s, sizeof(s))) return false;
+        // An FString key of a live TSet row is never empty (every FName/FString key
+        // in this game is a name), and "Num == 0" is exactly what a wrong stride
+        // reads out of the middle of a neighbouring element -- so reject it, which
+        // is what makes the stride probe able to tell the two layouts apart.
+        if (s.Num < 1 || s.Num > 4096) return false;
+        if (s.Max < s.Num) return false;
+        if (!PlausiblePtr(s.Data)) return false;
+        return true;
+    }
+    return true;                              // unknown key type: cannot judge
+}
+
+bool SlotAllocated(const MapInfo& mi, int32 i) {
+    if (mi.flags && mi.numBits == mi.num) {
+        const int32 word = i >> 5;
+        if (word < 0 || word >= mi.flagWords) return false;
+        uint32 w = 0;
+        if (!Read(mi.flags + word, w)) return false;
+        return (w & (1u << (i & 31))) != 0;
+    }
+    FName n;
+    if (!Read(mi.elem + (size_t)i * mi.stride + mi.keyOff, n)) return false;
+    return KeyLooksValid((const uint8_t*)&n, mi.keySize);
+}
+
+// Read the sparse-array header.  Returns false (and logs nothing) for anything
+// that does not look like a TMap, which is the normal case for a mistyped property.
+bool ReadMapInfo(const void* mapAddr, int32 keyOff, int32 keySize, int32 valueOff,
+                 int32 valueSize, MapInfo* mi) {
+    if (!MapAddrOk(mapAddr) || !mi) return false;
+    memset(mi, 0, sizeof(*mi));
+
+    const uint8_t* base = (const uint8_t*)mapAddr;
+    int32 num = 0, max = 0;
+    if (!Read(base + kOffMapPairNum, num) || !Read(base + kOffMapPairMax, max)) return false;
+    if (num < 0 || max < 0 || num > max || max > (1 << 22)) return false;
+
+    const uint8_t* data = nullptr;
+    if (!Read(base, data)) return false;
+    if (num > 0 && !MapAddrOk(data)) return false;
+
+    // Allocation flags: only trusted when the sparse array's own invariant holds
+    // (AllocationFlags.Num() == Data.Num()); otherwise the keys themselves decide.
+    const uint32* flags = nullptr;
+    int32 flagWords = 0, numBits = 0;
+    if (Read(base + kOffMapFlagsPtr, flags) && Read(base + kOffMapFlagsNum, flagWords) &&
+        Read(base + kOffMapFlagsBits, numBits)) {
+        if (numBits == num && flagWords >= 0 && flagWords == (num + 31) / 32 &&
+            flagWords <= (1 << 22) && (flagWords == 0 || MapAddrOk(flags))) {
+            mi->flags = flags;
+            mi->flagWords = flagWords;
+            mi->numBits = numBits;
+        }
+    }
+
+    mi->elem = data;
+    mi->num = num;
+    mi->keyOff = keyOff < 0 ? 0 : keyOff;
+    mi->keySize = keySize;
+    mi->valueOff = valueOff;
+    mi->valueSize = valueSize;
+    if (mi->keySize <= 0 || mi->keySize > 0x400 || mi->valueSize <= 0 || mi->valueSize > 0x400)
+        return false;
+    if (mi->valueOff < mi->keyOff) return false;
+    if (mi->keyOff + mi->keySize > mi->valueOff) return false;   // overlap: not a pair
+
+    const int32 pairEnd = mi->valueOff + mi->valueSize;
+    if (pairEnd > 0x800) return false;
+
+    // Pick the element stride.  Both candidates are the pair padded to 4 or to 8,
+    // plus the two int32 the sparse array stores after it; the real one is decided
+    // by which of them decodes as real keys.
+    const int32 s4 = AlignUp(pairEnd, 4) + 8;
+    const int32 s8 = AlignUp(pairEnd, 8) + 8;
+    mi->stride = s4;
+    if (s8 != s4) {
+        MapInfo probe = *mi;
+        auto score = [&probe](int32 stride) {
+            probe.stride = stride;
+            int good = 0, seen = 0;
+            for (int32 i = 0; i < probe.num && seen < 8; ++i) {
+                if (probe.flags) {   // probe is shallow-copied; SlotAllocated reads it
+                    const int32 word = i >> 5;
+                    if (word >= probe.flagWords) break;
+                    uint32 w = 0;
+                    if (!Read(probe.flags + word, w)) break;
+                    if (!(w & (1u << (i & 31)))) continue;
+                }
+                ++seen;
+                const uint8_t* key = probe.elem + (size_t)i * stride + probe.keyOff;
+                if (KeyLooksValid(key, probe.keySize)) ++good;
+            }
+            return good;
+        };
+        const int good4 = score(s4);
+        const int good8 = score(s8);
+        if (good8 > good4) mi->stride = s8;
+    }
+    return true;
+}
+
+bool IterateMap(MapInfo& mi, const std::function<bool(void*, void*)>& fn) {
+    if (!fn || !mi.elem || mi.num <= 0 || mi.stride <= 0) return false;
+    for (int32 i = 0; i < mi.num; ++i) {
+        if (!SlotAllocated(mi, i)) continue;
+        const uint8_t* el = mi.elem + (size_t)i * mi.stride;
+        if (!MapAddrOk(el)) break;             // walked off the allocation
+        if (!fn((void*)(el + mi.keyOff), (void*)(el + mi.valueOff))) break;
+    }
+    return true;
+}
+
+// Does this property already have the key?  `found` reports the value slot.
+bool MapFindKey(UObject* o, const char* prop, const char* key, bool fnameKey, void** valueSlot) {
+    if (valueSlot) *valueSlot = nullptr;
+    if (!o || !prop || !key) return false;
+    UClass* c = GetClass(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    if (!PlausiblePtr(p)) return false;
+
+    int32 keySize = 0, valueSize = 0;
+    FProperty* kp = nullptr;
+    FProperty* vp = nullptr;
+    if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+    if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+    if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+    if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+
+    // No FScriptMapLayout in this build (see the offsets at the top of this block).
+    const int32 keyOff = 0;
+    const int32 valueOff = DerivedValueOffset(keySize, valueSize);
+
+    MapInfo mi;
+    const int32_t mapOff = PropOffset(o, prop);
+    if (mapOff < 0) return false;
+    if (!ReadMapInfo((const uint8_t*)o + mapOff, keyOff, keySize, valueOff, valueSize, &mi))
+        return false;
+
+    bool hit = false;
+    IterateMap(mi, [&](void* k, void* v) -> bool {
+        if (fnameKey) {
+            FName want = MakeName(key);
+            FName got;
+            if (!want.ComparisonIndex) return false;
+            if (!SafeRead(k, &got, sizeof(got))) return false;
+            if (got == want) {
+                if (valueSlot) *valueSlot = v;
+                hit = true;
+                return false;
+            }
+        } else {
+            FString got;
+            if (!SafeRead(k, &got, sizeof(got))) return true;
+            if (ToUtf8(got) == key) {
+                if (valueSlot) *valueSlot = v;
+                hit = true;
+                return false;
+            }
+        }
+        return true;
+    });
+    return hit;
+}
+
+// Two separate rate limiters so a geometry warning cannot silence the "the key is
+// not in the map" warning (and the other way round).
+std::atomic<int> g_mapGeomWarned{0};
+std::atomic<int> g_mapAddWarned{0};
+
+}  // namespace
+
+bool MapForEach(UObject* o, const char* prop, std::function<bool(void* key, void* value)> fn) {
+    if (!o || !prop || !fn) return false;
+
+    // Locate the property and decide whether it really is a map.
+    FProperty* p = nullptr;
+    {
+        UClass* c = GetClass(o);
+        p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    }
+    if (!PlausiblePtr(p)) return false;
+
+    const std::string cls = FieldClassOf(p);
+    if (!cls.empty()) {
+        if (cls != "MapProperty") {
+            // Every other FProperty subclass is definitely NOT a TMap.  Anything
+            // else (an empty or unrecognisable name) falls through to the geometry
+            // check below rather than silently disabling the caller's feature.
+            static const char* const kNotMap[] = {
+                "StructProperty", "ObjectProperty", "WeakObjectProperty", "ClassProperty",
+                "InterfaceProperty", "ArrayProperty", "SetProperty", "BoolProperty",
+                "IntProperty", "Int8Property", "Int16Property", "Int64Property",
+                "UInt16Property", "UInt32Property", "UInt64Property", "FloatProperty",
+                "DoubleProperty", "NameProperty", "StrProperty", "TextProperty",
+                "ByteProperty", "EnumProperty", "DelegateProperty", "MulticastDelegateProperty",
+                "MulticastInlineDelegateProperty", "MulticastSparseDelegateProperty",
+                "FieldPathProperty", "SoftObjectProperty", "SoftClassProperty",
+                "LazyObjectProperty", "ObjectPtrProperty", "ClassPtrProperty"};
+            for (const char* n : kNotMap) {
+                if (cls == n) return false;
+            }
+            if (g_mapGeomWarned.fetch_add(1) < 3) {
+                ms2::Logf("MapForEach(\"%s\"): property class is '%s', not MapProperty -- "
+                          "trying the KeyProp/ValueProp geometry anyway", prop, cls.c_str());
+            }
+        }
+    } else if (g_mapGeomWarned.fetch_add(1) < 1) {
+        ms2::Logf("MapForEach(\"%s\"): the property's FField class did not resolve -- "
+                  "falling back to the KeyProp/ValueProp geometry", prop);
+    }
+
+    int32 keySize = 0, valueSize = 0;
+    FProperty* kp = nullptr;
+    FProperty* vp = nullptr;
+    if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+    if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+    if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+    if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+
+    // No FScriptMapLayout in this build (see the offsets at the top of this block).
+    const int32 keyOff = 0;
+    const int32 valueOff = DerivedValueOffset(keySize, valueSize);
+
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+
+    MapInfo mi;
+    if (!ReadMapInfo((const uint8_t*)o + off, keyOff, keySize, valueOff, valueSize, &mi)) {
+        // This used to fail silently for every map in the build. Say it once per
+        // property so an unreadable map is visible instead of "0 rows".
+        static std::atomic<int> warned{0};
+        if (warned.fetch_add(1) < 4) {
+            ms2::Logf("MapForEach(\"%s\"): ReadMapInfo failed at prop+0x%X "
+                      "(key %d@%d, value %d@%d) -- geometry, not the caller",
+                      prop, (unsigned)off, (int)keySize, (int)keyOff, (int)valueSize,
+                      (int)valueOff);
+        }
+        return false;
+    }
+    return IterateMap(mi, fn);
+}
+
+bool MapForEachRaw(const void* mapAddr, std::function<bool(void* key, void* value)> fn) {
+    // The FName-keyed shape every map reached this way has (FSpartaMapInt/Bool).
+    return MapForEachRaw(mapAddr, 8, 4, std::move(fn));
+}
+
+bool MapForEachRaw(const void* mapAddr, int32 keySize, int32 valueSize,
+                   std::function<bool(void* key, void* value)> fn) {
+    if (!fn) return false;
+    const int32 keyOff = 0;
+    const int32 valueOff = AlignUp(keySize, valueSize >= 8 ? 8 : (valueSize >= 4 ? 4 : 1));
+    MapInfo mi;
+    if (!ReadMapInfo(mapAddr, keyOff, keySize, valueOff, valueSize, &mi)) return false;
+    return IterateMap(mi, fn);
+}
+
+bool MapAddNameInt(UObject* o, const char* prop, const char* key, int32 value) {
+    void* slot = nullptr;
+    if (MapFindKey(o, prop, key, /*fnameKey*/ true, &slot) && slot) {
+        return WriteMem(slot, &value, sizeof(value));
+    }
+    if (g_mapAddWarned.fetch_add(1) < 3) {
+        ms2::Logf("MapAddNameInt(%s, \"%s\"): key is not in the map.  Growing a TMap needs the "
+                  "game's allocator and a rehash, which this layer cannot do safely -- the write "
+                  "is skipped (the value stays at its saved default)", prop ? prop : "?", key ? key : "?");
+    }
+    return false;
+}
+
+bool MapAddStrInt(UObject* o, const char* prop, const char* key, int32 value) {
+    void* slot = nullptr;
+    if (MapFindKey(o, prop, key, /*fnameKey*/ false, &slot) && slot) {
+        return WriteMem(slot, &value, sizeof(value));
+    }
+    if (g_mapAddWarned.fetch_add(1) < 3) {
+        ms2::Logf("MapAddStrInt(%s, \"%s\"): key is not in the map; see MapAddNameInt", prop ? prop : "?",
+                  key ? key : "?");
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Test-only: run the module's own scanner over a file image.  See ms2_ue_test.h.
+//
+// This is what makes the AOB patterns checkable without the game: the same
+// ParseAob/ScanAob/rel32 arithmetic the DLL uses at run time is pointed at a
+// buffer holding the real exe's .text, and the resolved RVA is compared to the
+// independently recovered one.
+// ---------------------------------------------------------------------------
+namespace detail {
+
+namespace {
+
+int CountMatches(const AobPattern& p) {
+    if (!g_textLo || !g_textHi || p.len <= 0) return 0;
+    int anchor = 0;
+    while (anchor < p.len && p.mask[anchor]) ++anchor;
+    if (anchor >= p.len) return 0;
+    if ((size_t)(g_textHi - g_textLo) <= (size_t)p.len) return 0;
+
+    int n = 0;
+    uint8_t* cur = g_textLo;
+    uint8_t* end = g_textHi - p.len;
+    while (cur <= end) {
+        uint8_t* found = (uint8_t*)memchr(cur, p.bytes[anchor], (size_t)(end - cur) + 1);
+        if (!found) break;
+        uint8_t* start = found - anchor;
+        if (start >= g_textLo) {
+            int i = 0;
+            for (; i < p.len; ++i)
+                if (!p.mask[i] && start[i] != p.bytes[i]) break;
+            if (i == p.len) ++n;
+        }
+        cur = found + 1;
+    }
+    return n;
+}
+
+}  // namespace
+
+int RunPatternSelfCheck(const void* imageBase, ScanCheck* out, int max) {
+    if (!imageBase || !out || max <= 0) return 0;
+
+    // Save and restore the live module's view of .text: in the test host nothing
+    // is initialised, but this must not be able to disturb a real session.
+    uint8_t* saveLo = g_textLo;
+    uint8_t* saveHi = g_textHi;
+
+    int checked = 0;
+    if (FindTextRange((uint8_t*)imageBase, &g_textLo, &g_textHi)) {
+        struct Row { const char* name; const char* aob; int disp; };
+        const Row rows[] = {
+            {"ProcessEvent", kSigProcessEvent, -1},
+            {"AppendString", kSigAppendString, -1},
+            {"EngineTick",   kSigEngineTick,   -1},
+            {"GObjects",     kSigGObjects,      3},
+        };
+        for (const Row& r : rows) {
+            if (checked >= max) break;
+            AobPattern p;
+            if (!ParseAob(r.aob, p)) continue;
+            ScanCheck c;
+            c.name = r.name;
+            c.matches = CountMatches(p);
+            uint8_t* hit = nullptr;
+            if (ScanAob(p, &hit)) {
+                uintptr_t resolved = (uintptr_t)hit;
+                if (r.disp >= 0) {
+                    int32_t d = 0;
+                    if (SafeRead(hit + r.disp, &d, sizeof(d)))
+                        resolved = (uintptr_t)(hit + r.disp + 4 + d);
+                }
+                c.rva = resolved - (uintptr_t)imageBase;
+            }
+            out[checked++] = c;
+        }
+    }
+
+    g_textLo = saveLo;
+    g_textHi = saveHi;
+    return checked;
+}
+
+}  // namespace detail
+
+}  // namespace ue

@@ -1,0 +1,146 @@
+// proxy.cpp -- the dxgi.dll that takes over the name and loads the co-op core.
+//
+// WHY dxgi.dll
+// ------------
+// The exe statically imports dxgi.dll (2 imports, checked with tools/pe_imports.py
+// against the shipping exe), so Windows maps this file from the executable's own
+// directory before the game's entry point runs: no injection, no UE4SS, no
+// dwmapi.dll of UE4SS's.  pe_imports.py's proxy-slot check reports dxgi.dll as
+// USABLE -- it is not a KnownDLL, so the exe-directory copy wins over System32 --
+// and its export surface is the smallest of the candidates: 19 named exports,
+// every one of them a forwarder generated from System32\dxgi.dll (see proxy.def).
+// Fewer exports means fewer chances to break some other module that imports it,
+// which matters because d3d11/d3d12/DLSS/FSR all resolve this name too.
+//
+// WHAT THIS FILE DELIBERATELY DOES NOT DO
+// ---------------------------------------
+// Nothing happens in DllMain except CreateThread.  Loading a DLL is a delicate
+// state (the loader lock is held, our own imports may still be arriving), so all
+// real work -- opening the log, scanning for the engine globals, installing the
+// MinHook detours -- happens on the worker thread a moment later.  A crash there
+// is a crash in our code with our log open; a fault in DllMain is an unattributable
+// loader failure.
+#include <windows.h>
+#include <stdlib.h>
+
+#include "ms2_log.h"
+#include "ms2_ue.h"
+#include "coop_state.h"
+#include "exports.h"
+
+namespace {
+
+HANDLE g_worker = nullptr;
+
+void VerifyForwarders();   // defined below; the worker calls it early
+
+// Everything the module does after start-up lives here.  It is deliberately
+// boring: resolve, hook, prove it works, then heartbeat.
+DWORD WINAPI WorkerThread(LPVOID) {
+    // Give the loader time to finish and the CRT to initialise.  This is the
+    // only sleep that matters: after it, the module only reads state.
+    Sleep(750);
+
+    // One call: Init() waits internally (up to ~15 s) for the engine to populate
+    // the object array, so retrying here would only repeat the AOB scans.
+    const bool ready = ue::Init();
+    ms2::Logf("worker: init %s", ready ? "succeeded" : "FAILED");
+    VerifyForwarders();
+
+    // Hand over to the co-op module.  coop::Start() is the whole module entry
+    // point (coop_main.cpp): it resolves the coop dir, loads the kill switches,
+    // removes stale state files and registers the single per-frame tick that drives
+    // every 30/15/2/1 Hz loop.  It is called here, on this thread, ON PURPOSE:
+    // it touches no UObject; all engine work happens later, inside the tick
+    // callback, on the game thread.  When Init() failed the module stays off and
+    // the game runs normally.
+    if (ready) {
+        coop::Start();
+    } else {
+        ms2::Log("worker: the engine layer is not ready -- the co-op module stays off");
+    }
+
+    // The per-frame callback: this is where a co-op module does its work, so it
+    // also proves the whole hook chain (tick detour -> game thread -> our code).
+    ue::OnTick([](float dt) {
+        static float acc = 0.0f;
+        static unsigned beats = 0;
+        acc += dt;
+        if (acc < 30.0f) return;          // a heartbeat every ~30 s of game time
+        acc = 0.0f;
+        ++beats;
+        ms2::Logf("heartbeat %u: %llu ProcessEvent calls, dt %.3f s",
+                  beats, (unsigned long long)ue::ProcessEventCount(), dt);
+        // Worst-first profile of everything slow since the last beat, so a frame
+        // that took seconds can be attributed to a named step from the log alone.
+        ue::ProfDump("heartbeat");
+        // And the always-on cost table: avg/p95/max per frame and per step over
+        // the last 30 s of game time, which is what a fps difference is made of.
+        ue::CostDump("heartbeat");
+    });
+
+    // The acceptance test the integrator reads off the log, ten seconds of wall
+    // clock after the module is up, run ON the game thread.  The tick detour also
+    // schedules one after 10 s of GAME time (NoteSelfTestTick); this one exists so
+    // the log is never silent if the tick hook is not live.
+    Sleep(10000);
+    ue::EnqueueGameThread([] { ue::SelfTest("+10s, game thread"); });
+
+    // Backstop: if ProcessEvent still has not been seen 25 s in, the detour is not
+    // live, so run the same checklist from this thread -- read-only probing is
+    // safe here and a silent log is not.
+    Sleep(15000);
+    if (ue::ProcessEventCount() == 0) {
+        ms2::Log("worker: no ProcessEvent seen in 25 s -- the detour is NOT live; running the "
+                 "self-test from the worker thread so the log still reports what resolved");
+        ue::SelfTest("fallback, worker thread");
+    } else {
+        ms2::Logf("worker: %llu ProcessEvent calls seen -- the hook chain is live",
+                  (unsigned long long)ue::ProcessEventCount());
+    }
+
+    return 0;
+}
+
+// A proxy is only transparent if every export still resolves to System32.  Check
+// once, off the worker's critical path, and report any that do not: a missing
+// forwarder would otherwise surface much later as a loader failure inside d3d12
+// or the DLSS runtime, with nothing in the log to point at this DLL.
+void VerifyForwarders() {
+    HMODULE real = LoadLibraryW(L"C:\\Windows\\System32\\dxgi.dll");
+    if (!real) {
+        ms2::Log("forwarders: could not load System32\\dxgi.dll to compare against");
+        return;
+    }
+    int missing = 0;
+    for (unsigned i = 0; i < kExportCount; ++i) {
+        FARPROC p = GetProcAddress(GetModuleHandleW(L"dxgi.dll"), kExportNames[i]);
+        if (!p) {
+            ms2::Logf("forwarders: MISSING export %s", kExportNames[i]);
+            ++missing;
+        }
+    }
+    ms2::Logf("forwarders: %u exports declared, %d missing, %s",
+              kExportCount, missing, missing ? "PROXY IS INCOMPLETE" : "all resolve");
+}
+
+}  // namespace
+
+BOOL WINAPI DllMain(HINSTANCE self, DWORD reason, LPVOID) {
+    if (reason == DLL_PROCESS_ATTACH) {
+        // Do not tell the loader to call us on every thread: we never use them.
+        DisableThreadLibraryCalls(self);
+        // NO work here.  Only a thread, which starts after the loader is done.
+        g_worker = CreateThread(nullptr, 0, WorkerThread, nullptr, 0, nullptr);
+        if (!g_worker) {
+            // Cannot even log yet (the log is opened on that thread); this is the
+            // one failure the module cannot report.
+            return TRUE;
+        }
+    } else if (reason == DLL_PROCESS_DETACH) {
+        // Nothing to join: the game is exiting, and shutting our thread down here
+        // risks a deadlock inside the loader (a detached thread cannot be joined
+        // safely under the loader lock).  The OS reclaims everything.
+    }
+    return TRUE;
+}

@@ -1,0 +1,826 @@
+declared_in	class	member	type	offset	dump_line
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x4C0	271677
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CSConsoleExtension	ObjectProperty of /Script/CSUtility.CSConsoleExtensionComponent	0x4C8	271678
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Teleport	ObjectProperty of /Script/Engine.SceneComponent	0x4D0	271679
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	GateEnterVFX	ObjectProperty of /Script/Niagara.NiagaraComponent	0x4D8	271680
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Audio	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x4E0	271681
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RectLight	ObjectProperty of /Script/Engine.RectLightComponent	0x4F0	271683
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CameraShakeSource	ObjectProperty of /Script/Engine.CameraShakeSourceComponent	0x4F8	271684
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	N_Gate	ObjectProperty of /Script/Niagara.NiagaraComponent	0x500	271685
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	SpartaSave	ObjectProperty of /Script/Sparta.SpartaSaveComponent	0x508	271686
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	TeleportDetection	ObjectProperty of /Script/Engine.BoxComponent	0x510	271687
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	BPC_WorldMapObjective	ObjectProperty of /Game/Sparta/UI/World/Map/Blueprints/BPC_WorldMapObjective.BPC_WorldMapObjective_C	0x518	271688
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Decal	ObjectProperty of /Script/Engine.DecalComponent	0x520	271689
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	WhiteLight	ObjectProperty of /Script/Engine.SpotLightComponent	0x528	271690
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RedLight	ObjectProperty of /Script/Engine.SpotLightComponent	0x530	271691
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	N_Crows	ObjectProperty of /Script/Niagara.NiagaraComponent	0x538	271692
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	N_Lightnings	ObjectProperty of /Script/Niagara.NiagaraComponent	0x540	271693
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	VFX	ObjectProperty of /Script/Engine.SceneComponent	0x548	271694
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CamStateCollision	ObjectProperty of /Script/Engine.SphereComponent	0x550	271695
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CamShakeCollision	ObjectProperty of /Script/Engine.SphereComponent	0x558	271696
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Triggers	ObjectProperty of /Script/Engine.SceneComponent	0x560	271697
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh10	ObjectProperty of /Script/Engine.StaticMeshComponent	0x570	271699
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh9	ObjectProperty of /Script/Engine.StaticMeshComponent	0x578	271700
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	SM_GateEntrance	ObjectProperty of /Script/Engine.StaticMeshComponent	0x580	271701
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Glow	ObjectProperty of /Script/Engine.StaticMeshComponent	0x588	271702
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh7	ObjectProperty of /Script/Engine.StaticMeshComponent	0x590	271703
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh6	ObjectProperty of /Script/Engine.StaticMeshComponent	0x598	271704
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh5	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5A0	271705
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh4	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5A8	271706
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh3	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5B0	271707
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh2	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5B8	271708
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	P_CathEntranceSet3_BlockPart_08	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5C0	271709
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	StaticMesh1	ObjectProperty of /Script/Engine.StaticMeshComponent	0x5C8	271710
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Gate	ObjectProperty of /Script/Engine.SceneComponent	0x5D0	271711
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Timeline_Movement_FadeIn__Direction_F31AFDA54BB61EE30C72EBB7C96A2B05	ByteProperty	0x5D8	271712
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Timeline_Movement_FadeIn	ObjectProperty of /Script/Engine.TimelineComponent	0x5E0	271713
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Timeline_Movement_FadeOut__Direction_679AD94948B1A2245F6453ACCE9A7DE3	ByteProperty	0x5E8	271714
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Timeline_Movement_FadeOut	ObjectProperty of /Script/Engine.TimelineComponent	0x5F0	271715
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	BossCharacterID	StructProperty of /Script/GameplayTags.GameplayTag	0x5F8	271716
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CorruptionActors	ArrayProperty of CorruptionActors./Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C:CorruptionActors	0x600	271717
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CorruptionGates	ArrayProperty of CorruptionGates./Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C:CorruptionGates	0x610	271719
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CameraState	ObjectProperty of /Script/CameraStateFramework.CSCameraState	0x620	271721
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bDrawDebug	BoolProperty	0x628	271722
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CameraActors	SoftObjectProperty of /Game/Sparta/Maps/LevelDesignTools/BlueprintTools/BP_CameraMover.BP_CameraMover_C	0x630	271723
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CameraSequenceDuration	FloatProperty	0x658	271724
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	GateCleansingCamera	ObjectProperty of /Script/CameraStateFramework.CSCameraState	0x660	271725
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	LoadedCameraActor	ObjectProperty of /Game/Sparta/Maps/LevelDesignTools/BlueprintTools/BP_CameraMover.BP_CameraMover_C	0x668	271726
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance.BP_STH_Entrance_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	LinkedExit	SoftObjectProperty of /Game/Sparta/Core/World/Teleporting/BP_STH_Exit.BP_STH_Exit_C	0x468	271671
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance.BP_STH_Entrance_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OptionalTeleportSpawn	SoftObjectProperty of /Game/Sparta/Maps/LevelDesignTools/BlueprintTools/BP_DungeonSpawnLocations.BP_DungeonSpawnLocations_C	0x490	271672
+/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance.BP_STH_Entrance_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	AreaID	StructProperty of /Script/GameplayTags.GameplayTag	0x4B8	271673
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Spline	ObjectProperty of /Script/Engine.SplineComponent	0x2B0	271211
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ProximityDetection	ObjectProperty of /Script/Engine.SphereComponent	0x2B8	271212
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	DebugPlane	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2C0	271213
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	My	ObjectProperty of /Script/Sparta.SpartaStreamingSourceComponent	0x2C8	271214
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ForwardDirection	ObjectProperty of /Script/Engine.ArrowComponent	0x2D0	271215
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2D8	271216
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bDebugStreaming	BoolProperty	0x2E0	271217
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bDebugChecks	BoolProperty	0x2E1	271218
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	BiomeTag	StructProperty of /Script/GameplayTags.GameplayTag	0x2E4	271219
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	TeleportMethod	ByteProperty	0x2EC	271220
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ActivationDistance	DoubleProperty	0x2F0	271221
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RelevancyAngle	DoubleProperty	0x2F8	271222
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	MIDDebug	ObjectProperty of /Script/Engine.MaterialInstanceDynamic	0x300	271223
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	MyCachedLocation	StructProperty of /Script/CoreUObject.Vector	0x308	271224
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	MyCachedTransform	StructProperty of /Script/CoreUObject.Transform	0x320	271225
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	LastPosition	StructProperty of /Script/CoreUObject.Vector	0x380	271226
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	LastInFront	BoolProperty	0x398	271227
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	IsOverlapping	BoolProperty	0x399	271228
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RelevancyHeightRange	StructProperty of /Script/CoreUObject.Vector2D	0x3A0	271229
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	LoadedLinkHandler	ObjectProperty of /Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	0x3B0	271230
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CachedPlayer	ObjectProperty of /Script/Engine.Character	0x3B8	271231
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CachedDistance	DoubleProperty	0x3C0	271232
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CriticalDistance	DoubleProperty	0x3C8	271233
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OtherStreamingSource	ObjectProperty of /Script/Sparta.SpartaStreamingSourceComponent	0x3D0	271234
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ActivationBehaviors	ArrayProperty of ActivationBehaviors./Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C:ActivationBehaviors	0x3D8	271235
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	PostTeleportDelay	FloatProperty	0x3E8	271237
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnTeleportEvent	MulticastInlineDelegateProperty	0x3F0	271238
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	SreamingRadius	DoubleProperty	0x400	271239
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	BlockOnSlowStreaming	BoolProperty	0x408	271240
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	IsInRange	BoolProperty	0x409	271241
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	IsRelevant	BoolProperty	0x40A	271242
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	IsTeleporting	BoolProperty	0x40B	271243
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CachedPlayerController	ObjectProperty of /Game/Sparta/Core/Player/BP_PlayerController.BP_PlayerController_C	0x410	271244
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	TeleportLocationAlignmentMarker	SoftObjectProperty of /Script/Engine.Actor	0x418	271245
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	MyZoneData	ObjectProperty of /Script/Sparta.SpartaZoneData	0x440	271246
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	TransitionClass	ClassProperty	0x448	271247
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	TransitionDuration	DoubleProperty	0x450	271248
+/Game/Sparta/Core/World/Teleporting/BP_SpartaTeleportHandler.BP_SpartaTeleportHandler_C	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bHasAutomaticMovement	BoolProperty	0x460	271250
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/Teleporting/BP_STH_Entrance_Gate.BP_STH_Entrance_Gate_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2D0	268673
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InGameDebugTextWidget	ObjectProperty of /Script/UMG.WidgetComponent	0x2D8	268674
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SpartaSave	ObjectProperty of /Script/Sparta.SpartaSaveComponent	0x2E0	268675
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EditorDebugText	ObjectProperty of /Script/Engine.TextRenderComponent	0x2E8	268676
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SM_Plane	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2F0	268677
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2F8	268678
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PreviewEvent	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x300	268679
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Enabled	BoolProperty	0x308	268680
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DrawDebug	BoolProperty	0x309	268681
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventType	ByteProperty	0x30A	268682
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadingPolicy	ByteProperty	0x30B	268683
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SingleEvent	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x310	268684
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventsOverride	ArrayProperty of EventsOverride./Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C:EventsOverride	0x318	268685
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OptionSet	ObjectProperty of /Script/CSOptionSet.CSOptionSetDataAsset	0x328	268687
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PreviewLevelInstance	ObjectProperty of /Script/Engine.LevelInstance	0x330	268688
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LevelInstance	SoftObjectProperty of /Script/Engine.World	0x338	268689
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadedLevel	ObjectProperty of /Script/Engine.LevelStreamingDynamic	0x360	268690
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	HidePlane	BoolProperty	0x368	268691
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnFailedLoad	MulticastInlineDelegateProperty	0x370	268692
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIsLevelLoaded	BoolProperty	0x380	268693
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LastEventLoaded	ObjectProperty of /Script/Sparta.SpartaEventDataAsset	0x388	268694
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Optional	ClassProperty	0x390	268695
+/Script/Sparta.SpartaEventSpaceActor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventSettings	StructProperty of /Script/Sparta.LevelEventSettings	0x2A8	56009
+/Script/Sparta.SpartaEventSpaceActor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EventGameTime	FloatProperty	0x2C8	56010
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	401314
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	WorldPartitionStreamingSource	ObjectProperty of /Script/Engine.WorldPartitionStreamingSourceComponent	0x2B0	401315
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	TextRender	ObjectProperty of /Script/Engine.TextRenderComponent	0x2B8	401316
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Location	ObjectProperty of /Script/Engine.SceneComponent	0x2C0	401317
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Root	ObjectProperty of /Script/Engine.SceneComponent	0x2C8	401318
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Billboard	ObjectProperty of /Script/Engine.BillboardComponent	0x2D0	401319
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Category	StrProperty	0x2D8	401320
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	LocationName	StrProperty	0x2E8	401321
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	TeleportFadeTime	DoubleProperty	0x2F8	401322
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	CheckStreamingStateTimerHandle	StructProperty of /Script/Engine.TimerHandle	0x300	401323
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x308	720240
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	WorldPartitionStreamingSource	ObjectProperty of /Script/Engine.WorldPartitionStreamingSourceComponent	0x2B0	401315
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	TextRender	ObjectProperty of /Script/Engine.TextRenderComponent	0x2B8	401316
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Location	ObjectProperty of /Script/Engine.SceneComponent	0x2C0	401317
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Root	ObjectProperty of /Script/Engine.SceneComponent	0x2C8	401318
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Billboard	ObjectProperty of /Script/Engine.BillboardComponent	0x2D0	401319
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Category	StrProperty	0x2D8	401320
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	LocationName	StrProperty	0x2E8	401321
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	TeleportFadeTime	DoubleProperty	0x2F8	401322
+/Game/Sparta/Core/World/BP_TeleportLocation.BP_TeleportLocation_C	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	CheckStreamingStateTimerHandle	StructProperty of /Script/Engine.TimerHandle	0x300	401323
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/BP_TeleportLocation_OneShot.BP_TeleportLocation_OneShot_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2F8	271939
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BeamMesh	ObjectProperty of /Script/Engine.StaticMeshComponent	0x300	271940
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BeaconVFX	ObjectProperty of /Script/Niagara.NiagaraComponent	0x308	271941
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	P_Sphere_Coll_01	ObjectProperty of /Script/Engine.StaticMeshComponent	0x310	271942
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Audio	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x318	271943
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveEndDirection	ObjectProperty of /Script/Engine.ArrowComponent	0x320	271944
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveDirection	ObjectProperty of /Script/Engine.ArrowComponent	0x328	271945
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BlockingCollision	ObjectProperty of /Script/Engine.BoxComponent	0x330	271946
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveDownEnd	ObjectProperty of /Script/Engine.SceneComponent	0x338	271947
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveDownStart	ObjectProperty of /Script/Engine.SceneComponent	0x340	271948
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveDownSpline	ObjectProperty of /Script/Engine.SplineComponent	0x348	271949
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlayerSizeReference	ObjectProperty of /Script/Engine.CapsuleComponent	0x350	271950
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CoreWorldStreamingSource	ObjectProperty of /Script/Sparta.SpartaStreamingSourceComponent	0x358	271951
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PS_TarDisintegration	ObjectProperty of /Script/Niagara.NiagaraComponent	0x360	271952
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlaneOff	ObjectProperty of /Script/Engine.StaticMeshComponent	0x368	271953
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlaneOn	ObjectProperty of /Script/Engine.StaticMeshComponent	0x370	271954
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlayerPosition	ObjectProperty of /Script/Engine.ArrowComponent	0x378	271955
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CameraActor_Beacon	ObjectProperty of /Script/Engine.ChildActorComponent	0x380	271956
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	MenuPosition	ObjectProperty of /Script/Engine.SceneComponent	0x388	271957
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BPC_WorldMapObjective	ObjectProperty of /Game/Sparta/UI/World/Map/Blueprints/BPC_WorldMapObjective.BPC_WorldMapObjective_C	0x390	271958
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PointLight	ObjectProperty of /Script/Engine.PointLightComponent	0x398	271959
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal10	ObjectProperty of /Script/Engine.DecalComponent	0x3A0	271960
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal9	ObjectProperty of /Script/Engine.DecalComponent	0x3A8	271961
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal8	ObjectProperty of /Script/Engine.DecalComponent	0x3B0	271962
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal7	ObjectProperty of /Script/Engine.DecalComponent	0x3B8	271963
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal6	ObjectProperty of /Script/Engine.DecalComponent	0x3C0	271964
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal5	ObjectProperty of /Script/Engine.DecalComponent	0x3C8	271965
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal4	ObjectProperty of /Script/Engine.DecalComponent	0x3D0	271966
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal3	ObjectProperty of /Script/Engine.DecalComponent	0x3D8	271967
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal2	ObjectProperty of /Script/Engine.DecalComponent	0x3E0	271968
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal1	ObjectProperty of /Script/Engine.DecalComponent	0x3E8	271969
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Decal	ObjectProperty of /Script/Engine.DecalComponent	0x3F0	271970
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorDecal2	ObjectProperty of /Script/Engine.DecalComponent	0x3F8	271971
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorDecal3	ObjectProperty of /Script/Engine.DecalComponent	0x400	271972
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorDecal4	ObjectProperty of /Script/Engine.DecalComponent	0x408	271973
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorDecal	ObjectProperty of /Script/Engine.DecalComponent	0x410	271974
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorDecal1	ObjectProperty of /Script/Engine.DecalComponent	0x418	271975
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	SM_BoneBeacon_Base	ObjectProperty of /Script/Engine.StaticMeshComponent	0x420	271976
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	SM_BoneBeacon_TarCorruption	ObjectProperty of /Script/Engine.StaticMeshComponent	0x428	271977
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	3DCorpuptionVFX	ObjectProperty of /Script/Niagara.NiagaraComponent	0x430	271978
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CorruptionTrigger	ObjectProperty of /Script/Engine.SphereComponent	0x438	271979
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BPC_MAW_LandingArea	ObjectProperty of /Game/Sparta/UI/World/Map/BPC_MAW_LandingArea.BPC_MAW_LandingArea_C	0x440	271980
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BPC_IH_LandingAreaSelection	ObjectProperty of /Game/Sparta/Core/Common/Interactions/BPC_InteractionHandler.BPC_InteractionHandler_C	0x448	271981
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BPC_IH_LandingArea_Menu	ObjectProperty of /Game/Sparta/Core/Common/Interactions/BPC_InteractionHandler.BPC_InteractionHandler_C	0x450	271982
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InteractionCollision	ObjectProperty of /Script/Engine.CapsuleComponent	0x458	271983
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BPC_IH_Hold_LandingArea_Menu	ObjectProperty of /Game/Sparta/Core/Common/Interactions/BPC_InteractionHandler_Hold.BPC_InteractionHandler_Hold_C	0x460	271984
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TextRender	ObjectProperty of /Script/Engine.TextRenderComponent	0x468	271985
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Scene_Target	ObjectProperty of /Script/Engine.SceneComponent	0x470	271986
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Scene	ObjectProperty of /Script/Engine.SceneComponent	0x478	271987
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	WorldPartitionStreamingSource	ObjectProperty of /Script/Engine.WorldPartitionStreamingSourceComponent	0x480	271988
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Timeline_NewTrack_0_8C0E01784B46785F23EF1C858E131D83	FloatProperty	0x488	271989
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Timeline__Direction_8C0E01784B46785F23EF1C858E131D83	ByteProperty	0x48C	271990
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Timeline	ObjectProperty of /Script/Engine.TimelineComponent	0x490	271991
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarDisolveAnim_Alpha_9E7BFE3C4BB02C3D728274ADC8CAA2E2	FloatProperty	0x498	271992
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarDisolveAnim__Direction_9E7BFE3C4BB02C3D728274ADC8CAA2E2	ByteProperty	0x49C	271993
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarDisolveAnim	ObjectProperty of /Script/Engine.TimelineComponent	0x4A0	271994
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bIsEnabled	BoolProperty	0x4A8	271995
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bIsActive	BoolProperty	0x4A9	271996
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	WidgetScale	DoubleProperty	0x4B0	271997
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CachedDistance	DoubleProperty	0x4B8	271998
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	XYForce	FloatProperty	0x4C0	271999
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	ZForce	DoubleProperty	0x4C8	272000
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BiomeTag	StructProperty of /Script/GameplayTags.GameplayTag	0x4D0	272001
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	LandingAreaType	StructProperty of /Script/GameplayTags.GameplayTag	0x4D8	272002
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OptionalTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x4E0	272003
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	IsDefault	BoolProperty	0x500	272004
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	UniqueID	NameProperty	0x504	272005
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TeleportHandlerObject	ObjectProperty of /Game/Sparta/Core/World/Teleporting/BPO_STH_Beacon.BPO_STH_Beacon_C	0x510	272006
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveType	ByteProperty	0x518	272007
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveDownCurve	ObjectProperty of /Script/Engine.CurveFloat	0x520	272008
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Area	TextProperty	0x528	272009
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnEnableStateChanged	MulticastInlineDelegateProperty	0x538	272010
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BlockingLoad	BoolProperty	0x548	272011
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	WBP_Menu	ObjectProperty of /Game/Sparta/UI/Menu/LandingArea/WBP_MGT_LandingArea.WBP_MGT_LandingArea_C	0x550	272012
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	HasHubMenuOptionByDefault	BoolProperty	0x558	272013
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	TarCorruptionMaterial	ObjectProperty of /Script/Engine.MaterialInstanceDynamic	0x560	272014
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	MenuZOrder	IntProperty	0x568	272015
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	HasLevelUpMenuOptionByDefault	BoolProperty	0x56C	272016
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CorruptionToClear	ArrayProperty of CorruptionToClear./Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C:CorruptionToClear	0x570	272017
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InvisibleEffect	StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectHandle	0x580	272019
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	HasEquipmentMenuOptionByDefault	BoolProperty	0x588	272020
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveStartLocation	StructProperty of /Script/CoreUObject.Vector	0x590	272021
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	HasFastTravelMenuOptionByDefault	BoolProperty	0x5A8	272022
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DiveEndLocation	StructProperty of /Script/CoreUObject.Vector	0x5B0	272023
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CustomDiveSpline	ObjectProperty of /Script/Engine.SplineComponent	0x5C8	272024
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Beam_Intensity	DoubleProperty	0x5D0	272025
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Beam_DistanceBeforeFade	DoubleProperty	0x5D8	272026
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bShouldPlayAudioLoop	BoolProperty	0x5E0	272027
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	IdleAudioLoopId	StructProperty of /Script/WaveWeaver.AudioEventId	0x5E8	272028
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DefaultAudioState	StructProperty of /Script/WaveWeaver.AudioSwitchState	0x5F0	272029
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PositionZOffset	DoubleProperty	0x618	272030
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlayerReposition	StructProperty of /Script/CoreUObject.Vector	0x620	272031
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	MenuReposition	StructProperty of /Script/CoreUObject.Vector	0x638	272032
+/Game/Sparta/Core/World/Launch/BP_LandingAreaBase.BP_LandingAreaBase_C	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CameraReposition	StructProperty of /Script/CoreUObject.Vector	0x650	272033
+/Script/Sparta.SpartaPlayerStart	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	StreamingSourceComponent	ObjectProperty of /Script/Engine.WorldPartitionStreamingSourceComponent	0x2D8	57595
+/Script/Sparta.SpartaPlayerStart	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	RootCapsuleMobility	ByteProperty	0x2E0	57596
+/Script/Sparta.SpartaPlayerStart	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	AreaID	StructProperty of /Script/GameplayTags.GameplayTag	0x2E4	57597
+/Script/Sparta.SpartaPlayerStart	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	ZoneData	ObjectProperty of /Script/Sparta.SpartaZoneData	0x2F0	57598
+/Script/Engine.PlayerStart	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PlayerStartTag	NameProperty	0x2D0	31069
+/Script/Engine.NavigationObjectBase	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CapsuleComponent	ObjectProperty of /Script/Engine.CapsuleComponent	0x2B0	30127
+/Script/Engine.NavigationObjectBase	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	GoodSprite	ObjectProperty of /Script/Engine.BillboardComponent	0x2B8	30128
+/Script/Engine.NavigationObjectBase	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BadSprite	ObjectProperty of /Script/Engine.BillboardComponent	0x2C0	30129
+/Script/Engine.NavigationObjectBase	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bIsPIEPlayerStart	BoolProperty	0x2C8	30130
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/Launch/BP_LandingArea_Teleport.BP_LandingArea_Teleport_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	724199
+/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Niagara	ObjectProperty of /Script/Niagara.NiagaraComponent	0x2B0	724200
+/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Box	ObjectProperty of /Script/Engine.BoxComponent	0x2B8	724201
+/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2C0	724202
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/TombZone/BP_TombEntranceTeleporter.BP_TombEntranceTeleporter_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x398	653409
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	SpartaAudio	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x3A0	653410
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NiagaraVFX	ObjectProperty of /Script/Niagara.NiagaraComponent	0x3A8	653411
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Decal1	ObjectProperty of /Script/Engine.DecalComponent	0x3B0	653412
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Decal	ObjectProperty of /Script/Engine.DecalComponent	0x3B8	653413
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Altar	ObjectProperty of /Script/Engine.StaticMeshComponent	0x3C0	653414
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	MoveAltar_ShowAltar_9BAFE0BE4E3FA15ECAA176B0062D4DE4	FloatProperty	0x3C8	653415
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	MoveAltar__Direction_9BAFE0BE4E3FA15ECAA176B0062D4DE4	ByteProperty	0x3CC	653416
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	MoveAltar	ObjectProperty of /Script/Engine.TimelineComponent	0x3D0	653417
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InteractEnabled	BoolProperty	0x3D8	653418
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	LocationToTeleport	ObjectProperty of /Script/Engine.TargetPoint	0x3E0	653419
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	WeaponUnlock	ObjectProperty of /Game/Sparta/Core/Interaction/BP_UnlockWeapon.BP_UnlockWeapon_C	0x3E8	653420
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	ShellToUnlock	ObjectProperty of /Game/Sparta/Core/Interaction/Equipment/BP_Interaction_UnlockShell.BP_Interaction_UnlockShell_C	0x3F0	653421
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	EnemyRequired	ObjectProperty of /Game/Sparta/Characters/SpawnSystem/BP_Spawner.BP_Spawner_C	0x3F8	653422
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	TeleporterLoop	StructProperty of /Script/WaveWeaver.AudioEventId	0x400	653423
+/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	TeleportSFX	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x408	653424
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	IndicatorWidget	ObjectProperty of /Script/Sparta.SpartaWidgetComponent	0x2B0	302806
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InteractionLocation	ObjectProperty of /Script/Engine.SceneComponent	0x2B8	302807
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Trigger	ObjectProperty of /Script/Engine.BoxComponent	0x2C0	302808
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InteractionRootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x2C8	302809
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InputContext	ObjectProperty of /Script/EnhancedInput.InputMappingContext	0x2D0	302810
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	TriggerInputHandle	StructProperty of /Script/Sparta.InputActionEventHandle	0x2D8	302811
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	CompletedInputHandle	StructProperty of /Script/Sparta.InputActionEventHandle	0x2DC	302812
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	StartedInputHandle	StructProperty of /Script/Sparta.InputActionEventHandle	0x2E0	302813
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	IsActive	BoolProperty	0x2E4	302814
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	TagQuery	StructProperty of /Script/GameplayTags.GameplayTagQuery	0x2E8	302815
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	PromptWidget	ArrayProperty of PromptWidget./Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C:PromptWidget	0x330	302816
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	ElapsedTime	FloatProperty	0x340	302818
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Inputs	ArrayProperty of Inputs./Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C:Inputs	0x348	302819
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Prompts	ArrayProperty of Prompts./Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C:Prompts	0x358	302821
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	RelevanceDistanceOffset	DoubleProperty	0x368	302823
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	DotIndicator	ObjectProperty of /Game/Sparta/UI/Interaction/WBP_InteractionIndicator.WBP_InteractionIndicator_C	0x370	302824
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InteractionDurationGameplayEffects	ArrayProperty of InteractionDurationGameplayEffects./Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C:InteractionDurationGameplayEffects	0x378	302825
+/Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InteractionDurationEffectHandles	ArrayProperty of InteractionDurationEffectHandles./Game/Sparta/Core/Interaction/BP_Interaction.BP_Interaction_C:InteractionDurationEffectHandles	0x388	302827
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_EndOfDungeonTeleporter.BP_EndOfDungeonTeleporter_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129

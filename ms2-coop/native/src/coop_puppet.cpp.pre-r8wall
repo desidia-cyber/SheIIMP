@@ -1,0 +1,1603 @@
+// coop_puppet.cpp -- the peer's body: summon/adopt, shell mesh, animation,
+// drive/travel/patrol, World Partition streaming sources and the stream verdict.
+//
+// Ported from G:\Freespace\shell_coop\ms2-coop\mod\CoopMod\Scripts\main.lua:
+//   188-491   body + animation block (ANIMBONES, ANIM_MESH, PUPPET_MESH, LOCO,
+//             SEQ_PATHS, SEQ, ANIM, GSTATICS/WORLD/rt, skinnedMeshesOf,
+//             missingAssets, GAMELOAD/requestGameLoad, findObjectByPath/findAsset,
+//             footBonesOnMesh, BODY_STATE, APPLIED_BODY, PUPPET_HIDDEN,
+//             BODY_ATTEMPTS, puppetMeshComponent, applyBodyMesh,
+//             ensurePuppetBody, syncBodyChoice, animOff, PEER_MONTAGE, normDeg,
+//             playSeq, setRate, playMontage, updatePuppetAnimation)
+//   492-606   S/enter/pt, STREAM, streamSources, streamSetup, setupPuppet, bootTick
+//   1607-1765 peerSpeed, drive counters, clearInput, teleportPuppet, PUPPET_SPEED,
+//             prevPuppetPos, lastDriveT, peerEverSeen, setPuppetHidden, PUPPET_YAW,
+//             travelTick, driveTick, PATROL, cmdPatrol, patrolTick
+//   3738-3811 actorsNear, streamTick
+//
+// ---------------------------------------------------------------------------
+// CRASH NOTES -- these are not opinions, each cost a run (docs/HANDOFF.md 5,
+// docs/NATIVE-PORT.md 4). Do not "fix" any of them:
+//
+//  * The puppet is POSITIONED DIRECTLY (K2_SetActorLocation / K2_SetActorRotation).
+//    NEVER SetMovementMode(1) + AddMovementInput: a possession-less pawn in
+//    Walking mode crashes inside the movement tick, 3/3 (HANDOFF.md 5.6).
+//    kLegacyTeleportDist / kLegacyStopDist / kLegacyMaxSpeed / kLegacyMinSpeed /
+//    kLegacyStuckTicks (coop_state.h, Lua 70-74) are the leftovers of that
+//    abandoned drive: they are declared and never read. THERE IS NO STUCK
+//    DETECTION -- the body snaps only when the distance is > 400 uu. Implementing
+//    "the tuning constants" re-creates the crash. (SetMovementMode(1) in
+//    Setup() is the Lua's own once-per-adopt call and does not feed input; the
+//    crash needs the input vector.)
+//  * SetAnimInstanceClass(nullptr) BEFORE SetSkeletalMeshAsset(shell), always:
+//    swapping the mesh while a live AnimBP instance exists crashes in memcpy
+//    during the anim re-init (HANDOFF.md 5.5).
+//  * Animation is SetAnimationMode(1,true) ONCE, then SetAnimation / Play /
+//    SetPlayRate. PlayAnimation() alone hung a client twice.
+//  * RootMotionMode = 1 set ONCE right after that mode switch, otherwise a
+//    root-motion clip drags the mesh off the capsule.
+//  * The body stays hidden until there is a packet, the peer is live, the packet
+//    is <= 3 s old AND the body is ready. A mesh swap re-applies PUPPET_HIDDEN;
+//    it never un-hides.
+//  * Every cached pointer goes through ue::IsValid before use; Reset() drops all
+//    of them on a world change (docs/NATIVE-PORT.md 4.41 / HANDOFF.md 18: a guest
+//    client died in ProcessEvent on a freed actor).
+//
+// ---------------------------------------------------------------------------
+// CONTRACT-REQUEST (things coop_state.h / ms2_ue.h do not give this module)
+//
+//  1. ue::ConsoleCommand() is not in native\src\ms2_ue.h. The summon goes through
+//     net::Console() (coop_state.h 8, "the ONLY way to spawn the puppet"), which
+//     must also emit the Lua's "console [%s]" line (main.lua:181). Nothing here
+//     logs a second one.
+//  2. ue::GetWorld/GetPawn/GetPlayerController are not in ms2_ue.h either; this
+//     module uses net::World()/net::Pawn() from coop_state.h.
+//  3. ue::ToString(FName) / ue::MakeFName() are listed in the brief but absent
+//     from ms2_ue.h. Bone names are resolved through
+//     UKismetStringLibrary.Conv_NameToString instead (FNameToStr below), which
+//     needs no new ue:: primitive. If ue::ToString lands, FNameToStr can go.
+//  4. ue::GetCDO() is absent; the KismetStringLibrary CDO is resolved by path
+//     ("/Script/Engine.Default__KismetStringLibrary").
+//  5. No native LoadAsset. requestGameLoad() keeps the whole Lua gate (LOAD_ON.txt
+//     default off, 3 tries, 2 s gap, one job at a time) but the queued job can
+//     only re-query the object array (ue::FindObject); it cannot force a load.
+//     LOAD_ON stays off by default exactly as in Lua (main.lua:253-277).
+//  6. FOLDED IN: StartTravel / StartTp / MovementMode / OwnStreamingIncomplete are
+//     now declared in coop_state.h section 10 (they used to live in a private
+//     coop_puppet_extra.h). The definitions at the bottom of this file are
+//     unchanged; coop_net calls StartTp/StartTravel instead of writing PuppetState
+//     itself, so the "owner writes" rule holds.
+//  7. PEER_MONTAGE has no `at` field in MontageSig. In Lua PEER_MONTAGE.at is
+//     always == lastPeer.at (it is captured from the same `at` and only on a
+//     fresh packet, and lastPeer.at does not advance otherwise), so the montage
+//     play head reads state().peer.at. No new field is needed -- but that
+//     equality must hold in net::ApplyPeer.
+// ===========================================================================
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include "coop_state.h"
+#include "ms2_ue.h"
+
+namespace coop {
+namespace puppet {
+
+// ===========================================================================
+// module-local constants that main.lua keeps out of the shared table
+// ===========================================================================
+
+namespace {
+
+const char* const kSummonCmd =
+    "summon /Game/Sparta/Core/Player/BP_PlayerCharacter.BP_PlayerCharacter_C"; // main.lua:589
+
+// main.lua:204-212 (LOCO .. <relative path>, spelled out)
+struct SeqPath {
+    const char* key;
+    const char* path;
+};
+const SeqPath kSeqPaths[] = {
+    {"idle",   "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Idles/A_Shared_Idle_H.A_Shared_Idle_H"},
+    {"walk",   "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Walk/H2/A_Shared_Locomotion_Walk_Fwd_H2.A_Shared_Locomotion_Walk_Fwd_H2"},
+    {"walk_b", "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Walk/H2/A_Shared_Locomotion_Walk_Back_H2.A_Shared_Locomotion_Walk_Back_H2"},
+    {"walk_l", "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Walk/H2/A_Shared_Locomotion_Walk_Left_H2.A_Shared_Locomotion_Walk_Left_H2"},
+    {"walk_r", "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Walk/H2/A_Shared_Locomotion_Walk_Right_H2.A_Shared_Locomotion_Walk_Right_H2"},
+    {"sprint", "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Sprint_800/H2/A_Shared_Locomotion_Sprint_800_H2.A_Shared_Locomotion_Sprint_800_H2"},
+};
+
+const char* const kMainMenuClass = "WBP_MainMenu_C";               // main.lua:562
+const char* const kPlayerCharClass = "BP_PlayerCharacter_C";       // main.lua:184
+const char* const kStreamCompClass = "WorldPartitionStreamingSourceComponent"; // main.lua:517
+
+const double kRad2Deg = 57.295779513082320876798154814105;
+
+// main.lua:3798: the stream verdict needs this many static meshes around the peer
+constexpr int kStreamNeedsActors = 5;
+// main.lua:3782: "the puppet moved" threshold for the stream measurement
+constexpr double kStreamMoveEps = 300.0;
+// main.lua:1704: below this the body is close enough and is not touched
+constexpr double kDriveDeadZone = 0.5;
+// main.lua:3782 / 3748: the 15k box of actorsNear
+constexpr double kActorsNearBox = 15000.0;
+// main.lua:295: footBonesOnMesh scans at most 400 bones
+constexpr int kFootBoneScan = 400;
+
+// ===========================================================================
+// the module's own clock
+//
+// net::Now() is UGameplayStatics.GetRealTimeSeconds through ProcessEvent, and in
+// this build its return is NOT a usable clock.  Measured in the 2026-10-25 run
+// (probe.log, both clients): one second of wall time produced 0.0 -> -0.6 ->
+// -160.0 (`spawnscan: clock rewound`, coop_combat's own guard firing), and the
+// drive-hide diagnostic below printed now=3.7e35 / now=2.9e38.  Every timer this
+// module owns aborted on its first tick because of it:
+//
+//   patrol   `patrol: done`          1 s after a 14 s circle   (t > dur on tick 2)
+//   travel   `travel arrived at ...`  the same second as a 60 s trip
+//   tp hold  `tp hold released`       1 s after a 6 s hold
+//   stream   verdict written 1 s into the 25 s settle window (n0 -> n1 sequentially)
+//
+// The Lua used os.clock()/rt() -- real elapsed time -- so a steady clock is the
+// faithful replacement, and unlike GetRealTimeSeconds it cannot rewind on a level
+// load (docs/NATIVE-PORT.md 4.7 already says os.clock() must become real time).
+// The two fields net::ApplyPeer stamps from net::Now() (PEER().at / PEER().wallAt)
+// are read through PeerAge() below so a broken game clock cannot hide the body.
+// ===========================================================================
+
+double TickSeconds() {
+    using namespace std::chrono;
+    static const steady_clock::time_point t0 = steady_clock::now();
+    return duration_cast<duration<double>>(steady_clock::now() - t0).count();
+}
+
+// ===========================================================================
+// state accessors (the sub-structs are PUBLIC, but only this module writes
+// PuppetState -- coop_state.h rule 1)
+// ===========================================================================
+
+inline PuppetState& P() { return coop::state().puppet; }
+inline PeerState& PEER() { return coop::state().peer; }
+inline LocalState& LOCAL() { return coop::state().local; }
+inline const Toggles& TG() { return coop::state().toggles; }
+
+// How old the peer's last packet is, in seconds, from a clock that cannot lie.
+// PEER().at comes from net::Now(); when that reads garbage the difference is not
+// a plausible age (negative or astronomically large) and the 1 s wall stamp
+// net::ApplyPeer also writes (PEER().wallAt) is used instead.  DriveTick hides the
+// body when this exceeds kPeerStale, so a garbage age made the body flicker
+// hidden/visible ~3x/s for the whole run (`puppet hidden (peer not in session
+// yet)` x1583 on A, x2448 on B).
+double PeerAge(double tnow) {
+    const double a = tnow - PEER().at;
+    if (a >= -1.0 && a <= 120.0) return a;
+    const double w = (double)(net::Wall() - PEER().wallAt);
+    if (w >= 0.0 && w <= 120.0) return w;
+    return 0.0;
+}
+
+// main.lua:586 -- the FindAllOf("BP_PlayerCharacter_C") name snapshot that tells
+// the summoned actor apart from the ones that were already there (NATIVE-PORT 4.33)
+StrSet g_baseline;
+
+// ===========================================================================
+// guarded call helpers
+// ===========================================================================
+
+bool Valid(ue::UObject* o) { return o != nullptr && ue::IsValid(o); }
+
+// A UFunction call with a correctly sized, zero-initialised parameter block.
+// ue::Params must never be constructed from a null UFunction, hence the heap
+// block only when the function resolved.
+class FnCall {
+public:
+    FnCall(ue::UObject* obj, const char* name) : obj_(obj) {
+        if (obj_ == nullptr || !ue::IsValid(obj_)) {
+            obj_ = nullptr;
+            return;
+        }
+        fn_ = ue::FindFunction(obj_, name);
+        if (fn_ != nullptr) p_ = new ue::Params(fn_);
+    }
+    ~FnCall() { delete p_; }
+    FnCall(const FnCall&) = delete;
+    FnCall& operator=(const FnCall&) = delete;
+
+    bool ok() const { return obj_ != nullptr && fn_ != nullptr && p_ != nullptr; }
+    bool Run() { return ok() && ue::Call(obj_, fn_, p_->data()); }
+
+    template <class T>
+    void Set(const char* n, const T& v) {
+        if (p_ != nullptr) p_->Set<T>(n, v);
+    }
+    template <class T>
+    T Get(const char* n) {
+        T t{};
+        if (p_ != nullptr) t = p_->Get<T>(n);
+        return t;
+    }
+
+private:
+    ue::UObject* obj_ = nullptr;
+    ue::UFunction* fn_ = nullptr;
+    ue::Params* p_ = nullptr;
+};
+
+bool CallNoArg(ue::UObject* o, const char* name) {
+    FnCall c(o, name);
+    return c.ok() && c.Run();
+}
+
+// --- AActor ---------------------------------------------------------------
+
+bool HideActor(ue::UObject* a, bool hide) {
+    FnCall c(a, "SetActorHiddenInGame");
+    if (!c.ok()) return false;
+    c.Set<bool>("bNewHidden", hide);
+    return c.Run();
+}
+
+// K2_SetActorLocation(FVector, bSweep, {FHitResult}, bTeleport). The hit result
+// is the Lua's `{}`: the parameter block is zeroed, which is what Lua passed.
+bool SetLoc(ue::UObject* a, const Vec3& v, bool teleport = true) {
+    FnCall c(a, "K2_SetActorLocation");
+    if (!c.ok()) return false;
+    ue::FVector fv;
+    fv.X = v.X;
+    fv.Y = v.Y;
+    fv.Z = v.Z;
+    c.Set<ue::FVector>("NewLocation", fv);
+    c.Set<bool>("bSweep", false);
+    c.Set<bool>("bTeleport", teleport);
+    return c.Run();
+}
+
+bool SetYaw(ue::UObject* a, double yaw) {
+    FnCall c(a, "K2_SetActorRotation");
+    if (!c.ok()) return false;
+    ue::FRotator r;
+    r.Pitch = 0.0;
+    r.Yaw = yaw;
+    r.Roll = 0.0;
+    c.Set<ue::FRotator>("NewRotation", r);
+    c.Set<bool>("bTeleportPhysics", false);   // UE5 name (was bTeleportRotation: no-op)
+    return c.Run();
+}
+
+// Returns false when the location cannot be read at all (Lua locOf -> nil).
+bool ActorLoc(ue::UObject* a, Vec3* out) {
+    if (out == nullptr) return false;
+    FnCall c(a, "K2_GetActorLocation");
+    if (!c.ok() || !c.Run()) return false;
+    ue::FVector v = c.Get<ue::FVector>("ReturnValue");
+    if (v.X == 0.0 && v.Y == 0.0 && v.Z == 0.0) {
+        // A world origin read means the return property did not resolve; fall
+        // back to the shared accessor rather than snapping the body to (0,0,0)
+        // every tick.
+        *out = net::Loc(a);
+        return true;
+    }
+    *out = ToVec3(v);
+    return true;
+}
+
+// --- components -----------------------------------------------------------
+
+ue::UObject* ComponentOf(ue::UObject* a, const char* prop) {
+    if (!Valid(a)) return nullptr;
+    ue::UObject* c = nullptr;
+    if (!ue::Get<ue::UObject*>(a, prop, c)) return nullptr;
+    return Valid(c) ? c : nullptr;
+}
+
+ue::UObject* CharacterMovement(ue::UObject* a) { return ComponentOf(a, "CharacterMovement"); }
+
+bool SetMovementMode(ue::UObject* mc, int mode, int custom) {
+    FnCall c(mc, "SetMovementMode");
+    if (!c.ok()) return false;
+    c.Set<std::uint8_t>("NewMovementMode", static_cast<std::uint8_t>(mode));
+    c.Set<std::uint8_t>("NewCustomMode", static_cast<std::uint8_t>(custom));
+    return c.Run();
+}
+
+// Reads a reflected bool as "true"/"false", or "nil" when the property does not
+// exist (Lua's tostring(nil)).
+std::string BoolStr(ue::UObject* o, const char* prop) {
+    if (!Valid(o) || ue::PropOffset(o, prop) < 0) return "nil";
+    bool v = false;
+    if (!ue::Get<bool>(o, prop, v)) return "nil";
+    return v ? "true" : "false";
+}
+
+ue::UObject* GetOwnerOf(ue::UObject* comp) {
+    if (!Valid(comp)) return nullptr;
+    FnCall c(comp, "GetOwner");
+    if (c.ok() && c.Run()) {
+        ue::UObject* o = c.Get<ue::UObject*>("ReturnValue");
+        if (Valid(o)) return o;
+    }
+    // ActorComponent keeps Owner as a plain member in some builds; the property
+    // read is the fallback when the UFunction is missing.
+    ue::UObject* o = nullptr;
+    if (ue::Get<ue::UObject*>(comp, "Owner", o) && Valid(o)) return o;
+    return nullptr;
+}
+
+// main.lua:228-236: every SkeletalMeshComponent whose owner is `actor`.
+// FindAllOf walks GObjects -- 2 Hz only, never on the drive path (NATIVE-PORT 1.2).
+//
+// `GetOwner()` costs a ProcessEvent per component; the owner of a component IS its
+// Outer, so compare that first and keep the call as the fallback (the look/body
+// paths run this over every skinned mesh in the world).
+std::vector<ue::UObject*> SkinnedMeshesOf(ue::UObject* actor) {
+    std::vector<ue::UObject*> out;
+    if (!Valid(actor)) return out;
+    for (ue::UObject* m : ue::FindAllOf("SkeletalMeshComponent")) {
+        if (!Valid(m)) continue;
+        if (ue::GetOuter(m) == actor) {
+            out.push_back(m);
+            continue;
+        }
+        if (GetOwnerOf(m) == actor) out.push_back(m);
+    }
+    return out;
+}
+
+// ===========================================================================
+// FName -> string (only needed for the foot-bone log line, main.lua:292-305)
+//
+// ms2_ue.h does not expose ue::ToString(FName) yet (CONTRACT-REQUEST 3), so the
+// name goes through UKismetStringLibrary.Conv_NameToString on its CDO. Every
+// call is guarded: if the library is not resolved the bone list is simply empty,
+// which only shortens one log line -- ANIMBONES is never used for behaviour.
+// ===========================================================================
+
+ue::UObject* StringLibrary() {
+    static ue::UObject* cached = nullptr;
+    if (Valid(cached)) return cached;
+    cached = ue::FindObject("/Script/Engine.Default__KismetStringLibrary");
+    if (!Valid(cached)) cached = ue::FindObject("Default__KismetStringLibrary");
+    if (!Valid(cached)) cached = nullptr;
+    return cached;
+}
+
+bool FNameToStr(const ue::FName& n, std::string* out) {
+    if (out == nullptr) return false;
+    out->clear();
+    ue::UObject* lib = StringLibrary();
+    if (lib == nullptr) return false;
+    FnCall c(lib, "Conv_NameToString");
+    if (!c.ok()) return false;
+    c.Set<ue::FName>("InName", n);
+    if (!c.Run()) return false;
+    ue::FString fs = c.Get<ue::FString>("ReturnValue");
+    if (fs.Data == nullptr || fs.Num <= 0) return false;
+    // Bone names are ASCII; anything wider is not a name we look for.
+    for (int i = 0; i < fs.Num; ++i) {
+        wchar_t ch = 0;
+        if (!ue::ReadMem(fs.Data + i, &ch, sizeof(ch))) break;
+        if (ch == 0) break;
+        out->push_back(ch < 128 ? static_cast<char>(ch) : '?');
+    }
+    return !out->empty();
+}
+
+// main.lua:292-305 (400 bones max -- an unbounded scan of a 164-bone mesh stalls
+// the tick, NATIVE-PORT 4.30)
+std::vector<std::string> FootBonesOnMesh(ue::UObject* mesh) {
+    std::vector<std::string> out;
+    if (!Valid(mesh)) return out;
+    int bones = 0;
+    {
+        FnCall c(mesh, "GetNumBones");
+        if (!c.ok() || !c.Run()) return out;
+        bones = c.Get<std::int32_t>("ReturnValue");
+    }
+    const int last = std::min(bones, kFootBoneScan);
+    for (int i = 0; i < last; ++i) {
+        FnCall c(mesh, "GetBoneName");
+        if (!c.ok()) break;
+        c.Set<std::int32_t>("BoneIndex", i);
+        if (!c.Run()) continue;
+        ue::FName nm = c.Get<ue::FName>("ReturnValue");
+        std::string s;
+        if (!FNameToStr(nm, &s)) continue;
+        std::string low = s;
+        for (std::size_t k = 0; k < low.size(); ++k) {
+            if (low[k] >= 'A' && low[k] <= 'Z') low[k] = static_cast<char>(low[k] - 'A' + 'a');
+        }
+        if ((low == "foot_l" || low == "foot_r" || low == "ball_l" || low == "ball_r") &&
+            out.size() < 3) {
+            out.push_back(s);
+        }
+    }
+    return out;
+}
+
+// ===========================================================================
+// asset lookup + the gated game-thread loader (main.lua:238-290)
+// ===========================================================================
+
+bool IsGamePath(const std::string& p) {
+    // ^/Game/[%w_/%.%-]+$
+    const std::string prefix = "/Game/";
+    if (p.size() <= prefix.size()) return false;
+    if (p.compare(0, prefix.size(), prefix) != 0) return false;
+    for (std::size_t i = prefix.size(); i < p.size(); ++i) {
+        const char c = p[i];
+        const bool okc = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                         (c >= '0' && c <= '9') || c == '_' || c == '/' || c == '.' || c == '-';
+        if (!okc) return false;
+    }
+    return true;
+}
+
+// main.lua:258-277. GAMELOAD: one job at a time, 2 s apart, three tries per path,
+// a job that never ran is cleared after 10 s.
+//
+// [R8-APPEAR] the job is now a REAL load (coop_load.cpp, LoadAsset_Blocking through
+// KismetSystemLibrary) instead of a re-query of the object array: a peer wearing a
+// shell this client never loaded left the puppet with no body at all, and the old
+// `FindObject` could never change that (CONTRACT-REQUEST 5, docs/HANDOFF.md 20).
+// The queue is gone too -- this runs on the game thread already (net::Step from the
+// tick), and LoadAsset_Blocking must not run from inside a ProcessEvent drain.
+void RequestGameLoad(const std::string& path) {
+    if (!TG().loadOn && !TG().assetLoad) return;
+    if (!IsGamePath(path)) return;
+    const int64_t now = net::Wall();
+    if (P().loadBusy && now - P().loadBusyAt > 10) P().loadBusy = false;
+    if (P().loadBusy || now < P().loadNextAt) return;
+    const int n = P().loadTries.Get(path, 0);
+    if (n >= kGameLoadTries) return;
+    P().loadTries.Set(path, n + 1);
+    P().loadBusy = true;
+    P().loadBusyAt = now;
+    P().loadNextAt = now + 2;
+    bool loaded = false;
+    if (TG().assetLoad) {
+        loaded = coop::load::Asset(path) != nullptr;
+    } else {
+        ue::FindObject(path.c_str());   // LOAD_ON.txt without the loader: re-query
+    }
+    P().loadBusy = false;
+    ++P().loadDone;
+    net::Log("game load %d: %s%s", n + 1, path.c_str(), loaded ? " (loaded)" : "");
+}
+
+// main.lua:279-290 (findAsset)
+ue::UObject* FindAsset(const std::string& path, bool load) {
+    if (path.size() < 4) return nullptr;
+    ue::UObject* obj = ue::FindObject(path.c_str());
+    if (Valid(obj)) return obj;
+    if (!P().missingAssets.Has(path)) {
+        P().missingAssets.Add(path);
+        net::Log("asset not loaded yet: %s", path.c_str());
+    }
+    if (load) RequestGameLoad(path);
+    return nullptr;
+}
+
+// ===========================================================================
+// the shell mesh (main.lua:307-376)
+// ===========================================================================
+
+// main.lua:314-326. PUPPET_MESH is only valid for the CURRENT puppet: Lua kept
+// the cache across a re-summon, which could drive the previous body's component.
+ue::UObject* PuppetMeshComponent() {
+    if (Valid(P().puppetMesh) && GetOwnerOf(P().puppetMesh) == P().actor) return P().puppetMesh;
+    P().puppetMesh = nullptr;
+    if (!Valid(P().actor)) return nullptr;
+    const std::vector<ue::UObject*> meshes = SkinnedMeshesOf(P().actor);
+    for (ue::UObject* m : meshes) {
+        int n = 0;
+        FnCall c(m, "GetNumBones");
+        if (c.ok() && c.Run()) n = c.Get<std::int32_t>("ReturnValue");
+        if (n > 0) { // prefer the component that already has the most bones
+            P().puppetMesh = m;
+            return m;
+        }
+    }
+    if (!meshes.empty()) P().puppetMesh = meshes[0]; // CharacterMesh0
+    return P().puppetMesh;
+}
+
+int MeshBones(ue::UObject* mesh) {
+    FnCall c(mesh, "GetNumBones");
+    if (!c.ok() || !c.Run()) return 0;
+    return c.Get<std::int32_t>("ReturnValue");
+}
+
+// main.lua:328-348
+bool ApplyBodyMeshImpl(const std::string& path, std::string* err) {
+    ue::UObject* mesh = PuppetMeshComponent();
+    if (mesh == nullptr) {
+        if (err) *err = "no mesh component";
+        return false;
+    }
+    ue::UObject* asset = FindAsset(path, true);
+    if (asset == nullptr) {
+        if (err) *err = "asset not found: " + path;
+        return false;
+    }
+    // MUST be cleared first: swapping the mesh with a live AnimBP instance
+    // crashes in memcpy during the anim re-init (HANDOFF.md 5.5).
+    {
+        FnCall c(mesh, "SetAnimInstanceClass");
+        if (c.ok()) {
+            c.Set<ue::UObject*>("NewClass", static_cast<ue::UObject*>(nullptr));
+            c.Run();
+        }
+    }
+    {
+        FnCall c(mesh, "SetSkeletalMeshAsset");
+        if (c.ok()) {
+            c.Set<ue::UObject*>("NewMesh", asset);
+            c.Run();
+        }
+    }
+    {
+        FnCall c(mesh, "SetVisibility");
+        if (c.ok()) {
+            c.Set<bool>("bNewVisibility", true);
+            c.Set<bool>("bPropagateToChildren", true);
+            c.Run();
+        }
+    }
+    // a mesh swap re-applies the hide gate, it never un-hides (main.lua:337)
+    HideActor(P().actor, P().hidden);
+    const int bones = MeshBones(mesh);
+    net::Log("puppet body <- %s : bones=%d", path.c_str(), bones);
+    if (bones <= 0) {
+        if (err) *err = "no bones after assign";
+        return false;
+    }
+    P().appliedBody = path;
+    P().mesh = mesh;                       // ANIM_MESH
+    P().footBones = FootBonesOnMesh(mesh); // ANIMBONES
+    ResetAnimationState();                 // ANIM.state/rate/mode = nil,nil,false
+    std::string joined;
+    for (std::size_t i = 0; i < P().footBones.size(); ++i) {
+        if (i != 0) joined += ",";
+        joined += P().footBones[i];
+    }
+    net::Log("puppet body ready (feet bones: %s)", joined.c_str());
+    return true;
+}
+
+} // namespace
+
+// ===========================================================================
+// public API (coop_state.h 10)
+// ===========================================================================
+
+ue::UObject* Actor() { return Valid(P().actor) ? P().actor : nullptr; }
+
+ue::UObject* Mesh() { return Valid(P().mesh) ? P().mesh : nullptr; }
+
+bool BodyReady() { return P().bodyReady; }
+
+bool Hidden() { return P().hidden; }
+
+// main.lua:1640-1645. PUPPET_HIDDEN is the single source of truth.
+void SetHidden(bool hide) {
+    if (!Valid(P().actor) || P().hidden == hide) return;
+    P().hidden = hide;
+    HideActor(P().actor, hide);
+    net::Log("puppet %s", hide ? "hidden (peer not in session yet)" : "visible");
+}
+
+// main.lua:328-348
+bool ApplyBodyMesh(const std::string& path) { return ApplyBodyMeshImpl(path, nullptr); }
+
+// main.lua:213 (ANIM.state / ANIM.rate / ANIM.mode dropped after a mesh swap;
+// ANIM.kind deliberately survives, exactly as in Lua)
+void ResetAnimationState() {
+    P().animState.clear();
+    P().animRate = -1.0;
+    P().animModeSet = false;
+}
+
+// main.lua:350-367
+void EnsureBody() {
+    if (!Valid(P().actor)) return;
+    ue::UObject* mesh = PuppetMeshComponent();
+    if (mesh == nullptr) return;
+    if (MeshBones(mesh) > 0) {
+        P().bodyReady = true;
+        if (P().mesh != mesh) {
+            P().mesh = mesh;
+            P().footBones = FootBonesOnMesh(mesh);
+        }
+        return;
+    }
+    // the peer's shell if we already know it, else our own shell as a placeholder
+    std::string want;
+    if (PEER().body.size() > 8) {
+        want = PEER().body;
+    } else if (LOCAL().body.size() > 8) {
+        want = LOCAL().body;
+    }
+    if (want.size() <= 8) return;
+    ++P().bodyAttempts;
+    if (ApplyBodyMeshImpl(want, nullptr)) P().bodyReady = true;
+}
+
+// main.lua:370-376 -- follow the peer's shell swaps
+void SyncBody() {
+    const std::string& peerBody = PEER().body;
+    if (!P().bodyReady || peerBody.empty()) return;
+    if (P().appliedBody == peerBody) return;
+    if (peerBody.size() < 8) return;
+    if (!ApplyBodyMeshImpl(peerBody, nullptr)) net::Log("body swap failed for %s", peerBody.c_str());
+}
+
+// ===========================================================================
+// streaming sources (main.lua:514-543, 3755-3776)
+// ===========================================================================
+
+namespace {
+
+struct StreamSource {
+    ue::UObject* comp = nullptr;
+    bool blocking = false;
+};
+
+// main.lua:516-529. The two sources a player carries are "Streaming Source
+// (Blocking)" and "Streaming Source (Non Blocking)"; anything without
+// "Non Blocking" in its name is the blocking one.
+std::vector<StreamSource> StreamSources(ue::UObject* actor) {
+    std::vector<StreamSource> out;
+    if (!Valid(actor)) return out;
+    ue::UObject* cls = net::EngineClass(kStreamCompClass);
+    if (!Valid(cls)) return out;
+    FnCall c(actor, "K2_GetComponentsByClass");
+    if (!c.ok()) return out;
+    c.Set<ue::UObject*>("ComponentClass", cls);
+    if (!c.Run()) return out;
+    ue::TArray<ue::UObject*> arr = c.Get<ue::TArray<ue::UObject*>>("ReturnValue");
+    if (arr.Data == nullptr || arr.Num <= 0) return out;
+    const int n = std::min(arr.Num, 16);
+    for (int i = 0; i < n; ++i) {
+        ue::UObject* comp = nullptr;
+        if (!ue::ReadMem(arr.Data + i, &comp, sizeof(comp))) break;
+        if (!Valid(comp)) continue;
+        StreamSource e;
+        e.comp = comp;
+        e.blocking = net::FullName(comp).find("Non Blocking") == std::string::npos;
+        out.push_back(e);
+    }
+    return out;
+}
+
+void SetSourceEnabled(ue::UObject* comp, bool want) {
+    CallNoArg(comp, want ? "EnableStreamingSource" : "DisableStreamingSource");
+}
+
+// The Lua read the bool property directly (`e.c.bStreamingSourceEnabled`). A
+// reflected bool that is a bitfield would share its byte with the component's
+// other flags, so the accessor is preferred when this build has it, and the
+// property read is the fallback (Lua's exact path).
+std::string SourceEnabledStr(ue::UObject* comp) {
+    FnCall c(comp, "IsStreamingSourceEnabled");
+    if (c.ok() && c.Run()) return c.Get<bool>("ReturnValue") ? "true" : "false";
+    return BoolStr(comp, "bStreamingSourceEnabled");
+}
+
+// main.lua:531-543
+void StreamSetup(ue::UObject* actor) {
+    std::vector<std::string> parts;
+    for (const StreamSource& e : StreamSources(actor)) {
+        const bool want = TG().streamEnabled && !e.blocking;
+        SetSourceEnabled(e.comp, want);
+        parts.push_back(std::string(e.blocking ? "blk=" : "nb=") + SourceEnabledStr(e.comp));
+    }
+    std::string joined;
+    for (std::size_t i = 0; i < parts.size(); ++i) {
+        if (i != 0) joined += "/";
+        joined += parts[i];
+    }
+    P().streamSrc = parts.empty() ? "none" : joined;
+    net::Log("puppet streaming sources: %s (enabled=%s)", P().streamSrc.c_str(),
+             TG().streamEnabled ? "true" : "false");
+}
+
+// main.lua:3744-3751 -- StaticMeshActor ONLY. FindAllOf("Actor") while cells
+// stream froze the Lua thread of a travelling client (NATIVE-PORT 4.31).
+int ActorsNear(const Vec3& p) {
+    int n = 0;
+    for (ue::UObject* a : ue::FindAllOf("StaticMeshActor")) {
+        if (!Valid(a)) continue;
+        Vec3 l;
+        if (!ActorLoc(a, &l)) continue;
+        if (std::fabs(l.X - p.X) < kActorsNearBox && std::fabs(l.Y - p.Y) < kActorsNearBox) ++n;
+    }
+    return n;
+}
+
+// main.lua:3757-3762 -- TP_HOLD: hover for 6 s after a teleport, then back to
+// Walking, or a far teleport falls through unloaded ground and the game's fall
+// recovery puts the player back where it came from (NATIVE-PORT 4.27).
+void ReleaseTpHoldIfDue(double now) {
+    if (!P().hasTpHold) return;
+    if (now - P().tpHoldAt <= kTravelHoldSecs) return;
+    ue::UObject* pawn = P().tpHoldPawn;
+    P().hasTpHold = false;
+    P().tpHoldPawn = nullptr;
+    if (Valid(pawn)) {
+        ue::UObject* mc = CharacterMovement(pawn);
+        if (mc != nullptr) SetMovementMode(mc, 1, 0);
+    }
+    net::Log("tp hold released");
+}
+
+} // namespace
+
+// ===========================================================================
+// boot state machine (main.lua:545-606)
+// ===========================================================================
+
+// main.lua:545-558
+void Setup(ue::UObject* actor) {
+    if (!Valid(actor)) return;
+    P().actor = actor;
+    P().hidden = true;
+    HideActor(actor, true);
+    // Lua kept BODY_STATE / PUPPET_MESH / ANIM_MESH across a re-summon, which
+    // left a re-summoned body invisible; the port drops every cached pointer on
+    // a world change (contract rule 5) and starts the new body from scratch.
+    P().mesh = nullptr;
+    P().puppetMesh = nullptr;
+    P().bodyReady = false;
+    P().appliedBody.clear();
+    P().animState.clear();
+    P().animRate = -1.0;
+    P().animModeSet = false;
+    P().sequences.clear();
+    StreamSetup(actor);
+    // Nobody possesses this pawn. Walking mode alone is what Lua does once per
+    // adopt; the crash needs SetMovementMode(1) + AddMovementInput, which is
+    // exactly what this module never does (HANDOFF.md 5.6).
+    ue::UObject* mc = CharacterMovement(actor);
+    if (mc != nullptr) {
+        SetMovementMode(mc, 1, 0);
+        ue::Set<bool>(mc, "bOrientRotationToMovement", false);
+        ue::Set<float>(mc, "MaxAcceleration", 2048.0f);
+    }
+    net::Log("puppet ready: %s (drive=movement-input)", net::FullName(actor).c_str());
+}
+
+// main.lua:560-606
+void Boot() {
+    const Phase ph = P().phase;
+    const double pt = net::PhaseSeconds();
+    const int pts = static_cast<int>(pt);
+
+    if (ph == Phase::Menu) {
+        ue::UObject* w = nullptr;
+        for (ue::UObject* o : ue::FindAllOf(kMainMenuClass)) {
+            if (o != nullptr) {
+                w = o;
+                break;
+            }
+        }
+        if (Valid(w)) {
+            net::Log("menu ready after %ds", pts);
+            const bool ok = CallNoArg(w, "ContinueGame");
+            net::Log("ContinueGame ok=%s", ok ? "true" : "false");
+            net::EnterPhase(Phase::World);
+        } else if (pt > kMenuTimeout) {
+            net::Log("boot: menu timeout");
+            net::EnterPhase(Phase::World); // still try
+        } else if (pts - P().phaseNoted >= 20) {
+            P().phaseNoted = pts;
+            // Say WHAT the menu wait sees, not just that it is waiting: "no menu
+            // widget, but 1 player character and a world" is a different bug from
+            // "nothing loaded at all", and one log line settles it.
+            const std::vector<ue::UObject*> menus = ue::FindAllOf(kMainMenuClass);
+            const std::vector<ue::UObject*> chars = ue::FindAllOf(kPlayerCharClass);
+            net::Log("boot: waiting for menu (%ds) menu=%d chars=%d world=%s pawn=%s",
+                     pts, (int)menus.size(), (int)chars.size(),
+                     net::FullName(net::World()).c_str(), net::FullName(net::Pawn()).c_str());
+        }
+        return;
+    }
+
+    if (ph == Phase::World) {
+        ue::UObject* pawn = net::Pawn();
+        const bool isChar = Valid(pawn) && net::FullName(pawn).find(kPlayerCharClass) != std::string::npos;
+        if (isChar) {
+            if (pt >= kGameplayMinWait) {
+                net::Log("gameplay ready after %ds: %s", pts, net::FullName(pawn).c_str());
+                net::EnterPhase(Phase::Summon);
+            }
+        } else if (pt > kGameplayTimeout) {
+            net::Log("boot: gameplay timeout");
+        } else if (pts - P().phaseNoted >= 20) {
+            P().phaseNoted = pts;
+            net::Log("boot: waiting for gameplay (%ds) world=%s pc=%s pawn=%s chars=%d",
+                     pts, net::FullName(net::World()).c_str(), net::FullName(net::PC()).c_str(),
+                     net::FullName(pawn).c_str(), (int)ue::FindAllOf(kPlayerCharClass).size());
+        }
+        return;
+    }
+
+    if (ph == Phase::Summon) {
+        // NATIVE-PORT 4.33: adopt = name diff against a baseline snapshot, never
+        // a spawn. `summon` is the only proven way to make this actor.
+        g_baseline.Clear();
+        int n = 0;
+        for (ue::UObject* o : ue::FindAllOf(kPlayerCharClass)) {
+            if (o == nullptr) continue;
+            g_baseline.Add(net::FullName(o));
+            ++n;
+        }
+        if (n > 0) {
+            net::Log("summoning puppet (%d chars present)", n);
+            net::Console(kSummonCmd);
+            net::EnterPhase(Phase::Adopt);
+        } else {
+            net::EnterPhase(Phase::World);
+        }
+        return;
+    }
+
+    if (ph == Phase::Adopt) {
+        for (ue::UObject* o : ue::FindAllOf(kPlayerCharClass)) {
+            if (o == nullptr) continue;
+            const std::string fn = net::FullName(o);
+            if (!g_baseline.Has(fn)) {
+                Setup(o);
+                net::WriteFile("puppet.txt", fn + "\n");
+                net::EnterPhase(Phase::Sync);
+                return;
+            }
+        }
+        if (pt > kSummonTimeout) {
+            net::Log("boot: summon produced nothing");
+            net::EnterPhase(Phase::Summon);
+        }
+    }
+}
+
+// ===========================================================================
+// animation (main.lua:378-491)
+// ===========================================================================
+
+namespace {
+
+const char* SeqPathOf(const std::string& key);
+
+// main.lua:213 -- SEQ cache, keyed by the clip name
+ue::UObject* Sequence(const std::string& key) {
+    for (const NamedActor& kv : P().sequences) {
+        if (kv.tail == key) return Valid(kv.obj) ? kv.obj : nullptr;
+    }
+    const char* path = SeqPathOf(key);
+    if (path == nullptr) return nullptr;
+    ue::UObject* o = FindAsset(path, false);
+    if (o != nullptr) {
+        NamedActor row;
+        row.tail = key;
+        row.obj = o;
+        P().sequences.push_back(row);
+    }
+    return o;
+}
+
+const char* SeqPathOf(const std::string& key) {
+    for (const SeqPath& e : kSeqPaths) {
+        if (key == e.key) return e.path;
+    }
+    return nullptr;
+}
+
+std::string Basename(const std::string& path) {
+    const std::size_t dot = path.find_last_of('.');
+    if (dot == std::string::npos || dot + 1 >= path.size()) return path;
+    return path.substr(dot + 1);
+}
+
+// main.lua:402-422. Single-node playback: the mode switch is done ONCE because
+// it re-creates the single-node instance; root motion is extracted but not
+// applied so a clip cannot drag the mesh off the capsule.
+bool PlaySeq(const std::string& key, ue::UObject* seq, bool looping) {
+    ue::UObject* mesh = Valid(P().mesh) ? P().mesh : nullptr;
+    if (mesh == nullptr || seq == nullptr) return false;
+    if (!P().animModeSet) {
+        FnCall mode(mesh, "SetAnimationMode");
+        if (!mode.ok()) {
+            net::Log("puppet anim mode switch failed");
+            return false;
+        }
+        // The UE 5.6 parameter is InAnimationMode.  "AnimationMode" (the old spelling)
+        // matched nothing, so the call ran with mode 0 = AnimationBlueprint on a mesh
+        // whose AnimClass we cleared: no anim instance, reference pose forever (round 5).
+        mode.Set<std::uint8_t>("InAnimationMode", 1); // EAnimationMode::AnimationSingleNode
+        mode.Set<bool>("bForceInitAnimScriptInstance", true);
+        if (!mode.Run()) {
+            net::Log("puppet anim mode switch failed");
+            return false;
+        }
+        P().animModeSet = true;
+        // NATIVE-PORT 4.3: set ONCE, right after the switch.
+        FnCall inst(mesh, "GetAnimInstance");
+        if (inst.ok() && inst.Run()) {
+            ue::UObject* ai = inst.Get<ue::UObject*>("ReturnValue");
+            if (Valid(ai)) ue::Set<std::uint8_t>(ai, "RootMotionMode", 1);
+        }
+    }
+    bool okSet = false;
+    {
+        FnCall c(mesh, "SetAnimation");
+        if (c.ok()) {
+            c.Set<ue::UObject*>("NewAnimToPlay", seq);
+            okSet = c.Run();
+        }
+    }
+    bool okPlay = false;
+    {
+        FnCall c(mesh, "Play");
+        if (c.ok()) {
+            c.Set<bool>("bLooping", looping);
+            okPlay = c.Run();
+        }
+    }
+    if (!(okSet && okPlay)) {
+        net::Log("puppet anim switch failed (%s/%s) for %s", okSet ? "true" : "false",
+                 okPlay ? "true" : "false", key.c_str());
+        return false;
+    }
+    P().animState = key;
+    P().animRate = -1.0; // Lua: ANIM.rate = nil -> the next setRate always applies
+    return true;
+}
+
+// main.lua:424-429
+void SetRate(double rate) {
+    if (P().animRate < 0.0 || std::fabs(P().animRate - rate) > 0.05) {
+        FnCall c(Valid(P().mesh) ? P().mesh : nullptr, "SetPlayRate");
+        if (c.ok()) {
+            c.Set<float>("Rate", static_cast<float>(rate));
+            c.Run();
+        }
+        P().animRate = rate; // Lua caches the value even when the call failed
+    }
+}
+
+bool MeshPosition(ue::UObject* mesh, double* out) {
+    if (out == nullptr) return false;
+    FnCall c(mesh, "GetPosition");
+    if (!c.ok() || !c.Run()) return false;
+    *out = c.Get<float>("ReturnValue");
+    return true;
+}
+
+bool SetMeshPosition(ue::UObject* mesh, double pos) {
+    FnCall c(mesh, "SetPosition");
+    if (!c.ok()) return false;
+    c.Set<float>("InPos", static_cast<float>(pos));
+    c.Set<bool>("bFireNotifies", false);
+    return c.Run();
+}
+
+// main.lua:431-450. The play head advances on the packet clock, not per packet;
+// re-seek only when the drift is > 0.12 s (NATIVE-PORT 4.11).
+bool PlayMontage(const MontageSig& m, double tnow) {
+    ue::UObject* seq = FindAsset(m.path, false);
+    if (seq == nullptr) return false;
+    const double age = std::min(std::max(PeerAge(tnow), 0.0), kMontageLead);
+    const double expected = m.pos + age * m.rate;
+    const std::string key = net::Fmt("m:%d:%s", m.id, m.path.c_str());
+    ue::UObject* mesh = Valid(P().mesh) ? P().mesh : nullptr;
+    if (mesh == nullptr) return false;
+    if (P().animState != key) {
+        if (!PlaySeq(key, seq, false)) return false;
+        SetMeshPosition(mesh, expected);
+        if (P().animKind != "montage") {
+            net::Log("puppet action -> %s @%.2f", Basename(m.path).c_str(), expected);
+        }
+        P().animKind = "montage";
+    } else {
+        double cur = 0.0;
+        if (MeshPosition(mesh, &cur) && std::fabs(cur - expected) > kMontageSlack) {
+            SetMeshPosition(mesh, expected);
+        }
+    }
+    SetRate(std::max(kMontageRateMin, m.rate));
+    return true;
+}
+
+} // namespace
+
+// [R5-BODY] begin -- single-node playback of an animation ASSET that the puppet
+// state machine does not know (the peer death visual: a DeathsLibrary
+// AnimSequence).  Same mode switch, same clip cache, same play head rules.
+bool PlayAsset(const std::string& path, bool looping) {
+    if (path.size() < 8) return false;
+    ue::UObject* seq = FindAsset(path, true);
+    if (seq == nullptr) return false;
+    const std::string key = "a:" + path;
+    if (Valid(P().mesh) && P().animState == key) {
+        FnCall play(P().mesh, "Play");
+        if (play.ok()) {
+            play.Set<bool>("bLooping", looping);
+            play.Run();
+        }
+        return true;
+    }
+    return PlaySeq(key, seq, looping);
+}
+// [R5-BODY] end
+
+// main.lua:454-491
+void UpdateAnimation(double vx, double vy, double yaw, double now) {
+    if (TG().animOff || !P().bodyReady || !Valid(P().mesh)) return;
+
+    // [R5-BODY] begin -- the friend's body is dead: the death clip owns the mesh
+    // until its ds goes back to 0, so locomotion/montages must not take it over.
+    if (coop::body::PuppetDead()) return;
+    // [R5-BODY] end
+
+    // [R7-DIALOG] begin -- the friend is in a conversation or a cutscene.
+    // Its own client has the input locked and is running whatever the game
+    // authored for that moment (facial anim, sequence-driven pose); the montage it
+    // last published is stale and a "frozen" body is exactly the artefact the
+    // round-7 brief forbids.  Hold the idle clip instead: a person standing still.
+    if (coop::dialog::PeerLocked()) {
+        if (ue::UObject* idle = Sequence("idle")) {
+            if (P().animState != "idle") {
+                if (!PlaySeq("idle", idle, true)) return;
+                P().animKind = "idle";
+            }
+            SetRate(1.0);
+        }
+        return;
+    }
+    // [R7-DIALOG] end
+
+    if (PEER().hasMontage && PEER().montage.path.size() > 4) {
+        if (PlayMontage(PEER().montage, now)) return;
+    }
+
+    const double speed = std::sqrt(vx * vx + vy * vy);
+    std::string want = "idle";
+    std::string kind = "idle";
+    if (speed >= kRunSpeed) {
+        want = "sprint";
+        kind = "sprint";
+    } else if (speed >= kWalkSpeed) {
+        kind = "walk";
+        const double rel = coop::NormDeg(std::atan2(vy, vx) * kRad2Deg - yaw);
+        const double ar = std::fabs(rel);
+        if (ar <= 50.0) {
+            want = "walk";
+        } else if (ar >= 130.0) {
+            want = "walk_b";
+        } else if (rel > 0.0) {
+            want = "walk_r";
+        } else {
+            want = "walk_l";
+        }
+    }
+    ue::UObject* seq = Sequence(want);
+    // a directional clip that is not loaded yet falls back to the forward walk
+    if (seq == nullptr && kind == "walk" && want != "walk") {
+        want = "walk";
+        seq = Sequence(want);
+    }
+    if (seq == nullptr) return;
+    if (P().animState != want) {
+        if (!PlaySeq(want, seq, true)) return;
+        if (P().animKind != kind) net::Log("puppet locomotion -> %s", want.c_str());
+        P().animKind = kind;
+    }
+    double rate = 1.0;
+    if (kind == "walk") {
+        rate = std::min(kWalkRateMax, std::max(kWalkRateMin, speed / kWalkRateDiv));
+    } else if (kind == "sprint") {
+        rate = std::min(kSprintRateMax, std::max(kSprintRateMin, speed / kSprintRateDiv));
+    }
+    SetRate(rate);
+}
+
+// ===========================================================================
+// drive (main.lua:1607-1728)
+// ===========================================================================
+
+namespace {
+
+// main.lua:1615-1620
+void ClearInput() {
+    ue::UObject* a = P().actor;
+    if (!Valid(a)) return;
+    CallNoArg(a, "ConsumeMovementInputVector");
+    ue::UObject* mc = CharacterMovement(a);
+    if (mc != nullptr) {
+        ue::FVector zero;
+        ue::Set<ue::FVector>(mc, "Velocity", zero);
+    }
+}
+
+// main.lua:1622-1630
+void TeleportPuppet(const Vec3& to) {
+    ++P().driveTeleports;
+    ClearInput();
+    SetLoc(P().actor, to, true);
+}
+
+// main.lua:1668-1728. Ordering is load-bearing (NATIVE-PORT 3.3):
+// phase -> no packet: hide -> stale or !live: hide -> unhide only when the body
+// is ready -> yaw easing -> extrapolate -> snap/ease -> telemetry -> animation.
+void DriveTick() {
+    if (P().phase != Phase::Sync || !Valid(P().actor)) return;
+    // [R5-BODY] begin -- zone guard: the peer is in a different map, so its
+    // position, its animation and its enemies all belong to a world we are not
+    // in.  Freeze the body where it is and keep it hidden; coop_net publishes the
+    // zone string and clears this the moment the maps agree again.
+    if (coop::zone::Paused()) {
+        SetHidden(true);
+        return;
+    }
+    // [R5-BODY] end
+    if (!PEER().present) {
+        SetHidden(true);
+        return;
+    }
+    const double tnow = TickSeconds();
+    // only a peer that is actually in gameplay and sending is drawn: a state file
+    // left over from an earlier session, or a peer sitting in the menu / loading
+    // screen, sends nothing new and keeps the body hidden.
+    const double peerAge = PeerAge(tnow);
+    if (!PEER().live || peerAge > kPeerStale) {
+        // Say WHY on a 1 s throttle: present/live/age distinguishes "packet lost",
+        // "peer says rdy:0" and "our world clock jumped", and this hide/show pair
+        // was flickering several times a second on the first two-client runs.
+        static double lastWhy = -1.0e9;
+        if (tnow - lastWhy >= 1.0) {
+            lastWhy = tnow;
+            net::Log("drive hide: present=%d live=%d ready=%d age=%.2f at=%.2f stale=%.2f",
+                     PEER().present ? 1 : 0, PEER().live ? 1 : 0, PEER().ready ? 1 : 0,
+                     peerAge, PEER().at, kPeerStale);
+        }
+        SetHidden(true);
+        return;
+    }
+    P().peerEverSeen = true;
+    if (P().bodyReady) SetHidden(false);
+
+    Vec3 loc;
+    if (!ActorLoc(P().actor, &loc)) return;
+
+    const double tyaw = PEER().rot.Yaw;
+    if (!P().puppetYawSet) {
+        P().puppetYaw = tyaw;
+        P().puppetYawSet = true;
+    }
+    const double dyaw = coop::NormDeg(tyaw - P().puppetYaw);
+    if (std::fabs(dyaw) > kYawSnapDeg) {
+        P().puppetYaw = tyaw; // never spin through 180 on a teleport
+    } else {
+        P().puppetYaw += dyaw * kYawEase;
+    }
+    SetYaw(P().actor, P().puppetYaw);
+
+    const double age = std::min(std::max(peerAge, 0.0), kMaxExtrapAge);
+    const double vx = PEER().vel.X;
+    const double vy = PEER().vel.Y;
+    const double vz = PEER().vel.Z;
+    Vec3 target;
+    target.X = PEER().pos.X + vx * age;
+    target.Y = PEER().pos.Y + vy * age;
+    target.Z = PEER().pos.Z + vz * age;
+
+    const double d = coop::Dist(loc, target);
+    Vec3 next;
+    if (d > kSnapDist) {
+        // far away (spawn, teleport, big lag): snap
+        next = target;
+        TeleportPuppet(next);
+    } else if (d > kDriveDeadZone) {
+        const double k = kEasePerTick;
+        next.X = loc.X + (target.X - loc.X) * k;
+        next.Y = loc.Y + (target.Y - loc.Y) * k;
+        next.Z = loc.Z + (target.Z - loc.Z) * k;
+        ++P().driveInputs;
+        SetLoc(P().actor, next, true);
+    } else {
+        next = loc;
+    }
+
+    // body speed (uu/s) for telemetry
+    if (P().hasPrevPos && P().lastDriveAt != 0.0) {
+        const double dt = tnow - P().lastDriveAt;
+        if (dt > 0.001) {
+            const double spd = coop::Dist(next, P().prevPos) / dt;
+            P().puppetSpeed = P().puppetSpeed * 0.6 + spd * 0.4;
+        }
+    }
+    P().prevPos = next;
+    P().hasPrevPos = true;
+    P().lastDriveAt = tnow;
+
+    try {
+        UpdateAnimation(vx, vy, P().puppetYaw, tnow);
+    } catch (...) {
+        net::Log("ERR puppet anim: exception");
+    }
+}
+
+// main.lua:1653-1666. Straight-line hover trip through whatever has to stream in.
+void TravelTick() {
+    if (!P().travelActive) return;
+    // the pawn dies / the map reloads mid-travel: the cached pawn is freed
+    if (!Valid(P().travelPawn)) {
+        P().travelActive = false;
+        P().travelPawn = nullptr;
+        net::Log("travel cancelled: pawn gone");
+        return;
+    }
+    const double now = TickSeconds();
+    double k = 1.0;
+    if (P().travelDur > 0.0) k = std::min(1.0, (now - P().travelT0) / P().travelDur);
+    Vec3 p;
+    p.X = P().travelFrom.X + (P().travelTo.X - P().travelFrom.X) * k;
+    p.Y = P().travelFrom.Y + (P().travelTo.Y - P().travelFrom.Y) * k;
+    p.Z = P().travelFrom.Z + (P().travelTo.Z - P().travelFrom.Z) * k;
+    SetLoc(P().travelPawn, p, true);
+    if (k >= 1.0) {
+        ue::UObject* pawn = P().travelPawn;
+        P().travelActive = false;
+        P().travelPawn = nullptr;
+        P().hasTpHold = true;
+        P().tpHoldPawn = pawn;
+        P().tpHoldAt = now;
+        net::Log("travel arrived at %.0f %.0f %.0f", p.X, p.Y, p.Z);
+    }
+}
+
+// main.lua:1748-1765. Lua used os.clock() -- process CPU time, several times
+// faster than real time (NATIVE-PORT 4.7). The circle is real-time here:
+// TickSeconds() is a steady clock with sub-millisecond resolution (net::Now() is
+// the game's GetRealTimeSeconds, which returns garbage in this build -- see the
+// clock note at the top -- and net::Wall() only has 1 s resolution, which would
+// step the circle once a second).
+void PatrolTick() {
+    if (!P().patrolActive) return;
+    ue::UObject* pawn = net::Pawn();
+    if (!Valid(pawn)) {
+        P().patrolActive = false;
+        return;
+    }
+    const double t = TickSeconds() - P().patrolT0;
+    if (t > P().patrolDur) {
+        P().patrolActive = false;
+        net::Log("patrol: done");
+        return;
+    }
+    const double radius = P().patrolRadius > 0.0 ? P().patrolRadius : 260.0;
+    const double ang = (t * P().patrolSpeed) / radius;
+    Vec3 p;
+    p.X = P().patrolOrigin.X + std::cos(ang) * radius;
+    p.Y = P().patrolOrigin.Y + std::sin(ang) * radius;
+    p.Z = P().patrolOrigin.Z;
+    SetLoc(pawn, p, true);
+}
+
+} // namespace
+
+// main.lua:1733-1746
+void StartPatrol(double seconds) {
+    ue::UObject* pawn = net::Pawn();
+    if (!Valid(pawn)) {
+        net::Log("patrol: no pawn");
+        return;
+    }
+    Vec3 loc;
+    if (!ActorLoc(pawn, &loc)) return;
+    P().patrolActive = true;
+    P().patrolOrigin = loc;
+    P().patrolT0 = TickSeconds();
+    P().patrolDur = (seconds > 0.0 && seconds < 1.0e6) ? seconds : 10.0; // Lua: tonumber(x) or 10
+    P().patrolRadius = 260.0;
+    P().patrolSpeed = 260.0;
+    net::Log("patrol: %.0fs circle r=260 around %.1f %.1f %.1f", P().patrolDur, loc.X, loc.Y, loc.Z);
+}
+
+// ===========================================================================
+// ticks (coop_state.h 10)
+// ===========================================================================
+
+// 30 Hz: patrol -> drive -> travel, in the Lua's order (main.lua:4062-4067).
+// The Guard values reproduce main.lua:3995-4002: `drive` is in BOTH skip lists,
+// so it takes the settle guard from net::Step and checks the local hold itself
+// (Lua checks the hold first; the only difference is that an expired settle
+// window can be cleared on the same tick, which Lua also does from this loop).
+void Tick30(double dt) {
+    (void)dt;
+    net::Step("patrol", Guard::Hold, []() { PatrolTick(); });
+    net::Step("drive", Guard::Settle, []() {
+        if (net::LocalHold()) return;
+        DriveTick();
+    });
+    net::Step("travel", Guard::Hold, []() { TravelTick(); });
+}
+
+// 2 Hz: boot until sync, then the body mesh and the streaming sources
+// (main.lua:4082-4095, 4123). `boot` is in neither skip list.
+void Tick2() {
+    net::Step("boot", Guard::None, []() { Boot(); });
+    if (P().phase != Phase::Sync) return;
+    if (!P().bodyReady) {
+        net::Step("ensureBody", Guard::Settle, []() {
+            if (net::LocalHold()) return;
+            EnsureBody();
+        });
+    } else {
+        net::Step("syncBody", Guard::Settle, []() {
+            if (net::LocalHold()) return;
+            SyncBody();
+        });
+    }
+    net::Step("stream", Guard::Settle, []() {
+        if (net::LocalHold()) return;
+        StreamTick();
+    });
+}
+
+// ===========================================================================
+// streamTick (main.lua:3755-3806)
+// ===========================================================================
+
+void StreamTick() {
+    const double now = TickSeconds();
+    ReleaseTpHoldIfDue(now);
+    if (!Valid(P().actor)) return;
+
+    // re-assert the sources every 10 s: non-blocking only, never the blocking one
+    // (it stalls this client whenever the peer runs into unloaded cells)
+    if (now - P().streamChecked > kStreamReassert) {
+        P().streamChecked = now;
+        for (const StreamSource& e : StreamSources(P().actor)) {
+            const bool want = TG().streamEnabled && !e.blocking;
+            const std::string en = SourceEnabledStr(e.comp);
+            if (en != (want ? "true" : "false")) {
+                SetSourceEnabled(e.comp, want);
+                net::Log("stream source %s re-set to %s", e.blocking ? "blocking" : "non-blocking",
+                         want ? "true" : "false");
+            }
+        }
+    }
+
+    if (!P().streamVerdict.empty() || !(PEER().present && PEER().live)) return;
+
+    Vec3 me;
+    Vec3 pl;
+    if (!ActorLoc(net::Pawn(), &me)) return;
+    if (!ActorLoc(P().actor, &pl)) return;
+    const double dx = me.X - pl.X;
+    const double dy = me.Y - pl.Y;
+    const double d = std::sqrt(dx * dx + dy * dy);
+
+    if (d < kStreamFarDist) {
+        P().streamFarSet = false;
+        return;
+    }
+    bool moving = false;
+    if (P().hasLastPl) {
+        const double mx = pl.X - P().lastPl.X;
+        const double my = pl.Y - P().lastPl.Y;
+        moving = std::sqrt(mx * mx + my * my) > kStreamMoveEps;
+    }
+    P().lastPl = pl;
+    P().hasLastPl = true;
+
+    // measuring while the peer moves reads a half-loaded cell (NATIVE-PORT 4.29);
+    // the timer restarts on every moving sample and the trip is flagged
+    if (moving && P().streamFarSet) {
+        P().streamFarAt = now;
+        P().streamTravelled = true;
+        return;
+    }
+    if (!P().streamFarSet) {
+        P().streamFarSet = true;
+        P().streamFarAt = now;
+        P().streamN0 = ActorsNear(pl);
+        // The body was teleported ~90k uu the tick before: re-assert the
+        // non-blocking source once here, at the position it now has, so the
+        // engine's source list is rebuilt around it (the 10 s re-assert above
+        // only fires on a state *mismatch* and would stay silent).  The Lua's
+        // source was enabled at adopt and this call is a no-op when it already
+        // is -- it costs one engine call per far transition.
+        for (const StreamSource& e : StreamSources(P().actor)) {
+            if (e.blocking) continue;
+            SetSourceEnabled(e.comp, TG().streamEnabled);
+            net::Log("peer far: non-blocking source %s at %.0f %.0f %.0f",
+                     SourceEnabledStr(e.comp).c_str(), pl.X, pl.Y, pl.Z);
+        }
+        net::Log("peer far away (%.0f uu): %d actors around it now; settling %.0fs",
+                 d, P().streamN0, kStreamSettle);
+        return;
+    }
+    // A settle window that is measured in the game's clock is what produced the
+    // 2026-10-25 FAIL: the verdict was written 1 s after the peer stopped (the
+    // settle timer never elapsed because net::Now() is not a clock -- see the
+    // module clock note).  Say how long the window really is, so the next run
+    // proves it either way.
+    static double lastProbe = -1.0e9;
+    if (now - lastProbe >= 5.0) {
+        lastProbe = now;
+        bool probeDone = false;
+        bool probeSet = false;
+        for (const StreamSource& e : StreamSources(P().actor)) {
+            if (e.blocking) continue;
+            FnCall c(e.comp, "IsStreamingCompleted");
+            if (c.ok() && c.Run()) {
+                probeDone = c.Get<bool>("ReturnValue");
+                probeSet = true;
+            }
+        }
+        net::Log("stream settle %.0f/%.0fs: n=%d done=%s",
+                 now - P().streamFarAt, kStreamSettle, ActorsNear(pl),
+                 probeSet ? (probeDone ? "true" : "false") : "nil");
+    }
+    if (now - P().streamFarAt <= kStreamSettle) return;
+
+    P().streamN1 = ActorsNear(pl);
+    bool doneSet = false;
+    bool done = false;
+    for (const StreamSource& e : StreamSources(P().actor)) {
+        if (e.blocking) continue;
+        FnCall c(e.comp, "IsStreamingCompleted");
+        if (c.ok() && c.Run()) {
+            done = c.Get<bool>("ReturnValue");
+            doneSet = true;
+        }
+    }
+    const bool ok = TG().streamEnabled && doneSet && done && P().streamN1 >= kStreamNeedsActors;
+    P().streamVerdict = net::Fmt(
+        "%s remote area streamed around peer %.0f uu away%s: cells around it loaded=%s, static meshes "
+        "%d -> %d (sources %s); enemies there: own %d mirrored %d",
+        ok ? "PASS" : "FAIL", d, P().streamTravelled ? " after a long travel" : "",
+        doneSet ? (done ? "true" : "false") : "nil", P().streamN0, P().streamN1,
+        P().streamSrc.c_str(), coop::state().combat.npcOwned, coop::state().combat.npcMirrored);
+    net::WriteFile("result_stream.txt", P().streamVerdict + "\n");
+    net::Log("stream verdict: %s", P().streamVerdict.c_str());
+}
+
+// ===========================================================================
+// extra API for coop_net / coop_local (see coop_puppet_extra.h)
+// ===========================================================================
+
+void StartTravel(ue::UObject* pawn, double x, double y, double z, double secs) {
+    Vec3 from;
+    if (!Valid(pawn) || !ActorLoc(pawn, &from)) return;
+    // hover through whatever has to stream in (main.lua:2148)
+    ue::UObject* mc = CharacterMovement(pawn);
+    if (mc != nullptr) SetMovementMode(mc, 5, 0);
+    P().travelActive = true;
+    P().travelPawn = pawn;
+    P().travelFrom = from;
+    P().travelTo.X = x;
+    P().travelTo.Y = y;
+    P().travelTo.Z = z;
+    P().travelT0 = TickSeconds();
+    P().travelDur = (secs > 0.0 && secs < 1.0e6) ? secs : 60.0; // Lua: tonumber(secs) or 60
+    const double dx = x - from.X;
+    const double dy = y - from.Y;
+    net::Log("travel %.0f uu over %.0fs", std::sqrt(dx * dx + dy * dy), P().travelDur);
+}
+
+// main.lua:2088-2099. The "tp -> x y z" log line stays in net::RunCommands, which
+// has the raw text the Lua printed (%s %s %s) -- do not log it here a second time.
+void StartTp(ue::UObject* pawn, double x, double y, double z) {
+    if (!Valid(pawn)) return;
+    Vec3 to;
+    to.X = x;
+    to.Y = y;
+    to.Z = z;
+    SetLoc(pawn, to, true);
+    // hover until the ground there has streamed in, or the game's fall recovery
+    // puts the player back where it came from (main.lua:2093-2096)
+    ue::UObject* mc = CharacterMovement(pawn);
+    if (mc != nullptr) SetMovementMode(mc, 5, 0);
+    P().hasTpHold = true;
+    P().tpHoldPawn = pawn;
+    P().tpHoldAt = TickSeconds();
+}
+
+// main.lua:337 -- "movemode=" in sync.txt. -1 when it cannot be read (Lua would
+// have printed nil there).
+int MovementMode() {
+    ue::UObject* mc = CharacterMovement(P().actor);
+    if (mc == nullptr) return -1;
+    const std::int32_t off = ue::PropOffset(mc, "MovementMode");
+    if (off < 0) return -1;
+    std::uint8_t mode = 0;
+    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(mc) + off, &mode, sizeof(mode))) return -1;
+    return static_cast<int>(mode);
+}
+
+// main.lua:1543-1545 (readyTick): our own pawn is only ready once no streaming
+// source of its own reports IsStreamingCompleted() == false.
+bool OwnStreamingIncomplete(ue::UObject* pawn) {
+    for (const StreamSource& e : StreamSources(pawn)) {
+        FnCall c(e.comp, "IsStreamingCompleted");
+        if (c.ok() && c.Run() && !c.Get<bool>("ReturnValue")) return true;
+    }
+    return false;
+}
+
+// ===========================================================================
+// Reset (coop_state.h rule 5)
+// ===========================================================================
+
+void Reset() {
+    PuppetState& p = P();
+    const bool hadBody = p.actor != nullptr;
+    p.actor = nullptr;
+    p.mesh = nullptr;
+    p.puppetMesh = nullptr;
+    p.appliedBody.clear();
+    p.bodyReady = false;
+    p.bodyAttempts = 0;
+    p.hidden = true;
+    p.animState.clear();
+    p.animRate = -1.0;
+    p.animKind.clear();
+    p.animModeSet = false;
+    p.footBones.clear();
+    p.sequences.clear();
+
+    p.puppetSpeed = 0.0;
+    p.hasPrevPos = false;
+    p.prevPos = Vec3();
+    p.lastDriveAt = 0.0;
+    p.puppetYawSet = false;
+    p.puppetYaw = 0.0;
+    p.peerEverSeen = false;
+    p.stuckTicks = 0; // dead in Lua too -- no stuck detection exists
+
+    p.streamSrc = "none";
+    p.streamChecked = 0.0;
+    p.streamFarSet = false;
+    p.streamFarAt = 0.0;
+    p.streamN0 = -1;
+    p.streamN1 = -1;
+    p.streamVerdict.clear();
+    p.streamTravelled = false;
+    p.hasLastPl = false;
+    p.lastPl = Vec3();
+
+    p.travelActive = false;
+    p.travelPawn = nullptr;
+    p.travelFrom = Vec3();
+    p.travelTo = Vec3();
+    p.travelT0 = 0.0;
+    p.travelDur = 0.0;
+    p.hasTpHold = false;
+    p.tpHoldPawn = nullptr;
+    p.tpHoldAt = 0.0;
+    p.patrolActive = false;
+
+    p.loadBusy = false;
+    p.loadBusyAt = 0;
+    p.loadNextAt = 0;
+    p.loadTries.Clear();
+    p.missingAssets.Clear();
+
+    g_baseline.Clear();
+
+    // The summoned body belongs to the world that just went away. Lua left the
+    // phase at "sync" with a freed puppet (and never got the body back); the port
+    // re-runs boot so the body is summoned again for the new world.
+    if (hadBody || p.phase == Phase::Sync || p.phase == Phase::Adopt || p.phase == Phase::Summon) {
+        if (p.phase != Phase::Menu) net::EnterPhase(Phase::World);
+    }
+}
+
+} // namespace puppet
+} // namespace coop

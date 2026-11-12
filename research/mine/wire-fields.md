@@ -1,0 +1,63 @@
+| side | field | type | sample |
+|---|---|---|---|
+| A | t | str | 'p' |
+| A | id | str | 'A' |
+| A | sq | int | 415 |
+| A | x | float | 49171.18 |
+| A | y | float | -133982.92 |
+| A | z | float | -42196.95 |
+| A | vx | float | 0.0 |
+| A | vy | float | 0.0 |
+| A | vz | float | 0.0 |
+| A | yaw | float | -55.0 |
+| A | pitch | float | 0.0 |
+| A | anim | str | 'idle' |
+| A | spd | float | 0.0 |
+| A | mseq | str | '' |
+| A | mpos | float | 0.0 |
+| A | mrate | float | 1.0 |
+| A | mid | int | 0 |
+| A | body | str | '/Game/Sparta/Characters/Shells/DarkForm_Bulk/Art/Mesh/SK_DarkForm_Bulk.SK_DarkForm_Bulk' |
+| A | apart | str | '/Game/Sparta/Characters/Humans/Player/Animations/ABP_Player.ABP_Player_C' |
+| A | wpn | str | '/Game/Sparta/Weapons/Player/HadernsSword/SM_HadernsSword_01.SM_HadernsSword_01' |
+| A | wsock | str | 'Socket_Prop_R' |
+| A | wpns | list[3] | [["/Game/Sparta/Weapons/Player/HadernsSword/SM_HadernsSword_01.SM_HadernsSword_01", "S", "Socket_Prop_R", 0.0, 0.0, 0.0, |
+| A | npc | list[2] | [["BP_Cultist_HUB_C_UAID_D8BBC1D053266E4902_83a1dc45e2a01438_1464626973", 48160.2, -132370.2, -42181.5, 1.0, 0, 0.0, 0.0 |
+| A | pd | float | 0.1 |
+| A | nhp | list[2] | [["BP_Cultist_HUB_C_UAID_D8BBC1D053266E4902_83a1dc45e2a01438_1464626973", 1.0], ["BP_NPC_ShellKeeper_C_UAID_D4E98A7EF567 |
+| A | dead | list[1] | ["BP_Cultist_HUB_C_UAID_D8BBC1D05326704902_83a1dc45e2a01438_1417419333"] |
+| A | ws | list[12] | [["136c45ad", 0], ["40892c28", 0]] |
+| A | wb | list[5] | [["i\|BP_Interactable_Chest_General_C_UAID_D4E98A7EF56742AA02_1804192252\|TimesUsed", 1, 0], ["b\|LargeGate\|GateOpened", 1, |
+| A | wq | list[10] | [["k\|GorfQuest", 1, 0], ["c\|GorfQuest", 1, 0]] |
+| A | wd | list[16] | [["DL_Parasite_Golem_PreCinematic", 1, 0], ["DL_ENV_ART_SECTION2_WALLS", 3, 0]] |
+| A | wl | list[1] | [["BP_HubLift_C_UAID_D4E98A7EF5672F1B02_83a1dc45e2a01438_1653632767", 1, 1, 0]] |
+| B | t | str | 'p' |
+| B | id | str | 'B' |
+| B | sq | int | 259 |
+| B | x | float | 66468.71 |
+| B | y | float | -122453.7 |
+| B | z | float | -44517.29 |
+| B | vx | float | 0.0 |
+| B | vy | float | 0.0 |
+| B | vz | float | 0.0 |
+| B | yaw | float | 39.7 |
+| B | pitch | float | 0.0 |
+| B | anim | str | 'action' |
+| B | spd | float | 0.0 |
+| B | mseq | str | '/Game/MS1/Characters/DeathsLibrary/death_093_front.death_093_front' |
+| B | mpos | float | 3.8 |
+| B | mrate | float | 1.0 |
+| B | mid | int | 8 |
+| B | body | str | '/Game/Sparta/Characters/Shells/DarkForm_Bulk/Art/Mesh/SK_DarkForm_Bulk.SK_DarkForm_Bulk' |
+| B | apart | str | '/Game/Sparta/Characters/Humans/Player/Animations/ABP_Player.ABP_Player_C' |
+| B | wpn | str | '/Game/Sparta/Weapons/Player/HadernsSword/SM_HadernsSword_01.SM_HadernsSword_01' |
+| B | wsock | str | 'None' |
+| B | wpns | list[3] | [["/Game/Sparta/Weapons/Player/HadernsSword/SM_HadernsSword_01.SM_HadernsSword_01", "S", "None", 67501.12, -125496.45, - |
+| B | npc | list[12] | [["SP_BP_Spawner_C_UAID_D4E98A7EF567CDCC02_1977965565", 66052.3, -122763.1, -45611.3, 1.0, 0, -8.2, 12.5, 0.0, -178.3, " |
+| B | pd | float | 0.0 |
+| B | nhp | list[14] | [["SP_BP_Spawner_C_UAID_D4E98A7EF567CDCC02_1977965565", 1.0], ["SP_BP_Spawner_C_UAID_D4E98A7EF567CDCC02_2000114566", 1.0 |
+| B | dead | list[1] | ["BP_Cultist_HUB_C_UAID_D8BBC1D05326704902_83a1dc45e2a01438_1417419333"] |
+| B | ws | list[12] | [["40892c28", 0], ["fa40743e", 0]] |
+| B | wb | list[5] | [["b\|LargeGate\|GateOpened", 1, 0], ["b\|DoorIsOpen\|DoorIsOpen", 1, 0]] |
+| B | wq | list[9] | [["c\|LocationQuest", 1, 0], ["u\|LocationQuest", 1, 0]] |
+| B | wl | list[1] | [["BP_HubLift_C_UAID_D4E98A7EF5672F1B02_83a1dc45e2a01438_1653632767", 0, 1, 0]] |

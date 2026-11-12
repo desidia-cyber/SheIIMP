@@ -1,0 +1,44 @@
+# Set up a Mortal Shell II install for co-op modding/testing.
+# Installs UE4SS + the MortalShell2 custom config (if missing), deploys the mod,
+# and points the mod's state dir at this install.
+#
+# Usage: .\setup-install.ps1 -GameDir "E:\Games\_MS2-coop-b"
+#        .\setup-install.ps1 -GameDir "E:\Games\_MS2-coop-b" -PlayerId B -SkipUe4ss
+
+param(
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    [string]$PlayerId = "",
+    [switch]$SkipUe4ss
+)
+
+$ErrorActionPreference = 'Stop'
+$src = $PSScriptRoot
+$tool = Join-Path (Split-Path -Parent $src) 'tools\ue4ss\dist'
+$w64 = Join-Path $GameDir 'MortalShell2\Binaries\Win64'
+
+if (-not (Test-Path $w64)) { throw "not a Mortal Shell II install (no Binaries\Win64): $GameDir" }
+
+if (-not $SkipUe4ss -and -not (Test-Path (Join-Path $w64 'UE4SS.dll'))) {
+    if (-not (Test-Path $tool)) { throw "UE4SS dist not found at $tool (see tools/ue4ss)" }
+    Copy-Item (Join-Path $tool 'dwmapi.dll') $w64 -Force
+    Copy-Item (Join-Path $tool 'ue4ss\*') $w64 -Recurse -Force
+    Copy-Item (Join-Path $tool 'MortalShell2\UE4SS-settings.ini') (Join-Path $w64 'UE4SS-settings.ini') -Force
+    New-Item -ItemType Directory -Force -Path (Join-Path $w64 'UE4SS_Signatures') | Out-Null
+    Copy-Item (Join-Path $tool 'MortalShell2\UE4SS_Signatures\*.lua') (Join-Path $w64 'UE4SS_Signatures') -Force
+    Write-Host "UE4SS installed into $w64"
+}
+elseif (Test-Path (Join-Path $w64 'UE4SS.dll')) {
+    Write-Host "UE4SS already present in $w64"
+}
+
+& (Join-Path $src 'deploy.ps1') -GameDir $GameDir -Enable
+
+if ($PlayerId) {
+    # per-install player id so two clients can share one machine's network dir
+    $modDir = Join-Path $w64 'Mods\CoopProbe\Scripts'
+    New-Item -ItemType Directory -Force -Path $modDir | Out-Null
+    Set-Content -Path (Join-Path $modDir 'playerid.txt') -Value $PlayerId -Encoding ASCII -NoNewline
+    Write-Host "player id: $PlayerId"
+}
+
+Write-Host "ready: $GameDir"

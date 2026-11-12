@@ -1,0 +1,6 @@
+﻿### Class /Script/Sparta.SpartaLevelStreamingDynamic  [00007FF46F04E738]
+    super: /Script/Engine.LevelStreamingDynamic
+
+### Class /Script/Sparta.SpartaLevelStreamingDynamicHighPrio  [00007FF46F04E938]
+    super: /Script/Engine.LevelStreamingDynamic
+

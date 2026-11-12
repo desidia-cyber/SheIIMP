@@ -1,0 +1,1110 @@
+﻿### ArrayProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:Temp_real_Variable  [000001F6216F6380]
+
+### ArrayProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingCapacityUpgradeCost  [000001F61C513680]
+    1 members:
+      PRP HealingCapacityUpgradeCost : IntProperty [o:0x0]
+
+### ArrayProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingEfficiencyUpgradeCost  [000001F61C513600]
+    1 members:
+      PRP HealingEfficiencyUpgradeCost : IntProperty [o:0x0]
+
+### ArrayProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierRanges  [000001F61C513900]
+    1 members:
+      PRP TierRanges : StructProperty of /Script/CoreUObject.Vector2D [o:0x0]
+
+### ArrayProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierThresholds  [000001F61C513980]
+    1 members:
+      PRP TierThresholds : IntProperty [o:0x0]
+
+### BPC_Player_Progression_C /Game/Sparta/Core/Player/Components/BPC_Player_Progression.Default__BPC_Player_Progression_C  [000001F61C30E010]
+
+### BlueprintGeneratedClass /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C  [000001F617F19520]
+    super: /Script/Sparta.PlayerProgressionComponent
+    59 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0x290]
+      PRP LevelingCurve : ObjectProperty of /Script/Engine.CurveFloat [o:0x298]
+      PRP StartingMaxShellPoints : MapProperty [o:0x2a0]
+      PRP MaxLevel : IntProperty [o:0x2f0]
+      PRP OnPointsUpdated : MulticastInlineDelegateProperty [o:0x2f8]
+      PRP OnAssignedPointsUpdated : MulticastInlineDelegateProperty [o:0x308]
+      PRP OnTierPointsUpdated : MulticastInlineDelegateProperty [o:0x318]
+      PRP OnTierUnlocked : MulticastInlineDelegateProperty [o:0x328]
+      PRP MaxBondingPoints : IntProperty [o:0x338]
+      PRP ShellProgression : MapProperty [o:0x340]
+      PRP TierThresholds : ArrayProperty of TierThresholds./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierThresholds [o:0x390]
+      PRP TierRanges : ArrayProperty of TierRanges./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierRanges [o:0x3a0]
+      PRP DarkbroProgresionDataAsset : ObjectProperty of /Script/Sparta.SpartaProgressionDataAsset [o:0x3b0]
+      PRP MySpartaASC : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x3b8]
+      PRP ProgressionGameplayEffect : StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectHandle [o:0x3c0]
+      PRP HealingCapacityUpgradeCost : ArrayProperty of HealingCapacityUpgradeCost./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingCapacityUpgradeCost [o:0x3c8]
+      PRP HealingEfficiencyUpgradeCost : ArrayProperty of HealingEfficiencyUpgradeCost./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingEfficiencyUpgradeCost [o:0x3d8]
+      PRP OnHealingPowerUpgraded : MulticastInlineDelegateProperty [o:0x3e8]
+      PRP OnHealingEfficiencyUpgraded : MulticastInlineDelegateProperty [o:0x3f8]
+      PRP DebugWidget : ObjectProperty of /Game/Sparta/UI/Player/Debug/WBP_Player_Debug_Healing.WBP_Player_Debug_Healing_C [o:0x408]
+      FUN FindShellRevivePower 
+          param Success : BoolProperty [o:0x0]
+          param ReturnValue : DoubleProperty [o:0x8]
+          param ProgressionData : ClassProperty [o:0x10]
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x18]
+          param Controller : ObjectProperty of /Script/Engine.Controller [o:0x20]
+          param Temp_real_Variable : ArrayProperty of 000001F6216D8580 [o:0x28]
+          param CallFunc_FindShellProgressionData_Success : BoolProperty [o:0x38]
+          param CallFunc_FindShellProgressionData_ReturnValue : ClassProperty [o:0x40]
+          param K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x48]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x58]
+          param CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x60]
+          param CallFunc_GetShellStat_ReturnValue : IntProperty [o:0x68]
+          param CallFunc_Array_Get_Item : DoubleProperty [o:0x70]
+          param K2Node_DynamicCast_AsBPI_Player_Controller_1 : InterfaceProperty [o:0x78]
+          param K2Node_DynamicCast_bSuccess_1 : BoolProperty [o:0x88]
+          param CallFunc_GetSelectedShellData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaCharacterData [o:0x90]
+          param CallFunc_GetOwner_ReturnValue : ObjectProperty of /Script/Engine.Actor [o:0x98]
+          param K2Node_DynamicCast_AsController : ObjectProperty of /Script/Engine.Controller [o:0xa0]
+          param K2Node_DynamicCast_bSuccess_2 : BoolProperty [o:0xa8]
+          param CallFunc_IsValid_ReturnValue : BoolProperty [o:0xa9]
+      FUN RefundAllPoints 
+          param Success : BoolProperty [o:0x0]
+          param TotalPoints : IntProperty [o:0x4]
+          param CallFunc_GetTotalAssignedPoints_Success : BoolProperty [o:0x8]
+          param CallFunc_GetTotalAssignedPoints_ReturnValue : IntProperty [o:0xc]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+      FUN GetTotalAssignedPoints 
+          param Success : BoolProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x4]
+          param CurrentPoints : IntProperty [o:0x8]
+          param TotalPoints : IntProperty [o:0xc]
+          param Temp_int_Variable : IntProperty [o:0x10]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x14]
+          param CallFunc_Greater_IntInt_ReturnValue : BoolProperty [o:0x18]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x20]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x28]
+          param CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x2c]
+          param CallFunc_Map_GetKeyValueByIndex_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x30]
+          param CallFunc_Map_GetKeyValueByIndex_Value : IntProperty [o:0x38]
+          param CallFunc_Map_Length_ReturnValue : IntProperty [o:0x3c]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x40]
+          param CallFunc_GetProgressionSaveData_ReturnValue_1 : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x48]
+          param CallFunc_GetProgressionSaveData_bSuccess_1 : BoolProperty [o:0x50]
+          param CallFunc_Map_IsNotEmpty_ReturnValue : BoolProperty [o:0x51]
+      FUN GetProgressionSaveData 
+          param ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x0]
+          param bSuccess : BoolProperty [o:0x8]
+          param CallFunc_GetRuntimeData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x10]
+          param K2Node_DynamicCast_AsBPSO_Progression : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x18]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x20]
+      FUN CacheASC 
+          param CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x0]
+          param CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x8]
+          param K2Node_DynamicCast_AsSparta_Ability_System_Component : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x10]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+      FUN ApplyProgressionEffect 
+          param CallFunc_MakeEffectContext_ReturnValue : StructProperty of /Script/GameplayAbilities.GameplayEffectContextHandle [o:0x0]
+          param CallFunc_BP_ApplyGameplayEffectToSelf_ReturnValue : StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectHandle [o:0x18]
+      FUN IsAtMaxTier 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x9]
+          param CallFunc_GetBondingPoints_Success : BoolProperty [o:0xa]
+          param CallFunc_GetBondingPoints_ReturnValue : IntProperty [o:0xc]
+          param CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x10]
+      FUN ToggleHealingDebug 
+          param CallFunc_Create_ReturnValue : ObjectProperty of /Game/Sparta/UI/Player/Debug/WBP_Player_Debug_Healing.WBP_Player_Debug_Healing_C [o:0x0]
+          param CallFunc_IsValid_ReturnValue : BoolProperty [o:0x8]
+      FUN GetHealingEfficiencyUpgradeCost 
+          param UpgradeLevel : IntProperty [o:0x0]
+          param Item : ClassProperty [o:0x8]
+          param Output : IntProperty [o:0x10]
+          param CallFunc_Array_LastIndex_ReturnValue : IntProperty [o:0x14]
+          param CallFunc_Clamp_ReturnValue : IntProperty [o:0x18]
+          param CallFunc_Array_Get_Item : IntProperty [o:0x1c]
+      FUN GetHealingCapacityUpgradeCost 
+          param UpgradeLevel : IntProperty [o:0x0]
+          param Item : ClassProperty [o:0x8]
+          param Output : IntProperty [o:0x10]
+          param CallFunc_Array_LastIndex_ReturnValue : IntProperty [o:0x14]
+          param CallFunc_Clamp_ReturnValue : IntProperty [o:0x18]
+          param CallFunc_Array_Get_Item : IntProperty [o:0x1c]
+      FUN IncrementHealingEfficiency 
+          param Delta : IntProperty [o:0x0]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+      FUN IncrementHealingCapacity 
+          param Delta : IntProperty [o:0x0]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+      FUN GetHealingEfficiency 
+          param ReturnValue : IntProperty [o:0x0]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+          param CallFunc_GetPlayerStat_ReturnValue : IntProperty [o:0x14]
+      FUN UpdateDarkbroProgression 
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x0]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x8]
+      FUN BondingPointsToTier 
+          param Points : IntProperty [o:0x0]
+          param Tier : IntProperty [o:0x4]
+          param FoundTier : IntProperty [o:0x8]
+          param CurrentTier : IntProperty [o:0xc]
+          param CurrentThreshold : IntProperty [o:0x10]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x14]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x18]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x1c]
+          param CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x20]
+          param CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x24]
+          param CallFunc_Array_Get_Item : IntProperty [o:0x28]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x2c]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x30]
+      FUN UpdateBondingPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Delta : IntProperty [o:0x8]
+          param NewValue : IntProperty [o:0xc]
+          param OldValue : IntProperty [o:0x10]
+          param CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Game/Sparta/Core/Achievements/F_AchievementData.F_AchievementData [o:0x18]
+          param CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0x38]
+          param CallFunc_GetSpartaPlayerController_ReturnValue : ObjectProperty of /Script/Sparta.SpartaPlayerController [o:0x40]
+          param K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x48]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x58]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x60]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x68]
+          param CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x69]
+          param CallFunc_BondingPointsToTier_Tier : IntProperty [o:0x6c]
+          param CallFunc_BondingPointsToTier_Tier_1 : IntProperty [o:0x70]
+          param CallFunc_BondingPointsToTier_Tier_2 : IntProperty [o:0x74]
+          param CallFunc_Greater_IntInt_ReturnValue : BoolProperty [o:0x78]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x7c]
+          param CallFunc_Clamp_ReturnValue : IntProperty [o:0x80]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x84]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x88]
+      FUN GetBondingPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : IntProperty [o:0xc]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+      FUN FindShellProgressionData 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : ClassProperty [o:0x10]
+          param CallFunc_Map_Find_Value : ClassProperty [o:0x18]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+      FUN GetAssignedPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : IntProperty [o:0xc]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+      FUN UpdateAssignedPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Delta : IntProperty [o:0x8]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x24]
+      FUN GetAvailablePoints 
+          param ReturnValue : IntProperty [o:0x0]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+      FUN GetTotalMaxShellPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : IntProperty [o:0xc]
+          param PlayerSave : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x10]
+          param StartingMaxPoints : IntProperty [o:0x18]
+          param CallFunc_GetShellStat_ReturnValue : IntProperty [o:0x1c]
+          param CallFunc_GetStartingMaxShellPoints_Success : BoolProperty [o:0x20]
+          param CallFunc_GetStartingMaxShellPoints_ReturnValue : IntProperty [o:0x24]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x28]
+          param CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x30]
+          param K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x38]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x48]
+          param CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x50]
+      FUN GetStartingMaxShellPoints 
+          param ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Success : BoolProperty [o:0x8]
+          param ReturnValue : IntProperty [o:0xc]
+          param CallFunc_Map_Find_Value : IntProperty [o:0x10]
+          param CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x14]
+      FUN GetLevel 
+          param ReturnValue : IntProperty [o:0x0]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+      FUN UpdatePoints 
+          param Delta : IntProperty [o:0x0]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+          param CallFunc_GetProgressionSaveData_ReturnValue_1 : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x18]
+          param CallFunc_GetProgressionSaveData_bSuccess_1 : BoolProperty [o:0x20]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x24]
+          param CallFunc_Clamp_ReturnValue : IntProperty [o:0x28]
+      FUN GetHealingCapacity 
+          param ReturnValue : IntProperty [o:0x0]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+          param CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+          param CallFunc_GetPlayerStat_ReturnValue : IntProperty [o:0x14]
+      FUN UpdateLevel 
+          param NewValue : IntProperty [o:0x0]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+          param CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x18]
+          param CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x20]
+          param K2Node_DynamicCast_AsSparta_Ability_System_Component : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x28]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+      FUN GetCostForLevel 
+          param Level : IntProperty [o:0x0]
+          param Return : IntProperty [o:0x4]
+          param Sum : IntProperty [o:0x8]
+          param CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+          param CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x1c]
+          param Temp_int_Variable : IntProperty [o:0x20]
+          param CallFunc_Conv_IntToDouble_ReturnValue : DoubleProperty [o:0x28]
+          param CallFunc_GetFloatValue_ReturnValue : FloatProperty [o:0x30]
+          param CallFunc_LessEqual_IntInt_ReturnValue : BoolProperty [o:0x34]
+          param CallFunc_FTrunc_ReturnValue : IntProperty [o:0x38]
+          param CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x3c]
+          param CallFunc_Add_IntInt_ReturnValue_2 : IntProperty [o:0x40]
+          param CallFunc_GetFloatValue_InTime_ImplicitCast : FloatProperty [o:0x44]
+          param CallFunc_FTrunc_A_ImplicitCast : DoubleProperty [o:0x48]
+      FUN SaveLoaded 
+          param SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+      FUN ReceiveBeginPlay 
+      FUN UpdateProgressionOnChangeShell 
+          param EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN ReceiveEndPlay 
+          param EndPlayReason : ByteProperty [o:0x0]
+      FUN ExecuteUbergraph_BPC_Player_Progression 
+          param EntryPoint : IntProperty [o:0x0]
+          param K2Node_Event_EndPlayReason : ByteProperty [o:0x4]
+          param K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x8]
+          param CallFunc_SubscribeToEvent_ReturnValue : BoolProperty [o:0x18]
+          param K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x20]
+          param K2Node_CustomEvent_EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x50]
+          param CallFunc_UnsubscribeFromEvent_ReturnValue : BoolProperty [o:0x58]
+      FUN OnHealingEfficiencyUpgraded__DelegateSignature 
+      FUN OnHealingPowerUpgraded__DelegateSignature 
+      FUN OnTierUnlocked__DelegateSignature 
+          param Tier : IntProperty [o:0x0]
+      FUN OnTierPointsUpdated__DelegateSignature 
+      FUN OnAssignedPointsUpdated__DelegateSignature 
+      FUN OnPointsUpdated__DelegateSignature 
+          param NewValue : IntProperty [o:0x0]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_GreaterEqual_IntInt_ReturnValue  [000001F6216F6B80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_Less_IntInt_ReturnValue  [000001F6216F6B00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:CacheASC:K2Node_DynamicCast_bSuccess  [000001F6216F6900]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:CallFunc_SubscribeToEvent_ReturnValue  [000001F61C514000]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:CallFunc_UnsubscribeFromEvent_ReturnValue  [000001F61C513E80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData:CallFunc_Map_Find_ReturnValue  [000001F6216F6680]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData:Success  [000001F6216F6800]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_FindShellProgressionData_Success  [000001F6216F8400]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_IsValid_ReturnValue  [000001F6216F7E80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_bSuccess  [000001F6216F8280]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_bSuccess_1  [000001F6216F8100]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_bSuccess_2  [000001F6216F7F00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:Success  [000001F6216F6580]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F7C80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:CallFunc_Map_Find_ReturnValue  [000001F6216F7C00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:Success  [000001F6216F7D80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAvailablePoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F7B00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F7900]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:CallFunc_Map_Find_ReturnValue  [000001F6216F7880]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:Success  [000001F6216F7A00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F7700]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_LessEqual_IntInt_ReturnValue  [000001F6216F7680]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacity:CallFunc_GetPlayerSaveObjectFromCurrentSave_Success  [000001F6216F7600]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiency:CallFunc_GetPlayerSaveObjectFromCurrentSave_Success  [000001F6216F7480]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetLevel:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F9400]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData:K2Node_DynamicCast_bSuccess  [000001F6216F9180]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData:bSuccess  [000001F6216F9300]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints:CallFunc_Map_Find_ReturnValue  [000001F6216F9000]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints:Success  [000001F6216F9080]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F8D80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_GetProgressionSaveData_bSuccess_1  [000001F6216F8B80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Greater_IntInt_ReturnValue  [000001F6216F8E80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Less_IntInt_ReturnValue  [000001F6216F8C80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Map_IsNotEmpty_ReturnValue  [000001F6216F8B00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:Success  [000001F6216F8F00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_GetStartingMaxShellPoints_Success  [000001F6216F8900]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:K2Node_DynamicCast_bSuccess  [000001F6216F8780]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:Success  [000001F6216F8A00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingCapacity:CallFunc_GetPlayerSaveObjectFromCurrentSave_Success  [000001F6216F8600]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingEfficiency:CallFunc_GetPlayerSaveObjectFromCurrentSave_Success  [000001F6216F8500]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:CallFunc_GetBondingPoints_Success  [000001F6216FA400]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:CallFunc_GreaterEqual_IntInt_ReturnValue  [000001F6216FA380]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:ReturnValue  [000001F6216FA480]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:Success  [000001F6216FA500]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216FA100]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:CallFunc_GetTotalAssignedPoints_Success  [000001F6216FA200]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:Success  [000001F6216FA280]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ToggleHealingDebug:CallFunc_IsValid_ReturnValue  [000001F6216F9F80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F9E00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:CallFunc_Map_Find_ReturnValue  [000001F6216F9D80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GetDataTableRowFromName_ReturnValue  [000001F6216F9C00]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F9980]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GreaterEqual_IntInt_ReturnValue  [000001F6216F9900]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_Greater_IntInt_ReturnValue  [000001F6216F9880]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_Map_Find_ReturnValue  [000001F6216F9800]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:K2Node_DynamicCast_bSuccess  [000001F6216F9A80]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateDarkbroProgression:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F9700]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216F9600]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:K2Node_DynamicCast_bSuccess  [000001F6216FB500]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_GetProgressionSaveData_bSuccess  [000001F6216FB400]
+
+### BoolProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_GetProgressionSaveData_bSuccess_1  [000001F6216FB300]
+
+### ByteProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:K2Node_Event_EndPlayReason  [000001F61C514100]
+
+### ByteProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ReceiveEndPlay:EndPlayReason  [000001F6216FA300]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData:CallFunc_Map_Find_Value  [000001F6216F6700]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData:ReturnValue  [000001F6216F6780]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_FindShellProgressionData_ReturnValue  [000001F6216F8380]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:ProgressionData  [000001F6216F6500]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:Item  [000001F6216F7580]
+
+### ClassProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:Item  [000001F6216F7400]
+
+### ClassProperty ShellProgression./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ShellProgression_Value  [000001F61C513A00]
+
+### DelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:K2Node_CreateDelegate_OutputDelegate  [000001F61C514080]
+
+### DoubleProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_Array_Get_Item  [000001F6216D84A0]
+
+### DoubleProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:ReturnValue  [000001F6216D8AC0]
+
+### DoubleProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:Temp_real_Variable  [NA0282039]
+
+### DoubleProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_Conv_IntToDouble_ReturnValue  [000001F6216D9CB0]
+
+### DoubleProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_FTrunc_A_ImplicitCast  [000001F6216D9A10]
+
+### FloatProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_GetFloatValue_InTime_ImplicitCast  [000001F6216D9A80]
+
+### FloatProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_GetFloatValue_ReturnValue  [000001F6216D9C40]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ApplyProgressionEffect  [000001F61C3B7500]
+    2 members:
+      PRP CallFunc_MakeEffectContext_ReturnValue : StructProperty of /Script/GameplayAbilities.GameplayEffectContextHandle [o:0x0]
+      PRP CallFunc_BP_ApplyGameplayEffectToSelf_ReturnValue : StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectHandle [o:0x18]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier  [000001F61C3B6C00]
+    13 members:
+      PRP Points : IntProperty [o:0x0]
+      PRP Tier : IntProperty [o:0x4]
+      PRP FoundTier : IntProperty [o:0x8]
+      PRP CurrentTier : IntProperty [o:0xc]
+      PRP CurrentThreshold : IntProperty [o:0x10]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x14]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x18]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x1c]
+      PRP CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x20]
+      PRP CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x24]
+      PRP CallFunc_Array_Get_Item : IntProperty [o:0x28]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x2c]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x30]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:CacheASC  [000001F61C3B7600]
+    4 members:
+      PRP CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x0]
+      PRP CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x8]
+      PRP K2Node_DynamicCast_AsSparta_Ability_System_Component : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x10]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression  [000001F61C3B9A00]
+    7 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP K2Node_Event_EndPlayReason : ByteProperty [o:0x4]
+      PRP K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x8]
+      PRP CallFunc_SubscribeToEvent_ReturnValue : BoolProperty [o:0x18]
+      PRP K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x20]
+      PRP K2Node_CustomEvent_EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x50]
+      PRP CallFunc_UnsubscribeFromEvent_ReturnValue : BoolProperty [o:0x58]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData  [000001F61C3B6900]
+    5 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : ClassProperty [o:0x10]
+      PRP CallFunc_Map_Find_Value : ClassProperty [o:0x18]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower  [000001F61C3B7A00]
+    20 members:
+      PRP Success : BoolProperty [o:0x0]
+      PRP ReturnValue : DoubleProperty [o:0x8]
+      PRP ProgressionData : ClassProperty [o:0x10]
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x18]
+      PRP Controller : ObjectProperty of /Script/Engine.Controller [o:0x20]
+      PRP Temp_real_Variable : ArrayProperty of 000001F6216D8580 [o:0x28]
+      PRP CallFunc_FindShellProgressionData_Success : BoolProperty [o:0x38]
+      PRP CallFunc_FindShellProgressionData_ReturnValue : ClassProperty [o:0x40]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x48]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x58]
+      PRP CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x60]
+      PRP CallFunc_GetShellStat_ReturnValue : IntProperty [o:0x68]
+      PRP CallFunc_Array_Get_Item : DoubleProperty [o:0x70]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller_1 : InterfaceProperty [o:0x78]
+      PRP K2Node_DynamicCast_bSuccess_1 : BoolProperty [o:0x88]
+      PRP CallFunc_GetSelectedShellData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaCharacterData [o:0x90]
+      PRP CallFunc_GetOwner_ReturnValue : ObjectProperty of /Script/Engine.Actor [o:0x98]
+      PRP K2Node_DynamicCast_AsController : ObjectProperty of /Script/Engine.Controller [o:0xa0]
+      PRP K2Node_DynamicCast_bSuccess_2 : BoolProperty [o:0xa8]
+      PRP CallFunc_IsValid_ReturnValue : BoolProperty [o:0xa9]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints  [000001F61C3B6800]
+    7 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAvailablePoints  [000001F61C3B6600]
+    3 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints  [000001F61C3B6A00]
+    7 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel  [000001F61C3BA100]
+    15 members:
+      PRP Level : IntProperty [o:0x0]
+      PRP Return : IntProperty [o:0x4]
+      PRP Sum : IntProperty [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x1c]
+      PRP Temp_int_Variable : IntProperty [o:0x20]
+      PRP CallFunc_Conv_IntToDouble_ReturnValue : DoubleProperty [o:0x28]
+      PRP CallFunc_GetFloatValue_ReturnValue : FloatProperty [o:0x30]
+      PRP CallFunc_LessEqual_IntInt_ReturnValue : BoolProperty [o:0x34]
+      PRP CallFunc_FTrunc_ReturnValue : IntProperty [o:0x38]
+      PRP CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x3c]
+      PRP CallFunc_Add_IntInt_ReturnValue_2 : IntProperty [o:0x40]
+      PRP CallFunc_GetFloatValue_InTime_ImplicitCast : FloatProperty [o:0x44]
+      PRP CallFunc_FTrunc_A_ImplicitCast : DoubleProperty [o:0x48]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacity  [000001F61C3BA300]
+    4 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+      PRP CallFunc_GetPlayerStat_ReturnValue : IntProperty [o:0x14]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost  [000001F61C3B7100]
+    6 members:
+      PRP UpgradeLevel : IntProperty [o:0x0]
+      PRP Item : ClassProperty [o:0x8]
+      PRP Output : IntProperty [o:0x10]
+      PRP CallFunc_Array_LastIndex_ReturnValue : IntProperty [o:0x14]
+      PRP CallFunc_Clamp_ReturnValue : IntProperty [o:0x18]
+      PRP CallFunc_Array_Get_Item : IntProperty [o:0x1c]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiency  [000001F61C3B6E00]
+    4 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+      PRP CallFunc_GetPlayerStat_ReturnValue : IntProperty [o:0x14]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost  [000001F61C3B7200]
+    6 members:
+      PRP UpgradeLevel : IntProperty [o:0x0]
+      PRP Item : ClassProperty [o:0x8]
+      PRP Output : IntProperty [o:0x10]
+      PRP CallFunc_Array_LastIndex_ReturnValue : IntProperty [o:0x14]
+      PRP CallFunc_Clamp_ReturnValue : IntProperty [o:0x18]
+      PRP CallFunc_Array_Get_Item : IntProperty [o:0x1c]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetLevel  [000001F61C3BA500]
+    3 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData  [000001F61C3B7700]
+    5 members:
+      PRP ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x0]
+      PRP bSuccess : BoolProperty [o:0x8]
+      PRP CallFunc_GetRuntimeData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x10]
+      PRP K2Node_DynamicCast_AsBPSO_Progression : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x18]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x20]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints  [000001F61C3B6400]
+    5 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x10]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x14]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints  [000001F61C3B7800]
+    17 members:
+      PRP Success : BoolProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x4]
+      PRP CurrentPoints : IntProperty [o:0x8]
+      PRP TotalPoints : IntProperty [o:0xc]
+      PRP Temp_int_Variable : IntProperty [o:0x10]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x14]
+      PRP CallFunc_Greater_IntInt_ReturnValue : BoolProperty [o:0x18]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x20]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x28]
+      PRP CallFunc_Add_IntInt_ReturnValue_1 : IntProperty [o:0x2c]
+      PRP CallFunc_Map_GetKeyValueByIndex_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x30]
+      PRP CallFunc_Map_GetKeyValueByIndex_Value : IntProperty [o:0x38]
+      PRP CallFunc_Map_Length_ReturnValue : IntProperty [o:0x3c]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x40]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue_1 : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x48]
+      PRP CallFunc_GetProgressionSaveData_bSuccess_1 : BoolProperty [o:0x50]
+      PRP CallFunc_Map_IsNotEmpty_ReturnValue : BoolProperty [o:0x51]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints  [000001F61C3B6500]
+    13 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : IntProperty [o:0xc]
+      PRP PlayerSave : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x10]
+      PRP StartingMaxPoints : IntProperty [o:0x18]
+      PRP CallFunc_GetShellStat_ReturnValue : IntProperty [o:0x1c]
+      PRP CallFunc_GetStartingMaxShellPoints_Success : BoolProperty [o:0x20]
+      PRP CallFunc_GetStartingMaxShellPoints_ReturnValue : IntProperty [o:0x24]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x28]
+      PRP CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x30]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x38]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x48]
+      PRP CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x50]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingCapacity  [000001F61C3B6F00]
+    3 members:
+      PRP Delta : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingEfficiency  [000001F61C3B7000]
+    3 members:
+      PRP Delta : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0x8]
+      PRP CallFunc_GetPlayerSaveObjectFromCurrentSave_Success : BoolProperty [o:0x10]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier  [000001F61C3B7400]
+    6 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Success : BoolProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x9]
+      PRP CallFunc_GetBondingPoints_Success : BoolProperty [o:0xa]
+      PRP CallFunc_GetBondingPoints_ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x10]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnAssignedPointsUpdated__DelegateSignature  [000001F6198DEF00]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnHealingEfficiencyUpgraded__DelegateSignature  [000001F61C3B9C00]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnHealingPowerUpgraded__DelegateSignature  [000001F61A4FB300]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnPointsUpdated__DelegateSignature  [000001F619951A00]
+    1 members:
+      PRP NewValue : IntProperty [o:0x0]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnTierPointsUpdated__DelegateSignature  [000001F6198DEE00]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnTierUnlocked__DelegateSignature  [000001F61C3B9B00]
+    1 members:
+      PRP Tier : IntProperty [o:0x0]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ReceiveBeginPlay  [000001F61C3B9F00]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ReceiveEndPlay  [000001F61C3B9D00]
+    1 members:
+      PRP EndPlayReason : ByteProperty [o:0x0]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints  [000001F61C3B7900]
+    6 members:
+      PRP Success : BoolProperty [o:0x0]
+      PRP TotalPoints : IntProperty [o:0x4]
+      PRP CallFunc_GetTotalAssignedPoints_Success : BoolProperty [o:0x8]
+      PRP CallFunc_GetTotalAssignedPoints_ReturnValue : IntProperty [o:0xc]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:SaveLoaded  [000001F61C3BA000]
+    1 members:
+      PRP SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ToggleHealingDebug  [000001F61C3B7300]
+    2 members:
+      PRP CallFunc_Create_ReturnValue : ObjectProperty of /Game/Sparta/UI/Player/Debug/WBP_Player_Debug_Healing.WBP_Player_Debug_Healing_C [o:0x0]
+      PRP CallFunc_IsValid_ReturnValue : BoolProperty [o:0x8]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints  [000001F61C3B6700]
+    7 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Delta : IntProperty [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x18]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x1c]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x20]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x24]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints  [000001F61C3B6B00]
+    20 members:
+      PRP ShellId : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Delta : IntProperty [o:0x8]
+      PRP NewValue : IntProperty [o:0xc]
+      PRP OldValue : IntProperty [o:0x10]
+      PRP CallFunc_GetDataTableRowFromName_OutRow : StructProperty of /Game/Sparta/Core/Achievements/F_AchievementData.F_AchievementData [o:0x18]
+      PRP CallFunc_GetDataTableRowFromName_ReturnValue : BoolProperty [o:0x38]
+      PRP CallFunc_GetSpartaPlayerController_ReturnValue : ObjectProperty of /Script/Sparta.SpartaPlayerController [o:0x40]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x48]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x58]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x60]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x68]
+      PRP CallFunc_GreaterEqual_IntInt_ReturnValue : BoolProperty [o:0x69]
+      PRP CallFunc_BondingPointsToTier_Tier : IntProperty [o:0x6c]
+      PRP CallFunc_BondingPointsToTier_Tier_1 : IntProperty [o:0x70]
+      PRP CallFunc_BondingPointsToTier_Tier_2 : IntProperty [o:0x74]
+      PRP CallFunc_Greater_IntInt_ReturnValue : BoolProperty [o:0x78]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x7c]
+      PRP CallFunc_Clamp_ReturnValue : IntProperty [o:0x80]
+      PRP CallFunc_Map_Find_Value : IntProperty [o:0x84]
+      PRP CallFunc_Map_Find_ReturnValue : BoolProperty [o:0x88]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateDarkbroProgression  [000001F61C3B6D00]
+    2 members:
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x0]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x8]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel  [000001F61C3BA200]
+    7 members:
+      PRP NewValue : IntProperty [o:0x0]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+      PRP CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x18]
+      PRP CallFunc_GetAbilitySystemComponent_ReturnValue : ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent [o:0x20]
+      PRP K2Node_DynamicCast_AsSparta_Ability_System_Component : ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent [o:0x28]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints  [000001F61C3BA400]
+    7 members:
+      PRP Delta : IntProperty [o:0x0]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x8]
+      PRP CallFunc_GetProgressionSaveData_bSuccess : BoolProperty [o:0x10]
+      PRP CallFunc_GetProgressionSaveData_ReturnValue_1 : ObjectProperty of /Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C [o:0x18]
+      PRP CallFunc_GetProgressionSaveData_bSuccess_1 : BoolProperty [o:0x20]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x24]
+      PRP CallFunc_Clamp_ReturnValue : IntProperty [o:0x28]
+
+### Function /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateProgressionOnChangeShell  [000001F61C3B9E00]
+    1 members:
+      PRP EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_Add_IntInt_ReturnValue  [000001F6216D8740]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_Add_IntInt_ReturnValue_1  [000001F6216D86D0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_Array_Get_Item  [000001F6216D8660]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CallFunc_Array_Length_ReturnValue  [000001F6216D85F0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CurrentThreshold  [000001F6216D8890]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:CurrentTier  [000001F6216D8900]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:FoundTier  [000001F6216D8970]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:Points  [000001F6216D8A50]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:Temp_int_Array_Index_Variable  [000001F6216D8820]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:Temp_int_Loop_Counter_Variable  [000001F6216D87B0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:BondingPointsToTier:Tier  [000001F6216D89E0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:EntryPoint  [000001F61C38EC50]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_GetShellStat_ReturnValue  [000001F6216D8510]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:CallFunc_Map_Find_Value  [000001F6216D83C0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:ReturnValue  [000001F6216D8430]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAvailablePoints:ReturnValue  [000001F6216D8350]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:CallFunc_Map_Find_Value  [000001F6216D8270]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:ReturnValue  [000001F6216D82E0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_Add_IntInt_ReturnValue  [000001F6216D9D90]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_Add_IntInt_ReturnValue_1  [000001F6216D9B60]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_Add_IntInt_ReturnValue_2  [000001F6216D9AF0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_FTrunc_ReturnValue  [000001F6216D9BD0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:Level  [000001F6216D8200]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:Return  [000001F6216D9E70]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:Sum  [000001F6216D9E00]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:Temp_int_Variable  [000001F6216D9D20]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacity:CallFunc_GetPlayerStat_ReturnValue  [000001F6216D9930]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacity:ReturnValue  [000001F6216D99A0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:CallFunc_Array_Get_Item  [000001F6216D9700]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:CallFunc_Array_LastIndex_ReturnValue  [000001F6216D97E0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:CallFunc_Clamp_ReturnValue  [000001F6216D9770]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:Output  [000001F6216D9850]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacityUpgradeCost:UpgradeLevel  [000001F6216D98C0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiency:CallFunc_GetPlayerStat_ReturnValue  [000001F6216D9620]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiency:ReturnValue  [000001F6216D9690]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:CallFunc_Array_Get_Item  [000001F6216D93F0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:CallFunc_Array_LastIndex_ReturnValue  [000001F6216D94D0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:CallFunc_Clamp_ReturnValue  [000001F6216D9460]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:Output  [000001F6216D9540]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiencyUpgradeCost:UpgradeLevel  [000001F6216D95B0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetLevel:ReturnValue  [000001F6216D9380]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints:CallFunc_Map_Find_Value  [000001F6216D92A0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints:ReturnValue  [000001F6216D9310]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Add_IntInt_ReturnValue  [000001F6216D9070]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Add_IntInt_ReturnValue_1  [000001F6216DACE0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Map_GetKeyValueByIndex_Value  [000001F6216DAC70]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Map_Length_ReturnValue  [000001F6216DAC00]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CurrentPoints  [000001F6216D91C0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:ReturnValue  [000001F6216D9230]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:Temp_int_Variable  [000001F6216D90E0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:TotalPoints  [000001F6216D9150]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_Add_IntInt_ReturnValue  [000001F6216DA960]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_GetShellStat_ReturnValue  [000001F6216DAA40]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_GetStartingMaxShellPoints_ReturnValue  [000001F6216DA9D0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:ReturnValue  [000001F6216DAB20]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:StartingMaxPoints  [000001F6216DAAB0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingCapacity:Delta  [000001F6216DAB90]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingEfficiency:Delta  [000001F6216DA8F0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:CallFunc_GetBondingPoints_ReturnValue  [000001F6216DA880]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:MaxBondingPoints  [000001F61C38EB00]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:MaxLevel  [000001F61C38EB70]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnPointsUpdated__DelegateSignature:NewValue  [000001F6216DA810]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnTierUnlocked__DelegateSignature:Tier  [000001F6216DA7A0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:CallFunc_GetTotalAssignedPoints_ReturnValue  [000001F6216DA6C0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:TotalPoints  [000001F6216DA730]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:CallFunc_Add_IntInt_ReturnValue  [000001F6216DA570]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:CallFunc_Map_Find_Value  [000001F6216DA5E0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:Delta  [000001F6216DA650]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_Add_IntInt_ReturnValue  [000001F6216DA260]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_BondingPointsToTier_Tier  [000001F6216DA3B0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_BondingPointsToTier_Tier_1  [000001F6216DA340]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_BondingPointsToTier_Tier_2  [000001F6216DA2D0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_Clamp_ReturnValue  [000001F6216DA1F0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_Map_Find_Value  [000001F6216DA180]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:Delta  [000001F6216DA500]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:NewValue  [000001F6216DA490]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:OldValue  [000001F6216DA420]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:NewValue  [000001F6216DA0A0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_Add_IntInt_ReturnValue  [000001F6216D9FC0]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_Clamp_ReturnValue  [000001F6216D9F50]
+
+### IntProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:Delta  [000001F6216DA030]
+
+### IntProperty HealingCapacityUpgradeCost./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingCapacityUpgradeCost  [000001F61C38EA20]
+
+### IntProperty HealingEfficiencyUpgradeCost./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:HealingEfficiencyUpgradeCost  [000001F61C38E9B0]
+
+### IntProperty StartingMaxShellPoints./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:StartingMaxShellPoints_Value  [000001F61C38EBE0]
+
+### IntProperty TierThresholds./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierThresholds  [000001F61C38EA90]
+
+### InterfaceProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_AsBPI_Player_Controller  [000001F6216F8300]
+
+### InterfaceProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_AsBPI_Player_Controller_1  [000001F6216F8180]
+
+### InterfaceProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:K2Node_DynamicCast_AsBPI_Player_Controller  [000001F6216F8800]
+
+### InterfaceProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:K2Node_DynamicCast_AsBPI_Player_Controller  [000001F6216F9B00]
+
+### MapProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ShellProgression  [000001F614CE8440]
+    2 members:
+      PRP ShellProgression : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ShellProgression_Value : ClassProperty [o:0x8]
+
+### MapProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:StartingMaxShellPoints  [000001F614CE84E0]
+    2 members:
+      PRP StartingMaxShellPoints : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP StartingMaxShellPoints_Value : IntProperty [o:0x8]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnAssignedPointsUpdated  [000001F61C513C00]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnHealingEfficiencyUpgraded  [000001F61C513500]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnHealingPowerUpgraded  [000001F61C513580]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnPointsUpdated  [000001F61C513C80]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnTierPointsUpdated  [000001F61C513B80]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:OnTierUnlocked  [000001F61C513B00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:CacheASC:CallFunc_GetAbilitySystemComponent_ReturnValue  [000001F6216F6A00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:CacheASC:CallFunc_GetPlayerCharacter_ReturnValue  [000001F6216F6A80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:CacheASC:K2Node_DynamicCast_AsSparta_Ability_System_Component  [000001F6216F6980]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:DarkbroProgresionDataAsset  [000001F61C513800]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:DebugWidget  [000001F61C513480]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:K2Node_CustomEvent_EventData  [000001F61C513F00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_GetOwner_ReturnValue  [000001F6216F8000]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_GetPlayerSaveGameObject_ReturnValue  [000001F6216F8200]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:CallFunc_GetSelectedShellData_ReturnValue  [000001F6216F8080]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:Controller  [000001F6216F6400]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:K2Node_DynamicCast_AsController  [000001F6216F7F80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F7D00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAvailablePoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F7B80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F7980]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetCostForLevel:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F7780]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingCapacity:CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue  [000001F6216F7800]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetHealingEfficiency:CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue  [000001F6216F7500]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetLevel:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F9480]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData:CallFunc_GetRuntimeData_ReturnValue  [000001F6216F9280]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData:K2Node_DynamicCast_AsBPSO_Progression  [000001F6216F9200]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetProgressionSaveData:ReturnValue  [000001F6216F9380]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F8E00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_GetProgressionSaveData_ReturnValue_1  [000001F6216F8C00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_GetPlayerController_ReturnValue  [000001F6216F8880]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:CallFunc_GetPlayerSaveGameObject_ReturnValue  [000001F6216F8700]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:PlayerSave  [000001F6216F8980]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingCapacity:CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue  [000001F6216F8680]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IncrementHealingEfficiency:CallFunc_GetPlayerSaveObjectFromCurrentSave_ReturnValue  [000001F6216F8580]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:LevelingCurve  [000001F61C513D80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:MySpartaASC  [000001F61C513780]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:RefundAllPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216FA180]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ToggleHealingDebug:CallFunc_Create_ReturnValue  [000001F6216FA000]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F9E80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F9A00]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GetSpartaPlayerController_ReturnValue  [000001F6216F9B80]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateDarkbroProgression:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F9780]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:CallFunc_GetAbilitySystemComponent_ReturnValue  [000001F6216F9500]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:CallFunc_GetPlayerCharacter_ReturnValue  [000001F6216F9580]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216F9680]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateLevel:K2Node_DynamicCast_AsSparta_Ability_System_Component  [000001F6216FB580]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_GetProgressionSaveData_ReturnValue  [000001F6216FB480]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdatePoints:CallFunc_GetProgressionSaveData_ReturnValue_1  [000001F6216FB380]
+
+### ObjectProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateProgressionOnChangeShell:EventData  [000001F6216FB280]
+
+### Package /Game/Sparta/Core/Player/Components/BPC_Player_Progression  [000001F4D1C17B80]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BPC_Player_Progression_C 
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ApplyProgressionEffect:CallFunc_BP_ApplyGameplayEffectToSelf_ReturnValue  [000001F6216F6C00]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ApplyProgressionEffect:CallFunc_MakeEffectContext_ReturnValue  [000001F6216F6C80]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ExecuteUbergraph_BPC_Player_Progression:K2Node_Event_SaveContext  [000001F61C513F80]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellProgressionData:ShellId  [000001F6216F6880]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:FindShellRevivePower:ShellId  [000001F6216F6480]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetAssignedPoints:ShellId  [000001F6216F7E00]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetBondingPoints:ShellId  [000001F6216F7A80]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetStartingMaxShellPoints:ShellId  [000001F6216F9100]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalAssignedPoints:CallFunc_Map_GetKeyValueByIndex_Key  [000001F6216F8D00]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:GetTotalMaxShellPoints:ShellId  [000001F6216F8A80]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:IsAtMaxTier:ShellId  [000001F6216F8480]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ProgressionGameplayEffect  [000001F61C513700]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:SaveLoaded:SaveContext  [000001F6216FA080]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UberGraphFrame  [000001F61C513E00]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateAssignedPoints:ShellId  [000001F6216F9F00]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:CallFunc_GetDataTableRowFromName_OutRow  [000001F6216F9C80]
+
+### StructProperty /Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:UpdateBondingPoints:ShellId  [000001F6216F9D00]
+
+### StructProperty ShellProgression./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:ShellProgression  [000001F61C513A80]
+
+### StructProperty StartingMaxShellPoints./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:StartingMaxShellPoints  [000001F61C513D00]
+
+### StructProperty TierRanges./Game/Sparta/Core/Player/Components/BPC_Player_Progression.BPC_Player_Progression_C:TierRanges  [000001F61C513880]
+

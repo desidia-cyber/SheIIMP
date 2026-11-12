@@ -1,0 +1,1 @@
+wa2test: bools=2 ints=3 arrays=0 skipped=9 (kinds=36 typed=10)

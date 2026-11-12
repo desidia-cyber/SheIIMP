@@ -1,0 +1,1 @@
+﻿SELECT substr(c.path, length(rtrim(c.path, replace(c.path,'/','')))+1) AS name, substr(o.path, instr(o.path,':')+1) AS prop, o.type, printf('0x%X',o.off) AS off FROM cls c JOIN obj o ON o.owner=c.addr WHERE o.type NOT IN ('Function','DelegateFunction') AND c.path LIKE '/Game/Sparta/Core/Player/Ability/Input/%' AND o.path NOT LIKE '%UberGraphFrame%' ORDER BY c.path

@@ -1,0 +1,1 @@
+SELECT o.type, o.path, r.path AS ownerpath FROM obj o LEFT JOIN obj r ON r.addr=UPPER(o.owner) WHERE lower(o.path) LIKE '%socket%' AND o.type NOT IN ('SkeletalMeshSocket','StaticMeshSocket') ORDER BY o.path

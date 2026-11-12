@@ -1,0 +1,52 @@
+﻿### BPSO_QuestLogComponent_C /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.Default__BPSO_QuestLogComponent_C  [000001F6216E4800]
+
+### BlueprintGeneratedClass /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C  [000001F61C3586E0]
+    super: /Script/Sparta.SpartaSaveObject
+    5 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0xb8]
+      PRP NarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0xc0]
+      FUN ReceiveApplySkipProloguePreset 
+      FUN ReceiveSpartaPreSave 
+          param SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+      FUN ExecuteUbergraph_BPSO_QuestLogComponent 
+          param EntryPoint : IntProperty [o:0x0]
+          param CallFunc_GetOwningSaveComponent_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveComponent [o:0x8]
+          param K2Node_DynamicCast_AsBPC_Quest_Log_Component : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x10]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+          param K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x20]
+
+### BoolProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent:K2Node_DynamicCast_bSuccess  [000001F621795380]
+
+### Function /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent  [000001F6216E4B00]
+    5 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP CallFunc_GetOwningSaveComponent_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveComponent [o:0x8]
+      PRP K2Node_DynamicCast_AsBPC_Quest_Log_Component : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x10]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+      PRP K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x20]
+
+### Function /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ReceiveApplySkipProloguePreset  [000001F6216E4A00]
+
+### Function /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ReceiveSpartaPreSave  [000001F6216E4900]
+    1 members:
+      PRP SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+
+### IntProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent:EntryPoint  [000001F621784BC0]
+
+### ObjectProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent:CallFunc_GetOwningSaveComponent_ReturnValue  [000001F621795480]
+
+### ObjectProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent:K2Node_DynamicCast_AsBPC_Quest_Log_Component  [000001F621795400]
+
+### Package /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent  [000001F4A8D8FB50]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BPSO_QuestLogComponent_C 
+
+### StructProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ExecuteUbergraph_BPSO_QuestLogComponent:K2Node_Event_SaveContext  [000001F621795300]
+
+### StructProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:NarrativeTags  [000001F621797300]
+
+### StructProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:ReceiveSpartaPreSave:SaveContext  [000001F621797280]
+
+### StructProperty /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C:UberGraphFrame  [000001F621797380]
+

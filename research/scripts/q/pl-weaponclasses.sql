@@ -1,0 +1,1 @@
+SELECT 'class' AS k, type, path, '' AS super FROM obj WHERE (path LIKE '/Game/Sparta/Core/Weapons/Player/%' OR path LIKE '/Game/Sparta/Weapons/%') AND type IN ('BlueprintGeneratedClass') ORDER BY path

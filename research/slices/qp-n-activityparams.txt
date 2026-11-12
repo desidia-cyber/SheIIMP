@@ -1,0 +1,26 @@
+﻿### EnumProperty Costs./Script/Sparta.ActivityParameters:Costs_Key  [000001F4A8871100]
+
+### FloatProperty /Script/Sparta.ActivityParameters:RandomWeight  [000001F4A861C330]
+
+### FloatProperty Costs./Script/Sparta.ActivityParameters:Costs  [000001F4A861C3A0]
+
+### MapProperty /Script/Sparta.ActivityParameters:Costs  [000001F495E1FF60]
+    2 members:
+      PRP Costs_Key : EnumProperty of /Script/Sparta.EMapGenCostType [o:0x0]
+      PRP Costs : FloatProperty [o:0x4]
+
+### ScriptStruct /Script/Sparta.ActivityParameters  [00007FF46F4881F8]
+    super: [n:
+    5 members:
+      PRP RandomWeight : FloatProperty [o:0x0]
+      PRP Costs : MapProperty [o:0x8]
+      PRP RequiredTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x58]
+      PRP ExcludedTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x78]
+      PRP AddedTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x98]
+
+### StructProperty /Script/Sparta.ActivityParameters:AddedTags  [000001F4A8871280]
+
+### StructProperty /Script/Sparta.ActivityParameters:ExcludedTags  [000001F4A8871200]
+
+### StructProperty /Script/Sparta.ActivityParameters:RequiredTags  [000001F4A8871180]
+

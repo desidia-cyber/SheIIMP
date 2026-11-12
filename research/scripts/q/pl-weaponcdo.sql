@@ -1,0 +1,1 @@
+SELECT o.type, o.path FROM obj o WHERE o.path LIKE '/Game/Sparta/Core/Weapons/Player/%Default__%' AND (o.type LIKE '%MeshComponent%' OR o.path LIKE '%WeaponMesh%' OR o.type LIKE '%SpartaWeaponComponent%' OR o.type='SphereComponent') ORDER BY o.path

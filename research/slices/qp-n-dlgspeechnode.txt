@@ -1,0 +1,96 @@
+﻿### ArrayProperty /Script/Sparta.Dialogue_SpartaSpeechNode:TextArguments  [000001F4ACD5BE00]
+    1 members:
+      PRP TextArguments : StructProperty of /Script/DlgSystem.DlgTextArgument [o:0x0]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:IsVirtualParent:ReturnValue  [000001F4ACD5C280]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:bAutoGenerateOptions  [000001F4ACD5C180]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:bAutoProceedToNextNode  [000001F4ACD5C100]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:bIsVirtualParent  [000001F4ACD5BC80]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:bUseCustomSubtitleName  [000001F4ACD5C200]
+
+### BoolProperty /Script/Sparta.Dialogue_SpartaSpeechNode:bVirtualParentFireDirectChildEnterEvents  [000001F4ACD5BD00]
+
+### Class /Script/Sparta.Dialogue_SpartaSpeechNode  [00007FF46F032538]
+    super: /Script/DlgSystem.DlgNode_Custom
+    21 members:
+      PRP bIsVirtualParent : BoolProperty [o:0x98]
+      PRP bVirtualParentFireDirectChildEnterEvents : BoolProperty [o:0x99]
+      PRP Text : TextProperty [o:0xa0]
+      PRP TextArguments : ArrayProperty of TextArguments./Script/Sparta.Dialogue_SpartaSpeechNode:TextArguments [o:0xb0]
+      PRP SpeakerState : NameProperty [o:0xc0]
+      PRP NodeData : ObjectProperty of /Script/DlgSystem.DlgNodeData [o:0xc8]
+      PRP SoundWave : ObjectProperty of /Script/Engine.SoundWave [o:0xd0]
+      PRP GenericData : ObjectProperty of /Script/CoreUObject.Object [o:0xd8]
+      PRP AudioEvent : ObjectProperty of /Script/WaveWeaver.AudioEvent [o:0xf8]
+      PRP FacialAnimation : ObjectProperty of /Script/Engine.AnimSequence [o:0x100]
+      PRP bAutoProceedToNextNode : BoolProperty [o:0x108]
+      PRP AutoProceedDelayTimer : FloatProperty [o:0x10c]
+      PRP bAutoGenerateOptions : BoolProperty [o:0x110]
+      PRP bUseCustomSubtitleName : BoolProperty [o:0x111]
+      PRP SubtitleSpeakerName : NameProperty [o:0x114]
+      PRP SubtitleSpeakerText : TextProperty [o:0x120]
+      FUN IsVirtualParent 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetSubtitleSpeakerText 
+          param ReturnValue : TextProperty [o:0x0]
+      FUN GetSubtitleSpeakerName 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetNodeSoundWave 
+          param ReturnValue : ObjectProperty of /Script/Engine.SoundWave [o:0x0]
+      FUN GetNodeAudioEvent 
+          param ReturnValue : ObjectProperty of /Script/WaveWeaver.AudioEvent [o:0x0]
+
+### FloatProperty /Script/Sparta.Dialogue_SpartaSpeechNode:AutoProceedDelayTimer  [000001F4ACD0FCF0]
+
+### Function /Script/Sparta.Dialogue_SpartaSpeechNode:GetNodeAudioEvent  [00007FF46F6E4C38]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/WaveWeaver.AudioEvent [o:0x0]
+
+### Function /Script/Sparta.Dialogue_SpartaSpeechNode:GetNodeSoundWave  [00007FF46F6E4D18]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.SoundWave [o:0x0]
+
+### Function /Script/Sparta.Dialogue_SpartaSpeechNode:GetSubtitleSpeakerName  [00007FF46F6E4DF8]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/Sparta.Dialogue_SpartaSpeechNode:GetSubtitleSpeakerText  [00007FF46F6E4ED8]
+    1 members:
+      PRP ReturnValue : TextProperty [o:0x0]
+
+### Function /Script/Sparta.Dialogue_SpartaSpeechNode:IsVirtualParent  [00007FF46F6E4FB8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### NameProperty /Script/Sparta.Dialogue_SpartaSpeechNode:GetSubtitleSpeakerName:ReturnValue  [000001F4ACD0FEB0]
+
+### NameProperty /Script/Sparta.Dialogue_SpartaSpeechNode:SpeakerState  [000001F4ACD0FC80]
+
+### NameProperty /Script/Sparta.Dialogue_SpartaSpeechNode:SubtitleSpeakerName  [000001F4ACD0FD60]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:AudioEvent  [000001F4ACD5C000]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:FacialAnimation  [000001F4ACD5C080]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:GenericData  [000001F4ACD5BF80]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:GetNodeAudioEvent:ReturnValue  [000001F4ACD5C380]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:GetNodeSoundWave:ReturnValue  [000001F4ACD5C300]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:NodeData  [000001F4ACD5BE80]
+
+### ObjectProperty /Script/Sparta.Dialogue_SpartaSpeechNode:SoundWave  [000001F4ACD5BF00]
+
+### StructProperty TextArguments./Script/Sparta.Dialogue_SpartaSpeechNode:TextArguments  [000001F4ACD5BD80]
+
+### TextProperty /Script/Sparta.Dialogue_SpartaSpeechNode:GetSubtitleSpeakerText:ReturnValue  [000001F4ACD0FE40]
+
+### TextProperty /Script/Sparta.Dialogue_SpartaSpeechNode:SubtitleSpeakerText  [000001F4ACD0FDD0]
+
+### TextProperty /Script/Sparta.Dialogue_SpartaSpeechNode:Text  [000001F4ACD0FC10]
+

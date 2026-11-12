@@ -1,0 +1,67 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3	Final, Native, Public, HasOutParams	53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	SetTickInterval	TickInterval FloatProperty	1	Final, Native, Public, BlueprintCallable	53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	SetTickEnabled	bEnabled BoolProperty	1	Final, Native, Public, BlueprintCallable	53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	ReceiveTick	DeltaTime FloatProperty	1	Event, Public, BlueprintEvent	53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Event, Public, HasOutParams, BlueprintEvent	53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	ReceiveOnLoaded		0	Event, Public, BlueprintEvent	53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	IsTickEnabled	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	IsSessionSaveData	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	GetTickInterval	ReturnValue FloatProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53871
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSaveObject	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	Save	Events StructProperty of /Script/GameplayTags.GameplayTagContainer	1	Final, Native, Public, BlueprintCallable	53893
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	ResetSaveData		0	Final, Native, Public, BlueprintCallable	53895
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	IsSaveLoaded	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53896
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	GetRuntimeData	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveObject	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	53898
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	GetGUID	ReturnValue StructProperty of /Script/CoreUObject.Guid	1	Final, Native, Public, HasDefaults, BlueprintCallable, BlueprintPure, Const	53900
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	GenerateNewGuid		0	Final, Native, Public	53902
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ReceiveEndPlay	EndPlayReason ByteProperty	1		2358
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ReceiveBeginPlay		0		2360
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSaveComponent	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveInterface	/Script/Sparta.SpartaSaveInterface	SpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Native, Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent	57835
+/Script/Sparta.SpartaSaveInterface	/Script/Sparta.SpartaSaveInterface	SessionReset		0	Native, Event, Public, BlueprintCallable, BlueprintEvent	57837
+/Script/Sparta.SpartaSaveInterface	/Script/Sparta.SpartaSaveInterface	SaveLoaded	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1	Native, Event, Public, HasOutParams, BlueprintCallable, BlueprintEvent	57838
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSaveInterface	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSessionSaveObjectBase	/Script/Sparta.SpartaSessionSaveObjectBase	GetSessionStartTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1	Native, Event, Public, HasDefaults, BlueprintEvent, Const	57988
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Script/Sparta.SpartaSessionSaveObjectBase	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaMetaSave	ExecuteUbergraph	EntryPoint IntProperty	1		3

@@ -1,0 +1,42 @@
+# Verify that the mod does not spawn shell processes while the game runs.
+# Launches one client for ~60 s, samples cmd.exe every 400 ms, prints the max seen.
+param(
+    [string]$GameDir = 'E:\Games\_MS2-coop-test'
+)
+
+$ErrorActionPreference = 'Stop'
+$w64 = Join-Path $GameDir 'MortalShell2\Binaries\Win64'
+$exe = Join-Path $w64 'MortalShell2-Win64-Shipping.exe'
+
+Get-Process | Where-Object ProcessName -match 'MortalShell2' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+Start-Sleep -Seconds 2
+
+$baseline = (Get-Process cmd -ErrorAction SilentlyContinue | Measure-Object).Count
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $exe
+$psi.Arguments = 'MortalShell2 -windowed -ResX=1024 -ResY=576 -nosound -nosplash -nocrashreport'
+$psi.WorkingDirectory = $GameDir
+$psi.UseShellExecute = $true
+$psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Normal
+$p = [System.Diagnostics.Process]::Start($psi)
+Write-Host "launched pid $($p.Id); sampling cmd.exe for 60s (baseline $baseline)"
+
+$maxCmd = 0
+for ($i = 0; $i -lt 150; $i++) {
+    $c = (Get-Process cmd -ErrorAction SilentlyContinue | Measure-Object).Count
+    if ($c -gt $maxCmd) { $maxCmd = $c }
+    Start-Sleep -Milliseconds 400
+}
+Write-Host "MAXCMD=$maxCmd"
+
+$log = Join-Path $w64 'coop\probe.log'
+if (Test-Path $log) {
+    Write-Host "=== mod log tail ==="
+    Get-Content $log | Select-Object -Last 6
+} else {
+    Write-Host "no mod log yet"
+}
+
+Get-Process | Where-Object ProcessName -match 'MortalShell2' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+Get-Process | Where-Object ProcessName -match 'CrashReportClient' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+Write-Host "stopped"

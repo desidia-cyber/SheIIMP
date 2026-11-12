@@ -1,0 +1,6 @@
+﻿### Class /Script/DlgSystem.DlgNodeData  [00007FF46F015138]
+    super: /Script/DlgSystem.DlgObject
+
+### Class /Script/DlgSystem.DlgNodeDataHideCategories  [00007FF46F015338]
+    super: /Script/DlgSystem.DlgNodeData
+

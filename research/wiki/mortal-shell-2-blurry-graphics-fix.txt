@@ -1,0 +1,16 @@
+Mortal Shell 2 Blurry Graphics Fix — PC Settings Checklist 
+Skip to content
+ Mortal Shell 2 Blurry Graphics Fix: PC Checks to Try
+ Mortal Shell 2 blurry graphics are reported by launch players; use this reversible PC checklist without assuming one universal fix.
+Last verified 2026-08-20 
+ This Mortal Shell 2 blurry graphics fix page is a launch PC troubleshooting checklist based on a public Steam report, not a promise of a universal solution. One player reports that the game looked blurry at 4K and that changing presets did not solve it. Your result can differ by resolution, upscaling mode, GPU, driver, and display.
+ Official Steam image used for the Mortal Shell 2 blurry-graphics checklist. 
+ Safe checks first
+ Confirm the game is running at your display’s native resolution.
+ Compare the image with motion blur, film grain, and vignette disabled where the retail menu exposes those options.
+ Test the available upscaling or resolution-scale setting one change at a time.
+ Restart after a major graphics change so shader and renderer state are not confused with the new setting.
+ Verify the GPU driver and Steam installation before editing configuration files.
+ The official Steam requirements list Windows 10/11, DirectX 12, 16 GB RAM, an RTX 2060 SUPER or RX 6600-class GPU, and an SSD. If the machine is below that baseline, image-quality symptoms can be mixed with frame-time problems.
+ What not to promise
+ Do not claim that one preset fixes blur for every PC, and do not download an unknown “fix pack.” If the menu settings do not help, record resolution, GPU, driver, upscaling mode, and a screenshot before reporting the issue. The Mortal Shell 2 PC requirements page has the official baseline; the Reflex stutter guide covers a separate symptom.

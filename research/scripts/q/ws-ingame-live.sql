@@ -1,0 +1,30 @@
+SELECT o.type AS obj_class, COUNT(*) AS n
+FROM obj o
+WHERE o.path LIKE '%:PersistentLevel%'
+  AND (o.type LIKE 'BP\_HubDoor%' ESCAPE '\' OR o.type LIKE 'BP\_HubDoorManager%' ESCAPE '\' OR o.type LIKE 'BP\_HubDoubleDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Interactable\_Lock\_Door%' ESCAPE '\' OR o.type LIKE 'BP\_Interactable\_Chest%' ESCAPE '\'
+    OR o.type LIKE 'BP\_DoorLockedDungeon%' ESCAPE '\' OR o.type LIKE 'BP\_EndDungeonRewardDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_HiddenWall%' ESCAPE '\' OR o.type LIKE 'BP\_BreakableWall%' ESCAPE '\'
+    OR o.type LIKE 'BP\_InteractionOpenGate%' ESCAPE '\' OR o.type LIKE 'BP\_InteractionOpenDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_InteractionLockedOpenGate%' ESCAPE '\' OR o.type LIKE 'BP\_InteractionStoneGate%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Electric\_StoneGate%' ESCAPE '\' OR o.type LIKE 'BP\_PressurePlateOpenDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_HubLift%' ESCAPE '\' OR o.type LIKE 'BP\_Interaction\_LiftCall%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Drawbridge%' ESCAPE '\' OR o.type LIKE 'BP\_MakeBridgeByAttack%' ESCAPE '\'
+    OR o.type LIKE 'BP\_BossGate%' ESCAPE '\' OR o.type LIKE 'BP\_BlockedBossGate%' ESCAPE '\'
+    OR o.type LIKE 'BP\_STH\_Entrance\_Gate%' ESCAPE '\' OR o.type LIKE 'BP\_STH\_Exit%' ESCAPE '\'
+    OR o.type LIKE 'BP\_SpartaPlayerStart%' ESCAPE '\' OR o.type LIKE 'BP\_LandingArea%' ESCAPE '\'
+    OR o.type LIKE 'BP\_PrologueCheckpoint%' ESCAPE '\' OR o.type LIKE 'BP\_ShatteredBeacon%' ESCAPE '\'
+    OR o.type LIKE 'BP\_VFX\_Breakable%' ESCAPE '\' OR o.type LIKE 'BP\_BearTrap%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Trap%' ESCAPE '\' OR o.type LIKE 'BP\_SpikeTrap%' ESCAPE '\'
+    OR o.type LIKE 'BP\_FlowerChest%' ESCAPE '\' OR o.type LIKE 'BP\_UnlimitedChest%' ESCAPE '\'
+    OR o.type LIKE 'BP\_LockedLightChest%' ESCAPE '\' OR o.type LIKE 'BP\_GloomDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_TarRootGate%' ESCAPE '\' OR o.type LIKE 'BP\_Interactable\_TarRoot%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Grisha\_Cage%' ESCAPE '\' OR o.type LIKE 'BP\_Spawner.C%' ESCAPE '\'
+    OR o.type LIKE 'SpartaSaveComponent%' OR o.type LIKE 'BP\_PlayerController.C%' ESCAPE '\'
+    OR o.type LIKE 'BP\_FogVolume%' ESCAPE '\' OR o.type LIKE 'FogPauseArea%' ESCAPE '\'
+    OR o.type LIKE 'BP\_InteractableBase%' ESCAPE '\' OR o.type LIKE 'BP\_Interaction.C%' ESCAPE '\'
+    OR o.type LIKE 'BP\_DungeonTransition%' ESCAPE '\' OR o.type LIKE 'BP\_BagTeleport%' ESCAPE '\'
+    OR o.type LIKE 'BP\_Interactable\_PutLever%' ESCAPE '\' OR o.type LIKE 'BP\_Interactable\_PrayToOpenDoor%' ESCAPE '\'
+    OR o.type LIKE 'BP\_WoodenSelfClosingDoor%' ESCAPE '\' OR o.type LIKE 'BP\_Interactable\_LockedChest%' ESCAPE '\')
+GROUP BY o.type
+ORDER BY n DESC, o.type

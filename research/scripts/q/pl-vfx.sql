@@ -1,0 +1,1 @@
+SELECT type, path FROM obj WHERE path LIKE '/Game/Sparta/Core/VFX%' AND type IN ('BlueprintGeneratedClass','NiagaraSystem','NiagaraParameterCollection','MaterialInstanceConstant','MaterialParameterCollection','NiagaraDataAsset','SpartaVfxManager') ORDER BY type, path LIMIT 300

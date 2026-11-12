@@ -1,0 +1,10 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CoreUObject	FRotator	0x0000	0x0008	double	Pitch	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FRotator	0x0008	0x0008	double	Yaw	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FRotator	0x0010	0x0008	double	Roll	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0000	0x0008	double	X	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0008	0x0008	double	Y	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0010	0x0008	double	Z	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+DlgSystem	FDlgParticipantName	0x0000	0x0008	class FName	ParticipantName	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+GameplayTags	FGameplayTagContainer	0x0000	0x0010	TArray<struct FGameplayTag>	GameplayTags	(Edit, BlueprintVisible, ZeroConstructor, EditConst, SaveGame, Protected, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0010	0x0010	TArray<struct FGameplayTag>	ParentTags	(ZeroConstructor, Transient, Protected, NativeAccessSpecifierProtected)

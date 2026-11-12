@@ -1,0 +1,60 @@
+﻿### Class /Script/Sparta.SpartaSaveGame  [00007FF46F057138]
+    super: /Script/Engine.SaveGame
+    7 members:
+      PRP ChangedActors : SetProperty [o:0x28]
+      PRP ActorFloats : MapProperty [o:0x78]
+      PRP ActorInts : MapProperty [o:0xc8]
+      PRP ActorNames : MapProperty [o:0x118]
+      PRP ActorBools : MapProperty [o:0x168]
+      PRP ActorObjectMap : MapProperty [o:0x1b8]
+      PRP ActorObjectMapAsString : StrProperty [o:0x208]
+
+### MapProperty /Script/Sparta.SpartaSaveGame:ActorBools  [000001F49CD2F560]
+    2 members:
+      PRP ActorBools_Key : NameProperty [o:0x0]
+      PRP ActorBools : StructProperty of /Script/Sparta.SpartaMapBool [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaSaveGame:ActorFloats  [000001F49CD2F380]
+    2 members:
+      PRP ActorFloats_Key : NameProperty [o:0x0]
+      PRP ActorFloats : StructProperty of /Script/Sparta.SpartaMapFloat [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaSaveGame:ActorInts  [000001F49CD2F420]
+    2 members:
+      PRP ActorInts_Key : NameProperty [o:0x0]
+      PRP ActorInts : StructProperty of /Script/Sparta.SpartaMapInt [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaSaveGame:ActorNames  [000001F49CD2F4C0]
+    2 members:
+      PRP ActorNames_Key : NameProperty [o:0x0]
+      PRP ActorNames : StructProperty of /Script/Sparta.SpartaMapName [o:0x8]
+
+### MapProperty /Script/Sparta.SpartaSaveGame:ActorObjectMap  [000001F49CD2F600]
+    2 members:
+      PRP ActorObjectMap_Key : NameProperty [o:0x0]
+      PRP ActorObjectMap : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+
+### NameProperty ActorBools./Script/Sparta.SpartaSaveGame:ActorBools_Key  [000001F4ACDE1510]
+
+### NameProperty ActorFloats./Script/Sparta.SpartaSaveGame:ActorFloats_Key  [000001F4ACDE13C0]
+
+### NameProperty ActorInts./Script/Sparta.SpartaSaveGame:ActorInts_Key  [000001F4ACDE1430]
+
+### NameProperty ActorNames./Script/Sparta.SpartaSaveGame:ActorNames_Key  [000001F4ACDE14A0]
+
+### NameProperty ActorObjectMap./Script/Sparta.SpartaSaveGame:ActorObjectMap_Key  [000001F4ACDE1580]
+
+### ObjectProperty ActorObjectMap./Script/Sparta.SpartaSaveGame:ActorObjectMap  [000001F4ACDF2800]
+
+### SetProperty /Script/Sparta.SpartaSaveGame:ChangedActors  [000001F4A93E85F0]
+
+### StrProperty /Script/Sparta.SpartaSaveGame:ActorObjectMapAsString  [000001F4ACDE15F0]
+
+### StructProperty ActorBools./Script/Sparta.SpartaSaveGame:ActorBools  [000001F4ACDF2780]
+
+### StructProperty ActorFloats./Script/Sparta.SpartaSaveGame:ActorFloats  [000001F4ACDF2600]
+
+### StructProperty ActorInts./Script/Sparta.SpartaSaveGame:ActorInts  [000001F4ACDF2680]
+
+### StructProperty ActorNames./Script/Sparta.SpartaSaveGame:ActorNames  [000001F4ACDF2700]
+

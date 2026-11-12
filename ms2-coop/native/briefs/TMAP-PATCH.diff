@@ -1,0 +1,250 @@
+# TMAP-PATCH.diff -- PROPOSED patch for native\src\ms2_ue.cpp (NOT applied here)
+#
+# Owner: the agent editing ms2_ue.cpp.  coordinator asked for the exact unified diff
+# instead of a concurrent edit, because two agents writing that file at once is how
+# the tree got broken before.  Everything else in this brief is already in the tree;
+# this is the only change that still has to be merged by hand.
+#
+# WHAT IT FIXES (verified, not guessed)
+# -------------------------------------
+# native\src\coop_progress.cpp read store B through ue::MapForEach(), which takes the
+# map geometry from the UE4 layout of FMapProperty:
+#
+#     kOffMapLayoutK = 0x70   FScriptMapLayout::KeyOffset   (int32)
+#     kOffMapLayoutV = 0x74   FScriptMapLayout::ValueOffset (int32)
+#     kOffMapKeyProp = 0x78   FMapProperty::KeyProp
+#     kOffMapValProp = 0x80   FMapProperty::ValueProp
+#
+# This build's SDK -- research\raw\Dumper7\SDK\Basic.hpp, "Predefined struct
+# FMapProperty // 0x0010 (0x0080 - 0x0070)" -- says otherwise:
+#
+#     class FMapProperty final : public FProperty
+#     {
+#         class FProperty* KeyProperty;      // 0x0070(0x0008)(NOT AUTO-GENERATED PROPERTY)
+#         class FProperty* ValueProperty;    // 0x0078(0x0008)(NOT AUTO-GENERATED PROPERTY)
+#     };
+#
+# i.e. FMapProperty is 0x80 bytes and there is NO FScriptMapLayout member (UE5
+# derives the pair offsets from the two properties).  Consequence in the current
+# code: the int32 halves of the KeyProperty POINTER are read as keyOff/valueOff, and
+# the "ValueProperty" is then read from the 8 bytes AFTER the property object (past
+# its end).  That either fails PlausiblePtr or yields a nonsense ElementSize, so
+# ReadMapInfo() returns false and MapForEach() returns false SILENTLY for every map
+# in the game.
+#
+# Observed symptom (two-client run, sync.txt on both clients):
+#       wp=b:0/0+0!0 q:13/13+0!0 d:104/0+0!0
+#                          ^^^ store B: 0 local entries, 0 peer entries
+# while the Lua build of the same run printed `b:5/5`.  The `q:` half shows the
+# non-map sources (tags/quests/layers) working, which is exactly what a broken map
+# walk looks like: everything that does not need a TMap still works.
+#
+# WHY THE PATCH IS SHAPED THIS WAY
+# --------------------------------
+# * KeyProperty 0x70 / ValueProperty 0x78 -- straight from the SDK above.
+# * No MapLayout read at all; the value offset inside TPair<Key,Value> is derived
+#   from the two ElementSizes (DerivedValueOffset).  Checked against every map this
+#   mod touches:
+#       TMap<FName,int32>            key 8  value  4 -> value@8   pair 12 -> stride 20
+#       TMap<FName,bool>             key 8  value  1 -> value@8   pair 12 -> stride 20
+#       TMap<FString,int32>          key16  value  4 -> value@16  pair 20 -> stride 24
+#       TMap<FName,FSpartaMapInt>    key 8  value 80 -> value@8   pair 88 -> stride 96
+#       TMap<FName,UObject*>         key 8  value  8 -> value@8   pair 16 -> stride 24
+#   (all sizes from the same SDK: FSpartaMapInt/Bool are 0x0050 with `Map` at 0x0000)
+# * MapFindKey() (used by MapAddNameInt/MapAddStrInt, i.e. every quest-map write) had
+#   the same wrong offsets; it is fixed the same way.
+# * The silent failure is made visible: one ms2::Logf() the first 4 times ReadMapInfo
+#   refuses a property, with the geometry it used.  If it still fails after this
+#   patch the log names the property and the numbers instead of the caller guessing.
+# * MapForEachRaw() is untouched: it never reads a property (caller supplies the
+#   sizes), which is why coop_progress.cpp can already work with ue::MapForEachRaw
+#   alone -- see WalkMapProp()/ScanSaveMap() there.  Merging this patch makes the
+#   property-based form correct too, which is what every other module uses.
+#
+# VERIFICATION STATUS
+# -------------------
+# * All five hunks were generated against the working tree's ms2_ue.cpp and then
+#   re-checked with `git apply --check` against that file as it stands now: every
+#   hunk applies (with a +14 line offset, because that file is being edited in
+#   parallel -- line numbers moved, the context did not).
+# * The patched copy compiles warning-free with the project's own flags
+#   (cl /c /O2 /W3 /std:c++20 /permissive- ...), so the hunks are syntactically and
+#   type-wise sound against the current file, not only against my snapshot.
+# * The element-stride arithmetic is the same as MapForEachRaw's, which is
+#   independent of FMapProperty, so store B is exercisable today without this patch.
+# * Not verified against live memory (no game run available): the TBitArray layout
+#   the walker assumes for AllocationFlags (ptr@0x10, num@0x18, NumBits@0x20) is
+#   unchanged by this patch.  If it is wrong the walker falls back to "the key must
+#   decode as a real FName/FString", which is why a wrong flags offset loses no rows.
+#
+diff --git a/src/ms2_ue.cpp b/src/ms2_ue.cpp
+index 0000000..0000000 100644
+--- a/src/ms2_ue.cpp
++++ b/src/ms2_ue.cpp
+@@ -2837,14 +2837,16 @@ std::string TextToString(void* ftext) {
+ //     +0x10 TBitArray       AllocationFlags (TArray<uint32> ptr,num,max; NumBits)
+ //     +0x28 int32 FirstFreeIndex, +0x2C NumFreeIndices
+ //   followed by the hash (int32 HashSize, element ids) which this never touches.
+ //
+ // One element = the pair, padded to the array's alignment, followed by HashNextId
+ // (int32) and HashIndex (int32): stride = Align(sizeof(pair)) + 8.  Key and value
+-// offsets come from the FMapProperty's FScriptMapLayout / KeyProp / ValueProp; for
+-// the raw form the caller supplies the two sizes.
++// sizes come from the FMapProperty's KeyProperty/ValueProperty `ElementSize` and
++// the value's offset inside the pair is derived from them (this build's
++// FMapProperty carries no FScriptMapLayout); for the raw form the caller supplies
++// the two sizes.
+ //
+ // THE HARD RULE: an element is only ever touched after its slot is proven live
+ // (allocation-flag bit) or its key is proven to be a real FName/FString, and every
+ // read goes through SafeRead.  A wrong stride or a stale map therefore yields
+ // "fewer rows", never a fault.
+ // ---------------------------------------------------------------------------
+@@ -2853,22 +2855,42 @@ namespace {
+ constexpr uint32 kOffMapPairNum   = 0x08;
+ constexpr uint32 kOffMapPairMax   = 0x0C;
+ constexpr uint32 kOffMapFlagsPtr  = 0x10;
+ constexpr uint32 kOffMapFlagsNum  = 0x18;
+ constexpr uint32 kOffMapFlagsBits = 0x20;
+ constexpr uint32 kOffFieldClass   = 0x08;   // FField::ClassPrivate
+-constexpr uint32 kOffMapLayoutK   = 0x70;   // FScriptMapLayout::KeyOffset   (int32)
+-constexpr uint32 kOffMapLayoutV   = 0x74;   // FScriptMapLayout::ValueOffset (int32)
+-constexpr uint32 kOffMapKeyProp   = 0x78;   // FMapProperty::KeyProp
+-constexpr uint32 kOffMapValProp   = 0x80;   // FMapProperty::ValueProp
++// FMapProperty in THIS build -- research\raw\Dumper7\SDK\Basic.hpp,
++// "Predefined struct FMapProperty // 0x0010 (0x0080 - 0x0070)":
++//   0x70  FProperty* KeyProperty
++//   0x78  FProperty* ValueProperty
++// There is NO FScriptMapLayout member any more (UE5 dropped it; the offsets are
++// derived from the two properties), so the previous 0x70/0x74/0x78/0x80 -- the UE4
++// layout, MapLayout{KeyOffset,ValueOffset} then KeyProp then ValueProp -- read the
++// two int32 HALVES OF THE KeyProperty POINTER as the offsets and then read a
++// "ValueProperty" from the 8 bytes AFTER the property object.  That read either
++// fails PlausiblePtr or yields a nonsense ElementSize, so ReadMapInfo returned
++// false and ue::MapForEach reported "not a map" for EVERY map, without logging:
++// store B published `wp=b:0/0` where the Lua had `b:5/5`.
++constexpr uint32 kOffMapKeyProp   = 0x70;   // FMapProperty::KeyProperty
++constexpr uint32 kOffMapValProp   = 0x78;   // FMapProperty::ValueProperty
+ 
+ int32 AlignUp(int32 v, int32 a) {
+     if (a <= 1) return v;
+     return ((v + a - 1) / a) * a;
+ }
+ 
++// TPair<Key,Value> value offset with no FScriptMapLayout to read it from: the value
++// follows the key, aligned to its own natural alignment (8 for a struct, FString or
++// pointer; 4 for int32/float/FName; 1 for bool/byte).
++int32 DerivedValueOffset(int32 keySize, int32 valueSize) {
++    int32 align = 1;
++    if (valueSize >= 8) align = 8;
++    else if (valueSize >= 4) align = 4;
++    return AlignUp(keySize, align);
++}
++
+ // A "plausible address" WITHOUT the 8-byte alignment requirement ue::PlausiblePtr
+ // imposes.  It is needed here because a TMap element is only 4-byte aligned once
+ // the stride is not a multiple of 8 (TPair<FName,int32> is 20 bytes), and a
+ // TArray<uint32> bit-allocation may be 4-aligned too.  Alignment is not evidence of
+ // anything for these pointers; the bounds and the SEH calls are.
+ bool MapAddrOk(const void* p) {
+@@ -2910,15 +2932,19 @@ bool KeyLooksValid(const uint8_t* key, int32 keySize) {
+         const std::string s = NameToString(n);
+         return !s.empty() && s[0] != '<';
+     }
+     if (keySize == 16) {                      // FString
+         FString s;
+         if (!SafeRead(key, &s, sizeof(s))) return false;
+-        if (s.Num < 0 || s.Num > 4096) return false;
++        // An FString key of a live TSet row is never empty (every FName/FString key
++        // in this game is a name), and "Num == 0" is exactly what a wrong stride
++        // reads out of the middle of a neighbouring element -- so reject it, which
++        // is what makes the stride probe able to tell the two layouts apart.
++        if (s.Num < 1 || s.Num > 4096) return false;
+         if (s.Max < s.Num) return false;
+-        if (s.Num > 0 && !PlausiblePtr(s.Data)) return false;
++        if (!PlausiblePtr(s.Data)) return false;
+         return true;
+     }
+     return true;                              // unknown key type: cannot judge
+ }
+ 
+ bool SlotAllocated(const MapInfo& mi, int32 i) {
+@@ -3026,25 +3052,25 @@ bool MapFindKey(UObject* o, const char* prop, const char* key, bool fnameKey, vo
+     if (valueSlot) *valueSlot = nullptr;
+     if (!o || !prop || !key) return false;
+     UClass* c = GetClass(o);
+     FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+     if (!PlausiblePtr(p)) return false;
+ 
+-    int32 keyOff = 0, valueOff = 0, keySize = 0, valueSize = 0;
+-    if (!Read((const uint8_t*)p + kOffMapLayoutK, keyOff)) return false;
+-    if (!Read((const uint8_t*)p + kOffMapLayoutV, valueOff)) return false;
++    int32 keySize = 0, valueSize = 0;
+     FProperty* kp = nullptr;
+     FProperty* vp = nullptr;
+     if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+     if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+     if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+     if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+ 
++    // No FScriptMapLayout in this build (see the offsets at the top of this block).
++    const int32 keyOff = 0;
++    const int32 valueOff = DerivedValueOffset(keySize, valueSize);
++
+     MapInfo mi;
+-    if (keyOff < 0 || keyOff > 0x100) keyOff = 0;
+-    if (valueOff <= keyOff) valueOff = AlignUp(keySize, 8);
+     const int32_t mapOff = PropOffset(o, prop);
+     if (mapOff < 0) return false;
+     if (!ReadMapInfo((const uint8_t*)o + mapOff, keyOff, keySize, valueOff, valueSize, &mi))
+         return false;
+ 
+     bool hit = false;
+@@ -3117,29 +3143,40 @@ bool MapForEach(UObject* o, const char* prop, std::function<bool(void* key, void
+         }
+     } else if (g_mapGeomWarned.fetch_add(1) < 1) {
+         ms2::Logf("MapForEach(\"%s\"): the property's FField class did not resolve -- "
+                   "falling back to the KeyProp/ValueProp geometry", prop);
+     }
+ 
+-    int32 keyOff = 0, valueOff = 0, keySize = 0, valueSize = 0;
+-    Read((const uint8_t*)p + kOffMapLayoutK, keyOff);
+-    Read((const uint8_t*)p + kOffMapLayoutV, valueOff);
++    int32 keySize = 0, valueSize = 0;
+     FProperty* kp = nullptr;
+     FProperty* vp = nullptr;
+     if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+     if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+     if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+     if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+ 
++    // No FScriptMapLayout in this build (see the offsets at the top of this block).
++    const int32 keyOff = 0;
++    const int32 valueOff = DerivedValueOffset(keySize, valueSize);
++
+     const int32_t off = PropOffset(o, prop);
+     if (off < 0) return false;
+-    if (keyOff < 0 || keyOff > 0x100) keyOff = 0;
+-    if (valueOff <= keyOff) valueOff = AlignUp(keySize, 8);
+ 
+     MapInfo mi;
+-    if (!ReadMapInfo((const uint8_t*)o + off, keyOff, keySize, valueOff, valueSize, &mi)) return false;
++    if (!ReadMapInfo((const uint8_t*)o + off, keyOff, keySize, valueOff, valueSize, &mi)) {
++        // This used to fail silently for every map in the build. Say it once per
++        // property so an unreadable map is visible instead of "0 rows".
++        static std::atomic<int> warned{0};
++        if (warned.fetch_add(1) < 4) {
++            ms2::Logf("MapForEach(\"%s\"): ReadMapInfo failed at prop+0x%X "
++                      "(key %d@%d, value %d@%d) -- geometry, not the caller",
++                      prop, (unsigned)off, (int)keySize, (int)keyOff, (int)valueSize,
++                      (int)valueOff);
++        }
++        return false;
++    }
+     return IterateMap(mi, fn);
+ }
+ 
+ bool MapForEachRaw(const void* mapAddr, std::function<bool(void* key, void* value)> fn) {
+     // The FName-keyed shape every map reached this way has (FSpartaMapInt/Bool).
+     return MapForEachRaw(mapAddr, 8, 4, std::move(fn));
+

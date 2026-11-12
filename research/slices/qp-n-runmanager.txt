@@ -1,0 +1,97 @@
+﻿### ArrayProperty /Script/Sparta.SpartaRunManagerSubsystem:AlreadySelectedEventInstances  [000001F4ACDF2900]
+    1 members:
+      PRP AlreadySelectedEventInstances : SoftObjectProperty of /Script/Engine.World [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaRunManagerSubsystem:HasLevelInstanceAlreadyBeenStreamed:ReturnValue  [000001F4ACDF2C00]
+
+### BoolProperty /Script/Sparta.SpartaRunManagerSubsystem:LevelInstanceSelected:ReturnValue  [000001F4ACDF2B00]
+
+### Class /Script/Sparta.SpartaRunManagerSubsystem  [00007FF46F056F38]
+    super: /Script/Engine.GameInstanceSubsystem
+    8 members:
+      PRP AlreadySelectedEventInstances : ArrayProperty of AlreadySelectedEventInstances./Script/Sparta.SpartaRunManagerSubsystem:AlreadySelectedEventInstances [o:0x30]
+      PRP RunStateIntegers : MapProperty [o:0x40]
+      FUN RemoveRunStateInteger 
+          param Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      FUN LevelInstanceSelected 
+          param SelectedLevel : SoftObjectProperty of /Script/Engine.World [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN HasLevelInstanceAlreadyBeenStreamed 
+          param Level : SoftObjectProperty of /Script/Engine.World [o:0x0]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN GetRunStateInteger 
+          param Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param ReturnValue : IntProperty [o:0x8]
+      FUN GetEventDataForSpace 
+          param OptionSet : ObjectProperty of /Script/CSOptionSet.CSOptionSetDataAsset [o:0x0]
+          param EventSpaceActor : ObjectProperty of /Script/Sparta.SpartaEventSpaceActor [o:0x8]
+          param OutError : StrProperty [o:0x10]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaEventDataAsset [o:0x20]
+      FUN AddRunStateInteger 
+          param Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param Value : IntProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:AddRunStateInteger  [00007FF46F70E998]
+    2 members:
+      PRP Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Value : IntProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:GetEventDataForSpace  [00007FF46F70EA78]
+    4 members:
+      PRP OptionSet : ObjectProperty of /Script/CSOptionSet.CSOptionSetDataAsset [o:0x0]
+      PRP EventSpaceActor : ObjectProperty of /Script/Sparta.SpartaEventSpaceActor [o:0x8]
+      PRP OutError : StrProperty [o:0x10]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaEventDataAsset [o:0x20]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:GetRunStateInteger  [00007FF46F70EB58]
+    2 members:
+      PRP Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:HasLevelInstanceAlreadyBeenStreamed  [00007FF46F70EC38]
+    2 members:
+      PRP Level : SoftObjectProperty of /Script/Engine.World [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:LevelInstanceSelected  [00007FF46F70ED18]
+    2 members:
+      PRP SelectedLevel : SoftObjectProperty of /Script/Engine.World [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### Function /Script/Sparta.SpartaRunManagerSubsystem:RemoveRunStateInteger  [00007FF46F70EDF8]
+    1 members:
+      PRP Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### IntProperty /Script/Sparta.SpartaRunManagerSubsystem:AddRunStateInteger:Value  [000001F4ACDE17B0]
+
+### IntProperty /Script/Sparta.SpartaRunManagerSubsystem:GetRunStateInteger:ReturnValue  [000001F4ACDE16D0]
+
+### IntProperty RunStateIntegers./Script/Sparta.SpartaRunManagerSubsystem:RunStateIntegers  [000001F4ACDE1660]
+
+### MapProperty /Script/Sparta.SpartaRunManagerSubsystem:RunStateIntegers  [000001F49CD2F6A0]
+    2 members:
+      PRP RunStateIntegers_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP RunStateIntegers : IntProperty [o:0x8]
+
+### ObjectProperty /Script/Sparta.SpartaRunManagerSubsystem:GetEventDataForSpace:EventSpaceActor  [000001F4ACDF2D80]
+
+### ObjectProperty /Script/Sparta.SpartaRunManagerSubsystem:GetEventDataForSpace:OptionSet  [000001F4ACDF2D00]
+
+### ObjectProperty /Script/Sparta.SpartaRunManagerSubsystem:GetEventDataForSpace:ReturnValue  [000001F4ACDF2E00]
+
+### SoftObjectProperty /Script/Sparta.SpartaRunManagerSubsystem:HasLevelInstanceAlreadyBeenStreamed:Level  [000001F4ACDF2B80]
+
+### SoftObjectProperty /Script/Sparta.SpartaRunManagerSubsystem:LevelInstanceSelected:SelectedLevel  [000001F4ACDF2A80]
+
+### SoftObjectProperty AlreadySelectedEventInstances./Script/Sparta.SpartaRunManagerSubsystem:AlreadySelectedEventInstances  [000001F4ACDF2880]
+
+### StrProperty /Script/Sparta.SpartaRunManagerSubsystem:GetEventDataForSpace:OutError  [000001F4ACDE1740]
+
+### StructProperty /Script/Sparta.SpartaRunManagerSubsystem:AddRunStateInteger:Key  [000001F4ACDF2E80]
+
+### StructProperty /Script/Sparta.SpartaRunManagerSubsystem:GetRunStateInteger:Key  [000001F4ACDF2C80]
+
+### StructProperty /Script/Sparta.SpartaRunManagerSubsystem:RemoveRunStateInteger:Key  [000001F4ACDF2A00]
+
+### StructProperty RunStateIntegers./Script/Sparta.SpartaRunManagerSubsystem:RunStateIntegers_Key  [000001F4ACDF2980]
+

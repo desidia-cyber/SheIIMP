@@ -1,0 +1,192 @@
+﻿### Class /Script/Sparta.PlayerSaveObject  [00007FF46F038F38]
+    super: /Script/Sparta.SpartaSaveObject
+    19 members:
+      PRP TotalPlayTimeSeconds : FloatProperty [o:0xb8]
+      PRP LastCachedCurrentTime : DoubleProperty [o:0xc0]
+      PRP LastSaveDateTime : StructProperty of /Script/CoreUObject.DateTime [o:0xc8]
+      PRP CompletedSpawnTriggerRecipes : MapProperty [o:0xd0]
+      PRP CompletetedSpawnTriggers : SetProperty [o:0x120]
+      PRP ShellStats : MapProperty [o:0x170]
+      PRP WeaponStats : MapProperty [o:0x1c0]
+      PRP PlayerStats : StructProperty of /Script/Sparta.PermanentStats [o:0x210]
+      PRP GameLibraryData : MapProperty [o:0x260]
+      PRP OverrideWorldGenTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x2b0]
+      PRP Difficulty : MapProperty [o:0x2d0]
+      FUN IncreaseWeaponStat 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+          param IncreaseBy : IntProperty [o:0x18]
+      FUN IncreaseShellStat 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+          param IncreaseBy : IntProperty [o:0x18]
+      FUN IncreasePlayerStat 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param IncreaseBy : IntProperty [o:0x10]
+      FUN GetWeaponStat 
+          param WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN GetShellStat 
+          param ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN GetPlayerStat 
+          param StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param ReturnValue : IntProperty [o:0x8]
+      FUN ClearWeaponStats 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      FUN ClearPlayerStats 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### DoubleProperty /Script/Sparta.PlayerSaveObject:LastCachedCurrentTime  [000001F4ACD61970]
+
+### EnumProperty GameLibraryData./Script/Sparta.PlayerSaveObject:GameLibraryData_Key  [000001F4ACD75080]
+
+### FloatProperty /Script/Sparta.PlayerSaveObject:TotalPlayTimeSeconds  [000001F4ACD61900]
+
+### Function /Script/Sparta.PlayerSaveObject:ClearPlayerStats  [00007FF46F6E9858]
+    1 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/Sparta.PlayerSaveObject:ClearWeaponStats  [00007FF46F6E9938]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+
+### Function /Script/Sparta.PlayerSaveObject:GetPlayerStat  [00007FF46F6E9A18]
+    2 members:
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x8]
+
+### Function /Script/Sparta.PlayerSaveObject:GetShellStat  [00007FF46F6E9AF8]
+    3 members:
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/Sparta.PlayerSaveObject:GetWeaponStat  [00007FF46F6E9BD8]
+    3 members:
+      PRP WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/Sparta.PlayerSaveObject:IncreasePlayerStat  [00007FF46F6E9CB8]
+    3 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP IncreaseBy : IntProperty [o:0x10]
+
+### Function /Script/Sparta.PlayerSaveObject:IncreaseShellStat  [00007FF46F6E9D98]
+    4 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ShellTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+      PRP IncreaseBy : IntProperty [o:0x18]
+
+### Function /Script/Sparta.PlayerSaveObject:IncreaseWeaponStat  [00007FF46F6E9E78]
+    4 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP WeaponTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x8]
+      PRP StatTag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x10]
+      PRP IncreaseBy : IntProperty [o:0x18]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:GetPlayerStat:ReturnValue  [000001F4ACD60080]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:GetShellStat:ReturnValue  [000001F4ACD60010]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:GetWeaponStat:ReturnValue  [000001F4ACD61C80]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:IncreasePlayerStat:IncreaseBy  [000001F4ACD61C10]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:IncreaseShellStat:IncreaseBy  [000001F4ACD61BA0]
+
+### IntProperty /Script/Sparta.PlayerSaveObject:IncreaseWeaponStat:IncreaseBy  [000001F4ACD61B30]
+
+### IntProperty Difficulty./Script/Sparta.PlayerSaveObject:Difficulty  [000001F4ACD61AC0]
+
+### MapProperty /Script/Sparta.PlayerSaveObject:CompletedSpawnTriggerRecipes  [000001F49CD2CAE0]
+    2 members:
+      PRP CompletedSpawnTriggerRecipes_Key : NameProperty [o:0x0]
+      PRP CompletedSpawnTriggerRecipes : StructProperty of /Script/Sparta.SpartaEncounterRecipeSet [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerSaveObject:Difficulty  [000001F49CD2CD60]
+    2 members:
+      PRP Difficulty_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP Difficulty : IntProperty [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerSaveObject:GameLibraryData  [000001F49CD2CCC0]
+    2 members:
+      PRP GameLibraryData_Key : EnumProperty of /Script/CSGameLibraryReader.ECSGamePlatform [o:0x0]
+      PRP GameLibraryData : StructProperty of /Script/Sparta.SpartaSavedPlayerGameEntryArray [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerSaveObject:ShellStats  [000001F49CD2CB80]
+    2 members:
+      PRP ShellStats_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ShellStats : StructProperty of /Script/Sparta.PermanentStats [o:0x8]
+
+### MapProperty /Script/Sparta.PlayerSaveObject:WeaponStats  [000001F49CD2CC20]
+    2 members:
+      PRP WeaponStats_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP WeaponStats : StructProperty of /Script/Sparta.PermanentStats [o:0x8]
+
+### NameProperty CompletedSpawnTriggerRecipes./Script/Sparta.PlayerSaveObject:CompletedSpawnTriggerRecipes_Key  [000001F4ACD619E0]
+
+### ObjectProperty /Script/Sparta.PlayerSaveObject:ClearPlayerStats:WorldContextObject  [000001F4ACD73880]
+
+### ObjectProperty /Script/Sparta.PlayerSaveObject:ClearWeaponStats:WorldContextObject  [000001F4ACD73780]
+
+### ObjectProperty /Script/Sparta.PlayerSaveObject:IncreasePlayerStat:WorldContextObject  [000001F4ACD73400]
+
+### ObjectProperty /Script/Sparta.PlayerSaveObject:IncreaseShellStat:WorldContextObject  [000001F4ACD73280]
+
+### ObjectProperty /Script/Sparta.PlayerSaveObject:IncreaseWeaponStat:WorldContextObject  [000001F4ACD75200]
+
+### SetProperty /Script/Sparta.PlayerSaveObject:CompletetedSpawnTriggers  [000001F4A93E89E0]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:ClearWeaponStats:WeaponTag  [000001F4ACD73800]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:GetPlayerStat:StatTag  [000001F4ACD73700]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:GetShellStat:ShellTag  [000001F4ACD73600]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:GetShellStat:StatTag  [000001F4ACD73680]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:GetWeaponStat:StatTag  [000001F4ACD73580]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:GetWeaponStat:WeaponTag  [000001F4ACD73500]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:IncreasePlayerStat:StatTag  [000001F4ACD73480]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:IncreaseShellStat:ShellTag  [000001F4ACD73300]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:IncreaseShellStat:StatTag  [000001F4ACD73380]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:IncreaseWeaponStat:StatTag  [000001F4ACD73200]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:IncreaseWeaponStat:WeaponTag  [000001F4ACD75280]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:LastSaveDateTime  [000001F4ACD74C00]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:OverrideWorldGenTags  [000001F4ACD75100]
+
+### StructProperty /Script/Sparta.PlayerSaveObject:PlayerStats  [000001F4ACD74F00]
+
+### StructProperty CompletedSpawnTriggerRecipes./Script/Sparta.PlayerSaveObject:CompletedSpawnTriggerRecipes  [000001F4ACD74C80]
+
+### StructProperty Difficulty./Script/Sparta.PlayerSaveObject:Difficulty_Key  [000001F4ACD75180]
+
+### StructProperty GameLibraryData./Script/Sparta.PlayerSaveObject:GameLibraryData  [000001F4ACD74F80]
+
+### StructProperty ShellStats./Script/Sparta.PlayerSaveObject:ShellStats  [000001F4ACD74D00]
+
+### StructProperty ShellStats./Script/Sparta.PlayerSaveObject:ShellStats_Key  [000001F4ACD74D80]
+
+### StructProperty WeaponStats./Script/Sparta.PlayerSaveObject:WeaponStats  [000001F4ACD74E00]
+
+### StructProperty WeaponStats./Script/Sparta.PlayerSaveObject:WeaponStats_Key  [000001F4ACD74E80]
+

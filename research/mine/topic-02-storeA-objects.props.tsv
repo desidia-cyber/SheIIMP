@@ -1,0 +1,376 @@
+declared_in	class	member	type	offset	dump_line
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	275067
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	WasKilled	BoolProperty	0xC0	275068
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SpawnerOwner	ObjectProperty of /Game/Sparta/Characters/SpawnSystem/BP_Spawner.BP_Spawner_C	0xC8	275069
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	DidSpawn	BoolProperty	0xD0	275070
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	Debug	BoolProperty	0xD1	275071
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	AttemptedSpawn	BoolProperty	0xD2	275072
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	Owner	ObjectProperty of /Script/Sparta.SpartaSaveComponent	0xD8	275073
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	Spawner	BoolProperty	0xE0	275074
+/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	SpawnedClass	ClassProperty	0xE8	275075
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Characters/SpawnSystem/BP_SpawnerSessionSaveObject.BP_SpawnerSessionSaveObject_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x338	225180
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActorBools	MapProperty	0x340	225181
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	DropItems	MapProperty	0x390	225184
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ItemPoolState	MapProperty	0x3E0	225187
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CumulativeGloom	IntProperty	0x430	225190
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CumulativeGold	IntProperty	0x434	225191
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveDarkFormItemDefinition	ClassProperty	0x438	225192
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveShellItemDefinition	ClassProperty	0x440	225193
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveSealItemDefinition	ClassProperty	0x448	225194
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveWeaponItemDefinition	ClassProperty	0x450	225195
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveSidearmItemDefinition	ClassProperty	0x458	225196
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveChargesItemDefinition	ClassProperty	0x460	225197
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	EquipmentUnlockState	MapProperty	0x468	225198
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	PastTarGolemFight	BoolProperty	0x4B8	225201
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	FinishedPrologue	BoolProperty	0x4B9	225202
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CurrentPrologueCheckpoint	StructProperty of /Script/CoreUObject.Transform	0x4C0	225203
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CumulativeGlimpses	IntProperty	0x520	225204
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	TotalDeaths	IntProperty	0x524	225205
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	TotalBossesDefeated	IntProperty	0x528	225206
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CurrentHubEventPoints	DoubleProperty	0x530	225207
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	TotalHubEventPoints	DoubleProperty	0x538	225208
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GiftEventPointBank	DoubleProperty	0x540	225209
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CurrentGiftEventLevel	IntProperty	0x548	225210
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UnlockedLandingAreas	ArrayProperty of UnlockedLandingAreas./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:UnlockedLandingAreas	0x550	225211
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	bHasLostGloom	BoolProperty	0x560	225213
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	bLostGloomInsideObjective	BoolProperty	0x561	225214
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LostGloomObjectiveGUID	StrProperty	0x568	225215
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LostGloomAmount	IntProperty	0x578	225216
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LostGloomLocation	StructProperty of /Script/CoreUObject.Vector	0x580	225217
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LostGloomBiome	StructProperty of /Script/GameplayTags.GameplayTag	0x598	225218
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CleansedLandingAreas	ArrayProperty of CleansedLandingAreas./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:CleansedLandingAreas	0x5A0	225219
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CinematicsWatched	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x5B0	225221
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SurpriseEggsFound	MapProperty	0x5D0	225222
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SoftItemStatus	ArrayProperty of SoftItemStatus./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:SoftItemStatus	0x620	225225
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	AttentionGrabberStatus	ArrayProperty of AttentionGrabberStatus./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:AttentionGrabberStatus	0x630	225227
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ShownTutorials	ArrayProperty of ShownTutorials./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:ShownTutorials	0x640	225229
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	EarnedAchievements	MapProperty	0x650	225231
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SlayerSealLockout	BoolProperty	0x6A0	225234
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	StoryCompletionActivityStarted	BoolProperty	0x6A1	225235
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	StoryCompletionActivityCompleted	BoolProperty	0x6A2	225236
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	PlayedLuteTracks	MapProperty	0x6A8	225237
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ProximaBiosampler	MapProperty	0x6F8	225240
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GraguManiac	SetProperty	0x748	225243
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	NewGamePlus	IntProperty	0x798	225244
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveDarkFormSkinID	MapProperty	0x7A0	225245
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveShellSkins	MapProperty	0x7F0	225248
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UnlockedSkins	MapProperty	0x840	225251
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SaveObjectsToResetForNGP	ArrayProperty of SaveObjectsToResetForNGP./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:SaveObjectsToResetForNGP	0x890	225254
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CurrentSpawnLocation	TextProperty	0x8A0	225256
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveDarkFormMask	MapProperty	0x8B0	225257
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveShellMask	MapProperty	0x900	225260
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UnlockedMasks	MapProperty	0x950	225263
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	PlayNewGamePlusTutorialNextSpawn	BoolProperty	0x9A0	225266
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	EquipmentToUnlockOnSkipPrologue	ArrayProperty of EquipmentToUnlockOnSkipPrologue./Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C:EquipmentToUnlockOnSkipPrologue	0x9A8	225267
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	SkippedPrologue	BoolProperty	0x9B8	225269
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CurrentGoodSheepAchievement	IntProperty	0x9BC	225270
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveDarkFormClothing	MapProperty	0x9C0	225271
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ActiveShellClothing	MapProperty	0xA10	225274
+/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	UnlockedClothing	MapProperty	0xA60	225277
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	TotalPlayTimeSeconds	FloatProperty	0xB8	53974
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LastCachedCurrentTime	DoubleProperty	0xC0	53975
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	LastSaveDateTime	StructProperty of /Script/CoreUObject.DateTime	0xC8	53976
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CompletedSpawnTriggerRecipes	MapProperty	0xD0	53977
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	CompletetedSpawnTriggers	SetProperty	0x120	53980
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	ShellStats	MapProperty	0x170	53981
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	WeaponStats	MapProperty	0x1C0	53984
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	PlayerStats	StructProperty of /Script/Sparta.PermanentStats	0x210	53987
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	GameLibraryData	MapProperty	0x260	53988
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	OverrideWorldGenTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x2B0	53991
+/Script/Sparta.PlayerSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	Difficulty	MapProperty	0x2D0	53992
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsDisarmed	BoolProperty	0xB8	201626
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	CurrentBoss	ByteProperty	0xB8	173808
+/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	RelevantDL	ObjectProperty of /Script/Engine.DataLayerAsset	0xC0	173809
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	Unlocked	BoolProperty	0xB8	171980
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	CinematicFired	BoolProperty	0xB8	199887
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CinematicDLUpdate.BPSO_CinematicDLUpdate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	CombatEncCompleted	BoolProperty	0xB8	173135
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ItemCollected	BoolProperty	0xB8	194897
+/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ItemInitialized	BoolProperty	0xB9	194898
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	DoorOpened	BoolProperty	0xB8	201623
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	WardenJumped	BoolProperty	0xB8	619849
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	WardenDefeated	BoolProperty	0xB9	619850
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ShellClaimed	BoolProperty	0xBA	619851
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	Cleansed	BoolProperty	0xB8	196406
+/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	RewardGiven	BoolProperty	0xB9	196407
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	Cleansed	BoolProperty	0xB8	201629
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	EndStrandingCompleted	BoolProperty	0xB8	195162
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	AllCorruptionCoresClensed	BoolProperty	0xB9	195163
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ClensedCores	IntProperty	0xBC	195164
+/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	TotalCoresNeeded	IntProperty	0xC0	195165
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T1Cleansed	BoolProperty	0xB8	202310
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T2Cleansed	BoolProperty	0xB9	202311
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	T3Clensed	BoolProperty	0xBA	202312
+/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	CenterClensed	BoolProperty	0xBB	202313
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ShotDown	BoolProperty	0xB8	205405
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	StatueFallen	BoolProperty	0xB8	173461
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ItemCollected	BoolProperty	0xB8	171340
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GateOpened	BoolProperty	0xB8	173149
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GotVarsOnce	BoolProperty	0xB9	173150
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	173151
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	EndingLoc	StructProperty of /Script/CoreUObject.Vector	0xD8	173152
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	StartingRot	StructProperty of /Script/CoreUObject.Rotator	0xF0	173153
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	EndingRot	StructProperty of /Script/CoreUObject.Rotator	0x108	173154
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SensorClensed	BoolProperty	0xB8	654340
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	CageOpened	BoolProperty	0xB8	198135
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	OpenType	StructProperty of /Script/GameplayTags.GameplayTag	0xBC	198136
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	BossDefeated	BoolProperty	0xB8	193853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	HutchbackDefeated	BoolProperty	0xB8	171812
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	BeaconRisen	BoolProperty	0xB8	172556
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	MovedToEnd	BoolProperty	0xB8	173478
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GotVarsOnce	BoolProperty	0xB9	173479
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	173480
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	EndingLoc	StructProperty of /Script/CoreUObject.Vector	0xD8	173481
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	StartingRot	StructProperty of /Script/CoreUObject.Rotator	0xF0	173482
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	EndingRot	StructProperty of /Script/CoreUObject.Rotator	0x108	173483
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	HasTriggeredInitialGreeting	BoolProperty	0xB8	213480
+/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	WasEverKilled	BoolProperty	0xB9	213481
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	Cleansed	BoolProperty	0xB8	173812
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	OvumCollected	BoolProperty	0xB9	173813
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	Harros	BoolProperty	0xB8	193856
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	TrappedOnce	BoolProperty	0xB8	198132
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PlayerTrapDungeon.BPSO_PlayerTrapDungeon_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	312652
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	NarrativeTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xC0	312653
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	StateIndex	IntProperty	0xB8	172559
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	StationUsed	BoolProperty	0xB8	173875
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GateOpened	BoolProperty	0xB8	194901
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	CachedItemsMap	MapProperty	0xB8	195737
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	TotalGoldSpent	IntProperty	0x108	195740
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	StolenItems	BoolProperty	0x10C	195741
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SealBroken	BoolProperty	0xB8	172562
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	WasEverKilled	BoolProperty	0xB8	194335
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SpawnerSaveObj.BPSO_SpawnerSaveObj_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GateClensed	BoolProperty	0xB8	203663
+/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	PlayerClensed	BoolProperty	0xB9	203664
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	StoneSealClaimed	BoolProperty	0xB8	205408
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	StoredTarcores	IntProperty	0xB8	596771
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	WagerPlaced	BoolProperty	0xB8	171807
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ArenaCombatLVL	IntProperty	0xBC	171808
+/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	RewardGiven	BoolProperty	0xC0	171809
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	StartingFloor	IntProperty	0xB8	205400
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	HasBrokenOnce	BoolProperty	0xBC	205401
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	205402
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SavedChestIDs	ArrayProperty of SavedChestIDs./Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C:SavedChestIDs	0xB8	205412
+/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	HasBeenOpened	BoolProperty	0xC8	205414
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SavedKeyIDs	ArrayProperty of SavedKeyIDs./Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C:SavedKeyIDs	0xB8	201632
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SavedDoorIDs	ArrayProperty of SavedDoorIDs./Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C:SavedDoorIDs	0xB8	194904
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	MyBool	BoolProperty	0xB8	198177
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	TotalPlayTimeSeconds	FloatProperty	0xB8	53974
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	LastCachedCurrentTime	DoubleProperty	0xC0	53975
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	LastSaveDateTime	StructProperty of /Script/CoreUObject.DateTime	0xC8	53976
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	CompletedSpawnTriggerRecipes	MapProperty	0xD0	53977
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	CompletetedSpawnTriggers	SetProperty	0x120	53980
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	ShellStats	MapProperty	0x170	53981
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	WeaponStats	MapProperty	0x1C0	53984
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	PlayerStats	StructProperty of /Script/Sparta.PermanentStats	0x210	53987
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	GameLibraryData	MapProperty	0x260	53988
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	OverrideWorldGenTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x2B0	53991
+/Script/Sparta.PlayerSaveObject	/Script/Sparta.PlayerSaveObject	Difficulty	MapProperty	0x2D0	53992
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerSaveObject	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.PlayerProgressionSaveData	/Script/Sparta.PlayerProgressionSaveData	SkillLevels	MapProperty	0xB8	53874
+/Script/Sparta.PlayerProgressionSaveData	/Script/Sparta.PlayerProgressionSaveData	ShellBuilds	MapProperty	0x108	53877
+/Script/Sparta.PlayerProgressionSaveData	/Script/Sparta.PlayerProgressionSaveData	TierBuilds	MapProperty	0x158	53880
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PlayerProgressionSaveData	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.TarstoneSaveData	/Script/Sparta.TarstoneSaveData	TarstoneLevels	MapProperty	0xB8	59199
+/Script/Sparta.TarstoneSaveData	/Script/Sparta.TarstoneSaveData	TarstoneBuilds	MapProperty	0x108	59202
+/Script/Sparta.TarstoneSaveData	/Script/Sparta.TarstoneSaveData	TarstoneSupportBuild	ArrayProperty of TarstoneSupportBuild./Script/Sparta.TarstoneSaveData:TarstoneSupportBuild	0x158	59205
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.TarstoneSaveData	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.PPItemsSaveData	/Script/Sparta.PPItemsSaveData	ActivePPItem	SoftClassProperty	0xB8	54062
+/Script/Sparta.PPItemsSaveData	/Script/Sparta.PPItemsSaveData	PassivePPItem	SoftClassProperty	0xE0	54063
+/Script/Sparta.PPItemsSaveData	/Script/Sparta.PPItemsSaveData	PPItemLevels	MapProperty	0x108	54064
+/Script/Sparta.PPItemsSaveData	/Script/Sparta.PPItemsSaveData	PPItemFoundAmounts	MapProperty	0x158	54067
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.PPItemsSaveData	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.DataLayersSave	/Script/Sparta.DataLayersSave	SavedDataLayerStates	MapProperty	0xB8	55845
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.DataLayersSave	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	140808
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	Resolve	DoubleProperty	0xC0	140809
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	Health	DoubleProperty	0xC8	140810
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ShellHealth	DoubleProperty	0xD0	140811
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	HealCurrentCharges	DoubleProperty	0xD8	140812
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ShellReviveProgress	FloatProperty	0xE0	140813
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	ShellReviveMaxProgress	FloatProperty	0xE4	140814
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	StartTransform	StructProperty of /Script/CoreUObject.Transform	0xF0	140815
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	PositionCheckFrequency	FloatProperty	0x150	140816
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	PositionCheckTimerHandle	StructProperty of /Script/Engine.TimerHandle	0x158	140817
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	PlayerPawnCache	ObjectProperty of /Script/Engine.Pawn	0x160	140818
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IsInDarkform	BoolProperty	0x168	140819
+/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	AbilitySystemComponent	ObjectProperty of /Script/GameplayAbilities.AbilitySystemComponent	0x170	140820
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_PlayerSession.BPSO_PlayerSession_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	CurrentLevel	IntProperty	0x1A8	151253
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	AvailablePoints	IntProperty	0x1AC	151254
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	AssignedPoints	MapProperty	0x1B0	151255
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	BondingPoints	MapProperty	0x200	151258
+/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	GoldSpentAtShop	IntProperty	0x250	151261
+/Script/Sparta.PlayerProgressionSaveData	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	SkillLevels	MapProperty	0xB8	53874
+/Script/Sparta.PlayerProgressionSaveData	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	ShellBuilds	MapProperty	0x108	53877
+/Script/Sparta.PlayerProgressionSaveData	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	TierBuilds	MapProperty	0x158	53880
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_Progression.BPSO_Progression_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	MemoryProgress	MapProperty	0xB8	156535
+/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	MemoriesWatched	SetProperty	0x108	156538
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/SaveObjects/BPSO_ShellMemories.BPSO_ShellMemories_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	NarrativeEventTimeTracking	MapProperty	0xB8	156528
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	Trackers	MapProperty	0xB8	161958
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ObjectiveGUID	StrProperty	0x108	161961
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IsInsideObjective	BoolProperty	0x118	161962
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	LastPlayerLocation	StructProperty of /Script/CoreUObject.Vector	0x120	161963
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	162014
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Visible	BoolProperty	0xC0	162015
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Revealed	BoolProperty	0xC1	162016
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Completed	BoolProperty	0xC2	162017
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ShowArea	BoolProperty	0xC3	162018
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	PlayedRevealScript	BoolProperty	0xC4	162019
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	bIsSessionSaveData	BoolProperty	0xB1	53848

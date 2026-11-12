@@ -1,0 +1,69 @@
+﻿### Class /Script/Sparta.SpartaCheatManager  [00007FF46F043F38]
+    super: /Script/Engine.CheatManager
+    15 members:
+      FUN WriteCurrentSaveToTextFile 
+      FUN UnlockEntitlement 
+          param EntitlementRow : StrProperty [o:0x0]
+      FUN UnlockAllEntitlements 
+      FUN SaveSessionNow 
+      FUN ResetSession 
+      FUN ResetAllSaveData 
+      FUN RemoveEntitlement 
+          param EntitlementRow : StrProperty [o:0x0]
+      FUN RemoveAllEntitlements 
+      FUN EnableProfilingMode 
+      FUN DLG_PrintActiveDialogues 
+      FUN DestroyAllEnemies 
+      FUN DestroyAllAI 
+      FUN Debug_CheckPS5DemoFiles 
+      FUN Debug_CheckNonStreamedTextures 
+          param Filename : StrProperty [o:0x0]
+      FUN Debug_CheckFallbackMeshes 
+          param Filename : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCheatManager:DLG_PrintActiveDialogues  [00007FF46F6F8FF8]
+
+### Function /Script/Sparta.SpartaCheatManager:Debug_CheckFallbackMeshes  [00007FF46F6F8B98]
+    1 members:
+      PRP Filename : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCheatManager:Debug_CheckNonStreamedTextures  [00007FF46F6F8C78]
+    1 members:
+      PRP Filename : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCheatManager:Debug_CheckPS5DemoFiles  [00007FF46F6F8D58]
+
+### Function /Script/Sparta.SpartaCheatManager:DestroyAllAI  [00007FF46F6F8E38]
+
+### Function /Script/Sparta.SpartaCheatManager:DestroyAllEnemies  [00007FF46F6F8F18]
+
+### Function /Script/Sparta.SpartaCheatManager:EnableProfilingMode  [00007FF46F6F90D8]
+
+### Function /Script/Sparta.SpartaCheatManager:RemoveAllEntitlements  [00007FF46F6F91B8]
+
+### Function /Script/Sparta.SpartaCheatManager:RemoveEntitlement  [00007FF46F6F9298]
+    1 members:
+      PRP EntitlementRow : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCheatManager:ResetAllSaveData  [00007FF46F6F9378]
+
+### Function /Script/Sparta.SpartaCheatManager:ResetSession  [00007FF46F6F9458]
+
+### Function /Script/Sparta.SpartaCheatManager:SaveSessionNow  [00007FF46F6F9538]
+
+### Function /Script/Sparta.SpartaCheatManager:UnlockAllEntitlements  [00007FF46F6F9618]
+
+### Function /Script/Sparta.SpartaCheatManager:UnlockEntitlement  [00007FF46F6F96F8]
+    1 members:
+      PRP EntitlementRow : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCheatManager:WriteCurrentSaveToTextFile  [00007FF46F6F97D8]
+
+### StrProperty /Script/Sparta.SpartaCheatManager:Debug_CheckFallbackMeshes:Filename  [000001F4ACD669F0]
+
+### StrProperty /Script/Sparta.SpartaCheatManager:Debug_CheckNonStreamedTextures:Filename  [000001F4ACD66980]
+
+### StrProperty /Script/Sparta.SpartaCheatManager:RemoveEntitlement:EntitlementRow  [000001F4ACD66910]
+
+### StrProperty /Script/Sparta.SpartaCheatManager:UnlockEntitlement:EntitlementRow  [000001F4ACD668A0]
+

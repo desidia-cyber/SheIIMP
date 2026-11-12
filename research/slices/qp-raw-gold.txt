@@ -1,0 +1,2 @@
+﻿[000001F61C38F7B0] StrProperty TotalGoldSpentMerchant./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TotalGoldSpentMerchant[o: 0] [n: 628196] [c: 00007FF721DFAB30] [owr: 000001F614CE7FE0]
+[000001F61C38F740] IntProperty TotalGoldSpentMerchant./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TotalGoldSpentMerchant_Value[o: 10] [n: 6281A2] [c: 00007FF721DE91F0] [owr: 000001F614CE7FE0]

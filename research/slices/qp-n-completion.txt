@@ -1,0 +1,330 @@
+﻿### ArrayProperty /Script/Sparta.SpartaCompletionResult:Categories  [000001F4A8873900]
+    1 members:
+      PRP Categories : StructProperty of /Script/Sparta.SpartaCompletionCategoryProgress [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:Categories  [000001F4ACDA2C80]
+    1 members:
+      PRP Categories : StructProperty of /Script/Sparta.SpartaCompletionCategoryDef [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:ExcludedItemClasses  [000001F4ACDA1180]
+    1 members:
+      PRP ExcludedItemClasses : SoftClassProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:ShellTags  [000001F4ACDA2F00]
+    1 members:
+      PRP ShellTags : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:SidearmTags  [000001F4ACDA3100]
+    1 members:
+      PRP SidearmTags : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:TarstoneTables  [000001F4ACDA2E00]
+    1 members:
+      PRP TarstoneTables : SoftObjectProperty of /Script/Engine.DataTable [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaCompletionSettings:WeaponTags  [000001F4ACDA3000]
+    1 members:
+      PRP WeaponTags : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaCompletionCategoryProgress:bScored  [000001F4A8873B00]
+
+### BoolProperty /Script/Sparta.SpartaCompletionResult:bValid  [000001F4A8873980]
+
+### BoolProperty /Script/Sparta.SpartaCompletionSettings:bExcludePermProgressionItems  [000001F4ACDA1200]
+
+### BoolProperty /Script/Sparta.SpartaCompletionSubsystem:HasSnapshot:ReturnValue  [000001F4ACDA2980]
+
+### BoolProperty /Script/Sparta.SpartaCompletionSubsystem:IsRunTimerPaused:ReturnValue  [000001F4ACDA2900]
+
+### BoolProperty /Script/Sparta.SpartaCompletionSubsystem:SetRunTimerPaused:bPaused  [000001F4ACDA2800]
+
+### BoolProperty /Script/Sparta.SpartaCompletionSubsystem:bRunTimerPaused  [000001F4ACDA2680]
+
+### Class /Script/Sparta.SpartaCompletionLibrary  [00007FF46F044738]
+    super: /Script/Engine.BlueprintFunctionLibrary
+    6 members:
+      FUN SnapshotRunCompletion 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+      FUN GetSurvivalOddsPercent 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : FloatProperty [o:0x8]
+      FUN GetRunTimeText 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : TextProperty [o:0x8]
+      FUN GetRunTimeSeconds 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : FloatProperty [o:0x8]
+      FUN GetRunCompletionResult 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+      FUN GetRunCompletionPercent 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : FloatProperty [o:0x8]
+
+### Class /Script/Sparta.SpartaCompletionSettings  [00007FF46F044938]
+    super: /Script/Engine.PrimaryDataAsset
+    12 members:
+      PRP Categories : ArrayProperty of Categories./Script/Sparta.SpartaCompletionSettings:Categories [o:0x30]
+      PRP OvaShareOfSurvivalOdds : FloatProperty [o:0x40]
+      PRP OvaItemDefinition : SoftClassProperty [o:0x48]
+      PRP TarstoneTables : ArrayProperty of TarstoneTables./Script/Sparta.SpartaCompletionSettings:TarstoneTables [o:0x70]
+      PRP ShellTags : ArrayProperty of ShellTags./Script/Sparta.SpartaCompletionSettings:ShellTags [o:0x80]
+      PRP WeaponTags : ArrayProperty of WeaponTags./Script/Sparta.SpartaCompletionSettings:WeaponTags [o:0x90]
+      PRP SidearmTags : ArrayProperty of SidearmTags./Script/Sparta.SpartaCompletionSettings:SidearmTags [o:0xa0]
+      PRP EquipmentUnlockStatePropertyName : NameProperty [o:0xb0]
+      PRP ItemsTable : SoftObjectProperty of /Script/Engine.DataTable [o:0xb8]
+      PRP ExcludedItemClasses : ArrayProperty of ExcludedItemClasses./Script/Sparta.SpartaCompletionSettings:ExcludedItemClasses [o:0xe0]
+      PRP bExcludePermProgressionItems : BoolProperty [o:0xf0]
+      PRP PermProgressionPathFragment : StrProperty [o:0xf8]
+
+### Class /Script/Sparta.SpartaCompletionSubsystem  [00007FF46F044B38]
+    super: /Script/Engine.GameInstanceSubsystem
+    17 members:
+      PRP CompletionSettings : SoftObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x30]
+      PRP ResolvedSettings : ObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x58]
+      PRP Snapshot : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x60]
+      PRP RunTimeSeconds : FloatProperty [o:0x88]
+      PRP bRunTimerPaused : BoolProperty [o:0x8c]
+      FUN SnapshotCompletion 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+      FUN SetRunTimeSeconds 
+          param InSeconds : FloatProperty [o:0x0]
+      FUN SetRunTimerPaused 
+          param bPaused : BoolProperty [o:0x0]
+      FUN SetCompletionSettings 
+          param InSettings : ObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x0]
+      FUN IsRunTimerPaused 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN HasSnapshot 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetSnapshot 
+          param ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x0]
+      FUN GetRunTimeSeconds 
+          param ReturnValue : FloatProperty [o:0x0]
+      FUN GetCompletionSettings 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x0]
+      FUN ClearSnapshot 
+      FUN CalculateCompletion 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+      FUN ApplySurvivalCurve 
+          param OvaFraction : FloatProperty [o:0x0]
+          param CapabilityFraction : FloatProperty [o:0x4]
+          param ReturnValue : FloatProperty [o:0x8]
+
+### EnumProperty /Script/Sparta.SpartaCompletionCategoryDef:Category  [000001F4A8873C00]
+
+### EnumProperty /Script/Sparta.SpartaCompletionCategoryProgress:Category  [000001F4A8873A80]
+
+### FloatProperty /Script/Sparta.SpartaCompletionCategoryDef:Weight  [000001F4A861D130]
+
+### FloatProperty /Script/Sparta.SpartaCompletionCategoryProgress:Fraction  [000001F4A861CF70]
+
+### FloatProperty /Script/Sparta.SpartaCompletionCategoryProgress:Weight  [000001F4A861CFE0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionPercent:ReturnValue  [000001F4ACD67470]
+
+### FloatProperty /Script/Sparta.SpartaCompletionLibrary:GetRunTimeSeconds:ReturnValue  [000001F4ACD67400]
+
+### FloatProperty /Script/Sparta.SpartaCompletionLibrary:GetSurvivalOddsPercent:ReturnValue  [000001F4ACD69000]
+
+### FloatProperty /Script/Sparta.SpartaCompletionResult:CompletionFraction  [000001F4A861CCD0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionResult:RunTimeSeconds  [000001F4A861CDB0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionResult:SurvivalOdds  [000001F4A861CD40]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSettings:OvaShareOfSurvivalOdds  [000001F4ACD68EB0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:ApplySurvivalCurve:CapabilityFraction  [000001F4ACD68DD0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:ApplySurvivalCurve:OvaFraction  [000001F4ACD68D60]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:ApplySurvivalCurve:ReturnValue  [000001F4ACD68E40]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:GetRunTimeSeconds:ReturnValue  [000001F4ACD68CF0]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:RunTimeSeconds  [000001F4ACD68C10]
+
+### FloatProperty /Script/Sparta.SpartaCompletionSubsystem:SetRunTimeSeconds:InSeconds  [000001F4ACD68C80]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionPercent  [00007FF46F6F9FB8]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionResult  [00007FF46F6FA098]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:GetRunTimeSeconds  [00007FF46F6FA178]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:GetRunTimeText  [00007FF46F6FA258]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : TextProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:GetSurvivalOddsPercent  [00007FF46F6FA338]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionLibrary:SnapshotRunCompletion  [00007FF46F6FA418]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:ApplySurvivalCurve  [00007FF46F6FA4F8]
+    3 members:
+      PRP OvaFraction : FloatProperty [o:0x0]
+      PRP CapabilityFraction : FloatProperty [o:0x4]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:CalculateCompletion  [00007FF46F6FA5D8]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:ClearSnapshot  [00007FF46F6FA6B8]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:GetCompletionSettings  [00007FF46F6FA798]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:GetRunTimeSeconds  [00007FF46F6FA878]
+    1 members:
+      PRP ReturnValue : FloatProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:GetSnapshot  [00007FF46F6FA958]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:HasSnapshot  [00007FF46F6FAA38]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:IsRunTimerPaused  [00007FF46F6FAB18]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:SetCompletionSettings  [00007FF46F6FABF8]
+    1 members:
+      PRP InSettings : ObjectProperty of /Script/Sparta.SpartaCompletionSettings [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:SetRunTimeSeconds  [00007FF46F6FADB8]
+    1 members:
+      PRP InSeconds : FloatProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:SetRunTimerPaused  [00007FF46F6FACD8]
+    1 members:
+      PRP bPaused : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaCompletionSubsystem:SnapshotCompletion  [00007FF46F6FAE98]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/Sparta.SpartaCompletionResult [o:0x8]
+
+### IntProperty /Script/Sparta.SpartaCompletionCategoryDef:TotalOverride  [000001F4A861D0C0]
+
+### IntProperty /Script/Sparta.SpartaCompletionCategoryProgress:Collected  [000001F4A861CE90]
+
+### IntProperty /Script/Sparta.SpartaCompletionCategoryProgress:Total  [000001F4A861CF00]
+
+### NameProperty /Script/Sparta.SpartaCompletionSettings:EquipmentUnlockStatePropertyName  [000001F4ACD68F20]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionPercent:WorldContextObject  [000001F4ACDA1600]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionResult:WorldContextObject  [000001F4ACDA1500]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:GetRunTimeSeconds:WorldContextObject  [000001F4ACDA1480]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:GetRunTimeText:WorldContextObject  [000001F4ACDA1400]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:GetSurvivalOddsPercent:WorldContextObject  [000001F4ACDA1380]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionLibrary:SnapshotRunCompletion:WorldContextObject  [000001F4ACDA1280]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionSubsystem:CalculateCompletion:WorldContextObject  [000001F4ACDA2B00]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionSubsystem:GetCompletionSettings:ReturnValue  [000001F4ACDA2A80]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionSubsystem:ResolvedSettings  [000001F4ACDA2580]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionSubsystem:SetCompletionSettings:InSettings  [000001F4ACDA2880]
+
+### ObjectProperty /Script/Sparta.SpartaCompletionSubsystem:SnapshotCompletion:WorldContextObject  [000001F4ACDA2700]
+
+### ScriptStruct /Script/Sparta.SpartaCompletionCategoryDef  [00007FF46F488F78]
+    super: [n:
+    4 members:
+      PRP Category : EnumProperty of /Script/Sparta.ESpartaCompletionCategory [o:0x0]
+      PRP DisplayName : TextProperty [o:0x8]
+      PRP TotalOverride : IntProperty [o:0x18]
+      PRP Weight : FloatProperty [o:0x1c]
+
+### ScriptStruct /Script/Sparta.SpartaCompletionCategoryProgress  [00007FF46F489038]
+    super: [n:
+    7 members:
+      PRP Category : EnumProperty of /Script/Sparta.ESpartaCompletionCategory [o:0x0]
+      PRP DisplayName : TextProperty [o:0x8]
+      PRP Collected : IntProperty [o:0x18]
+      PRP Total : IntProperty [o:0x1c]
+      PRP Fraction : FloatProperty [o:0x20]
+      PRP Weight : FloatProperty [o:0x24]
+      PRP bScored : BoolProperty [o:0x28]
+
+### ScriptStruct /Script/Sparta.SpartaCompletionResult  [00007FF46F4890F8]
+    super: [n:
+    5 members:
+      PRP CompletionFraction : FloatProperty [o:0x0]
+      PRP SurvivalOdds : FloatProperty [o:0x4]
+      PRP RunTimeSeconds : FloatProperty [o:0x8]
+      PRP Categories : ArrayProperty of Categories./Script/Sparta.SpartaCompletionResult:Categories [o:0x10]
+      PRP bValid : BoolProperty [o:0x20]
+
+### SoftClassProperty /Script/Sparta.SpartaCompletionSettings:OvaItemDefinition  [000001F4ACDA2D00]
+
+### SoftClassProperty ExcludedItemClasses./Script/Sparta.SpartaCompletionSettings:ExcludedItemClasses  [000001F4ACDA1100]
+
+### SoftObjectProperty /Script/Sparta.SpartaCompletionSettings:ItemsTable  [000001F4ACDA3180]
+
+### SoftObjectProperty /Script/Sparta.SpartaCompletionSubsystem:CompletionSettings  [000001F4ACDA2500]
+
+### SoftObjectProperty TarstoneTables./Script/Sparta.SpartaCompletionSettings:TarstoneTables  [000001F4ACDA2D80]
+
+### StrProperty /Script/Sparta.SpartaCompletionSettings:PermProgressionPathFragment  [000001F4ACD68F90]
+
+### StructProperty /Script/Sparta.SpartaCompletionLibrary:GetRunCompletionResult:ReturnValue  [000001F4ACDA1580]
+
+### StructProperty /Script/Sparta.SpartaCompletionLibrary:SnapshotRunCompletion:ReturnValue  [000001F4ACDA1300]
+
+### StructProperty /Script/Sparta.SpartaCompletionSubsystem:CalculateCompletion:ReturnValue  [000001F4ACDA2B80]
+
+### StructProperty /Script/Sparta.SpartaCompletionSubsystem:GetSnapshot:ReturnValue  [000001F4ACDA2A00]
+
+### StructProperty /Script/Sparta.SpartaCompletionSubsystem:Snapshot  [000001F4ACDA2600]
+
+### StructProperty /Script/Sparta.SpartaCompletionSubsystem:SnapshotCompletion:ReturnValue  [000001F4ACDA2780]
+
+### StructProperty Categories./Script/Sparta.SpartaCompletionResult:Categories  [000001F4A8873880]
+
+### StructProperty Categories./Script/Sparta.SpartaCompletionSettings:Categories  [000001F4ACDA2C00]
+
+### StructProperty ShellTags./Script/Sparta.SpartaCompletionSettings:ShellTags  [000001F4ACDA2E80]
+
+### StructProperty SidearmTags./Script/Sparta.SpartaCompletionSettings:SidearmTags  [000001F4ACDA3080]
+
+### StructProperty WeaponTags./Script/Sparta.SpartaCompletionSettings:WeaponTags  [000001F4ACDA2F80]
+
+### TextProperty /Script/Sparta.SpartaCompletionCategoryDef:DisplayName  [000001F4A861D050]
+
+### TextProperty /Script/Sparta.SpartaCompletionCategoryProgress:DisplayName  [000001F4A861CE20]
+
+### TextProperty /Script/Sparta.SpartaCompletionLibrary:GetRunTimeText:ReturnValue  [000001F4ACD67390]
+

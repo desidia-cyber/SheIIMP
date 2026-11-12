@@ -1,0 +1,50 @@
+﻿### BoolProperty /Script/Sparta.QuestObjectives:bBonusXP  [000001F4A864FA00]
+
+### BoolProperty /Script/Sparta.QuestObjectives:bOptional  [000001F4A864F980]
+
+### Class /Script/Sparta.QuestObjective  [00007FF46F039F38]
+    super: /Script/CoreUObject.Object
+    4 members:
+      PRP ObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x28]
+      PRP QuestID : NameProperty [o:0x60]
+      PRP OnObjectiveCompleted : MulticastInlineDelegateProperty [o:0x68]
+      FUN InitializeObjective 
+          param InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+          param InQuestID : NameProperty [o:0x38]
+
+### ClassProperty /Script/Sparta.QuestObjectives:ObjectiveClass  [000001F4A864F900]
+
+### Function /Script/Sparta.QuestObjective:InitializeObjective  [00007FF46F6EBED8]
+    2 members:
+      PRP InObjectiveData : StructProperty of /Script/Sparta.QuestObjectives [o:0x0]
+      PRP InQuestID : NameProperty [o:0x38]
+
+### IntProperty /Script/Sparta.QuestObjectives:Quantity  [000001F4A861B140]
+
+### MulticastInlineDelegateProperty /Script/Sparta.QuestObjective:OnObjectiveCompleted  [000001F4ACD78280]
+
+### NameProperty /Script/Sparta.QuestObjective:InitializeObjective:InQuestID  [000001F4ACD628C0]
+
+### NameProperty /Script/Sparta.QuestObjective:QuestID  [000001F4ACD62850]
+
+### NameProperty /Script/Sparta.QuestObjectives:ObjectiveID  [000001F4A861B0D0]
+
+### ScriptStruct /Script/Sparta.QuestObjectives  [00007FF46F487238]
+    super: [n:
+    7 members:
+      PRP ObjectiveName : TextProperty [o:0x0]
+      PRP Description : TextProperty [o:0x10]
+      PRP ObjectiveClass : ClassProperty [o:0x20]
+      PRP ObjectiveID : NameProperty [o:0x28]
+      PRP Quantity : IntProperty [o:0x30]
+      PRP bOptional : BoolProperty [o:0x34]
+      PRP bBonusXP : BoolProperty [o:0x35]
+
+### StructProperty /Script/Sparta.QuestObjective:InitializeObjective:InObjectiveData  [000001F4ACD78300]
+
+### StructProperty /Script/Sparta.QuestObjective:ObjectiveData  [000001F4ACD78200]
+
+### TextProperty /Script/Sparta.QuestObjectives:Description  [000001F4A861B060]
+
+### TextProperty /Script/Sparta.QuestObjectives:ObjectiveName  [000001F4A861AFF0]
+

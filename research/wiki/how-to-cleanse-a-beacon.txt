@@ -1,0 +1,13 @@
+How to Cleanse a Beacon in Mortal Shell 2 
+Skip to content
+ Cleanse it, then use it
+ A Mortal Shell 2 beacon is a checkpoint after you cleanse it. Mether's Breath turns cleansed beacons into fast travel.
+Last verified 2026-10-18 
+ A beacon you can see is not a beacon you can travel to. Cleanse it. After Mether’s Breath , every cleansed beacon is a fast-travel point. Before that unlock, it is still the checkpoint you should light before a gate.
+ The full count and the menu notes are on beacons . This page is the order.
+ Do this at every new one
+ Clear the enemies on the pad. A cleanse during a fight is how you lose the Gloom you were carrying.
+ Interact and finish the cleanse. The menu after that is the beacon menu, not a shop.
+ If you already have Mether’s Breath, leave and come back once, so you know the icon is in the travel list. The October hotfix added warnings on that menu. Back out of the second warning. Do not force it. Hotfix .
+ Pick the next gate from here. Do not run a second dungeon from an uncleansed pad.
+ Gloom spent at a beacon is the use of the currency. Dying drops Gloom. Pick it up. A beacon does not store it for you.

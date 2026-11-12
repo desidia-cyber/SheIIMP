@@ -1,0 +1,2367 @@
+// ms2_ue.cpp -- see ms2_ue.h for the contract.
+//
+// HOUSE RULES, all load-bearing:
+//
+//  1. Every read of game memory goes through ReadMem/WriteMem.  Those are the
+//     ONLY functions containing __try, and they are POD-only, because MSVC
+//     refuses __try in a function that needs object unwinding (C2712).  A wrong
+//     offset therefore returns false and logs; it cannot fault the game.
+//  2. Nothing runs at DllMain time.  Init() is called from the module's worker
+//     thread after the loader has finished with us.
+//  3. A global is used only after being PROVEN readable: the object array is
+//     validated by walking it and checking that every FUObjectItem's object
+//     reports the internal index the array claims for it.
+//  4. Nothing on the ProcessEvent hot path resolves a string.  The detour does
+//     integer FName compares and a mutex test; names are resolved only when
+//     something asks for one.
+#include "ms2_ue.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX          // std::min/std::max, not the winuser.h macros
+#endif
+#include <windows.h>
+// winuser.h defines GetClassName as a macro ("GetClassNameW"), which would eat
+// ue::GetClassName at every call site in this file and in every file that takes
+// the address of it.  windows.h is included here only for the Win32 primitives,
+// never for that API.
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
+#include <atomic>
+#include <cstdio>
+#include <cstring>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "MinHook.h"
+#include "ms2_log.h"
+#include "ms2_ue_test.h"
+
+namespace ue {
+namespace {
+
+// ---------------------------------------------------------------------------
+// Member offsets.  Sources in README.md; every value here appears in the
+// Dumper-7 SDK generated from THIS exe, and the engine globals were recovered
+// independently from UE4SS's probe log cross-checked against the exe's .pdata.
+// ---------------------------------------------------------------------------
+
+// UObject (CoreUObject_classes.hpp: "class alignas(0x08) UObject", size 0x28)
+constexpr uint32 kOffObjectFlags   = 0x08;
+constexpr uint32 kOffInternalIndex = 0x0C;
+constexpr uint32 kOffClass         = 0x10;
+constexpr uint32 kOffName          = 0x18;
+constexpr uint32 kOffOuter         = 0x20;
+
+// UField / UStruct / UClass / UFunction
+constexpr uint32 kOffFieldNext         = 0x28;
+constexpr uint32 kOffStructSuper       = 0x40;
+constexpr uint32 kOffStructChildren    = 0x48;   // UField chain: functions, nested types
+constexpr uint32 kOffStructChildProps  = 0x50;   // FField chain: properties (UE5)
+constexpr uint32 kOffStructSize        = 0x58;
+constexpr uint32 kOffClassCastFlags    = 0xD8;
+constexpr uint32 kOffClassDefaultObj   = 0x110;
+constexpr uint32 kOffFuncFlags         = 0xB0;
+constexpr uint32 kOffFuncParmsSize     = 0xB6;   // uint16
+constexpr uint32 kOffFuncReturnValue   = 0xB8;   // uint16
+constexpr uint32 kOffFuncExecFunction  = 0xD8;   // native entry point
+
+// FField / FProperty (Basic.hpp "class FProperty : public FField")
+constexpr uint32 kOffFieldName        = 0x20;
+constexpr uint32 kOffFieldNextF       = 0x18;
+constexpr uint32 kOffPropElementSize  = 0x34;
+constexpr uint32 kOffPropFlags        = 0x38;
+constexpr uint32 kOffPropOffset       = 0x44;    // Offset_Internal, UE5 name
+
+// TUObjectArray (Dumper-7's "GObjects"; = &FUObjectArray::ObjObjects)
+constexpr uint32 kOffArrChunks      = 0x00;
+constexpr uint32 kOffArrObjectsAlt  = 0x08;
+constexpr uint32 kOffArrMaxElements = 0x10;
+constexpr uint32 kOffArrNumElements = 0x14;
+constexpr uint32 kOffArrMaxChunks   = 0x18;
+constexpr uint32 kOffArrNumChunks   = 0x1C;
+constexpr uint32 kElementsPerChunk  = 0x10000;
+constexpr uint32 kSizeObjectItem    = 0x18;
+
+// EObjectFlags for this build (Basic.hpp)
+constexpr uint32 kRFClassDefaultObject = 0x00000010;
+constexpr uint32 kRFArchetypeObject    = 0x00000020;
+constexpr uint32 kRFBeginDestroyed     = 0x00008000;
+constexpr uint32 kRFFinishDestroyed    = 0x00010000;
+constexpr uint32 kRFMirroredGarbage    = 0x40000000;
+// EInternalObjectFlags, in FUObjectItem::Flags
+constexpr int32 kIOFGarbage         = 1 << 7;
+constexpr int32 kIOFPendingKill     = 1 << 5;
+constexpr int32 kIOFBeginDestroyed  = 1 << 8;
+constexpr int32 kIOFFinishDestroyed = 1 << 9;
+
+// ---------------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------------
+Resolved          g_res;
+uint8_t*          g_textLo = nullptr;
+uint8_t*          g_textHi = nullptr;
+std::atomic<bool> g_ready{false};
+std::mutex        g_initLock;
+std::string       g_initReport = "not initialised";
+
+std::atomic<uint64> g_peCount{0};
+std::atomic<uint32> g_gameThreadId{0};
+std::atomic<uint64> g_queueDropped{0};
+thread_local int    tl_inDetour = 0;
+
+uint32_t g_peOrig   = 0;
+uint32_t g_tickOrig = 0;
+bool     g_peHooked = false;
+bool     g_tickHooked = false;
+
+// MinHook hands the trampoline back through a void* out-parameter.
+void*    g_peTrampoline = nullptr;
+void*    g_tickTrampoline = nullptr;
+
+wchar_t g_exeDir[MAX_PATH] = L"";
+wchar_t g_iniPath[MAX_PATH] = L"";
+
+// ---------------------------------------------------------------------------
+// Guarded access -- the only __try in this file.  POD-only by necessity.
+// ---------------------------------------------------------------------------
+bool SafeRead(const void* src, void* dst, size_t n) {
+    if (!src || !dst || n == 0) return false;
+    __try {
+        memcpy(dst, src, n);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool SafeWrite(void* dst, const void* src, size_t n) {
+    if (!dst || !src || n == 0) return false;
+    __try {
+        memcpy(dst, src, n);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+template <class T>
+bool Read(const void* p, T& out) { return SafeRead(p, &out, sizeof(T)); }
+
+// Call helpers: also POD-only, so they can own the __try.
+typedef void (*ProcessEventFn)(UObject* self, UFunction* fn, void* parms);
+typedef void (*EngineTickFn)(void* self, float dt, bool idle);
+
+bool CallProcessEventAt(uintptr_t addr, UObject* self, UFunction* fn, void* parms) {
+    __try {
+        ((ProcessEventFn)addr)(self, fn, parms);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool CallEngineTickAt(uintptr_t addr, void* self, float dt, bool idle) {
+    __try {
+        ((EngineTickFn)addr)(self, dt, idle);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunHookFn(HookFn f, UObject* self, UFunction* fn, void* parms) {
+    __try {
+        f(self, fn, parms);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunTaskFn(std::function<void()>* f) {
+    __try {
+        (*f)();
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+bool RunTickFn(std::function<void(float)>* f, float dt) {
+    __try {
+        (*f)(dt);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+}  // namespace
+
+bool ReadMem(const void* src, void* dst, size_t n) { return SafeRead(src, dst, n); }
+bool WriteMem(void* dst, const void* src, size_t n) { return SafeWrite(dst, src, n); }
+
+bool PlausiblePtr(const void* p) {
+    const uintptr_t v = reinterpret_cast<uintptr_t>(p);
+    return v >= 0x10000 && v < 0x00007FFFFFFFFFFFULL && (v & 7) == 0;
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// PE header walk: where is .text?  (For the AOB scan only.)
+// ---------------------------------------------------------------------------
+bool FindTextRange(uint8_t* base, uint8_t** lo, uint8_t** hi) {
+    __try {
+        const uint8_t* dos = base;
+        if (dos[0] != 'M' || dos[1] != 'Z') return false;
+        const uint32_t e_lfanew = *reinterpret_cast<const uint32_t*>(dos + 0x3C);
+        const uint8_t* nt = dos + e_lfanew;
+        if (nt[0] != 'P' || nt[1] != 'E') return false;
+        const uint16_t nsec = *reinterpret_cast<const uint16_t*>(nt + 6);
+        const uint16_t optsize = *reinterpret_cast<const uint16_t*>(nt + 20);
+        const uint8_t* sect = nt + 24 + optsize;
+        for (uint16_t i = 0; i < nsec; ++i) {
+            const uint8_t* s = sect + i * 40;
+            const uint32_t vsize = *reinterpret_cast<const uint32_t*>(s + 8);
+            const uint32_t vaddr = *reinterpret_cast<const uint32_t*>(s + 12);
+            const uint32_t chars = *reinterpret_cast<const uint32_t*>(s + 36);
+            if ((chars & 0x20000000) && s[0] == '.' && s[1] == 't' && s[2] == 'e') {
+                *lo = base + vaddr;
+                *hi = base + vaddr + vsize;
+                return true;
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// AOB scan: "48 8B 05 ?? ?? ?? ??" -- the same notation as UE4SS's signature
+// files, so a signature can be pasted between the tools without translation.
+// ---------------------------------------------------------------------------
+struct AobPattern {
+    uint8_t bytes[64];
+    uint8_t mask[64];
+    int     len = 0;
+};
+
+int HexDigit(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    return -1;
+}
+
+bool ParseAob(const char* s, AobPattern& p) {
+    p.len = 0;
+    while (*s) {
+        while (*s == ' ') ++s;
+        if (!*s) break;
+        if (p.len >= 64) return false;
+        if (s[0] == '?' && s[1] == '?') {
+            p.mask[p.len] = 1;
+            p.bytes[p.len] = 0;
+            ++p.len;
+            s += 2;
+            continue;
+        }
+        const int hi = HexDigit(s[0]);
+        const int lo = (s[1] ? HexDigit(s[1]) : -1);
+        if (hi < 0 || lo < 0) return false;
+        p.bytes[p.len] = (uint8_t)((hi << 4) | lo);
+        p.mask[p.len] = 0;
+        ++p.len;
+        s += 2;
+    }
+    return p.len > 0;
+}
+
+bool ScanAob(const AobPattern& p, uint8_t** hit) {
+    if (!g_textLo || !g_textHi || p.len <= 0) return false;
+    int anchor = 0;
+    while (anchor < p.len && p.mask[anchor]) ++anchor;
+    if (anchor >= p.len) return false;
+
+    uint8_t* cur = g_textLo;
+    if ((size_t)(g_textHi - g_textLo) <= (size_t)p.len) return false;
+    uint8_t* end = g_textHi - p.len;
+    while (cur <= end) {
+        uint8_t* found = (uint8_t*)memchr(cur, p.bytes[anchor], (size_t)(end - cur) + 1);
+        if (!found) return false;
+        uint8_t* start = found - anchor;
+        if (start >= g_textLo) {
+            int i = 0;
+            for (; i < p.len; ++i)
+                if (!p.mask[i] && start[i] != p.bytes[i]) break;
+            if (i == p.len) { *hit = start; return true; }
+        }
+        cur = found + 1;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// ini overrides -- the escape hatch for a different game build.
+// ---------------------------------------------------------------------------
+bool ReadIniValue(const wchar_t* iniPath, const char* key, uint64_t* out) {
+    if (!iniPath || !iniPath[0]) return false;
+    HANDLE h = CreateFileW(iniPath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                           NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    char buf[4096];
+    DWORD got = 0;
+    const BOOL ok = ReadFile(h, buf, sizeof(buf) - 1, &got, NULL);
+    CloseHandle(h);
+    if (!ok || got == 0) return false;
+    buf[got] = 0;
+
+    const size_t klen = strlen(key);
+    for (char* line = buf; *line; ) {
+        char* e = line;
+        while (*e && *e != '\n' && *e != '\r') ++e;
+        const char save = *e;
+        *e = 0;
+
+        char* p = line;
+        while (*p == ' ' || *p == '\t') ++p;
+        if (*p && *p != ';' && *p != '#' && _strnicmp(p, key, klen) == 0) {
+            const char* q = p + klen;
+            while (*q == ' ' || *q == '\t') ++q;
+            if (*q == '=') {
+                ++q;
+                while (*q == ' ' || *q == '\t') ++q;
+                uint64_t v = 0;
+                bool any = false;
+                if (q[0] == '0' && (q[1] == 'x' || q[1] == 'X')) {
+                    for (q += 2; *q; ++q) {
+                        const int d = HexDigit(*q);
+                        if (d < 0) break;
+                        v = (v << 4) | (uint64_t)d;
+                        any = true;
+                    }
+                } else {
+                    for (; *q >= '0' && *q <= '9'; ++q) { v = v * 10 + (uint64_t)(*q - '0'); any = true; }
+                }
+                *e = save;
+                if (any) { *out = v; return true; }
+                return false;
+            }
+        }
+        *e = save;
+        line = save ? e + 1 : e;
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Global resolution: ini, then AOB, then this build's RVA (provenance logged).
+// ---------------------------------------------------------------------------
+struct GlobalSpec {
+    const char* name;
+    const char* aob;
+    int         dispOffset;   // -1: the match address IS the answer
+    uint32_t    fallbackRva;
+    uintptr_t*  out;
+    const char** source;
+};
+
+// Each pattern below was verified offline against this exe: it matches exactly
+// once in .text and resolves to the address the recovery pass proved (see
+// tools/gen_patterns.py, whose output is quoted in README.md).
+const char* kSigProcessEvent =
+    "40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC 00 01 00 00 48 8D 6C 24 30";
+// FName::AppendString.  This one is EXACT rather than wildcarded on purpose: the
+// first attempt wildcarded the "cmp byte ptr [rip+X], 0" displacement and matched
+// 27 places in .text (tests/test_scan.cpp caught it, which is why that test
+// exists).  A wildcard that costs uniqueness is not worth having, and the RVA
+// fallback covers a moved build anyway.
+const char* kSigAppendString =
+    "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 80 3D 63 E1 B5 09 00 48 8B";
+const char* kSigEngineTick =
+    "40 55 53 41 54 41 55 41 57 48 8D 6C 24 E0 48 81 EC 20 01 00 00 0F 29 B4";
+// The engine's own object-array accessor: mov rax,[GObjects] / mov rcx,[rax+rcx*8].
+// Anchoring on the USE rather than on a prologue is what makes this survive a
+// rebuild that moves the function.
+const char* kSigGObjects =
+    "48 8B 05 ?? ?? ?? ?? 48 8B 0C C8 48 8D 0C D1 EB 06 45 33 FF 41 8B CF BA";
+
+bool ResolveGlobal(const GlobalSpec& g, const wchar_t* iniPath) {
+    uint64_t rva = 0;
+    if (ReadIniValue(iniPath, g.name, &rva) && rva > 0 && rva < 0x40000000ull) {
+        *g.out = g_res.imageBase + (uintptr_t)rva;
+        *g.source = "ini";
+        return true;
+    }
+    if (g.aob) {
+        AobPattern p;
+        if (ParseAob(g.aob, p)) {
+            uint8_t* hit = nullptr;
+            if (ScanAob(p, &hit)) {
+                if (g.dispOffset < 0) {
+                    *g.out = (uintptr_t)hit;
+                } else {
+                    int32_t disp = 0;
+                    if (SafeRead(hit + g.dispOffset, &disp, sizeof(disp)))
+                        *g.out = (uintptr_t)(hit + g.dispOffset + 4 + disp);
+                }
+                if (*g.out) { *g.source = "aob"; return true; }
+            }
+        }
+    }
+    if (g.fallbackRva) {
+        const uintptr_t cand = g_res.imageBase + g.fallbackRva;
+        const bool inText = g_textLo && (uint8_t*)cand >= g_textLo && (uint8_t*)cand < g_textHi;
+        uint8_t probe = 0;
+        const bool readable = SafeRead((const void*)cand, &probe, 1);
+        if (inText || readable) {
+            *g.out = cand;
+            *g.source = "rva(build-specific)";
+            return true;
+        }
+    }
+    *g.out = 0;
+    *g.source = "UNRESOLVED";
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// The object array.
+//
+// 5.6 stores the CHUNK TABLE in word 0 of GObjects -- proven from the engine's
+// own accessor, which the GObjects pattern matches (a 64-bit load of [GObjects]
+// followed by [chunk]*8).  Pre-5.4 UE put a flat first chunk there instead and
+// the table at +0x08.  Which shape this build has is not assumed: it is decided
+// by ScoreLayout below and recorded in the log.
+// ---------------------------------------------------------------------------
+struct ObjArray {
+    int32_t maxElements = 0;
+    int32_t numElements = 0;
+    int32_t maxChunks = 0;
+    int32_t numChunks = 0;
+    bool    layoutB = true;
+};
+
+ObjArray g_arr;
+
+// ---------------------------------------------------------------------------
+// The object array GROWS, and ValidateArray() is a one-time snapshot.
+//
+// Every actor, component and widget created after Init() (the local pawn, the
+// summoned puppet, everything that streams in with a map) lands at an internal
+// index ABOVE the snapshot's NumElements.  With the stale count:
+//   * IsValid() rejects those objects ("index out of range"),
+//   * FindObject/FindAllOf never reach them,
+// so the whole module would quietly decide nothing exists.  Re-read the four
+// counts on a throttle instead.  Growth only, so the chunk count is published
+// before the element count: a reader that sees the larger NumElements must already
+// see the NumChunks that covers it.
+// ---------------------------------------------------------------------------
+std::atomic<uint64> g_arrCountsAt{0};    // GetTickCount64 of the last re-read
+
+void RefreshArrayCounts() {
+    if (!g_res.objects) return;
+    const uint64 now = GetTickCount64();
+    const uint64 last = g_arrCountsAt.load(std::memory_order_relaxed);
+    if (last != 0 && now - last < 100) return;
+    g_arrCountsAt.store(now, std::memory_order_relaxed);
+
+    int32_t maxElements = 0, numElements = 0, maxChunks = 0, numChunks = 0;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxElements), maxElements)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrNumElements), numElements)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxChunks), maxChunks)) return;
+    if (!Read((const void*)(g_res.objects + kOffArrNumChunks), numChunks)) return;
+    if (numElements < 0 || numElements > 50000000) return;
+    if (numChunks < 0 || numChunks > 4096) return;
+    if (numElements == g_arr.numElements && numChunks == g_arr.numChunks) return;
+
+    g_arr.maxChunks = maxChunks;
+    g_arr.numChunks = numChunks;
+    g_arr.maxElements = maxElements;
+    g_arr.numElements = numElements;
+}
+
+bool ArrayUsable() {
+    if (!g_res.objects) return false;
+    RefreshArrayCounts();
+    return g_arr.numElements > 0;
+}
+
+void* ItemAt(int32_t index) {
+    if (index < 0 || index >= g_arr.numElements) return nullptr;
+    const int32_t chunk = index / (int32_t)kElementsPerChunk;
+    const int32_t inChunk = index % (int32_t)kElementsPerChunk;
+    if (chunk < 0 || chunk >= g_arr.numChunks) return nullptr;
+
+    void* chunkBase = nullptr;
+    if (g_arr.layoutB || chunk == 0) {
+        if (!Read((const void*)(g_res.objects + kOffArrChunks), chunkBase)) return nullptr;
+    } else {
+        void** table = nullptr;
+        if (!Read((const void*)(g_res.objects + kOffArrObjectsAlt), table)) return nullptr;
+        if (!PlausiblePtr(table)) return nullptr;
+        if (!Read(table + chunk, chunkBase)) return nullptr;
+    }
+    if (!PlausiblePtr(chunkBase)) return nullptr;
+    return (uint8_t*)chunkBase + (size_t)inChunk * kSizeObjectItem;
+}
+
+UObject* ObjectAt(int32_t index) {
+    void* item = ItemAt(index);
+    if (!item) return nullptr;
+    UObject* obj = nullptr;
+    if (!Read(item, obj)) return nullptr;
+    return PlausiblePtr(obj) ? obj : nullptr;
+}
+
+int32_t ItemFlags(int32_t index) {
+    void* item = ItemAt(index);
+    if (!item) return 0;
+    int32_t f = 0;
+    Read((uint8_t*)item + 0x08, f);
+    return f;
+}
+
+// The array's own invariant: object #i must report internal index i.  True for
+// either layout, so a wrong guess is detectable without knowing anything else.
+int ScoreLayout(bool layoutB) {
+    g_arr.layoutB = layoutB;
+    int score = 0, tried = 0;
+    for (int32_t i = 0; i < g_arr.numElements && tried < 64; ++i) {
+        void* item = ItemAt(i);
+        if (!item) continue;
+        UObject* obj = nullptr;
+        if (!Read(item, obj) || !PlausiblePtr(obj)) continue;
+        int32_t idx = -1;
+        if (!Read((uint8_t*)obj + kOffInternalIndex, idx)) continue;
+        UObject* cls = nullptr;
+        if (!Read((uint8_t*)obj + kOffClass, cls) || !PlausiblePtr(cls)) continue;
+        ++tried;
+        if (idx == i) ++score;
+    }
+    return tried == 0 ? -1 : score;
+}
+
+bool ValidateArray() {
+    if (!g_res.objects) return false;
+
+    ObjArray a;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxElements), a.maxElements)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrNumElements), a.numElements)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrMaxChunks), a.maxChunks)) return false;
+    if (!Read((const void*)(g_res.objects + kOffArrNumChunks), a.numChunks)) return false;
+
+    ms2::Logf("object array: MaxElements=%d NumElements=%d MaxChunks=%d NumChunks=%d",
+              (int)a.maxElements, (int)a.numElements, (int)a.maxChunks, (int)a.numChunks);
+
+    if (a.numElements <= 0 || a.numElements > 50000000) {
+        ms2::Logf("object array: NumElements=%d is not plausible", (int)a.numElements);
+        return false;
+    }
+    if (a.numChunks <= 0 || a.numChunks > 4096 || a.maxElements < a.numElements) {
+        ms2::Logf("object array: chunk counts inconsistent (MaxChunks=%d NumChunks=%d)",
+                  (int)a.maxChunks, (int)a.numChunks);
+        return false;
+    }
+    g_arr = a;
+
+    const int scoreB = ScoreLayout(true);
+    const int scoreA = ScoreLayout(false);
+    ms2::Logf("object array: layout check -- chunk-table-at-0 scored %d, flat-first-chunk scored %d (of 64)",
+              scoreB, scoreA);
+
+    if (scoreB >= scoreA && scoreB > 0) {
+        g_arr.layoutB = true;
+        g_res.objectArrayLayoutB = true;
+        return true;
+    }
+    if (scoreA > 0) {
+        g_arr.layoutB = false;
+        g_res.objectArrayLayoutB = false;
+        ms2::Log("object array: using the legacy flat-first-chunk layout -- this build is NOT the one "
+                 "the offsets were measured on, expect trouble");
+        return true;
+    }
+    g_arr.layoutB = true;
+    ms2::Log("object array: NEITHER layout validated -- continuing with the 5.6 layout, reads may return nothing");
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// FName -> string via FName::AppendString(FString&).
+//
+// One FString is kept for the process lifetime and its length is reset before
+// each call, so the engine appends into an existing allocation.  Nothing is ever
+// freed, which is what makes this safe: freeing it would mean calling the game's
+// allocator through its vtable, and a FString leaked per call would be worse.
+// ---------------------------------------------------------------------------
+// FName::AppendString(FString&) is called with a STACK buffer, the way Dumper-7's
+// own SDK calls it (Basic.hpp: `wchar_t buffer[1024]; FString TempString(buffer, 0,
+// 1024);`).  For any name that fits, the engine appends without allocating -- so
+// this neither allocates nor frees game memory, which is exactly what makes it
+// safe to call from a log line.  If a name ever does not fit, the engine grows the
+// FString off our stack; that pointer is then ADOPTED (see g_nameBuf) and reused
+// for every later call, so even that case allocates at most once.
+FString        g_nameBuf;
+wchar_t        g_nameStack[1024];
+bool           g_nameBufSeeded = false;
+std::mutex     g_nameBufLock;
+typedef void (*AppendStringFn)(const FName* self, FString* out);
+AppendStringFn g_appendString = nullptr;
+
+// POD-only: owns the __try, so the CALLER may hold a lock or a std::string.
+bool CallAppendString(const FName* self, FString* out) {
+    __try {
+        g_appendString(self, out);
+        return true;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
+}
+
+std::string Narrow(const wchar_t* w, int32_t num) {
+    std::string out;
+    if (!w || num <= 0) return out;
+    out.reserve((size_t)num);
+    for (int32_t i = 0; i < num; ++i) {
+        const wchar_t c = w[i];
+        out.push_back(c > 0 && c < 128 ? (char)c : '?');
+    }
+    return out;
+}
+
+bool AppendNameToString(const FName& name, std::string& out) {
+    if (!g_appendString) return false;
+    std::lock_guard<std::mutex> lock(g_nameBufLock);
+    if (!g_nameBufSeeded) {
+        g_nameBuf.Data = g_nameStack;
+        g_nameBuf.Num = 0;
+        g_nameBuf.Max = (int32)sizeof(g_nameStack) / (int32)sizeof(wchar_t);
+        g_nameStack[0] = 0;
+        g_nameBufSeeded = true;
+    } else if (g_nameBuf.Data) {
+        g_nameBuf.Num = 0;
+        g_nameBuf.Data[0] = 0;
+    }
+    // The engine call itself carries the __try, in a POD-only helper: a __try
+    // here would be illegal (this function holds a lock_guard, so it needs
+    // unwinding) and the compiler says so with C2712 rather than at runtime.
+    if (!CallAppendString(&name, &g_nameBuf)) return false;
+    out = Narrow(g_nameBuf.Data, g_nameBuf.Num);
+    return true;
+}
+
+std::string NameToString(const FName& name) {
+    if (name.ComparisonIndex == 0 && name.Number == 0) return "None";
+    std::string s;
+    if (!AppendNameToString(name, s)) {
+        char raw[32];
+        _snprintf_s(raw, sizeof(raw), _TRUNCATE, "<fname %u:%u>", name.ComparisonIndex, name.Number);
+        return raw;
+    }
+    if (name.Number > 0) {
+        char suffix[16];
+        _snprintf_s(suffix, sizeof(suffix), _TRUNCATE, "_%d", (int)name.Number);
+        s += suffix;
+    }
+    return s;
+}
+
+// ---------------------------------------------------------------------------
+// Object accessors
+// ---------------------------------------------------------------------------
+UClass* ClassOf(UObject* o) {
+    if (!PlausiblePtr(o)) return nullptr;
+    UClass* c = nullptr;
+    if (!Read((uint8_t*)o + kOffClass, c)) return nullptr;
+    return PlausiblePtr(c) ? c : nullptr;
+}
+
+FName NameOf(UObject* o) {
+    FName n;
+    if (!PlausiblePtr(o)) return n;
+    if (!Read((uint8_t*)o + kOffName, n)) return FName();
+    return n;
+}
+
+UObject* OuterOf(UObject* o) {
+    if (!PlausiblePtr(o)) return nullptr;
+    UObject* p = nullptr;
+    if (!Read((uint8_t*)o + kOffOuter, p)) return nullptr;
+    return PlausiblePtr(p) ? p : nullptr;
+}
+
+UClass* SuperOf(UObject* c) {
+    if (!PlausiblePtr(c)) return nullptr;
+    UClass* s = nullptr;
+    if (!Read((uint8_t*)c + kOffStructSuper, s)) return nullptr;
+    return PlausiblePtr(s) ? s : nullptr;
+}
+
+bool IsChildOf(UClass* c, UClass* base) {
+    for (int depth = 0; depth < 256 && PlausiblePtr(c); ++depth) {
+        if (c == base) return true;
+        c = SuperOf((UObject*)c);
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Cheap "is this object of class X" via the class's FName, discovered once.
+// Comparing FNames is two integer compares; comparing strings would resolve a
+// name for every object in the array.
+// ---------------------------------------------------------------------------
+FName     g_fnameClass{};
+FName     g_fnameFunction{};
+bool      g_classNamesReady = false;
+std::mutex g_classNamesLock;
+
+bool DiscoverClassFNames() {
+    if (g_classNamesReady) return true;
+    std::lock_guard<std::mutex> lock(g_classNamesLock);
+    if (g_classNamesReady) return true;
+
+    int wanted = 0;
+    for (int32_t i = 0; i < g_arr.numElements && wanted < 2 && i < 200000; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        UClass* c = ClassOf(o);
+        if (!PlausiblePtr(c)) continue;
+        const std::string cn = NameToString(NameOf((UObject*)c));
+        if (cn == "Class" && g_fnameClass.ComparisonIndex == 0) {
+            g_fnameClass = NameOf((UObject*)c);
+            ++wanted;
+        } else if (cn == "Function" && g_fnameFunction.ComparisonIndex == 0) {
+            g_fnameFunction = NameOf((UObject*)c);
+            ++wanted;
+        }
+    }
+    g_classNamesReady = (g_fnameClass.ComparisonIndex != 0);
+    ms2::Logf("init: class FNames discovered -- Class=%u:%u Function=%u:%u",
+              g_fnameClass.ComparisonIndex, g_fnameClass.Number,
+              g_fnameFunction.ComparisonIndex, g_fnameFunction.Number);
+    return g_classNamesReady;
+}
+
+bool IsClassObject(UObject* o) {
+    if (!g_classNamesReady) DiscoverClassFNames();
+    UClass* c = ClassOf(o);
+    return PlausiblePtr(c) && NameOf((UObject*)c) == g_fnameClass;
+}
+
+bool IsFunctionObject(UObject* o) {
+    if (!g_classNamesReady) DiscoverClassFNames();
+    if (g_fnameFunction.ComparisonIndex != 0) {
+        UClass* c = ClassOf(o);
+        return PlausiblePtr(c) && NameOf((UObject*)c) == g_fnameFunction;
+    }
+    return ClassOf(o) ? NameToString(NameOf((UObject*)ClassOf(o))) == "Function" : false;
+}
+
+// ---------------------------------------------------------------------------
+// Small result caches so a lookup does not rescan the array every call.
+//
+// A MISS is only remembered for a moment (kMissRetryMs): Blueprint classes, CDOs
+// and the save subsystem appear when a map streams in, well AFTER Init(), so a
+// permanently cached "not found" would disable whichever feature asked for it for
+// the rest of the session.  A HIT is kept (callers still re-check IsValid).
+// ---------------------------------------------------------------------------
+constexpr uint64 kMissRetryMs = 2000;
+
+struct LookupRow {
+    UObject* obj = nullptr;
+    uint64   retryAt = 0;      // non-zero only on a miss: no re-scan before this
+};
+
+std::mutex g_lookupLock;
+std::unordered_map<std::string, LookupRow> g_classCache;
+std::unordered_map<std::string, LookupRow> g_objectCache;
+
+bool CachedHit(std::unordered_map<std::string, LookupRow>& cache, const std::string& key,
+               uint64 now, UObject** out) {
+    auto it = cache.find(key);
+    if (it == cache.end()) return false;
+    if (it->second.obj) {
+        *out = it->second.obj;
+        return true;
+    }
+    if (now < it->second.retryAt) {
+        *out = nullptr;
+        return true;
+    }
+    return false;                       // a stale miss: let the caller re-scan
+}
+
+void CacheStore(std::unordered_map<std::string, LookupRow>& cache, const std::string& key,
+                UObject* found, uint64 now) {
+    LookupRow& row = cache[key];
+    row.obj = found;
+    row.retryAt = found ? 0 : now + kMissRetryMs;
+}
+
+}  // namespace
+
+bool IsValid(UObject* o) {
+    if (!PlausiblePtr(o) || !ArrayUsable()) return false;
+
+    int32_t index = -1;
+    if (!Read((uint8_t*)o + kOffInternalIndex, index)) return false;
+    if (index < 0 || index >= g_arr.numElements) return false;
+    if (ObjectAt(index) != o) return false;
+
+    if (ItemFlags(index) & (kIOFGarbage | kIOFPendingKill | kIOFBeginDestroyed | kIOFFinishDestroyed))
+        return false;
+
+    uint32_t flags = 0;
+    if (!Read((uint8_t*)o + kOffObjectFlags, flags)) return false;
+    if (flags & (kRFMirroredGarbage | kRFBeginDestroyed | kRFFinishDestroyed)) return false;
+    return true;
+}
+
+UClass*  GetClass(UObject* o) { return ClassOf(o); }
+UObject* GetOuter(UObject* o) { return OuterOf(o); }
+
+bool IsA(UObject* o, UClass* c) {
+    if (!PlausiblePtr(c)) return false;
+    return IsChildOf(ClassOf(o), c);
+}
+
+std::string GetName(UObject* o) {
+    if (!PlausiblePtr(o)) return "<null>";
+    return NameToString(NameOf(o));
+}
+
+std::string GetClassName(UObject* o) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return "<no class>";
+    return NameToString(NameOf((UObject*)c));
+}
+
+std::string GetFullName(UObject* o) {
+    if (!PlausiblePtr(o)) return "<null>";
+    const std::string name = NameToString(NameOf(o));
+
+    std::string path;
+    UObject* it = OuterOf(o);
+    for (int depth = 0; depth < 64 && PlausiblePtr(it); ++depth) {
+        const std::string n = NameToString(NameOf(it));
+        path = n + (path.empty() ? "" : ".") + path;
+        it = OuterOf(it);
+    }
+
+    std::string out = GetClassName(o);
+    out += ' ';
+    if (!path.empty()) { out += path; out += '.'; }
+    out += name;
+    return out;
+}
+
+namespace {
+
+std::string LastSegment(const std::string& s) {
+    const size_t dot = s.rfind('.');
+    return dot == std::string::npos ? s : s.substr(dot + 1);
+}
+
+}  // namespace
+
+UObject* FindObject(const char* fullPathOrName) {
+    if (!ArrayUsable() || !fullPathOrName || !*fullPathOrName) return nullptr;
+    const std::string want(fullPathOrName);
+    const bool fullPath = want.find('/') != std::string::npos;
+    const uint64 now = GetTickCount64();
+    UObject* cached = nullptr;
+    if (!fullPath) {
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        if (CachedHit(g_objectCache, want, now, &cached)) return cached;
+    }
+
+    UObject* result = nullptr;
+    const std::string leaf = LastSegment(want);
+
+    for (int32_t i = 0; i < g_arr.numElements && !result; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        // Compare the bare name first: GetFullName walks the outer chain and
+        // resolves a name per level, so it is only worth doing for a candidate.
+        if (NameToString(NameOf(o)) != leaf) continue;
+        if (fullPath) {
+            if (GetFullName(o) != want) continue;
+        }
+        result = o;
+    }
+
+    if (!fullPath) {
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        CacheStore(g_objectCache, want, result, now);
+    }
+    return result;
+}
+
+UClass* FindClass(const char* name) {
+    if (!ArrayUsable() || !name || !*name) return nullptr;
+    const std::string want(name);
+    const uint64 now = GetTickCount64();
+    {
+        UObject* cached = nullptr;
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        if (CachedHit(g_classCache, want, now, &cached)) return (UClass*)cached;
+    }
+
+    UClass* result = nullptr;
+    for (int32_t i = 0; i < g_arr.numElements && !result; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o) continue;
+        if (!IsClassObject(o)) continue;
+        if (NameToString(NameOf(o)) == want) result = (UClass*)o;
+    }
+    if (!result) {
+        // Blueprint classes are usually addressed without the "_C" suffix.
+        for (int32_t i = 0; i < g_arr.numElements && !result; ++i) {
+            UObject* o = ObjectAt(i);
+            if (!o) continue;
+            if (!IsClassObject(o)) continue;
+            const std::string n = NameToString(NameOf(o));
+            if (n.size() > 2 && n.compare(n.size() - 2, 2, "_C") == 0 &&
+                n.compare(0, n.size() - 2, want) == 0)
+                result = (UClass*)o;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_lookupLock);
+        CacheStore(g_classCache, want, (UObject*)result, now);
+    }
+    return result;
+}
+
+std::vector<UObject*> FindAllOf(const char* className) {
+    std::vector<UObject*> out;
+    if (!ArrayUsable() || !className) return out;
+    UClass* c = FindClass(className);
+    if (!c) return out;
+
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || o == (UObject*)c) continue;
+        if (!IsChildOf(ClassOf(o), c)) continue;
+        uint32_t flags = 0;
+        Read((uint8_t*)o + kOffObjectFlags, flags);
+        if (flags & (kRFClassDefaultObject | kRFArchetypeObject)) continue;
+        if (!IsValid(o)) continue;
+        out.push_back(o);
+    }
+    return out;
+}
+
+UObject* FindFirstOf(const char* className) {
+    std::vector<UObject*> all = FindAllOf(className);
+    return all.empty() ? nullptr : all.front();
+}
+
+// ---------------------------------------------------------------------------
+// Properties
+// ---------------------------------------------------------------------------
+namespace {
+
+FProperty* FindPropertyLocal(UObject* st, const char* name) {
+    if (!PlausiblePtr(st) || !name) return nullptr;
+    FField* f = nullptr;
+    if (!Read((uint8_t*)st + kOffStructChildProps, f)) return nullptr;
+    for (int depth = 0; depth < 8192 && PlausiblePtr(f); ++depth) {
+        FName fn;
+        if (!Read((uint8_t*)f + kOffFieldName, fn)) return nullptr;
+        if (NameToString(fn) == name) return (FProperty*)f;
+        FField* next = nullptr;
+        if (!Read((uint8_t*)f + kOffFieldNextF, next)) return nullptr;
+        f = next;
+    }
+    return nullptr;
+}
+
+}  // namespace
+
+FProperty* FindProperty(UStruct* st, const char* name) {
+    UObject* it = (UObject*)st;
+    if (!PlausiblePtr(it) || !name) return nullptr;
+    for (int depth = 0; depth < 256 && PlausiblePtr(it); ++depth) {
+        if (FProperty* p = FindPropertyLocal(it, name)) return p;
+        it = (UObject*)SuperOf(it);
+    }
+    return nullptr;
+}
+
+FProperty* FindProperty(UClass* c, const char* name) {
+    return FindProperty((UStruct*)c, name);
+}
+
+namespace {
+
+std::mutex g_propCacheLock;
+std::unordered_map<std::string, int32_t> g_propOffsetCache;
+
+std::string PropKey(UObject* st, const char* name) {
+    char key[32];
+    _snprintf_s(key, sizeof(key), _TRUNCATE, "%llX:", (unsigned long long)(uintptr_t)st);
+    return std::string(key) + name;
+}
+
+}  // namespace
+
+int32_t PropOffsetStruct(UStruct* st, const char* name) {
+    UObject* s = (UObject*)st;
+    if (!PlausiblePtr(s) || !name) return -1;
+
+    const std::string key = PropKey(s, name);
+    {
+        std::lock_guard<std::mutex> lock(g_propCacheLock);
+        auto it = g_propOffsetCache.find(key);
+        if (it != g_propOffsetCache.end()) return it->second;
+    }
+
+    int32_t result = -1;
+    if (FProperty* p = FindProperty(st, name)) {
+        int32_t off = -1;
+        if (Read((uint8_t*)p + kOffPropOffset, off)) result = off;
+    }
+    {
+        std::lock_guard<std::mutex> lock(g_propCacheLock);
+        g_propOffsetCache[key] = result;
+    }
+    return result;
+}
+
+int32_t PropOffset(UObject* o, const char* name) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return -1;
+    return PropOffsetStruct((UStruct*)c, name);
+}
+
+int32_t PropSize(UObject* o, const char* name) {
+    UClass* c = ClassOf(o);
+    if (!PlausiblePtr(c)) return -1;
+    FProperty* p = FindProperty((UStruct*)c, name);
+    if (!p) return -1;
+    int32_t sz = -1;
+    Read((uint8_t*)p + kOffPropElementSize, sz);
+    return sz;
+}
+
+// ---------------------------------------------------------------------------
+// Booleans
+//
+// A UE bool property is a MASK, not a bool: FBoolProperty keeps FieldSize,
+// ByteOffset and ByteMask at +0x70..0x73, and the value lives in one bit.  Reading
+// a byte and calling it a bool is how a mod ends up toggling three unrelated flags
+// at once, so this applies the mask.
+// ---------------------------------------------------------------------------
+namespace {
+
+// A UE bool property is a MASK, not a bool -- see GetBool.
+
+}  // namespace
+
+bool GetBool(UObject* o, const char* prop) {
+    if (!IsValid(o)) return false;
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+
+    UClass* c = ClassOf(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    uint8_t fieldSize = 0, byteOffset = 0, byteMask = 0, fieldMask = 0;
+    if (PlausiblePtr(p)) {
+        Read((uint8_t*)p + 0x70, fieldSize);
+        Read((uint8_t*)p + 0x71, byteOffset);
+        Read((uint8_t*)p + 0x72, byteMask);
+        Read((uint8_t*)p + 0x73, fieldMask);
+    }
+    uint8_t byte = 0;
+    if (!Read((uint8_t*)o + off + (int32_t)byteOffset, byte)) return false;
+    const uint8_t mask = fieldMask ? fieldMask : (byteMask ? byteMask : 0xFF);
+    return (byte & mask) != 0;
+}
+
+bool SetBool(UObject* o, const char* prop, bool v) {
+    if (!IsValid(o)) return false;
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+
+    UClass* c = ClassOf(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    uint8_t byteOffset = 0, byteMask = 0, fieldMask = 0;
+    if (PlausiblePtr(p)) {
+        Read((uint8_t*)p + 0x71, byteOffset);
+        Read((uint8_t*)p + 0x72, byteMask);
+        Read((uint8_t*)p + 0x73, fieldMask);
+    }
+    uint8_t* at = (uint8_t*)o + off + (int32_t)byteOffset;
+    uint8_t byte = 0;
+    if (!Read(at, byte)) return false;
+    const uint8_t mask = fieldMask ? fieldMask : (byteMask ? byteMask : 0xFF);
+    byte = v ? (uint8_t)(byte | mask) : (uint8_t)(byte & ~mask);
+    return WriteMem(at, &byte, 1);
+}
+
+UObject* GetCDO(UClass* c) {
+    if (!PlausiblePtr(c)) return nullptr;
+    UObject* cdo = nullptr;
+    if (!Read((uint8_t*)c + kOffClassDefaultObj, cdo)) return nullptr;
+    return PlausiblePtr(cdo) ? cdo : nullptr;
+}
+
+// GWorld: a UWorld* global.  Validated, because this is the one address in the
+// module that comes from the SDK's RVA alone (no signature was recovered for it,
+// and the SDK itself calls it "decoration").  A wrong read yields nullptr.
+UObject* GetWorld() {
+    if (!g_res.gworld) return nullptr;
+    UObject* w = nullptr;
+    if (!Read((const void*)g_res.gworld, w)) return nullptr;
+    if (!PlausiblePtr(w) || !IsValid(w)) return nullptr;
+    if (GetClassName(w) != "World") return nullptr;
+    return w;
+}
+
+// ---------------------------------------------------------------------------
+// Functions
+// ---------------------------------------------------------------------------
+namespace {
+
+UFunction* FindFunctionLocal(UObject* st, const char* name) {
+    if (!PlausiblePtr(st) || !name) return nullptr;
+    UField* f = nullptr;
+    if (!Read((uint8_t*)st + kOffStructChildren, f)) return nullptr;
+    for (int depth = 0; depth < 8192 && PlausiblePtr(f); ++depth) {
+        // The Children chain holds nested classes and enums too; the cheap
+        // integer class test keeps the string compare off them.
+        if (IsFunctionObject((UObject*)f) && NameToString(NameOf((UObject*)f)) == name)
+            return (UFunction*)f;
+        UField* next = nullptr;
+        if (!Read((uint8_t*)f + kOffFieldNext, next)) return nullptr;
+        f = next;
+    }
+    return nullptr;
+}
+
+}  // namespace
+
+UFunction* FindFunction(UObject* o, const char* name) {
+    if (!PlausiblePtr(o) || !name) return nullptr;
+    UObject* c = (UObject*)ClassOf(o);
+    for (int depth = 0; depth < 256 && PlausiblePtr(c); ++depth) {
+        if (UFunction* f = FindFunctionLocal(c, name)) return f;
+        c = (UObject*)SuperOf(c);
+    }
+    return nullptr;
+}
+
+bool Call(UObject* o, UFunction* fn, void* params) {
+    if (!IsValid(o) || !PlausiblePtr(fn) || !g_res.processEvent) return false;
+    // A UFunction with parameters needs a parameter block.  Passing nullptr would
+    // have the engine's own thunk read through it; refuse instead of letting an AV
+    // land inside ProcessEvent (SEH would catch it, but the engine is mid-frame).
+    uint16_t parmsSize = 0;
+    if (Read((uint8_t*)fn + kOffFuncParmsSize, parmsSize) && parmsSize > 0 && !params) {
+        ms2::Logf("Call: %s has ParmsSize=%u but no parameter block -- refused",
+                  GetName((UObject*)fn).c_str(), (unsigned)parmsSize);
+        return false;
+    }
+    const bool ok = CallProcessEventAt(g_res.processEvent, o, fn, params);
+    if (!ok) ms2::Log("Call: ProcessEvent faulted -- suppressed (the offset or the function name is wrong)");
+    return ok;
+}
+
+bool Call(UObject* o, const char* fnName, void* params) {
+    UFunction* fn = FindFunction(o, fnName);
+    if (!fn) {
+        ms2::Logf("Call: no UFunction '%s' on %s", fnName ? fnName : "(null)",
+                  GetClassName(o).c_str());
+        return false;
+    }
+    return Call(o, fn, params);
+}
+
+// ---------------------------------------------------------------------------
+// MakeName: FName from a string, using the GAME's own conversion.
+//
+// UKismetStringLibrary::Conv_StringToName(FString InString) -> FName is called
+// through ProcessEvent with a Params block.  That keeps the name-pool layout --
+// which differs between UE versions and is not documented here -- entirely on the
+// engine's side, and it is the one path that is provably right because the game's
+// own Blueprint code uses exactly it.
+//
+// The rejected alternative: calling FName::FName(wchar_t*) at its address.  Its
+// prologue (mov rbx,rcx / mov r11,rdx / mov edi,r8d) takes three registers and the
+// convention could not be settled from the binary alone; guessing wrong means an
+// 8-byte write through a bad pointer, which no SEH guard can undo.
+// ---------------------------------------------------------------------------
+namespace {
+std::atomic<int> g_makeNameState{0};   // 0 = untried, 1 = works, 2 = unavailable
+}  // namespace
+
+FName MakeName(const char* ascii) {
+    if (!ascii || !*ascii) return FName();
+    if (g_makeNameState.load(std::memory_order_acquire) == 2) return FName();
+
+    UClass* lib = FindClass("KismetStringLibrary");
+    if (!lib) {
+        if (g_makeNameState.exchange(2) != 2)
+            ms2::Log("MakeName: KismetStringLibrary not found -- FName construction is unavailable");
+        return FName();
+    }
+    UObject* cdo = nullptr;
+    if (!Read((uint8_t*)lib + kOffClassDefaultObj, cdo) || !PlausiblePtr(cdo)) {
+        g_makeNameState.store(2);
+        return FName();
+    }
+    UFunction* fn = FindFunction(cdo, "Conv_StringToName");
+    if (!fn) {
+        if (g_makeNameState.exchange(2) != 2)
+            ms2::Log("MakeName: KismetStringLibrary.Conv_StringToName not found");
+        return FName();
+    }
+
+    // The argument lives in a stack buffer: FString is ptr/num/max and the engine
+    // only reads it -- the same shape the Dumper-7 SDK's name helper uses.
+    wchar_t buf[256];
+    int n = 0;
+    for (; ascii[n] && n < 255; ++n) buf[n] = (wchar_t)(unsigned char)ascii[n];
+    buf[n] = 0;
+    FString in;
+    in.Data = buf;
+    in.Num = n;
+    in.Max = 256;
+
+    Params p(fn);
+    if (!p.data()) return FName();
+    // The parameter is "InString" in UE5; older builds spell it "InName".  Ask
+    // rather than assume, and say so if neither is there.
+    if (PropOffsetStruct((UStruct*)fn, "InString") >= 0)
+        p.Set<FString>("InString", in);
+    else if (PropOffsetStruct((UStruct*)fn, "InName") >= 0)
+        p.Set<FString>("InName", in);
+    else {
+        ms2::Log("MakeName: Conv_StringToName has neither an InString nor an InName parameter");
+        g_makeNameState.store(2);
+        return FName();
+    }
+
+    if (!Call(cdo, fn, p.data())) {
+        g_makeNameState.store(2);
+        return FName();
+    }
+    const FName out = p.Get<FName>("ReturnValue");
+    g_makeNameState.store(out.ComparisonIndex ? 1 : 2);
+    if (!out.ComparisonIndex) ms2::Logf("MakeName: Conv_StringToName(\"%s\") returned None", ascii);
+    return out;
+}
+
+// Alias -- the co-op lanes write ue::MakeFName.
+FName MakeFName(const char* ascii) { return MakeName(ascii); }
+
+// ---------------------------------------------------------------------------
+// Params
+// ---------------------------------------------------------------------------
+Params::Params(UFunction* fn) : fn_(fn) {
+    if (!PlausiblePtr(fn)) return;
+    uint16_t parmsSize = 0;
+    if (!Read((uint8_t*)fn + kOffFuncParmsSize, parmsSize)) return;
+    size_ = parmsSize > 0 ? parmsSize : 8;
+    if (size_ > 0x4000) {
+        ms2::Logf("Params: %s reports ParmsSize=%d -- refusing", GetName((UObject*)fn).c_str(), (int)size_);
+        size_ = 0;
+        return;
+    }
+    buf_ = (uint8_t*)VirtualAlloc(nullptr, (size_t)size_, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    if (!buf_) { size_ = 0; return; }
+    memset(buf_, 0, (size_t)size_);
+}
+
+Params::~Params() {
+    if (buf_) VirtualFree(buf_, 0, MEM_RELEASE);
+    buf_ = nullptr;
+}
+
+int32_t Params::offset_of(const char* name) const {
+    if (!PlausiblePtr(fn_) || !name) return -1;
+    return PropOffsetStruct((UStruct*)fn_, name);
+}
+
+// ---------------------------------------------------------------------------
+// Hooks, the game-thread queue and per-frame callbacks
+// ---------------------------------------------------------------------------
+namespace {
+
+struct HookSlot {
+    FName    fnName{};
+    HookFn   pre = nullptr;
+    HookFn   post = nullptr;
+    char     name[192] = {0};
+};
+
+std::mutex            g_hookLock;
+std::vector<HookSlot> g_hooks;
+std::atomic<int>      g_hookCount{0};
+
+std::mutex                          g_queueLock;
+std::vector<std::function<void()>>  g_queue;
+
+std::mutex                              g_tickLock;
+std::vector<std::function<void(float)>> g_tickFns;
+
+// FName-only histogram for the self-test: resolving a name here would put an
+// engine call on the ProcessEvent hot path, so the strings are resolved later.
+struct HistEntry { FName name{}; uint32 count = 0; };
+constexpr int kHistMax = 128;
+HistEntry       g_hist[kHistMax];
+int             g_histUsed = 0;
+std::atomic<bool> g_histOn{true};
+
+void HistogramNote(UFunction* fn) {
+    if (!g_histOn.load(std::memory_order_relaxed)) return;
+    const FName n = NameOf((UObject*)fn);
+    for (int i = 0; i < g_histUsed; ++i) {
+        if (g_hist[i].name == n) { ++g_hist[i].count; return; }
+    }
+    if (g_histUsed >= kHistMax) return;
+    g_hist[g_histUsed].name = n;
+    g_hist[g_histUsed].count = 1;
+    ++g_histUsed;
+}
+
+void RunHooksOn(UObject* self, UFunction* fn, void* parms, bool pre) {
+    if (g_hookCount.load(std::memory_order_acquire) == 0) return;
+    const FName n = NameOf((UObject*)fn);
+    for (size_t i = 0; i < g_hooks.size(); ++i) {
+        HookSlot& h = g_hooks[i];
+        if (!(h.fnName == n)) continue;
+        HookFn f = pre ? h.pre : h.post;
+        if (!f) continue;
+        if (!RunHookFn(f, self, fn, parms))
+            ms2::Log("hook faulted -- suppressed (check the hook's own code)");
+    }
+}
+
+void DrainQueue() {
+    std::vector<std::function<void()>> take;
+    {
+        std::lock_guard<std::mutex> lock(g_queueLock);
+        if (g_queue.empty()) return;
+        take.swap(g_queue);
+    }
+    for (auto& f : take) {
+        if (!RunTaskFn(&f)) ms2::Log("game-thread task faulted -- suppressed");
+    }
+}
+
+void FireTick(float dt) {
+    std::vector<std::function<void(float)>> fns;
+    {
+        std::lock_guard<std::mutex> lock(g_tickLock);
+        if (g_tickFns.empty()) return;
+        fns = g_tickFns;
+    }
+    for (auto& f : fns) {
+        if (!RunTickFn(&f, dt)) ms2::Log("tick callback faulted -- suppressed");
+    }
+}
+
+// Wall-clock pacing for the per-frame callbacks when the engine-tick hook could
+// not be installed.  Rate-limited so a busy frame does not fire them per call.
+std::atomic<uint64> g_lastFallbackTickMs{0};
+
+void FallbackTick() {
+    const uint64_t now = GetTickCount64();
+    uint64_t last = g_lastFallbackTickMs.load(std::memory_order_relaxed);
+    if (now - last < 4) return;
+    if (!g_lastFallbackTickMs.compare_exchange_strong(last, now)) return;
+    static uint64_t prev = 0;
+    const float dt = prev ? (float)(now - prev) / 1000.0f : 0.016f;
+    prev = now;
+    FireTick(dt);
+    NoteSelfTestTick(dt);
+}
+
+// The ProcessEvent detour.  Per call: one counter bump, an O(hooks) integer
+// compare, the original, and a mutex test for the queue.
+void DetourProcessEvent(UObject* self, UFunction* fn, void* parms) {
+    ++g_peCount;
+    const uint32 tid = GetCurrentThreadId();
+
+    // Which thread is the game thread?  Latch the first thread that is seen
+    // calling ProcessEvent TWICE IN A ROW, not merely the first one: the async
+    // loading thread calls ProcessEvent too, and latching on a single call from it
+    // would send every EnqueueGameThread task to the wrong thread for the rest of
+    // the session.  The engine-tick detour, once installed, sets this exactly.
+    if (g_gameThreadId.load(std::memory_order_relaxed) == 0) {
+        static std::atomic<uint32> lastTid{0};
+        if (lastTid.load(std::memory_order_relaxed) == tid)
+            g_gameThreadId.store(tid, std::memory_order_relaxed);
+        else
+            lastTid.store(tid, std::memory_order_relaxed);
+    }
+
+    tl_inDetour = 1;
+    HistogramNote(fn);
+    RunHooksOn(self, fn, parms, true);
+
+    if (g_peTrampoline) {
+        if (!CallProcessEventAt((uintptr_t)g_peTrampoline, self, fn, parms))
+            ms2::Log("original ProcessEvent faulted -- swallowed");
+    }
+
+    RunHooksOn(self, fn, parms, false);
+
+    if (tid == g_gameThreadId.load(std::memory_order_relaxed)) {
+        DrainQueue();
+        if (!g_tickHooked) FallbackTick();
+    }
+    tl_inDetour = 0;
+}
+
+void DetourEngineTick(void* self, float dt, bool idle) {
+    g_gameThreadId.store(GetCurrentThreadId(), std::memory_order_relaxed);
+    tl_inDetour = 1;
+    if (g_tickTrampoline) {
+        if (!CallEngineTickAt((uintptr_t)g_tickTrampoline, self, dt, idle))
+            ms2::Log("original UGameEngine::Tick faulted -- swallowed");
+    }
+    DrainQueue();
+    FireTick(dt);
+    NoteSelfTestTick(dt);
+    tl_inDetour = 0;
+}
+
+}  // namespace
+
+namespace {
+
+// One resolver, two entry points: find the UFunction a hook spec names.
+UFunction* ResolveHookTarget(const char* spec) {
+    if (!spec || !*spec) return nullptr;
+    const std::string s(spec);
+
+    // 1. Full object path, e.g. "/Script/Engine.Actor.ReceiveBeginPlay".
+    if (s.find('/') != std::string::npos) {
+        UObject* o = FindObject(s.c_str());
+        if (PlausiblePtr(o) && IsFunctionObject(o)) return (UFunction*)o;
+    }
+
+    // 2. "Class.Function" -- resolve the class, then the function on its CDO.
+    const size_t dot = s.rfind('.');
+    if (dot != std::string::npos) {
+        const std::string cls = s.substr(0, dot);
+        const std::string leaf = s.substr(dot + 1);
+        if (UClass* c = FindClass(cls.c_str())) {
+            UObject* cdo = nullptr;
+            if (Read((uint8_t*)c + kOffClassDefaultObj, cdo) && PlausiblePtr(cdo)) {
+                if (UFunction* f = FindFunction(cdo, leaf.c_str())) return f;
+            }
+            UFunction* f = FindFunctionLocal((UObject*)c, leaf.c_str());
+            if (f) return f;
+        }
+    }
+
+    // 3. Bare function name -- unique in practice for the ones a mod hooks, and
+    //    ambiguity is reported rather than silently picking one.
+    UFunction* found = nullptr;
+    int matches = 0;
+    for (int32_t i = 0; i < g_arr.numElements && matches < 8; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !IsFunctionObject(o)) continue;
+        if (NameToString(NameOf(o)) != s) continue;
+        found = (UFunction*)o;
+        ++matches;
+    }
+    if (matches > 1) {
+        ms2::Logf("hook: '%s' is ambiguous (%d UFunctions) -- using the first", spec, matches);
+    }
+    return found;
+}
+
+bool RegisterHook(const char* spec, HookFn f, bool pre) {
+    if (!f || !spec || !*spec) return false;
+    UFunction* fn = ResolveHookTarget(spec);
+    if (!fn) {
+        ms2::Logf("hook: could not resolve '%s' -- it will NOT fire", spec);
+        return false;
+    }
+    const FName name = NameOf((UObject*)fn);
+
+    std::lock_guard<std::mutex> lock(g_hookLock);
+    for (auto& h : g_hooks) {
+        if (h.fnName == name) {
+            if (pre) h.pre = f; else h.post = f;
+            g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+            ms2::Logf("hook: %s hook replaced on %s", pre ? "pre" : "post", spec);
+            return true;
+        }
+    }
+    HookSlot slot;
+    slot.fnName = name;
+    if (pre) slot.pre = f; else slot.post = f;
+    strncpy_s(slot.name, sizeof(slot.name), spec, _TRUNCATE);
+    g_hooks.push_back(slot);
+    g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+    ms2::Logf("hook: %s hook on %s (FName %u:%u)", pre ? "pre" : "post", spec,
+              name.ComparisonIndex, name.Number);
+    return true;
+}
+
+}  // namespace
+
+bool HookPre(const char* spec, HookFn f)  { return RegisterHook(spec, f, true); }
+bool HookPost(const char* spec, HookFn f) { return RegisterHook(spec, f, false); }
+
+void EnqueueGameThread(std::function<void()> f) {
+    if (!f) return;
+    std::lock_guard<std::mutex> lock(g_queueLock);
+    if (g_queue.size() > 4096) { ++g_queueDropped; return; }
+    g_queue.push_back(std::move(f));
+}
+
+void OnTick(std::function<void(float)> f) {
+    if (!f) return;
+    std::lock_guard<std::mutex> lock(g_tickLock);
+    g_tickFns.push_back(std::move(f));
+}
+
+bool IsGameThread() {
+    const uint32 g = g_gameThreadId.load(std::memory_order_relaxed);
+    return g != 0 && GetCurrentThreadId() == g;
+}
+
+uint64 ProcessEventCount() { return g_peCount.load(); }
+const Resolved& GetResolved() { return g_res; }
+bool IsReady() { return g_ready.load(); }
+const char* InitReport() { return g_initReport.c_str(); }
+
+namespace {
+
+uint32 VerifyProcessEventIndex(UObject* probe) {
+    if (!PlausiblePtr(probe)) return g_res.processEventIndex;
+    void** vt = nullptr;
+    if (!Read(probe, vt) || !PlausiblePtr(vt)) return g_res.processEventIndex;
+
+    for (uint32 i = 0; i < 0x80; ++i) {
+        void* slot = nullptr;
+        if (!Read(vt + i, slot)) break;
+        if ((uintptr_t)slot == g_res.processEvent) {
+            if (i != g_res.processEventIndex) {
+                ms2::Logf("ProcessEvent: vtable index is 0x%X, not the 0x%X the SDK reported -- "
+                          "using the measured one", i, g_res.processEventIndex);
+                g_res.processEventIndex = i;
+            }
+            return i;
+        }
+    }
+    ms2::Log("ProcessEvent: the resolved address is not in the probe object's vtable -- calls use the "
+             "address, but the slot number stays unverified");
+    return g_res.processEventIndex;
+}
+
+void InitPaths() {
+    wchar_t exe[MAX_PATH] = L"";
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    wchar_t* slash = wcsrchr(exe, L'\\');
+    if (slash) *slash = 0;
+    wcscpy_s(g_exeDir, MAX_PATH, exe);
+    _snwprintf_s(g_iniPath, MAX_PATH, _TRUNCATE, L"%s\\ms2coop-native.ini", g_exeDir);
+}
+
+void WriteIniTemplate() {
+    if (GetFileAttributesW(g_iniPath) != INVALID_FILE_ATTRIBUTES) return;
+    HANDLE h = CreateFileW(g_iniPath, GENERIC_WRITE, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) return;
+    const char* text =
+        "; ms2 native module -- optional overrides.\r\n"
+        "; README.md explains these.  Values are RVAs (offsets from the exe image\r\n"
+        "; base) in hex, measured on game build 5.6.1 CL92086.  Leave them\r\n"
+        "; commented out: the AOB scan finds the globals on its own.  Uncomment and\r\n"
+        "; correct a value only if the log says UNRESOLVED for it.\r\n"
+        ";\r\n"
+        "; ProcessEvent=0x1619320\r\n"
+        "; AppendString=0x13F8FA0\r\n"
+        "; GObjects=0xB03AEF0\r\n"
+        "; EngineTick=0x3DA7B30\r\n"
+        "; ProcessEventIdx=76\r\n";
+    DWORD wrote = 0;
+    WriteFile(h, text, (DWORD)strlen(text), &wrote, NULL);
+    CloseHandle(h);
+}
+
+bool InstallProcessEventHook() {
+    if (!g_res.processEvent) return false;
+    if (MH_CreateHook((LPVOID)g_res.processEvent, (LPVOID)&DetourProcessEvent,
+                      (LPVOID*)&g_peTrampoline) != MH_OK) {
+        ms2::Log("MinHook: could not hook ProcessEvent");
+        return false;
+    }
+    if (MH_EnableHook((LPVOID)g_res.processEvent) != MH_OK) {
+        MH_RemoveHook((LPVOID)g_res.processEvent);
+        g_peTrampoline = nullptr;
+        ms2::Log("MinHook: could not ENABLE the ProcessEvent hook");
+        return false;
+    }
+    g_peHooked = true;
+    ms2::Logf("ProcessEvent HOOKED at 0x%llX -- hooks, EnqueueGameThread and the self-test hang off it",
+              (unsigned long long)g_res.processEvent);
+    return true;
+}
+
+bool InstallTickHook() {
+    if (!g_res.engineTick) return false;
+    if (MH_CreateHook((LPVOID)g_res.engineTick, (LPVOID)&DetourEngineTick,
+                      (LPVOID*)&g_tickTrampoline) != MH_OK) {
+        ms2::Log("MinHook: could not hook UGameEngine::Tick");
+        return false;
+    }
+    if (MH_EnableHook((LPVOID)g_res.engineTick) != MH_OK) {
+        MH_RemoveHook((LPVOID)g_res.engineTick);
+        g_tickTrampoline = nullptr;
+        ms2::Log("MinHook: could not enable the UGameEngine::Tick hook");
+        return false;
+    }
+    g_tickHooked = true;
+    ms2::Logf("UGameEngine::Tick HOOKED at 0x%llX -- OnTick runs on the game thread once per frame",
+              (unsigned long long)g_res.engineTick);
+    return true;
+}
+
+}  // namespace
+
+// ---------------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------------
+bool Init() {
+    if (g_ready.load()) return true;
+    std::lock_guard<std::mutex> lock(g_initLock);
+    if (g_ready.load()) return true;
+
+    InitPaths();
+    ms2::OpenLog(g_exeDir);
+    WriteIniTemplate();
+
+    if (MH_Initialize() != MH_OK) {
+        // MH_ERROR_ALREADY_INITIALIZED is fine (a second Init call), and so is any
+        // other failure: reflection works without hooks, and the log says which.
+        ms2::Log("init: MH_Initialize did not return MH_OK -- hooks may be unavailable, "
+                 "reflection is unaffected");
+    }
+
+    uint8_t* base = (uint8_t*)GetModuleHandleW(nullptr);
+    g_res.imageBase = (uintptr_t)base;
+
+    char exeDirNarrow[MAX_PATH];
+    for (int i = 0; i < MAX_PATH && g_exeDir[i]; ++i) exeDirNarrow[i] = (char)g_exeDir[i];
+    ms2::Logf("init: exe base 0x%llX, dir %s", (unsigned long long)g_res.imageBase, exeDirNarrow);
+
+    if (!FindTextRange(base, &g_textLo, &g_textHi)) {
+        ms2::Log("init: could not find .text -- AOB scanning disabled, only RVA fallbacks are possible");
+        g_textLo = g_textHi = nullptr;
+    } else {
+        ms2::Logf("init: .text 0x%llX .. 0x%llX (%.1f MB)",
+                  (unsigned long long)(uintptr_t)g_textLo, (unsigned long long)(uintptr_t)g_textHi,
+                  (double)(g_textHi - g_textLo) / 1048576.0);
+    }
+
+    GlobalSpec specs[] = {
+        {"ProcessEvent", kSigProcessEvent, -1, 0x01619320, &g_res.processEvent, &g_res.processEventSource},
+        {"AppendString", kSigAppendString, -1, 0x013F8FA0, &g_res.appendString, &g_res.appendStringSource},
+        {"EngineTick",   kSigEngineTick,   -1, 0x03DA7B30, &g_res.engineTick,   &g_res.engineTickSource},
+        {"GObjects",     kSigGObjects,      3, 0x0B03AEF0, &g_res.objects,      &g_res.objectsSource},
+        // GWorld has no recovered signature, so it is RVA-only and validated on
+        // every use (GetWorld).  Recorded rather than omitted so the log names it.
+        {"GWorld",       nullptr,          -1, 0x0AD4E7F0, &g_res.gworld,       &g_res.gworldSource},
+    };
+    int resolvedCount = 0;
+    for (auto& s : specs) {
+        const bool ok = ResolveGlobal(s, g_iniPath);
+        ms2::Logf("init: %-13s = 0x%llX  [%s]%s", s.name, (unsigned long long)*s.out, *s.source,
+                  ok ? "" : "   <<< FAILED");
+        if (ok) ++resolvedCount;
+    }
+
+    g_res.processEventIndex = 0x4C;   // Dumper-7's Offsets::ProcessEventIdx for this build
+    uint64_t idxOverride = 0;
+    if (ReadIniValue(g_iniPath, "ProcessEventIdx", &idxOverride) && idxOverride < 0x1000)
+        g_res.processEventIndex = (uint32)idxOverride;
+
+    g_appendString = (AppendStringFn)g_res.appendString;
+
+    if (!g_res.objects) {
+        g_initReport = "FAILED: GObjects unresolved";
+        ms2::Logf("init: %s", g_initReport.c_str());
+        return false;
+    }
+
+    bool arrayOk = false;
+    // 60 x 250 ms: the module can be mapped before the engine has populated the
+    // object array, and an empty array is not a failure -- it is "too early".
+    for (int attempt = 0; attempt < 60 && !arrayOk; ++attempt) {
+        arrayOk = ValidateArray();
+        if (!arrayOk) Sleep(250);
+    }
+    if (!arrayOk)
+        ms2::Log("init: the object array did not validate -- continuing so the log shows why");
+
+    if (g_appendString) {
+        UObject* probe = ObjectAt(0);
+        const std::string n = probe ? GetName(probe) : std::string();
+        ms2::Logf("init: FName::AppendString probe -> \"%s\"", n.c_str());
+    } else {
+        ms2::Log("init: FName::AppendString is unresolved -- names will read as <fname i:n>");
+    }
+
+    for (int32_t i = 0; i < g_arr.numElements; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !PlausiblePtr(ClassOf(o))) continue;
+        VerifyProcessEventIndex(o);
+        break;
+    }
+
+    if (!InstallProcessEventHook())
+        ms2::Log("init: ProcessEvent NOT hooked -- HookPre/HookPost and the call count are dead");
+    if (!InstallTickHook())
+        ms2::Log("init: per-frame callbacks will be paced from ProcessEvent (measured dt)");
+
+    g_ready.store(resolvedCount > 0 && g_arr.numElements > 0);
+
+    char report[512];
+    _snprintf_s(report, sizeof(report), _TRUNCATE,
+                "objects=%s pe=%s names=%s tick=%s | %d objects, layout %s, hooked=%s",
+                g_res.objectsSource, g_res.processEventSource,
+                g_res.appendString ? g_res.appendStringSource : "MISSING",
+                g_res.engineTick ? g_res.engineTickSource : "MISSING",
+                (int)g_arr.numElements, g_arr.layoutB ? "5.6(chunk-at-0)" : "legacy(flat-0)",
+                g_peHooked ? "yes" : "NO");
+    g_initReport = report;
+    ms2::Logf("init: %s -> %s", g_ready.load() ? "READY" : "NOT READY", report);
+    return g_ready.load();
+}
+
+// ---------------------------------------------------------------------------
+// Self-test
+// ---------------------------------------------------------------------------
+namespace {
+
+std::atomic<int> g_selfTestStage{0};
+float            g_selfTestElapsed = 0.0f;
+
+int32_t StructSize(UObject* st) {
+    int32_t sz = -1;
+    Read((uint8_t*)st + kOffStructSize, sz);
+    return sz;
+}
+
+void ReportTopFunctions() {
+    // Selection sort of the top few, resolving names only for the winners.
+    for (int r = 0; r < 6 && r < g_histUsed; ++r) {
+        int best = r;
+        for (int i = r + 1; i < g_histUsed; ++i)
+            if (g_hist[i].count > g_hist[best].count) best = i;
+        const HistEntry tmp = g_hist[r];
+        g_hist[r] = g_hist[best];
+        g_hist[best] = tmp;
+        ms2::Logf("  self-test: ProcessEvent #%d  %-46s %u calls", r + 1,
+                  NameToString(g_hist[r].name).c_str(), g_hist[r].count);
+    }
+}
+
+}  // namespace
+
+void NoteSelfTestTick(float dt) {
+    const int stage = g_selfTestStage.load(std::memory_order_relaxed);
+    if (stage != 1) return;
+    g_selfTestElapsed += dt;
+    // 10 s of GAME time, not wall clock: it means the game actually ran frames.
+    if (g_selfTestElapsed >= 10.0f) {
+        g_selfTestStage.store(2);
+        SelfTest("+10s of game time");
+        g_histOn.store(false);
+    }
+}
+
+void SelfTest(const char* when) {
+    ms2::Logf("---- self-test (%s) ----", when ? when : "manual");
+
+    if (!g_ready.load()) {
+        ms2::Logf("  self-test: NOT READY (%s)", g_initReport.c_str());
+        return;
+    }
+
+    ms2::Logf("  self-test: resolution -> %s", g_initReport.c_str());
+    ms2::Logf("  self-test: GUObjectArray at 0x%llX, NumElements=%d NumChunks=%d MaxElements=%d",
+              (unsigned long long)g_res.objects, (int)g_arr.numElements, (int)g_arr.numChunks,
+              (int)g_arr.maxElements);
+    ms2::Logf("  self-test: object count check -- %d objects is %s",
+              (int)g_arr.numElements,
+              (g_arr.numElements > 1000 && g_arr.numElements < 5000000) ? "plausible" : "SUSPICIOUS");
+
+    int shown = 0;
+    for (int32_t i = 0; i < g_arr.numElements && shown < 5; ++i) {
+        UObject* o = ObjectAt(i);
+        if (!o || !PlausiblePtr(ClassOf(o))) continue;
+        ms2::Logf("  self-test: object[%d] = %s", (int)i, GetFullName(o).c_str());
+        ++shown;
+    }
+    if (shown == 0) ms2::Log("  self-test: FAILED -- no readable objects in the array");
+
+    UClass* actorClass = FindClass("Actor");
+    if (actorClass) {
+        ms2::Logf("  self-test: FindClass(\"Actor\") OK -> %s, class %s, StructSize=0x%X",
+                  GetFullName((UObject*)actorClass).c_str(),
+                  GetClassName((UObject*)actorClass).c_str(), StructSize((UObject*)actorClass));
+    } else {
+        ms2::Log("  self-test: FindClass(\"Actor\") FAILED -- class lookup is broken");
+    }
+
+    if (actorClass) {
+        UObject* cdo = nullptr;
+        Read((uint8_t*)actorClass + kOffClassDefaultObj, cdo);
+        if (PlausiblePtr(cdo)) {
+            const int32_t root = PropOffset(cdo, "RootComponent");
+            const int32_t tick = PropOffset(cdo, "PrimaryActorTick");
+            ms2::Logf("  self-test: PropOffset(Actor CDO, \"RootComponent\")    = 0x%X  (SDK 0x1B8) %s",
+                      root, root == 0x1B8 ? "MATCH" : "MISMATCH <<<");
+            ms2::Logf("  self-test: PropOffset(Actor CDO, \"PrimaryActorTick\") = 0x%X  (SDK 0x28)  %s",
+                      tick, tick == 0x28 ? "MATCH" : "MISMATCH <<<");
+            if (root != 0x1B8)
+                ms2::Logf("  self-test: if BOTH offsets are wrong the ChildProperties walk is broken; "
+                          "if only one is, the SDK is stale for this build");
+        } else {
+            ms2::Log("  self-test: Actor has no readable class-default-object");
+        }
+    }
+
+    ms2::Logf("  self-test: ProcessEvent hook %s, %llu calls so far, tick hook %s",
+              g_peHooked ? "ACTIVE" : "NOT INSTALLED",
+              (unsigned long long)g_peCount.load(),
+              g_tickHooked ? "ACTIVE" : "not installed");
+    ReportTopFunctions();
+    ms2::Log("---- end self-test ----");
+}
+
+// ---------------------------------------------------------------------------
+// Strings: FName -> string, FString -> utf8, FText -> string
+// ---------------------------------------------------------------------------
+std::string ToString(FName name) { return NameToString(name); }
+
+std::string ToUtf8(const FString& s) {
+    if (!s.Data || s.Num <= 0) return std::string();
+    int32 n = s.Num;
+    if (n > 65536) n = 65536;          // a sane cap: no name or asset path is longer
+    std::wstring w((size_t)n, L'\0');
+    if (!SafeRead(s.Data, &w[0], (size_t)n * sizeof(wchar_t))) return std::string();
+    // The engine always NUL-terminates; trust Num, not a scan.
+    while (!w.empty() && w.back() == 0) w.pop_back();
+    if (w.empty()) return std::string();
+    const int need = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), nullptr, 0, nullptr, nullptr);
+    if (need <= 0) return std::string();
+    std::string out((size_t)need, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, w.c_str(), (int)w.size(), &out[0], need, nullptr, nullptr);
+    return out;
+}
+
+namespace {
+// FText is a shared reference (8-byte pointer) plus a flags word: 16 bytes.  It is
+// passed BY VALUE in a UFunction's parameter block, and the engine's own thunk does
+// the copy-construct -- so all this layer has to do is put the 16 bytes there.
+struct FTextBytes {
+    uint8_t b[16];
+};
+constexpr int32 kFTextBytes = 16;
+
+std::atomic<int> g_textConvState{0};    // 0 = untried, 1 = works, 2 = unavailable
+}  // namespace
+
+std::string TextToString(void* ftext) {
+    if (!ftext) return std::string();
+    if (g_textConvState.load(std::memory_order_acquire) == 2) return std::string();
+
+    UClass* lib = FindClass("KismetTextLibrary");
+    if (!lib) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: KismetTextLibrary not found -- FText conversion is unavailable");
+        return std::string();
+    }
+    UObject* cdo = GetCDO(lib);
+    if (!cdo) {
+        g_textConvState.store(2);
+        return std::string();
+    }
+    UFunction* fn = FindFunction(cdo, "Conv_TextToString");
+    if (!fn) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: KismetTextLibrary.Conv_TextToString not found");
+        return std::string();
+    }
+    if (PropOffsetStruct((UStruct*)fn, "InText") < 0) {
+        if (g_textConvState.exchange(2) != 2)
+            ms2::Log("TextToString: Conv_TextToString has no InText parameter");
+        return std::string();
+    }
+
+    FTextBytes box;
+    memset(&box, 0, sizeof(box));
+    if (!SafeRead(ftext, box.b, sizeof(box.b))) return std::string();
+
+    Params p(fn);
+    if (!p.data()) return std::string();
+    p.Set<FTextBytes>("InText", box);
+    if (!Call(cdo, fn, p.data())) {
+        g_textConvState.store(2);
+        return std::string();
+    }
+    // The returned FString is engine-allocated and is deliberately NOT freed
+    // (there is no verified Free to pair with this build's allocator).
+    const FString ret = p.Get<FString>("ReturnValue");
+    g_textConvState.store(1);
+    return ToUtf8(ret);
+}
+
+// ---------------------------------------------------------------------------
+// TMap / TSet iteration
+//
+// UE5.6's TMap<K,V> is a TSet<TPair<K,V>>, which is:
+//
+//   TSparseArray<TSparseArrayElementOrFreeListLink<TPair<K,V>>>
+//     +0x00 TArray<Element> Data        (ptr, ArrayNum, ArrayMax)
+//     +0x10 TBitArray       AllocationFlags (TArray<uint32> ptr,num,max; NumBits)
+//     +0x28 int32 FirstFreeIndex, +0x2C NumFreeIndices
+//   followed by the hash (int32 HashSize, element ids) which this never touches.
+//
+// One element = the pair, padded to the array's alignment, followed by HashNextId
+// (int32) and HashIndex (int32): stride = Align(sizeof(pair)) + 8.  Key and value
+// offsets come from the FMapProperty's FScriptMapLayout / KeyProp / ValueProp; for
+// the raw form the caller supplies the two sizes.
+//
+// THE HARD RULE: an element is only ever touched after its slot is proven live
+// (allocation-flag bit) or its key is proven to be a real FName/FString, and every
+// read goes through SafeRead.  A wrong stride or a stale map therefore yields
+// "fewer rows", never a fault.
+// ---------------------------------------------------------------------------
+namespace {
+
+constexpr uint32 kOffMapPairNum   = 0x08;
+constexpr uint32 kOffMapPairMax   = 0x0C;
+constexpr uint32 kOffMapFlagsPtr  = 0x10;
+constexpr uint32 kOffMapFlagsNum  = 0x18;
+constexpr uint32 kOffMapFlagsBits = 0x20;
+constexpr uint32 kOffFieldClass   = 0x08;   // FField::ClassPrivate
+constexpr uint32 kOffMapLayoutK   = 0x70;   // FScriptMapLayout::KeyOffset   (int32)
+constexpr uint32 kOffMapLayoutV   = 0x74;   // FScriptMapLayout::ValueOffset (int32)
+constexpr uint32 kOffMapKeyProp   = 0x78;   // FMapProperty::KeyProp
+constexpr uint32 kOffMapValProp   = 0x80;   // FMapProperty::ValueProp
+
+int32 AlignUp(int32 v, int32 a) {
+    if (a <= 1) return v;
+    return ((v + a - 1) / a) * a;
+}
+
+// A "plausible address" WITHOUT the 8-byte alignment requirement ue::PlausiblePtr
+// imposes.  It is needed here because a TMap element is only 4-byte aligned once
+// the stride is not a multiple of 8 (TPair<FName,int32> is 20 bytes), and a
+// TArray<uint32> bit-allocation may be 4-aligned too.  Alignment is not evidence of
+// anything for these pointers; the bounds and the SEH calls are.
+bool MapAddrOk(const void* p) {
+    const uintptr_t v = reinterpret_cast<uintptr_t>(p);
+    return v >= 0x10000 && v < 0x00007FFFFFFFFFFFULL;
+}
+
+struct MapInfo {
+    const uint8_t* elem = nullptr;
+    int32 num = 0;
+    int32 stride = 0;
+    int32 keyOff = 0, keySize = 0;
+    int32 valueOff = 0, valueSize = 0;
+    const uint32* flags = nullptr;
+    int32 flagWords = 0;
+    int32 numBits = 0;
+};
+
+// The FField class name of a property ("MapProperty", "StructProperty", ...).
+// FField::ClassPrivate -> FFieldClass, whose first member is an FName.
+std::string FieldClassOf(FProperty* p) {
+    if (!PlausiblePtr(p)) return std::string();
+    void* cls = nullptr;
+    if (!Read((const uint8_t*)p + kOffFieldClass, cls) || !PlausiblePtr(cls)) return std::string();
+    FName n;
+    if (!Read(cls, n)) return std::string();
+    return NameToString(n);
+}
+
+// A key is "believable" when it decodes as the type it claims to be.  Used only on
+// the fallback path (no usable allocation flags) and when picking a stride.
+bool KeyLooksValid(const uint8_t* key, int32 keySize) {
+    if (!key) return false;
+    if (keySize == 8) {                       // FName
+        FName n;
+        if (!SafeRead(key, &n, sizeof(n))) return false;
+        if (n.ComparisonIndex == 0) return false;
+        if (n.ComparisonIndex > 0x08000000u) return false;   // not a plausible name id
+        const std::string s = NameToString(n);
+        return !s.empty() && s[0] != '<';
+    }
+    if (keySize == 16) {                      // FString
+        FString s;
+        if (!SafeRead(key, &s, sizeof(s))) return false;
+        if (s.Num < 0 || s.Num > 4096) return false;
+        if (s.Max < s.Num) return false;
+        if (s.Num > 0 && !PlausiblePtr(s.Data)) return false;
+        return true;
+    }
+    return true;                              // unknown key type: cannot judge
+}
+
+bool SlotAllocated(const MapInfo& mi, int32 i) {
+    if (mi.flags && mi.numBits == mi.num) {
+        const int32 word = i >> 5;
+        if (word < 0 || word >= mi.flagWords) return false;
+        uint32 w = 0;
+        if (!Read(mi.flags + word, w)) return false;
+        return (w & (1u << (i & 31))) != 0;
+    }
+    FName n;
+    if (!Read(mi.elem + (size_t)i * mi.stride + mi.keyOff, n)) return false;
+    return KeyLooksValid((const uint8_t*)&n, mi.keySize);
+}
+
+// Read the sparse-array header.  Returns false (and logs nothing) for anything
+// that does not look like a TMap, which is the normal case for a mistyped property.
+bool ReadMapInfo(const void* mapAddr, int32 keyOff, int32 keySize, int32 valueOff,
+                 int32 valueSize, MapInfo* mi) {
+    if (!MapAddrOk(mapAddr) || !mi) return false;
+    memset(mi, 0, sizeof(*mi));
+
+    const uint8_t* base = (const uint8_t*)mapAddr;
+    int32 num = 0, max = 0;
+    if (!Read(base + kOffMapPairNum, num) || !Read(base + kOffMapPairMax, max)) return false;
+    if (num < 0 || max < 0 || num > max || max > (1 << 22)) return false;
+
+    const uint8_t* data = nullptr;
+    if (!Read(base, data)) return false;
+    if (num > 0 && !MapAddrOk(data)) return false;
+
+    // Allocation flags: only trusted when the sparse array's own invariant holds
+    // (AllocationFlags.Num() == Data.Num()); otherwise the keys themselves decide.
+    const uint32* flags = nullptr;
+    int32 flagWords = 0, numBits = 0;
+    if (Read(base + kOffMapFlagsPtr, flags) && Read(base + kOffMapFlagsNum, flagWords) &&
+        Read(base + kOffMapFlagsBits, numBits)) {
+        if (numBits == num && flagWords >= 0 && flagWords == (num + 31) / 32 &&
+            flagWords <= (1 << 22) && (flagWords == 0 || MapAddrOk(flags))) {
+            mi->flags = flags;
+            mi->flagWords = flagWords;
+            mi->numBits = numBits;
+        }
+    }
+
+    mi->elem = data;
+    mi->num = num;
+    mi->keyOff = keyOff < 0 ? 0 : keyOff;
+    mi->keySize = keySize;
+    mi->valueOff = valueOff;
+    mi->valueSize = valueSize;
+    if (mi->keySize <= 0 || mi->keySize > 0x400 || mi->valueSize <= 0 || mi->valueSize > 0x400)
+        return false;
+    if (mi->valueOff < mi->keyOff) return false;
+    if (mi->keyOff + mi->keySize > mi->valueOff) return false;   // overlap: not a pair
+
+    const int32 pairEnd = mi->valueOff + mi->valueSize;
+    if (pairEnd > 0x800) return false;
+
+    // Pick the element stride.  Both candidates are the pair padded to 4 or to 8,
+    // plus the two int32 the sparse array stores after it; the real one is decided
+    // by which of them decodes as real keys.
+    const int32 s4 = AlignUp(pairEnd, 4) + 8;
+    const int32 s8 = AlignUp(pairEnd, 8) + 8;
+    mi->stride = s4;
+    if (s8 != s4) {
+        MapInfo probe = *mi;
+        auto score = [&probe](int32 stride) {
+            probe.stride = stride;
+            int good = 0, seen = 0;
+            for (int32 i = 0; i < probe.num && seen < 8; ++i) {
+                if (probe.flags) {   // probe is shallow-copied; SlotAllocated reads it
+                    const int32 word = i >> 5;
+                    if (word >= probe.flagWords) break;
+                    uint32 w = 0;
+                    if (!Read(probe.flags + word, w)) break;
+                    if (!(w & (1u << (i & 31)))) continue;
+                }
+                ++seen;
+                const uint8_t* key = probe.elem + (size_t)i * stride + probe.keyOff;
+                if (KeyLooksValid(key, probe.keySize)) ++good;
+            }
+            return good;
+        };
+        const int good4 = score(s4);
+        const int good8 = score(s8);
+        if (good8 > good4) mi->stride = s8;
+    }
+    return true;
+}
+
+bool IterateMap(MapInfo& mi, const std::function<bool(void*, void*)>& fn) {
+    if (!fn || !mi.elem || mi.num <= 0 || mi.stride <= 0) return false;
+    for (int32 i = 0; i < mi.num; ++i) {
+        if (!SlotAllocated(mi, i)) continue;
+        const uint8_t* el = mi.elem + (size_t)i * mi.stride;
+        if (!MapAddrOk(el)) break;             // walked off the allocation
+        if (!fn((void*)(el + mi.keyOff), (void*)(el + mi.valueOff))) break;
+    }
+    return true;
+}
+
+// Does this property already have the key?  `found` reports the value slot.
+bool MapFindKey(UObject* o, const char* prop, const char* key, bool fnameKey, void** valueSlot) {
+    if (valueSlot) *valueSlot = nullptr;
+    if (!o || !prop || !key) return false;
+    UClass* c = GetClass(o);
+    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    if (!PlausiblePtr(p)) return false;
+
+    int32 keyOff = 0, valueOff = 0, keySize = 0, valueSize = 0;
+    if (!Read((const uint8_t*)p + kOffMapLayoutK, keyOff)) return false;
+    if (!Read((const uint8_t*)p + kOffMapLayoutV, valueOff)) return false;
+    FProperty* kp = nullptr;
+    FProperty* vp = nullptr;
+    if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+    if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+    if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+    if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+
+    MapInfo mi;
+    if (keyOff < 0 || keyOff > 0x100) keyOff = 0;
+    if (valueOff <= keyOff) valueOff = AlignUp(keySize, 8);
+    const int32_t mapOff = PropOffset(o, prop);
+    if (mapOff < 0) return false;
+    if (!ReadMapInfo((const uint8_t*)o + mapOff, keyOff, keySize, valueOff, valueSize, &mi))
+        return false;
+
+    bool hit = false;
+    IterateMap(mi, [&](void* k, void* v) -> bool {
+        if (fnameKey) {
+            FName want = MakeName(key);
+            FName got;
+            if (!want.ComparisonIndex) return false;
+            if (!SafeRead(k, &got, sizeof(got))) return false;
+            if (got == want) {
+                if (valueSlot) *valueSlot = v;
+                hit = true;
+                return false;
+            }
+        } else {
+            FString got;
+            if (!SafeRead(k, &got, sizeof(got))) return true;
+            if (ToUtf8(got) == key) {
+                if (valueSlot) *valueSlot = v;
+                hit = true;
+                return false;
+            }
+        }
+        return true;
+    });
+    return hit;
+}
+
+// Two separate rate limiters so a geometry warning cannot silence the "the key is
+// not in the map" warning (and the other way round).
+std::atomic<int> g_mapGeomWarned{0};
+std::atomic<int> g_mapAddWarned{0};
+
+}  // namespace
+
+bool MapForEach(UObject* o, const char* prop, std::function<bool(void* key, void* value)> fn) {
+    if (!o || !prop || !fn) return false;
+
+    // Locate the property and decide whether it really is a map.
+    FProperty* p = nullptr;
+    {
+        UClass* c = GetClass(o);
+        p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
+    }
+    if (!PlausiblePtr(p)) return false;
+
+    const std::string cls = FieldClassOf(p);
+    if (!cls.empty()) {
+        if (cls != "MapProperty") {
+            // Every other FProperty subclass is definitely NOT a TMap.  Anything
+            // else (an empty or unrecognisable name) falls through to the geometry
+            // check below rather than silently disabling the caller's feature.
+            static const char* const kNotMap[] = {
+                "StructProperty", "ObjectProperty", "WeakObjectProperty", "ClassProperty",
+                "InterfaceProperty", "ArrayProperty", "SetProperty", "BoolProperty",
+                "IntProperty", "Int8Property", "Int16Property", "Int64Property",
+                "UInt16Property", "UInt32Property", "UInt64Property", "FloatProperty",
+                "DoubleProperty", "NameProperty", "StrProperty", "TextProperty",
+                "ByteProperty", "EnumProperty", "DelegateProperty", "MulticastDelegateProperty",
+                "MulticastInlineDelegateProperty", "MulticastSparseDelegateProperty",
+                "FieldPathProperty", "SoftObjectProperty", "SoftClassProperty",
+                "LazyObjectProperty", "ObjectPtrProperty", "ClassPtrProperty"};
+            for (const char* n : kNotMap) {
+                if (cls == n) return false;
+            }
+            if (g_mapGeomWarned.fetch_add(1) < 3) {
+                ms2::Logf("MapForEach(\"%s\"): property class is '%s', not MapProperty -- "
+                          "trying the KeyProp/ValueProp geometry anyway", prop, cls.c_str());
+            }
+        }
+    } else if (g_mapGeomWarned.fetch_add(1) < 1) {
+        ms2::Logf("MapForEach(\"%s\"): the property's FField class did not resolve -- "
+                  "falling back to the KeyProp/ValueProp geometry", prop);
+    }
+
+    int32 keyOff = 0, valueOff = 0, keySize = 0, valueSize = 0;
+    Read((const uint8_t*)p + kOffMapLayoutK, keyOff);
+    Read((const uint8_t*)p + kOffMapLayoutV, valueOff);
+    FProperty* kp = nullptr;
+    FProperty* vp = nullptr;
+    if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
+    if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
+    if (!Read((const uint8_t*)kp + kOffPropElementSize, keySize)) return false;
+    if (!Read((const uint8_t*)vp + kOffPropElementSize, valueSize)) return false;
+
+    const int32_t off = PropOffset(o, prop);
+    if (off < 0) return false;
+    if (keyOff < 0 || keyOff > 0x100) keyOff = 0;
+    if (valueOff <= keyOff) valueOff = AlignUp(keySize, 8);
+
+    MapInfo mi;
+    if (!ReadMapInfo((const uint8_t*)o + off, keyOff, keySize, valueOff, valueSize, &mi)) return false;
+    return IterateMap(mi, fn);
+}
+
+bool MapForEachRaw(const void* mapAddr, std::function<bool(void* key, void* value)> fn) {
+    // The FName-keyed shape every map reached this way has (FSpartaMapInt/Bool).
+    return MapForEachRaw(mapAddr, 8, 4, std::move(fn));
+}
+
+bool MapForEachRaw(const void* mapAddr, int32 keySize, int32 valueSize,
+                   std::function<bool(void* key, void* value)> fn) {
+    if (!fn) return false;
+    const int32 keyOff = 0;
+    const int32 valueOff = AlignUp(keySize, valueSize >= 8 ? 8 : (valueSize >= 4 ? 4 : 1));
+    MapInfo mi;
+    if (!ReadMapInfo(mapAddr, keyOff, keySize, valueOff, valueSize, &mi)) return false;
+    return IterateMap(mi, fn);
+}
+
+bool MapAddNameInt(UObject* o, const char* prop, const char* key, int32 value) {
+    void* slot = nullptr;
+    if (MapFindKey(o, prop, key, /*fnameKey*/ true, &slot) && slot) {
+        return WriteMem(slot, &value, sizeof(value));
+    }
+    if (g_mapAddWarned.fetch_add(1) < 3) {
+        ms2::Logf("MapAddNameInt(%s, \"%s\"): key is not in the map.  Growing a TMap needs the "
+                  "game's allocator and a rehash, which this layer cannot do safely -- the write "
+                  "is skipped (the value stays at its saved default)", prop ? prop : "?", key ? key : "?");
+    }
+    return false;
+}
+
+bool MapAddStrInt(UObject* o, const char* prop, const char* key, int32 value) {
+    void* slot = nullptr;
+    if (MapFindKey(o, prop, key, /*fnameKey*/ false, &slot) && slot) {
+        return WriteMem(slot, &value, sizeof(value));
+    }
+    if (g_mapAddWarned.fetch_add(1) < 3) {
+        ms2::Logf("MapAddStrInt(%s, \"%s\"): key is not in the map; see MapAddNameInt", prop ? prop : "?",
+                  key ? key : "?");
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// Test-only: run the module's own scanner over a file image.  See ms2_ue_test.h.
+//
+// This is what makes the AOB patterns checkable without the game: the same
+// ParseAob/ScanAob/rel32 arithmetic the DLL uses at run time is pointed at a
+// buffer holding the real exe's .text, and the resolved RVA is compared to the
+// independently recovered one.
+// ---------------------------------------------------------------------------
+namespace detail {
+
+namespace {
+
+int CountMatches(const AobPattern& p) {
+    if (!g_textLo || !g_textHi || p.len <= 0) return 0;
+    int anchor = 0;
+    while (anchor < p.len && p.mask[anchor]) ++anchor;
+    if (anchor >= p.len) return 0;
+    if ((size_t)(g_textHi - g_textLo) <= (size_t)p.len) return 0;
+
+    int n = 0;
+    uint8_t* cur = g_textLo;
+    uint8_t* end = g_textHi - p.len;
+    while (cur <= end) {
+        uint8_t* found = (uint8_t*)memchr(cur, p.bytes[anchor], (size_t)(end - cur) + 1);
+        if (!found) break;
+        uint8_t* start = found - anchor;
+        if (start >= g_textLo) {
+            int i = 0;
+            for (; i < p.len; ++i)
+                if (!p.mask[i] && start[i] != p.bytes[i]) break;
+            if (i == p.len) ++n;
+        }
+        cur = found + 1;
+    }
+    return n;
+}
+
+}  // namespace
+
+int RunPatternSelfCheck(const void* imageBase, ScanCheck* out, int max) {
+    if (!imageBase || !out || max <= 0) return 0;
+
+    // Save and restore the live module's view of .text: in the test host nothing
+    // is initialised, but this must not be able to disturb a real session.
+    uint8_t* saveLo = g_textLo;
+    uint8_t* saveHi = g_textHi;
+
+    int checked = 0;
+    if (FindTextRange((uint8_t*)imageBase, &g_textLo, &g_textHi)) {
+        struct Row { const char* name; const char* aob; int disp; };
+        const Row rows[] = {
+            {"ProcessEvent", kSigProcessEvent, -1},
+            {"AppendString", kSigAppendString, -1},
+            {"EngineTick",   kSigEngineTick,   -1},
+            {"GObjects",     kSigGObjects,      3},
+        };
+        for (const Row& r : rows) {
+            if (checked >= max) break;
+            AobPattern p;
+            if (!ParseAob(r.aob, p)) continue;
+            ScanCheck c;
+            c.name = r.name;
+            c.matches = CountMatches(p);
+            uint8_t* hit = nullptr;
+            if (ScanAob(p, &hit)) {
+                uintptr_t resolved = (uintptr_t)hit;
+                if (r.disp >= 0) {
+                    int32_t d = 0;
+                    if (SafeRead(hit + r.disp, &d, sizeof(d)))
+                        resolved = (uintptr_t)(hit + r.disp + 4 + d);
+                }
+                c.rva = resolved - (uintptr_t)imageBase;
+            }
+            out[checked++] = c;
+        }
+    }
+
+    g_textLo = saveLo;
+    g_textHi = saveHi;
+    return checked;
+}
+
+}  // namespace detail
+
+}  // namespace ue

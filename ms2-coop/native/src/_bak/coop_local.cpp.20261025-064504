@@ -1,0 +1,1192 @@
+// coop_local.cpp -- coop::local: what *I* am (docs/NATIVE-PORT.md section 3.2)
+//
+// Ported from mod\CoopMod\Scripts\main.lua (READ-ONLY reference), Lua ranges:
+//   609-627   computeMyBody
+//   628-651   the 15 Hz trait caches: refreshChars / tickChars / tickTails / SPN_ALIAS
+//   652-671   WEAPON table + WEAPON_SPAWN_ENABLED / WS_ENABLED (the toggles are
+//             net's struct now; the WEAPON-owned half stays with coop_appear)
+//   673-700   engineClass / iterArray / assetPath
+//   702-785   localWeaponInfo  (the SENDER half of the weapon replication)
+//   1453-1482 segmentsOf
+//   1484-1505 OWN_M / ownMontage
+//   1507-1564 PLAY_READY / widgetOnScreen / readyTick
+//   1984-2017 animInstrument
+//   2018-2041 judge
+//   2043-2054 peerWatchdog
+// plus local::Capture() (the body of sendOwn, main.lua:1566-1606, minus the wire
+// write -- net::Publish() owns that) and local::WeaponInfo().
+//
+// ===========================================================================
+// CONTRACT-REQUESTs  (all three were folded into the shared headers by the
+// integrator; the notes are kept so the reasoning is not lost)
+// ===========================================================================
+// (1) RESOLVED: ue::ToString(FName) is declared in ms2_ue.h and implemented in
+//     ms2_ue.cpp (FName::AppendString + the "_<Number>" suffix).
+//
+// (2) ue::GetBool(UObject*, const char*) exists and is mask-aware. This module
+//     still does NOT read bHiddenInGame through it: it relies on
+//     USceneComponent::IsVisible(), which the engine computes as
+//     `bVisible && !bHiddenInGame`, so the Lua's `vis == false or hid == true`
+//     filter is preserved exactly. The one-time "own weapon" survey log prints the
+//     raw byte and marks it approximate.
+//
+// (3) RESOLVED: CombatState::spawnAlias is a string -> string map (StrStrMap,
+//     enemy tail -> "SP_<spawner tail>"), filled by coop_combat's spawner scan and
+//     folded into tickTails below (main.lua:646-649) -- one table, two readers,
+//     still the sanctioned one-way module 5 -> module 2 direction.
+//
+// (4) local::Capture()'s bool cannot express Lua's THIRD outcome. sendOwn has
+//     three: not ready -> write {"rdy":0}; ready but no/invalid pawn or no
+//     location -> write NOTHING (main.lua:1572-1577); otherwise the full shape.
+//     This module returns false only for the first (net writes the rdy shape with
+//     this sq) and, for the second, leaves every hot field untouched and returns
+//     true, so net rewrites a byte-identical line with an UNCHANGED "sq" -- which
+//     is what the receiver observes when the Lua writes nothing (the parsed sq
+//     does not advance, so the peer sees no fresh packet). net::Publish() no
+//     longer touches sq at all: THIS module is the single owner of that increment.
+//
+// (5) RESOLVED: local::RefreshChars() is declared in coop_state.h's
+//     `namespace local` block and defined at the bottom of this file;
+//     combat::RefreshChars() is a one-line forwarder to it.
+//
+// ===========================================================================
+// Fragile behaviours this file must keep (docs/NATIVE-PORT.md section 4)
+//   * 6  PLAY_READY needs 5 s of every SOFT check (kReadyHold), is lost only on a
+//        HARD signal, and uses the WALL clock (Lua os.time -> net::Wall, NOT
+//        net::Now): the world clock restarts with every map load.
+//   * 42 a hard ready loss sets LOCAL_HOLD = wall + 3 (net::SetLocalHold).
+//   * 45 refreshChars rebuilds the whole "Character" cache at 15 Hz; it is the
+//        only FindAllOf("Character") on the fast path.
+//   * 30 GetNumBones() is only touched at 2 Hz (computeMyBody).
+//   * 7  net::Now() for play heads (montage position is the game's own clock);
+//        net::Wall() only where the Lua used os.time().
+// ===========================================================================
+
+#include "ms2_ue.h"     // first: this is what gives ue::FVector/FRotator their layout
+#include "coop_state.h"
+
+#include <cmath>
+#include <cstring>
+#include <algorithm>
+#include <string>
+#include <vector>
+
+namespace coop {
+namespace local {
+namespace {
+
+using ue::UObject;
+using ue::UClass;
+using ue::UFunction;
+
+// ---------------------------------------------------------------------------
+// module globals (the Lua globals of the same names)
+// ---------------------------------------------------------------------------
+
+// main.lua:1456-1457 montageSegs / montageWarned, keyed by fullname(montage).
+struct MontageSeg {
+    std::string path;
+    double start = 0.0;   // StartPos
+    double a0 = 0.0;      // AnimStartTime
+    double a1 = 0.0;      // AnimEndTime
+    double rate = 1.0;    // AnimPlayRate
+    int loops = 1;        // LoopingCount
+};
+struct SegCacheRow {
+    std::string key;
+    std::vector<MontageSeg> segs;
+};
+std::vector<SegCacheRow> g_montageSegs;
+StrSet g_montageWarned;
+
+// main.lua:1484 OWN_M = { obj = nil, pos = -1, id = 0 }
+struct OwnMontage {
+    UObject* obj = nullptr;
+    double pos = -1.0;
+    int id = 0;
+};
+OwnMontage g_ownM;
+
+// main.lua:658 WPN_LOGGED (one-time per-weapon survey / no-asset dedupe)
+StrSet g_wpnLogged;
+
+// main.lua:636 SPN_ALIAS now lives in the shared state
+// (state().combat.spawnAlias, a string -> string map) so that this module and
+// coop_combat read one table instead of each keeping a copy.
+
+// ue::UFunction* cache keyed by (object class, function name). UFunctions belong
+// to classes, which live for the process, so this only has to be cleared for
+// hygiene (Reset()). The `name` argument must be a string literal.
+struct FnRow {
+    UClass* cls = nullptr;
+    std::string name;
+    UFunction* fn = nullptr;
+};
+std::vector<FnRow> g_fns;
+
+// Sanity caps -- crash guards, not behaviour.
+constexpr int32_t kMaxMontageTracks = 64;    // FSlotAnimationTrack count
+constexpr int32_t kMaxAnimSegments  = 256;   // FAnimSegment count per track
+constexpr int32_t kMaxComponents    = 256;   // K2_GetComponentsByClass results
+constexpr int32_t kMaxWeapons       = 64;    // SpartaWeapon actors scanned
+constexpr int32_t kMaxSpawners      = 512;   // combat::spawners read for aliases
+
+// ---------------------------------------------------------------------------
+// string helpers (the Lua patterns this file used)
+// ---------------------------------------------------------------------------
+
+bool IsAlphaByte(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+// s:find(needle, 1, true) ~= nil
+bool HasSub(const std::string& s, const char* needle) {
+    if (!needle || !*needle) return true;
+    return s.find(needle) != std::string::npos;
+}
+
+// Lua: s:match("^%a*" .. suffix) -- any number of letters, then `suffix`.
+// `%a*` is greedy, so every occurrence has to be tried; only "^" anchors it.
+bool LeadAlphaThen(const std::string& s, const char* suffix) {
+    if (!suffix || !*suffix) return false;
+    for (std::size_t p = s.find(suffix); p != std::string::npos; p = s.find(suffix, p + 1)) {
+        bool ok = true;
+        for (std::size_t i = 0; i < p; ++i) {
+            if (!IsAlphaByte(s[i])) { ok = false; break; }
+        }
+        if (ok) return true;
+        if (p + 1 >= s.size()) break;
+    }
+    return false;
+}
+
+// Lua: s:match("([^%.]+)$") or "?"
+std::string AfterLastDot(const std::string& s) {
+    const std::size_t p = s.rfind('.');
+    if (p == std::string::npos) return s.empty() ? std::string("?") : s;
+    return (p + 1 < s.size()) ? s.substr(p + 1) : std::string("?");
+}
+
+// Lua: s:match("^(%S+)") or "?"
+std::string FirstToken(const std::string& s) {
+    std::size_t e = 0;
+    while (e < s.size() && s[e] != ' ' && s[e] != '\t' && s[e] != '\n' && s[e] != '\r') ++e;
+    if (e == 0) return "?";
+    return s.substr(0, e);
+}
+
+// Lua tostring(bool)
+const char* BoolStr(bool v) { return v ? "true" : "false"; }
+
+// ---------------------------------------------------------------------------
+// ue:: call helpers. Every one is failure tolerant: a missing property or
+// function returns false, and the caller takes the same path the Lua took after
+// a `safe()`/pcall failure (nil).
+// ---------------------------------------------------------------------------
+
+UFunction* Fn(UObject* o, const char* name) {
+    if (!o || !name) return nullptr;
+    UClass* cls = ue::GetClass(o);
+    if (!cls) return nullptr;
+    for (const FnRow& r : g_fns) {
+        if (r.cls == cls && r.name == name) return r.fn;
+    }
+    FnRow row;
+    row.cls = cls;
+    row.name = name;
+    row.fn = ue::FindFunction(o, name);
+    g_fns.push_back(row);
+    return row.fn;
+}
+
+bool ReadPropRaw(UObject* o, const char* prop, void* dst, std::size_t n) {
+    if (!o || !prop || !dst || n == 0) return false;
+    const int32_t off = ue::PropOffset(o, prop);
+    if (off < 0) return false;
+    return ue::ReadMem(reinterpret_cast<const uint8_t*>(o) + off, dst, n);
+}
+
+bool ReadObjProp(UObject* o, const char* prop, UObject** out) {
+    if (out) *out = nullptr;
+    UObject* p = nullptr;
+    if (!ReadPropRaw(o, prop, &p, sizeof(p))) return false;
+    if (out) *out = p;
+    return true;
+}
+
+// TArray<T> layout: { Data, Num, Max } -- 16 bytes for every element type.
+struct RawArray {
+    void* Data = nullptr;
+    int32_t Num = 0;
+    int32_t Max = 0;
+};
+
+bool ReadArrayProp(UObject* o, const char* prop, RawArray* out) {
+    if (out) *out = RawArray();
+    return ReadPropRaw(o, prop, out, sizeof(RawArray));
+}
+
+// Copies a TArray<UObject*> into a vector, guarded element by element.
+bool ReadObjArray(const RawArray& arr, std::vector<UObject*>* out, int32_t cap) {
+    if (!out) return false;
+    out->clear();
+    if (!arr.Data || arr.Num <= 0) return true;
+    if (arr.Num > cap) return false;                  // bogus Num: refuse, do not fault
+    out->reserve(static_cast<std::size_t>(arr.Num));
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        UObject* e = nullptr;
+        if (!ue::ReadMem(reinterpret_cast<const uint8_t*>(arr.Data) +
+                             static_cast<std::size_t>(i) * sizeof(UObject*),
+                         &e, sizeof(e))) {
+            return false;
+        }
+        out->push_back(e);
+    }
+    return true;
+}
+
+bool ReadObjArrayProp(UObject* o, const char* prop, std::vector<UObject*>* out, int32_t cap) {
+    RawArray arr;
+    if (!ReadArrayProp(o, prop, &arr)) {
+        if (out) out->clear();
+        return false;
+    }
+    return ReadObjArray(arr, out, cap);
+}
+
+bool CallBool(UObject* o, const char* name, bool* out) {
+    if (out) *out = false;
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = p.Get<bool>("ReturnValue");
+    return true;
+}
+
+bool CallI32(UObject* o, const char* name, int32_t* out) {
+    if (out) *out = 0;
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = p.Get<int32_t>("ReturnValue");
+    return true;
+}
+
+bool CallFloat(UObject* o, const char* name, double* out) {
+    if (out) *out = 0.0;
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = static_cast<double>(p.Get<float>("ReturnValue"));
+    return true;
+}
+
+bool CallObj(UObject* o, const char* name, UObject** out) {
+    if (out) *out = nullptr;
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = p.Get<UObject*>("ReturnValue");
+    return true;
+}
+
+bool CallVec(UObject* o, const char* name, ue::FVector* out) {
+    if (out) *out = ue::FVector();
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = p.Get<ue::FVector>("ReturnValue");
+    return true;
+}
+
+bool CallRot(UObject* o, const char* name, ue::FRotator* out) {
+    if (out) *out = ue::FRotator();
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = p.Get<ue::FRotator>("ReturnValue");
+    return true;
+}
+
+// obj:Montage_GetPosition(montage) / obj:Montage_GetPlayRate(montage)
+bool CallFloatArg(UObject* o, const char* name, const char* arg, UObject* value, double* out) {
+    if (out) *out = 0.0;
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    p.Set(arg, value);
+    if (!ue::Call(o, fn, p.data())) return false;
+    if (out) *out = static_cast<double>(p.Get<float>("ReturnValue"));
+    return true;
+}
+
+// obj:K2_GetComponentsByClass(cls) -> TArray<UActorComponent*>
+// ("/Script/Engine.Actor.K2_GetComponentsByClass(ComponentClass)")
+// `value` is a UClass*; net::EngineClass hands those back as ue::UObject*, which
+// is why it is typed that way here.
+bool CallObjArrayArg(UObject* o, const char* name, const char* arg, UObject* value,
+                     std::vector<UObject*>* out) {
+    if (out) out->clear();
+    UFunction* fn = Fn(o, name);
+    if (!fn) return false;
+    ue::Params p(fn);
+    p.Set(arg, value);
+    if (!ue::Call(o, fn, p.data())) return false;
+    const RawArray arr = p.Get<RawArray>("ReturnValue");
+    return ReadObjArray(arr, out, kMaxComponents);
+}
+
+// main.lua:673 engineClass -- net::EngineClass already caches
+// "/Script/Engine.<name>", so this module keeps no CLS table of its own.
+// (net::EngineClass returns ue::UObject*; the class object is passed straight
+// through to K2_GetComponentsByClass, which takes a TSubclassOf.)
+UObject* EngineClass(const char* shortName) { return net::EngineClass(shortName); }
+
+// main.lua:697 assetPath ("" when there is no /Game/ token)
+std::string AssetPathOf(UObject* o) {
+    if (!o) return std::string();
+    return net::AssetPath(o);
+}
+
+// main.lua:166 locOf, with the failure signal the Lua had (nil)
+bool LocOf(UObject* o, Vec3* out) {
+    if (out) *out = Vec3();
+    if (!net::Valid(o)) return false;
+    ue::FVector v;
+    if (!CallVec(o, "K2_GetActorLocation", &v)) return false;
+    if (out) *out = ToVec3(v);
+    return true;
+}
+
+// main.lua:228 skinnedMeshesOf
+std::vector<UObject*> SkinnedMeshesOf(UObject* actor) {
+    std::vector<UObject*> out;
+    if (!net::Valid(actor)) return out;
+    for (UObject* m : ue::FindAllOf("SkeletalMeshComponent")) {
+        UObject* owner = nullptr;
+        if (CallObj(m, "GetOwner", &owner) && owner == actor) out.push_back(m);
+    }
+    return out;
+}
+
+// main.lua:1514 widgetOnScreen(cls)
+bool WidgetOnScreen(const char* cls) {
+    for (UObject* w : ue::FindAllOf(cls)) {
+        if (!net::Valid(w)) continue;
+        bool inv = false, vis = false;
+        const bool okInv = CallBool(w, "IsInViewport", &inv);
+        const bool okVis = CallBool(w, "IsVisible", &vis);
+        if (okInv && okVis && inv && vis) return true;
+    }
+    return false;
+}
+
+// main.lua:516 streamSources(actor) -- readyTick's "world streaming" soft check.
+struct StreamSource {
+    UObject* comp = nullptr;
+    bool blocking = false;
+};
+
+std::vector<StreamSource> StreamSources(UObject* actor) {
+    std::vector<StreamSource> out;
+    if (!net::Valid(actor)) return out;
+    UObject* cls = net::EngineClass("WorldPartitionStreamingSourceComponent");
+    if (!cls || !net::Valid(cls)) return out;
+    std::vector<UObject*> comps;
+    if (!CallObjArrayArg(actor, "K2_GetComponentsByClass", "ComponentClass", cls, &comps)) {
+        return out;
+    }
+    for (UObject* c : comps) {
+        if (!net::Valid(c)) continue;
+        StreamSource s;
+        s.comp = c;
+        s.blocking = !HasSub(net::FullName(c), "Non Blocking");
+        out.push_back(s);
+    }
+    return out;
+}
+
+// ---------------------------------------------------------------------------
+// main.lua:636-650 refreshChars -- moved out of the anonymous namespace below
+// because coop_state.h declares local::RefreshChars(): this module owns
+// local.tickChars / local.tickTails, and combat::RefreshChars() forwards here.
+// ---------------------------------------------------------------------------
+void SetTail(std::vector<NamedActor>* list, const std::string& tail, UObject* obj) {
+    for (NamedActor& a : *list) {
+        if (a.tail == tail) { a.obj = obj; return; }   // Lua: table[key] = actor
+    }
+    NamedActor row;
+    row.tail = tail;
+    row.obj = obj;
+    list->push_back(row);
+}
+
+bool RefreshCharsImpl() {
+    LocalState& L = state().local;
+    UObject* puppetActor = puppet::Actor();
+
+    L.tickChars = ue::FindAllOf("Character");
+
+    std::vector<NamedActor> tails;
+    tails.reserve(L.tickChars.size());
+    for (UObject* a : L.tickChars) {
+        if (!a) continue;
+        if (a == puppetActor) continue;                 // Lua: if a ~= puppet
+        SetTail(&tails, net::Tail(a), a);
+    }
+
+    // for et,key in pairs(SPN_ALIAS) do tickTails[key] = tickTails[et] end
+    // (main.lua:646-649; the map is combat's, one entry per spawned enemy)
+    for (const StrStr& alias : state().combat.spawnAlias.Items()) {
+        UObject* a = nullptr;
+        for (const NamedActor& row : tails) {
+            if (row.tail == alias.key) { a = row.obj; break; }
+        }
+        if (!a) continue;
+        SetTail(&tails, alias.value, a);
+    }
+
+    L.tickTails.swap(tails);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// main.lua:1458-1482 segmentsOf
+//
+// Layouts are from the Dumper-7 SDK dumped out of THIS build
+// (research\raw\Dumper7\SDK\Engine_structs.hpp):
+//   FSlotAnimationTrack : FName SlotName @0x00, FAnimTrack AnimTrack @0x08, size 0x18
+//   FAnimTrack          : TArray<FAnimSegment> AnimSegments @0x00,            size 0x10
+//   FAnimSegment        : UAnimSequenceBase* AnimReference @0x00,
+//                         float StartPos @0x08, AnimStartTime @0x0C,
+//                         AnimEndTime @0x10, AnimPlayRate @0x14,
+//                         int32 LoopingCount @0x18,                        size 0x20
+// SlotAnimTracks itself is read through reflection (ue::PropOffset), never an
+// offset, so only the two struct strides are pinned here.
+// ---------------------------------------------------------------------------
+constexpr std::size_t kSlotTrackSize      = 0x18;
+constexpr std::size_t kSlotTrackTrackOff  = 0x08;
+constexpr std::size_t kAnimSegmentSize    = 0x20;
+
+struct AnimSegmentRaw {
+    void* AnimReference = nullptr;
+    float StartPos = 0.0f;
+    float AnimStartTime = 0.0f;
+    float AnimEndTime = 0.0f;
+    float AnimPlayRate = 1.0f;
+    int32_t LoopingCount = 1;
+    int32_t Pad = 0;
+};
+
+// Returns by value on purpose: the cache row is a vector member of a growing
+// vector, and a reference into it would dangle after the next insertion.
+std::vector<MontageSeg> SegmentsOf(UObject* m) {
+    const std::string key = net::FullName(m);
+    for (const SegCacheRow& row : g_montageSegs) {
+        if (row.key == key) return row.segs;
+    }
+
+    std::vector<MontageSeg> segs;
+
+    RawArray tracks;
+    if (ReadArrayProp(m, "SlotAnimTracks", &tracks) && tracks.Data && tracks.Num > 0 &&
+        tracks.Num <= kMaxMontageTracks) {
+        const uint8_t* tbase = reinterpret_cast<const uint8_t*>(tracks.Data);
+        for (int32_t t = 0; t < tracks.Num; ++t) {
+            if (!segs.empty()) break;               // Lua: `if #segs > 0 then return end`
+            RawArray animSegs;
+            if (!ue::ReadMem(tbase + static_cast<std::size_t>(t) * kSlotTrackSize + kSlotTrackTrackOff,
+                             &animSegs, sizeof(animSegs))) {
+                break;
+            }
+            if (!animSegs.Data || animSegs.Num <= 0) continue;
+            if (animSegs.Num > kMaxAnimSegments) continue;
+            const uint8_t* sbase = reinterpret_cast<const uint8_t*>(animSegs.Data);
+            for (int32_t s = 0; s < animSegs.Num; ++s) {
+                AnimSegmentRaw raw;
+                if (!ue::ReadMem(sbase + static_cast<std::size_t>(s) * kAnimSegmentSize, &raw,
+                                 sizeof(raw))) {
+                    break;
+                }
+                UObject* ref = reinterpret_cast<UObject*>(raw.AnimReference);
+                if (!ref) continue;
+                const std::string p = AssetPathOf(ref);
+                if (p.empty()) continue;
+                MontageSeg seg;
+                seg.path = p;
+                seg.start = static_cast<double>(raw.StartPos);
+                seg.a0 = static_cast<double>(raw.AnimStartTime);
+                seg.a1 = static_cast<double>(raw.AnimEndTime);
+                seg.rate = static_cast<double>(raw.AnimPlayRate);
+                seg.loops = static_cast<int>(raw.LoopingCount);
+                segs.push_back(seg);
+            }
+        }
+    }
+
+    if (segs.empty() && g_montageWarned.Add(key)) {
+        net::Log("montage without readable segments: %s", key.c_str());
+    }
+
+    SegCacheRow row;
+    row.key = key;
+    row.segs = segs;
+    g_montageSegs.push_back(row);
+    return segs;
+}
+
+// main.lua:1485-1505 ownMontage. False == "no montage under the play head".
+bool OwnMontageOf(UObject* pawn, MontageSig* out) {
+    if (out) *out = MontageSig();
+    if (!net::Valid(pawn)) {
+        g_ownM.obj = nullptr;
+        return false;
+    }
+
+    UObject* m = nullptr;
+    if (!CallObj(pawn, "GetCurrentMontage", &m)) m = nullptr;
+    if (!net::Valid(m)) {
+        g_ownM.obj = nullptr;
+        return false;
+    }
+
+    UObject* mesh = nullptr;
+    ReadObjProp(pawn, "Mesh", &mesh);
+    UObject* inst = nullptr;
+    if (!net::Valid(mesh) || !CallObj(mesh, "GetAnimInstance", &inst) || !inst) return false;
+
+    double pos = 0.0, mrate = 1.0;
+    if (!CallFloatArg(inst, "Montage_GetPosition", "Montage", m, &pos)) pos = 0.0;
+    if (!CallFloatArg(inst, "Montage_GetPlayRate", "Montage", m, &mrate)) mrate = 1.0;
+
+    // a new montage, or the play head went backwards -> a new mid
+    if (g_ownM.obj != m || pos < g_ownM.pos - 0.05) g_ownM.id += 1;
+    g_ownM.obj = m;
+    g_ownM.pos = pos;
+
+    for (const MontageSeg& s : SegmentsOf(m)) {
+        const double r = (std::fabs(s.rate) > 0.001) ? std::fabs(s.rate) : 1.0;
+        const double len = (s.a1 - s.a0 > 0.001) ? (s.a1 - s.a0) : 0.001;
+        const double span = len / r * (s.loops > 1 ? s.loops : 1);
+        if (pos >= s.start && pos < s.start + span) {
+            double localT = std::fmod((pos - s.start) * r, len);
+            if (localT < 0.0) localT += len;               // Lua's % is never negative
+            if (s.rate < 0.0) localT = len - localT;
+            if (out) {
+                out->path = s.path;
+                out->pos = s.a0 + localT;
+                out->rate = r * mrate;
+                out->id = g_ownM.id;
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+// ---------------------------------------------------------------------------
+// main.lua:706-785 localWeaponInfo
+//
+// One mesh of one weapon -> its "wpns" element. False mirrors the Lua `break` of
+// the repeat/until block (skip this mesh, keep going with the next weapon).
+// ---------------------------------------------------------------------------
+bool WeaponMeshPart(UObject* c, UObject* root, const std::string& sock,
+                    std::string* pathOut, std::string* partOut) {
+    if (pathOut) pathOut->clear();
+    if (partOut) partOut->clear();
+
+    const std::string name = net::FullName(c);
+
+    char kind = 0;
+    if (LeadAlphaThen(name, "SkeletalMeshComponent")) kind = 'K';
+    else if (LeadAlphaThen(name, "StaticMeshComponent")) kind = 'S';
+
+    if (!kind) return false;
+
+    // Lua: `if vis == false or hid == true then break end`.
+    // bHiddenInGame is a bitfield, so a raw byte read is wrong (CONTRACT-REQUEST
+    // 2); USceneComponent::IsVisible() already folds it in (`bVisible && !bHidden`),
+    // so the filter above is preserved by the IsVisible() test alone.
+    bool vis = true;
+    const bool okVis = CallBool(c, "IsVisible", &vis);
+    if (okVis && !vis) return false;
+
+    std::string path;
+    if (kind == 'K') {
+        // the four accessors the Lua probes, in the same order
+        if (path.empty()) {
+            UObject* a = nullptr;
+            if (ReadObjProp(c, "SkinnedAsset", &a)) path = AssetPathOf(a);
+        }
+        if (path.empty()) {
+            UObject* a = nullptr;
+            if (CallObj(c, "GetSkeletalMeshAsset", &a)) path = AssetPathOf(a);
+        }
+        if (path.empty()) {
+            UObject* a = nullptr;
+            if (ReadObjProp(c, "SkeletalMeshAsset", &a)) path = AssetPathOf(a);
+        }
+        if (path.empty()) {
+            UObject* a = nullptr;
+            if (ReadObjProp(c, "SkeletalMesh", &a)) path = AssetPathOf(a);
+        }
+    } else {
+        UObject* a = nullptr;
+        if (ReadObjProp(c, "StaticMesh", &a)) path = AssetPathOf(a);
+    }
+
+    if (path.empty()) {
+        const std::string key = "noasset:" + name;
+        if (g_wpnLogged.Add(key)) net::Log("weapon mesh without asset path: %s", name.c_str());
+        return false;
+    }
+
+    ue::FVector l;
+    ue::FRotator r;
+    if (c != root) {
+        if (!ReadPropRaw(c, "RelativeLocation", &l, sizeof(l))) l = ue::FVector();
+        if (!ReadPropRaw(c, "RelativeRotation", &r, sizeof(r))) r = ue::FRotator();
+    }
+
+    if (pathOut) *pathOut = path;
+    if (partOut) {
+        *partOut = net::Fmt("[\"%s\",\"%c\",\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,%.2f]",
+                            path.c_str(), kind, sock.c_str(),
+                            l.X, l.Y, l.Z, r.Pitch, r.Yaw, r.Roll);
+    }
+    return true;
+}
+
+// main.lua:726-742 the one-time per-weapon survey (two log lines).
+void WeaponSurvey(UObject* w, const std::string& sock, const std::vector<UObject*>& list) {
+    const std::string wn = net::FullName(w);
+    if (!g_wpnLogged.Add(wn)) return;
+
+    // comps=[<class>:<name>,...] over K2_GetComponentsByClass(SceneComponent)
+    std::string all;
+    UObject* sceneCls = EngineClass("SceneComponent");
+    if (sceneCls) {
+        std::vector<UObject*> comps;
+        if (CallObjArrayArg(w, "K2_GetComponentsByClass", "ComponentClass", sceneCls, &comps)) {
+            for (UObject* c : comps) {
+                const std::string fnm = net::FullName(c);
+                if (!all.empty()) all += ",";
+                all += FirstToken(fnm);
+                all += ":";
+                all += AfterLastDot(fnm);
+            }
+        }
+    }
+
+    std::string wc;
+    std::vector<UObject*> wcomps;
+    if (ReadObjArrayProp(w, "WeaponComponents", &wcomps, kMaxComponents)) {
+        for (UObject* c : wcomps) {
+            if (!wc.empty()) wc += ",";
+            wc += net::FullName(c);
+        }
+    }
+
+    UObject* add = nullptr;
+    ReadObjProp(w, "AdditionalWeapon", &add);
+
+    net::Log("weapon survey %s: comps=[%s] WeaponComponents=[%s] additional=%s",
+             AfterLastDot(wn).c_str(), all.c_str(), wc.c_str(), net::FullName(add).c_str());
+
+    std::string names;
+    for (UObject* c : list) {
+        const std::string fnm = net::FullName(c);
+        bool vis = false;
+        const bool okVis = CallBool(c, "IsVisible", &vis);
+        uint8_t hidByte = 0;
+        const bool okHid = ReadPropRaw(c, "bHiddenInGame", &hidByte, sizeof(hidByte));
+        if (!names.empty()) names += ",";
+        names += FirstToken(fnm);
+        names += ":";
+        names += AfterLastDot(fnm);
+        names += ":vis=";
+        names += okVis ? BoolStr(vis) : "nil";
+        names += ":hid=";
+        // approximate: the raw flag byte, not the bit (CONTRACT-REQUEST 2)
+        names += okHid ? BoolStr(hidByte != 0) : "nil";
+    }
+    net::Log("own weapon %s socket=%s meshes=%s", AfterLastDot(wn).c_str(), sock.c_str(),
+             names.c_str());
+}
+
+void LocalWeaponInfo(std::string* wpn, std::string* wsock, std::string* wpns) {
+    if (wpn) wpn->clear();
+    if (wsock) wsock->clear();
+    if (wpns) *wpns = "[]";
+
+    UObject* pawn = net::Pawn();
+    if (!pawn) return;
+
+    UObject* meshCls = EngineClass("MeshComponent");
+
+    std::string firstPath, firstSock;
+    std::vector<std::string> parts;
+
+    int32_t scanned = 0;
+    for (UObject* w : ue::FindAllOf("SpartaWeapon")) {
+        if (++scanned > kMaxWeapons) break;
+        if (!net::Valid(w)) continue;                        // isLive(w)
+
+        UObject* holder = nullptr;
+        ReadObjProp(w, "HoldingCharacter", &holder);
+        UObject* parent = nullptr;
+        CallObj(w, "GetAttachParentActor", &parent);
+        if (!((holder && holder == pawn) || (parent && parent == pawn))) continue;
+
+        std::string sock;
+        {
+            UFunction* fn = Fn(w, "GetAttachParentSocketName");
+            if (fn) {
+                ue::Params p(fn);
+                if (ue::Call(w, fn, p.data())) {
+                    sock = ue::ToString(p.Get<ue::FName>("ReturnValue"));
+                }
+            }
+        }
+
+        UObject* root = nullptr;
+        CallObj(w, "K2_GetRootComponent", &root);
+
+        std::vector<UObject*> list;
+        auto add = [&list](UObject* c) {
+            if (!c || !net::Valid(c)) return;
+            for (UObject* e : list) {
+                if (e == c) return;                          // Lua: `seen`
+            }
+            list.push_back(c);
+        };
+        {
+            UObject* wm = nullptr;
+            if (ReadObjProp(w, "WeaponMesh", &wm)) add(wm);
+        }
+        if (meshCls) {
+            std::vector<UObject*> comps;
+            if (CallObjArrayArg(w, "K2_GetComponentsByClass", "ComponentClass", meshCls, &comps)) {
+                for (UObject* c : comps) add(c);
+            }
+        }
+
+        WeaponSurvey(w, sock, list);
+
+        for (UObject* c : list) {
+            std::string path, part;
+            // main.lua:755-760: the Lua's `break` leaves a `repeat ... until true`
+            // (i.e. it SKIPS this component).  Translating it to a C++ break ended
+            // the whole component list at the first mesh without an asset path --
+            // every weapon's skeletal WeaponMesh is such a component on this build,
+            // so `wpn` stayed empty and the WEAPON verdict failed.
+            if (!WeaponMeshPart(c, root, sock, &path, &part)) continue;
+            parts.push_back(part);
+            if (firstPath.empty()) {
+                firstPath = path;
+                firstSock = sock;
+            }
+        }
+    }
+
+    std::sort(parts.begin(), parts.end());
+
+    std::string joined;
+    for (std::size_t i = 0; i < parts.size(); ++i) {
+        if (i) joined += ",";
+        joined += parts[i];
+    }
+
+    if (wpn) *wpn = firstPath;
+    if (wsock) *wsock = firstSock;
+    if (wpns) *wpns = "[" + joined + "]";
+}
+
+}  // namespace
+
+// ===========================================================================
+// public API (coop_state.h section 9)
+// ===========================================================================
+
+// main.lua:638 refreshChars -- THE one implementation.
+//
+// cooperative contract (resolved): coop_state.h declares local::RefreshChars() and
+// combat::RefreshChars() is a one-line forwarder to it. Only THIS module may write
+// state().local.tickChars/tickTails (the Lua has exactly one refreshChars), so
+// whichever module needs the cache rebuilt -- net's WORLD_SETTLE-expiry dance
+// (main.lua:4011, `pcall(refreshChars); pcall(fillHealthCache)`) or the world
+// tests' distances -- calls this one.
+void RefreshChars() { RefreshCharsImpl(); }
+
+// main.lua:611 computeMyBody -- own shell mesh path + own AnimBP path.
+void ComputeBody() {
+    LocalState& L = state().local;
+    L.body.clear();
+    L.apart.clear();
+
+    UObject* pawn = net::Pawn();
+    if (!pawn) return;
+
+    UObject* mesh = nullptr;
+    for (UObject* m : SkinnedMeshesOf(pawn)) {
+        int32_t bones = 0;
+        if (CallI32(m, "GetNumBones", &bones) && bones > 0) { mesh = m; break; }
+    }
+    if (!mesh) return;
+
+    UObject* asset = nullptr;
+    CallObj(mesh, "GetSkeletalMeshAsset", &asset);
+    UObject* animClass = nullptr;
+    CallObj(mesh, "GetAnimClass", &animClass);
+
+    L.body = AssetPathOf(asset);
+    L.apart = AssetPathOf(animClass);
+}
+
+// main.lua:706 every rendered weapon mesh -> first path, its socket, the "wpns"
+// array body. Also refreshes state().local.wpn/wsock/wpns (what Publish reads).
+void WeaponInfo(std::string* wpn, std::string* wsock, std::string* wpns) {
+    std::string w, s, all;
+    LocalWeaponInfo(&w, &s, &all);
+    LocalState& L = state().local;
+    L.wpn = w;
+    L.wsock = s;
+    L.wpns = all;
+    if (wpn) *wpn = w;
+    if (wsock) *wsock = s;
+    if (wpns) *wpns = all;
+}
+
+// main.lua:1526-1564 readyTick -- the PLAY_READY gate.
+bool Ready() {
+    LocalState& L = state().local;
+
+    UObject* pc = net::PC();
+    UObject* pawn = net::Pawn();
+
+    const char* hard = nullptr;
+    if (!pawn || pawn == puppet::Actor() ||
+        !HasSub(net::FullName(pawn), "BP_PlayerCharacter_C")) {
+        hard = "no player pawn";
+    } else if (HasSub(net::FullName(pc), "MainMenu")) {
+        hard = "main menu controller";
+    } else if (HasSub(net::FullName(net::World()), "L_MainMenu")) {
+        hard = "main menu map";
+    } else if (WidgetOnScreen("WBP_LoadingScreen_C") || WidgetOnScreen("WBP_LoadingScreenBase_C")) {
+        hard = "loading screen";
+    }
+
+    const char* soft = hard;
+    if (!soft) {
+        UObject* ctrl = nullptr;
+        ReadObjProp(pawn, "Controller", &ctrl);
+        if (!(ctrl && net::Valid(ctrl) && net::FullName(ctrl) == net::FullName(pc))) {
+            soft = "pawn not possessed";
+        } else {
+            bool ignored = false;
+            const bool okIgn = CallBool(pc, "IsMoveInputIgnored", &ignored);
+            if (okIgn && ignored) {
+                soft = "move input blocked";
+            } else if (WidgetOnScreen("WBP_LoadingScreen_FadeToBlack_C")) {
+                soft = "fading in";
+            } else {
+                // the pawn exists a few seconds before the loading screen goes up:
+                // wait until our own streaming sources report the area loaded
+                for (const StreamSource& e : StreamSources(pawn)) {
+                    bool done = false;
+                    const bool okDone = CallBool(e.comp, "IsStreamingCompleted", &done);
+                    if (okDone && !done) { soft = "world streaming"; break; }
+                }
+            }
+        }
+    }
+
+    const bool was = L.ready;
+
+    // our own world is being torn down / rebuilt (death reload, map travel):
+    // cached actors, the puppet included, are freed under us (main.lua:1551)
+    if (hard) net::SetLocalHold(kLocalHoldSecs);
+
+    if (hard) {
+        L.ready = false;
+        L.readySince = 0;
+    } else if (!L.ready) {
+        if (soft) {
+            L.readySince = 0;
+        } else {
+            // os.time: the world clock restarts with every map load
+            if (L.readySince == 0) L.readySince = net::Wall();
+            if (net::Wall() - L.readySince >= static_cast<int64_t>(kReadyHold)) L.ready = true;
+        }
+    }
+
+    const char* why = L.ready ? "ready" : (hard ? hard : (soft ? soft : "settling"));
+    if (was != L.ready || (!L.ready && L.readyWhy != why)) {
+        net::Log("play ready=%s (%s)", BoolStr(L.ready), why);
+    }
+    L.readyWhy = why;
+    return L.ready;
+}
+
+// main.lua:1484-1505 the montage under the play head, resolved to a segment of
+// its slot track. False == no montage (the Lua returned nil, and the wire then
+// carries mseq:"", mpos:0, mrate:1, mid:0).
+bool CaptureMontage(MontageSig* out) {
+    if (out) *out = MontageSig();
+    UObject* pawn = net::Pawn();
+    if (!pawn) {
+        g_ownM.obj = nullptr;
+        return false;
+    }
+    return OwnMontageOf(pawn, out);
+}
+
+// main.lua:1566-1606 sendOwn, up to (not including) the wire write.
+// False ONLY for the not-ready shape (net then writes {"rdy":0} with this sq).
+bool Capture() {
+    LocalState& L = state().local;
+
+    if (!L.ready) {
+        L.seq += 1;
+        return false;
+    }
+
+    UObject* pawn = net::Pawn();
+    // ready but no usable pawn: Lua wrote NOTHING this tick (main.lua:1572-1577).
+    // Return true with every hot field untouched, so net rewrites a byte-identical
+    // line and "sq" does not advance -- what the receiver sees in Lua.
+    if (!pawn) return true;
+    if (!HasSub(net::FullName(pawn), "BP_PlayerCharacter_C")) return true;
+    if (pawn == puppet::Actor()) return true;
+
+    Vec3 loc;
+    if (!LocOf(pawn, &loc)) return true;
+
+    ue::FRotator rot;
+    const bool haveRot = CallRot(pawn, "K2_GetActorRotation", &rot);
+
+    ue::FVector v;
+    double vx = 0.0, vy = 0.0, vz = 0.0;
+    if (CallVec(pawn, "GetVelocity", &v)) {
+        vx = v.X;
+        vy = v.Y;
+        vz = v.Z;
+    }
+
+    // a teleported / scripted move (patrol, cutscene) has no engine velocity
+    if (L.hasSentPos && std::fabs(vx) + std::fabs(vy) < 1.0) {
+        const double dx = (loc.X - L.sentPos.X) * 15.0;
+        const double dy = (loc.Y - L.sentPos.Y) * 15.0;
+        const double d2 = dx * dx + dy * dy;
+        if (d2 > 900.0 && d2 < 4e6) {
+            vx = dx;
+            vy = dy;
+            vz = (loc.Z - L.sentPos.Z) * 15.0;
+        }
+    }
+    L.sentPos = loc;
+    L.hasSentPos = true;
+
+    const double speed = std::sqrt(vx * vx + vy * vy);
+    L.seq += 1;
+
+    const char* anim = "idle";
+    if (speed > 250.0) anim = "run";
+    else if (speed > 30.0) anim = "walk";
+
+    MontageSig msig;
+    const bool hasMontage = OwnMontageOf(pawn, &msig);
+    if (hasMontage) anim = "action";
+
+    L.pos = loc;
+    if (haveRot) {
+        L.rot.Pitch = rot.Pitch;
+        L.rot.Yaw = rot.Yaw;
+        L.rot.Roll = rot.Roll;
+    } else {
+        L.rot = Rot();
+    }
+    L.vel.X = vx;
+    L.vel.Y = vy;
+    L.vel.Z = vz;
+    L.speed = speed;
+    L.anim = anim;
+    if (hasMontage) {
+        L.montage = msig;
+    } else {
+        L.montage = MontageSig();      // mpath or "", mpos or 0, mrate or 1, mid or 0
+        L.montage.rate = 1.0;
+    }
+    return true;
+}
+
+namespace {
+
+// ---------------------------------------------------------------------------
+// The 15 Hz work (main.lua:4070-4079). net::Publish() calls local::Capture()
+// itself, so this function must NOT publish.
+// ---------------------------------------------------------------------------
+
+// The labels that appear in BOTH SETTLE_SKIP and HOLD_SKIP (main.lua:3995-4003).
+bool StepSkipBoth(const char* label, const std::function<void()>& fn) {
+    if (net::WorldSettle()) return false;          // SETTLE_SKIP
+    return net::Step(label, Guard::Hold, fn);      // HOLD_SKIP (+ "ERR <label>")
+}
+
+// main.lua:2023-2041 judge
+void Judge() {
+    LocalState& L = state().local;
+    if (L.verdictWritten) return;
+
+    UObject* puppetActor = puppet::Actor();
+    const PeerState& P = state().peer;
+    if (!puppetActor || !P.present) return;
+    if (net::Wall() - P.wallAt > 3) return;
+
+    Vec3 loc;
+    if (!LocOf(puppetActor, &loc)) return;
+    const double d = Dist(loc, P.pos);
+
+    L.totalTicks += 1;
+    if (d < 120.0) L.goodTicks += 1;
+
+    if (L.totalTicks >= 30) {
+        L.verdictWritten = true;
+        const PuppetState& S = state().puppet;
+        const std::string verdict = net::Fmt(
+            "%s puppet tracks peer (dist %.1f, %d/30 good; moves %d, snaps %d)",
+            (L.goodTicks >= 25) ? "PASS" : "FAIL", d, L.goodTicks, S.driveInputs, S.driveTeleports);
+        net::WriteFile("result.txt", verdict + "\n");
+        net::Log("%s", verdict.c_str());
+    }
+}
+
+// main.lua:2046-2054 peerWatchdog
+void PeerWatchdog() {
+    LocalState& L = state().local;
+    if (state().peer.present) return;
+    const int64_t now = net::Wall();
+    if (static_cast<double>(now) - L.lastPeerWarnAt < 10.0) return;
+    L.lastPeerWarnAt = static_cast<double>(now);
+
+    const std::string name = "peer_" + L.peer + ".txt";
+    const char* exists = net::FileExists(name) ? "exists" : "missing";
+    net::Log("waiting for peer state (%s): %s", exists, name.c_str());
+}
+
+// main.lua:1998-2017 animInstrument
+void AnimInstrument() {
+    LocalState& L = state().local;
+    if (L.animVerdictWritten) return;
+    if (!puppet::Mesh()) return;
+    if (!state().puppet.bodyReady) return;
+
+    const std::string& kind = state().puppet.animKind;
+    const bool moving = state().puppet.puppetSpeed > 45.0;   // main.lua:4078
+    const bool hasState = !kind.empty();
+
+    if (hasState) {
+        if (kind == "idle") L.animIdle += 1;
+        else if (kind == "walk") L.animWalk += 1;
+        else if (kind == "sprint") L.animSprint += 1;
+        else if (kind == "montage") L.animMontage += 1;
+    }
+
+    if (moving && hasState && kind != "idle") L.animMoveTicks += 1;
+    else L.animStillTicks += 1;
+
+    // Throttled gate evidence for the next run: `walk>=10 && moves>=20` is the
+    // whole verdict condition, and in the 2026-10-25 run both stayed 0 while the
+    // host patrolled, because `patrol` aborted on its first tick (see the clock
+    // note in coop_puppet.cpp) and the peer therefore never published a velocity.
+    {
+        static int64_t lastNote = 0;
+        const int64_t nowW = net::Wall();
+        if (nowW - lastNote >= 5) {
+            lastNote = nowW;
+            net::Log("anim instrument: kind=%s moving=%d speed=%.0f idle=%d walk=%d sprint=%d moves=%d"
+                     " (need walk>=10 moves>=20)",
+                     kind.empty() ? "-" : kind.c_str(), moving ? 1 : 0,
+                     state().puppet.puppetSpeed, L.animIdle, L.animWalk, L.animSprint,
+                     L.animMoveTicks);
+        }
+    }
+
+    // moving with the locomotion sequence active is the evidence: the body is not
+    // standing still while it travels
+    if (L.animWalk >= 10 && L.animMoveTicks >= 20 && !L.animVerdictWritten) {
+        L.animVerdictWritten = true;
+        const std::string text = net::Fmt(
+            "PASS puppet locomotion: sequence states idle=%d walk=%d sprint=%d, "
+            "moving-while-animated=%d ticks\n",
+            L.animIdle, L.animWalk, L.animSprint, L.animMoveTicks);
+        net::WriteFile("result_anim.txt", text);
+        std::string oneLine = text;
+        const std::size_t nl = oneLine.find('\n');
+        if (nl != std::string::npos) oneLine.erase(nl);
+        net::Log("%s", oneLine.c_str());
+    }
+}
+
+}  // namespace
+
+void Tick15() {
+    // main.lua:4072  if S.phase ~= "sync" then return end
+    if (state().puppet.phase != Phase::Sync) return;
+
+    StepSkipBoth("refreshChars", [] { RefreshCharsImpl(); });
+    StepSkipBoth("judge", [] { Judge(); });
+    net::Step("peerWatchdog", Guard::None, [] { PeerWatchdog(); });
+    StepSkipBoth("anim", [] { AnimInstrument(); });
+}
+
+void Tick2() {
+    // main.lua:4089-4100  everything here is inside `if S.phase == "sync"`
+    if (state().puppet.phase != Phase::Sync) return;
+
+    // step("ready", readyTick) -- in neither skip list
+    net::Step("ready", Guard::None, [] { Ready(); });
+
+    // computeMyBody is pcall'd directly: no step label, no skip list
+    net::Step("myBody", Guard::None, [] { ComputeBody(); });
+
+    // step("myWeapon", ...) -- in both skip lists
+    StepSkipBoth("myWeapon", [] {
+        std::string w, s, all;
+        LocalWeaponInfo(&w, &s, &all);
+        LocalState& L = state().local;
+        L.wpn = w;
+        L.wsock = s;
+        L.wpns = all;
+    });
+}
+
+void Reset() {
+    LocalState& L = state().local;
+
+    // drop every cached engine pointer (docs/HANDOFF.md 18 -- the crash defence)
+    L.tickChars.clear();
+    L.tickTails.clear();
+    g_fns.clear();
+
+    // strings only, but they were derived from objects a map load frees; the Lua
+    // kept them, a re-read is cheap and an asset path is the same next map.
+    g_montageSegs.clear();
+    g_montageWarned.Clear();
+    g_wpnLogged.Clear();
+    g_ownM = OwnMontage();
+
+    // deliberately NOT reset: L.ready / readySince / readyWhy (PLAY_READY is a Lua
+    // global that only readyTick's hard signals clear), L.seq (SEND_SEQ),
+    // L.hasSentPos/sentPos (sentPos), L.goodTicks/totalTicks/verdictWritten, the
+    // anim telemetry, and body/apart/wpn/wsock/wpns (refreshed at 2 Hz).
+}
+
+}  // namespace local
+}  // namespace coop

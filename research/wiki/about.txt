@@ -1,0 +1,40 @@
+About Mortal Shell II Wiki — Editorial & Sourcing 
+Skip to content
+ About this wiki
+An independent, fan-made guide to Mortal Shell II — built on one rule: every fact
+ carries a source and a confirmation status.
+ Image sources
+Screenshots and promotional images on this site come from the Mortal Shell II Steam store page and the official Cold Symmetry page at
+ coldsymmetry.com/mortal-shell-2 .
+ We use them for fan-site documentation with attribution under each figure where practical.
+ What this site is
+Mortal Shell II Wiki is a community resource covering Shells, weapons, bosses,
+ mechanics, and walkthroughs for Cold Symmetry's Mortal Shell II. We are not
+ affiliated with Cold Symmetry or Playstack. This is a fan project.
+ Who writes it
+The wiki is maintained by an independent editor who plays the game, captures
+ footage, and cross-checks every claim against official sources. Historical Open Beta,
+ trailer, and first-game material remains clearly labelled and is never presented as a
+ current retail fact.
+ How we mark confirmation status
+This is the core of the site. Instead of blending official facts with rumours,
+ every entry carries one of these labels so you always know how reliable it is:
+ ✅ Official — Confirmed by the developer via official website, Steam, or Discord. 
+ 🔬 Beta-tested — Personally verified in a Beta build. Version and test date noted. 
+ 💬 Community reports — Aggregated from public Steam player reports and guides; not developer-confirmed. 
+ 👁️ Trailer — Seen in a trailer, but system details are still unknown. 
+ 📖 Prequel-based — Inferred from Mortal Shell (2020). To be verified after launch. 
+ ❓ Unconfirmed — Circulating on forums without an official source. Not used as primary content. 
+ Where our information comes from
+ Our sources, in order of authority:
+ Official developer channels — Steam store and news, official Discord, verified social accounts
+ Hands-on testing in Beta builds, with the version number and test date recorded
+ Official trailers, cited with a timestamp where relevant
+ The first Mortal Shell (2020), used only for clearly-labelled inference
+Every article ends with a "Sources & verification" table listing the source,
+ game version, and the date we last checked it.
+ Game images and assets
+Screenshots are captured in-game or taken from official press material.
+ Trademarks and game assets belong to their respective owners. If you own rights to
+ content used here and would like it removed, contact us via the
+ contact page .

@@ -1,0 +1,884 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	UnbindInput	PlayerController ObjectProperty of /Script/Sparta.SpartaPlayerController; bClearCallbacks BoolProperty	2	Native, Event, Public, BlueprintCallable, BlueprintEvent	56699
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	Tick	DeltaTime FloatProperty	1	Event, Public, BlueprintEvent	56702
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	ShouldTick	ReturnValue BoolProperty	1	Native, Event, Public, BlueprintEvent, Const	56704
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	SetCurrentValue	Value FloatProperty; Method ByteProperty	2	Final, Native, Public, BlueprintCallable	56706
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	IsProgressive	ReturnValue BoolProperty	1	Event, Public, BlueprintCallable, BlueprintEvent, BlueprintPure, Const	56709
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	IsInputBound	ReturnValue BoolProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	56711
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetTimeDilation	ReturnValue FloatProperty	1	Final, Native, Protected, BlueprintCallable, BlueprintPure, Const	56713
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetProgress	ReturnValue FloatProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	56715
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetMinValue	ReturnValue FloatProperty	1	Native, Event, Public, BlueprintCallable, BlueprintEvent, BlueprintPure, Const	56717
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetMaxValue	ReturnValue FloatProperty	1	Native, Event, Public, BlueprintCallable, BlueprintEvent, BlueprintPure, Const	56719
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetInputAction	ReturnValue ObjectProperty of /Script/EnhancedInput.InputAction	1	Event, Public, BlueprintCallable, BlueprintEvent, BlueprintPure, Const	56721
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	GetCurrentValue	ReturnValue FloatProperty	1	Final, Native, Public, BlueprintCallable, BlueprintPure, Const	56723
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BroadcastProgressChanged		0	Final, Native, Public, BlueprintCallable	56725
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BroadcastInputStarted		0	Final, Native, Public, BlueprintCallable	56726
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BroadcastInputOngoing		0	Final, Native, Public, BlueprintCallable	56727
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BroadcastInputCompleted		0	Final, Native, Public, BlueprintCallable	56728
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BroadcastInputCancelled		0	Final, Native, Public, BlueprintCallable	56729
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BindInputWithCallbacks	PlayerController ObjectProperty of /Script/Sparta.SpartaPlayerController; Started DelegateProperty; Ongoing DelegateProperty; Complete DelegateProperty; Cancelled DelegateProperty; ProgressChanged DelegateProperty	6	Final, Native, Public, BlueprintCallable	56730
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	BindInput	PlayerController ObjectProperty of /Script/Sparta.SpartaPlayerController	1	Native, Event, Public, BlueprintCallable, BlueprintEvent	56737
+/Script/CoreUObject.Object	/Script/Sparta.SpartaInputInteraction	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaInstancedObject	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/CoreUObject.Object	/Script/Sparta.SpartaWorldObject	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.PickupableActor	/Script/Sparta.PickupableActor	AddPickupToItemManager	ItemComponent ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	1	Final, Native, Public, BlueprintCallable	53756
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	WasRecentlyRendered	Tolerance FloatProperty; ReturnValue BoolProperty	2		131
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	UserConstructionScript		0		134
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	UnregisterAsFocalPointInPhysicsReplicationLOD		0		135
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	TearOff		0		136
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetTickGroup	NewTickGroup ByteProperty	1		137
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		139
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetReplicates	bInReplicates BoolProperty	1		141
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetReplicateMovement	bInReplicateMovement BoolProperty	1		143
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetRayTracingGroupId	InRaytracingGroupId IntProperty	1		145
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetPhysicsReplicationMode	ReplicationMode EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		147
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetOwner	NewOwner ObjectProperty of /Script/Engine.Actor	1		149
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetNetUpdateFrequency	Frequency FloatProperty	1		151
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetNetDormancy	NewDormancy ByteProperty	1		153
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetNetCullDistanceSquared	DistanceSq FloatProperty	1		155
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetMinNetUpdateFrequency	MinFrequency FloatProperty	1		157
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetLifeSpan	InLifespan FloatProperty	1		159
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetAutoDestroyWhenFinished	bVal BoolProperty	1		161
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorTickInterval	TickInterval FloatProperty	1		163
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorTickEnabled	bEnabled BoolProperty	1		165
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorScale3D	NewScale3D StructProperty of /Script/CoreUObject.Vector	1		167
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorRelativeScale3D	NewRelativeScale StructProperty of /Script/CoreUObject.Vector	1		169
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorHiddenInGame	bNewHidden BoolProperty	1		171
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SetActorEnableCollision	bNewActorEnableCollision BoolProperty	1		173
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		175
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		177
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RegisterAsFocalPointInPhysicsReplicationLOD		0		179
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveTick	DeltaSeconds FloatProperty	1		180
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveRadialDamage	DamageReceived FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; Origin StructProperty of /Script/CoreUObject.Vector; HitInfo StructProperty of /Script/Engine.HitResult; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	6		182
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceivePointDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; HitComponent ObjectProperty of /Script/Engine.PrimitiveComponent; BoneName NameProperty; ShotFromDirection StructProperty of /Script/CoreUObject.Vector; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor; HitInfo StructProperty of /Script/Engine.HitResult	10		189
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveHit	MyComp ObjectProperty of /Script/Engine.PrimitiveComponent; Other ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; bSelfMoved BoolProperty; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; NormalImpulse StructProperty of /Script/CoreUObject.Vector; Hit StructProperty of /Script/Engine.HitResult	8		200
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveEndPlay	EndPlayReason ByteProperty	1		209
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveDestroyed		0		211
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveBeginPlay		0		212
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		213
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveAnyDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	4		216
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnReleased	ButtonReleased StructProperty of /Script/InputCore.Key	1		221
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnInputTouchLeave	FingerIndex ByteProperty	1		223
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnInputTouchEnter	FingerIndex ByteProperty	1		225
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnInputTouchEnd	FingerIndex ByteProperty	1		227
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnInputTouchBegin	FingerIndex ByteProperty	1		229
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorOnClicked	ButtonPressed StructProperty of /Script/InputCore.Key	1		231
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorEndOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		233
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorEndCursorOver		0		235
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorBeginOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		236
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReceiveActorBeginCursorOver		0		238
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	PrestreamTextures	Seconds FloatProperty; bEnableStreaming BoolProperty; CinematicTextureGroups IntProperty	3		239
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnRep_ReplicateMovement		0		243
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnRep_ReplicatedMovement		0		244
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnRep_Owner		0		245
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnRep_Instigator		0		246
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnRep_AttachmentReplication		0		247
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	MakeNoise	Loudness FloatProperty; NoiseInstigator ObjectProperty of /Script/Engine.Pawn; NoiseLocation StructProperty of /Script/CoreUObject.Vector; MaxRange FloatProperty; Tag NameProperty	5		248
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_TeleportTo	DestLocation StructProperty of /Script/CoreUObject.Vector; DestRotation StructProperty of /Script/CoreUObject.Rotator; ReturnValue BoolProperty	3		254
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		258
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorRotation	NewRotation StructProperty of /Script/CoreUObject.Rotator; bTeleportPhysics BoolProperty; ReturnValue BoolProperty	3		264
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorRelativeTransform	NewRelativeTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		268
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorRelativeRotation	NewRelativeRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		273
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorRelativeLocation	NewRelativeLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		278
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorLocationAndRotation	NewLocation StructProperty of /Script/CoreUObject.Vector; NewRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	6		283
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_SetActorLocation	NewLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		290
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_OnReset		0		296
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_OnEndViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		297
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_OnBecomeViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		299
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_GetRootComponent	ReturnValue ObjectProperty of /Script/Engine.SceneComponent	1		301
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_GetComponentsByClass	ComponentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:K2_GetComponentsByClass:ReturnValue	2		303
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_GetActorRotation	ReturnValue StructProperty of /Script/CoreUObject.Rotator	1		307
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_GetActorLocation	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		309
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_DetachFromActor	LocationRule EnumProperty of /Script/Engine.EDetachmentRule; RotationRule EnumProperty of /Script/Engine.EDetachmentRule; ScaleRule EnumProperty of /Script/Engine.EDetachmentRule	3		311
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_DestroyActor		0		315
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AttachToComponent	Parent ObjectProperty of /Script/Engine.SceneComponent; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		316
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AttachToActor	ParentActor ObjectProperty of /Script/Engine.Actor; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		324
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AttachRootComponentToActor	InParentActor ObjectProperty of /Script/Engine.Actor; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		332
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AttachRootComponentTo	InParent ObjectProperty of /Script/Engine.SceneComponent; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		337
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorWorldTransformKeepScale	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		342
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorWorldTransform	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		347
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorWorldRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		352
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorWorldOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		357
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorLocalTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		362
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorLocalRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		367
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	K2_AddActorLocalOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		372
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	IsOverlappingActor	Other ObjectProperty of /Script/Engine.Actor; ReturnValue BoolProperty	2		377
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	IsChildActor	ReturnValue BoolProperty	1		380
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	IsActorTickEnabled	ReturnValue BoolProperty	1		382
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	IsActorBeingDestroyed	ReturnValue BoolProperty	1		384
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	HasAuthority	ReturnValue BoolProperty	1		386
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetVerticalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		388
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetVelocity	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		391
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		393
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetTickableWhenPaused	ReturnValue BoolProperty	1		395
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetSquaredHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		397
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetSquaredDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		400
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetResimulationThreshold	ReturnValue FloatProperty	1		403
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetRemoteRole	ReturnValue ByteProperty	1		405
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetRayTracingGroupId	ReturnValue IntProperty	1		407
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetPhysicsReplicationMode	ReturnValue EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		409
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetParentComponent	ReturnValue ObjectProperty of /Script/Engine.ChildActorComponent	1		411
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		413
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		415
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetOverlappingComponents	OverlappingComponents ArrayProperty of OverlappingComponents./Script/Engine.Actor:GetOverlappingComponents:OverlappingComponents	1		417
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetOverlappingActors	OverlappingActors ArrayProperty of OverlappingActors./Script/Engine.Actor:GetOverlappingActors:OverlappingActors; ClassFilter ClassProperty	2		420
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetNetUpdateFrequency	ReturnValue FloatProperty	1		424
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetNetCullDistanceSquared	ReturnValue FloatProperty	1		426
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetMinNetUpdateFrequency	ReturnValue FloatProperty	1		428
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetLocalRole	ReturnValue ByteProperty	1		430
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetLifeSpan	ReturnValue FloatProperty	1		432
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetLevelTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		434
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetLevel	ReturnValue ObjectProperty of /Script/Engine.Level	1		436
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetInstigatorController	ReturnValue ObjectProperty of /Script/Engine.Controller	1		438
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetInstigator	ReturnValue ObjectProperty of /Script/Engine.Pawn	1		440
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetInputVectorAxisValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue StructProperty of /Script/CoreUObject.Vector	2		442
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetInputAxisValue	InputAxisName NameProperty; ReturnValue FloatProperty	2		445
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetInputAxisKeyValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue FloatProperty	2		448
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetHorizontalDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		451
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		454
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetGameTimeSinceCreation	ReturnValue FloatProperty	1		457
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		459
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		462
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetComponentsByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByTag:ReturnValue	3		465
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetComponentsByInterface	Interface ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByInterface:ReturnValue	2		470
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetComponentByClass	ComponentClass ClassProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	2		474
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetAttachParentSocketName	ReturnValue NameProperty	1		477
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetAttachParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		479
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetAttachedActors	OutActors ArrayProperty of OutActors./Script/Engine.Actor:GetAttachedActors:OutActors; bResetArray BoolProperty; bRecursivelyIncludeAttachedActors BoolProperty	3		481
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetAllChildActors	ChildActors ArrayProperty of ChildActors./Script/Engine.Actor:GetAllChildActors:ChildActors; bIncludeDescendants BoolProperty	2		486
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorUpVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		490
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorTimeDilation	ReturnValue FloatProperty	1		492
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorTickInterval	ReturnValue FloatProperty	1		494
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		496
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorRightVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		498
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorRelativeScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		500
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorForwardVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		502
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorEyesViewPoint	OutLocation StructProperty of /Script/CoreUObject.Vector; OutRotation StructProperty of /Script/CoreUObject.Rotator	2		504
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorEnableCollision	ReturnValue BoolProperty	1		507
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	GetActorBounds	bOnlyCollidingComponents BoolProperty; Origin StructProperty of /Script/CoreUObject.Vector; BoxExtent StructProperty of /Script/CoreUObject.Vector; bIncludeFromChildActors BoolProperty	4		509
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ForceNetUpdate		0		514
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	FlushNetDormancy		0		515
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	FinishAddComponent	Component ObjectProperty of /Script/Engine.ActorComponent; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform	3		516
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	FindComponentByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	3		520
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	EnableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		524
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	DisableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		526
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	DetachRootComponentFromParent	bMaintainWorldPosition BoolProperty	1		528
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	CreateInputComponent	InputComponentToCreate ClassProperty	1		530
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	CanTriggerResimulation	ReturnValue BoolProperty	1		532
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		534
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		536
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AddComponentByClass	Class ClassProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	5		538
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AddComponent	TemplateName NameProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; ComponentTemplateContext ObjectProperty of /Script/CoreUObject.Object; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	6		544
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ActorHasTag	Tag NameProperty; ReturnValue BoolProperty	2		551
+/Script/CoreUObject.Object	/Script/Sparta.PickupableActor	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	173814
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	198178
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetTimeLeft	Direction ByteProperty; TimeLeft DoubleProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	660771
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AudioStopMoving	Actor ObjectProperty of /Script/Engine.Actor	1	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660789
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AudioStart	Actor ObjectProperty of /Script/Engine.Actor	1	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660796
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	TriggerSpider		0	Public, BlueprintCallable, BlueprintEvent	660806
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovePressurePlate__FinishedFunc		0	BlueprintEvent	660808
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovePressurePlate__UpdateFunc		0	BlueprintEvent	660809
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline__FinishedFunc		0	BlueprintEvent	660810
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline__UpdateFunc		0	BlueprintEvent	660811
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_0__FinishedFunc		0	BlueprintEvent	660812
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_0__UpdateFunc		0	BlueprintEvent	660813
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	BndEvt__BP_PressurePlateDungeon_PressurePlateCollision_K2Node_ComponentBoundEvent_0_ComponentBeginOverlapSignature__DelegateSignature	OverlappedComponent ObjectProperty of /Script/Engine.PrimitiveComponent; OtherActor ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; OtherBodyIndex IntProperty; bFromSweep BoolProperty; SweepResult StructProperty of /Script/Engine.HitResult	6	HasOutParams, BlueprintEvent	660814
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	BndEvt__BP_PressurePlateDungeon_PressurePlateCollisionReverse_K2Node_ComponentBoundEvent_1_ComponentBeginOverlapSignature__DelegateSignature	OverlappedComponent ObjectProperty of /Script/Engine.PrimitiveComponent; OtherActor ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; OtherBodyIndex IntProperty; bFromSweep BoolProperty; SweepResult StructProperty of /Script/Engine.HitResult	6	HasOutParams, BlueprintEvent	660821
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ResetDoOnce		0	BlueprintCallable, BlueprintEvent	660828
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ExecuteUbergraph_BP_PressurePlateDungeon	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	660829
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	WasRecentlyRendered	Tolerance FloatProperty; ReturnValue BoolProperty	2		131
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	UserConstructionScript		0		134
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	UnregisterAsFocalPointInPhysicsReplicationLOD		0		135
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	TearOff		0		136
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetTickGroup	NewTickGroup ByteProperty	1		137
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		139
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetReplicates	bInReplicates BoolProperty	1		141
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetReplicateMovement	bInReplicateMovement BoolProperty	1		143
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetRayTracingGroupId	InRaytracingGroupId IntProperty	1		145
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetPhysicsReplicationMode	ReplicationMode EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		147
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetOwner	NewOwner ObjectProperty of /Script/Engine.Actor	1		149
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetNetUpdateFrequency	Frequency FloatProperty	1		151
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetNetDormancy	NewDormancy ByteProperty	1		153
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetNetCullDistanceSquared	DistanceSq FloatProperty	1		155
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetMinNetUpdateFrequency	MinFrequency FloatProperty	1		157
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetLifeSpan	InLifespan FloatProperty	1		159
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetAutoDestroyWhenFinished	bVal BoolProperty	1		161
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorTickInterval	TickInterval FloatProperty	1		163
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorTickEnabled	bEnabled BoolProperty	1		165
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorScale3D	NewScale3D StructProperty of /Script/CoreUObject.Vector	1		167
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorRelativeScale3D	NewRelativeScale StructProperty of /Script/CoreUObject.Vector	1		169
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorHiddenInGame	bNewHidden BoolProperty	1		171
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SetActorEnableCollision	bNewActorEnableCollision BoolProperty	1		173
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		175
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		177
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RegisterAsFocalPointInPhysicsReplicationLOD		0		179
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveTick	DeltaSeconds FloatProperty	1		180
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveRadialDamage	DamageReceived FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; Origin StructProperty of /Script/CoreUObject.Vector; HitInfo StructProperty of /Script/Engine.HitResult; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	6		182
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceivePointDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; HitComponent ObjectProperty of /Script/Engine.PrimitiveComponent; BoneName NameProperty; ShotFromDirection StructProperty of /Script/CoreUObject.Vector; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor; HitInfo StructProperty of /Script/Engine.HitResult	10		189
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveHit	MyComp ObjectProperty of /Script/Engine.PrimitiveComponent; Other ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; bSelfMoved BoolProperty; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; NormalImpulse StructProperty of /Script/CoreUObject.Vector; Hit StructProperty of /Script/Engine.HitResult	8		200
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveEndPlay	EndPlayReason ByteProperty	1		209
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveDestroyed		0		211
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveBeginPlay		0		212
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		213
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveAnyDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	4		216
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnReleased	ButtonReleased StructProperty of /Script/InputCore.Key	1		221
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnInputTouchLeave	FingerIndex ByteProperty	1		223
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnInputTouchEnter	FingerIndex ByteProperty	1		225
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnInputTouchEnd	FingerIndex ByteProperty	1		227
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnInputTouchBegin	FingerIndex ByteProperty	1		229
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorOnClicked	ButtonPressed StructProperty of /Script/InputCore.Key	1		231
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorEndOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		233
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorEndCursorOver		0		235
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorBeginOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		236
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReceiveActorBeginCursorOver		0		238
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PrestreamTextures	Seconds FloatProperty; bEnableStreaming BoolProperty; CinematicTextureGroups IntProperty	3		239
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnRep_ReplicateMovement		0		243
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnRep_ReplicatedMovement		0		244
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnRep_Owner		0		245
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnRep_Instigator		0		246
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnRep_AttachmentReplication		0		247
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MakeNoise	Loudness FloatProperty; NoiseInstigator ObjectProperty of /Script/Engine.Pawn; NoiseLocation StructProperty of /Script/CoreUObject.Vector; MaxRange FloatProperty; Tag NameProperty	5		248
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_TeleportTo	DestLocation StructProperty of /Script/CoreUObject.Vector; DestRotation StructProperty of /Script/CoreUObject.Rotator; ReturnValue BoolProperty	3		254
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		258
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorRotation	NewRotation StructProperty of /Script/CoreUObject.Rotator; bTeleportPhysics BoolProperty; ReturnValue BoolProperty	3		264
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorRelativeTransform	NewRelativeTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		268
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorRelativeRotation	NewRelativeRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		273
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorRelativeLocation	NewRelativeLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		278
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorLocationAndRotation	NewLocation StructProperty of /Script/CoreUObject.Vector; NewRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	6		283
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_SetActorLocation	NewLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		290
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_OnReset		0		296
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_OnEndViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		297
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_OnBecomeViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		299
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_GetRootComponent	ReturnValue ObjectProperty of /Script/Engine.SceneComponent	1		301
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_GetComponentsByClass	ComponentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:K2_GetComponentsByClass:ReturnValue	2		303
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_GetActorRotation	ReturnValue StructProperty of /Script/CoreUObject.Rotator	1		307
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_GetActorLocation	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		309
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_DetachFromActor	LocationRule EnumProperty of /Script/Engine.EDetachmentRule; RotationRule EnumProperty of /Script/Engine.EDetachmentRule; ScaleRule EnumProperty of /Script/Engine.EDetachmentRule	3		311
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_DestroyActor		0		315
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AttachToComponent	Parent ObjectProperty of /Script/Engine.SceneComponent; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		316
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AttachToActor	ParentActor ObjectProperty of /Script/Engine.Actor; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		324
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AttachRootComponentToActor	InParentActor ObjectProperty of /Script/Engine.Actor; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		332
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AttachRootComponentTo	InParent ObjectProperty of /Script/Engine.SceneComponent; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		337
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorWorldTransformKeepScale	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		342
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorWorldTransform	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		347
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorWorldRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		352
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorWorldOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		357
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorLocalTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		362
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorLocalRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		367
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	K2_AddActorLocalOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		372
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	IsOverlappingActor	Other ObjectProperty of /Script/Engine.Actor; ReturnValue BoolProperty	2		377
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	IsChildActor	ReturnValue BoolProperty	1		380
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	IsActorTickEnabled	ReturnValue BoolProperty	1		382
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	IsActorBeingDestroyed	ReturnValue BoolProperty	1		384
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	HasAuthority	ReturnValue BoolProperty	1		386
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetVerticalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		388
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetVelocity	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		391
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		393
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetTickableWhenPaused	ReturnValue BoolProperty	1		395
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetSquaredHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		397
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetSquaredDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		400
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetResimulationThreshold	ReturnValue FloatProperty	1		403
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetRemoteRole	ReturnValue ByteProperty	1		405
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetRayTracingGroupId	ReturnValue IntProperty	1		407
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetPhysicsReplicationMode	ReturnValue EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		409
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetParentComponent	ReturnValue ObjectProperty of /Script/Engine.ChildActorComponent	1		411
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		413
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		415
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetOverlappingComponents	OverlappingComponents ArrayProperty of OverlappingComponents./Script/Engine.Actor:GetOverlappingComponents:OverlappingComponents	1		417
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetOverlappingActors	OverlappingActors ArrayProperty of OverlappingActors./Script/Engine.Actor:GetOverlappingActors:OverlappingActors; ClassFilter ClassProperty	2		420
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetNetUpdateFrequency	ReturnValue FloatProperty	1		424
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetNetCullDistanceSquared	ReturnValue FloatProperty	1		426
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetMinNetUpdateFrequency	ReturnValue FloatProperty	1		428
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetLocalRole	ReturnValue ByteProperty	1		430
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetLifeSpan	ReturnValue FloatProperty	1		432
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetLevelTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		434
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetLevel	ReturnValue ObjectProperty of /Script/Engine.Level	1		436
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetInstigatorController	ReturnValue ObjectProperty of /Script/Engine.Controller	1		438
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetInstigator	ReturnValue ObjectProperty of /Script/Engine.Pawn	1		440
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetInputVectorAxisValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue StructProperty of /Script/CoreUObject.Vector	2		442
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetInputAxisValue	InputAxisName NameProperty; ReturnValue FloatProperty	2		445
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetInputAxisKeyValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue FloatProperty	2		448
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetHorizontalDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		451
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		454
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetGameTimeSinceCreation	ReturnValue FloatProperty	1		457
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		459
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		462
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetComponentsByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByTag:ReturnValue	3		465
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetComponentsByInterface	Interface ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByInterface:ReturnValue	2		470
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetComponentByClass	ComponentClass ClassProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	2		474
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetAttachParentSocketName	ReturnValue NameProperty	1		477
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetAttachParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		479
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetAttachedActors	OutActors ArrayProperty of OutActors./Script/Engine.Actor:GetAttachedActors:OutActors; bResetArray BoolProperty; bRecursivelyIncludeAttachedActors BoolProperty	3		481
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetAllChildActors	ChildActors ArrayProperty of ChildActors./Script/Engine.Actor:GetAllChildActors:ChildActors; bIncludeDescendants BoolProperty	2		486
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorUpVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		490
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorTimeDilation	ReturnValue FloatProperty	1		492
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorTickInterval	ReturnValue FloatProperty	1		494
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		496
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorRightVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		498
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorRelativeScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		500
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorForwardVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		502
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorEyesViewPoint	OutLocation StructProperty of /Script/CoreUObject.Vector; OutRotation StructProperty of /Script/CoreUObject.Rotator	2		504
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorEnableCollision	ReturnValue BoolProperty	1		507
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	GetActorBounds	bOnlyCollidingComponents BoolProperty; Origin StructProperty of /Script/CoreUObject.Vector; BoxExtent StructProperty of /Script/CoreUObject.Vector; bIncludeFromChildActors BoolProperty	4		509
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ForceNetUpdate		0		514
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	FlushNetDormancy		0		515
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	FinishAddComponent	Component ObjectProperty of /Script/Engine.ActorComponent; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform	3		516
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	FindComponentByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	3		520
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	EnableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		524
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	DisableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		526
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	DetachRootComponentFromParent	bMaintainWorldPosition BoolProperty	1		528
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	CreateInputComponent	InputComponentToCreate ClassProperty	1		530
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	CanTriggerResimulation	ReturnValue BoolProperty	1		532
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		534
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		536
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AddComponentByClass	Class ClassProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	5		538
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AddComponent	TemplateName NameProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; ComponentTemplateContext ObjectProperty of /Script/CoreUObject.Object; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	6		544
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ActorHasTag	Tag NameProperty; ReturnValue BoolProperty	2		551
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AudioStopMovingSFX		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660915
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetTimeLeft	Direction ByteProperty; ReturnValue DoubleProperty	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	660919
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CloseDoorSFX		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660937
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OpenDoorSFX		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660939
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PlateResetSFX		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660945
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PlatePressedSFX		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	660947
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CheckIfPlayerFar		0	Public, BlueprintCallable, BlueprintEvent	660949
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MoveDown__FinishedFunc		0	BlueprintEvent	660950
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MoveDown__UpdateFunc		0	BlueprintEvent	660951
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Timeline__FinishedFunc		0	BlueprintEvent	660952
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Timeline__UpdateFunc		0	BlueprintEvent	660953
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveBeginPlay		0	Event, Protected, BlueprintEvent	660954
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	BndEvt__BP_Trap_Collision_K2Node_ComponentBoundEvent_0_ComponentBeginOverlapSignature__DelegateSignature	OverlappedComponent ObjectProperty of /Script/Engine.PrimitiveComponent; OtherActor ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; OtherBodyIndex IntProperty; bFromSweep BoolProperty; SweepResult StructProperty of /Script/Engine.HitResult	6	HasOutParams, BlueprintEvent	660955
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ResetTrap		0	BlueprintCallable, BlueprintEvent	660962
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ResetOverlap		0	BlueprintCallable, BlueprintEvent	660963
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	BndEvt__BP_PressurePlateOpenDoor_Collision_K2Node_ComponentBoundEvent_1_ComponentEndOverlapSignature__DelegateSignature	OverlappedComponent ObjectProperty of /Script/Engine.PrimitiveComponent; OtherActor ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; OtherBodyIndex IntProperty	4	BlueprintEvent	660964
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RaiseWall		0	BlueprintCallable, BlueprintEvent	660969
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CloseWall		0	BlueprintCallable, BlueprintEvent	660970
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ForceWallDown		0	BlueprintCallable, BlueprintEvent	660971
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ExecuteUbergraph_BP_PressurePlateOpenDoor	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	660972
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	WasRecentlyRendered	Tolerance FloatProperty; ReturnValue BoolProperty	2		131
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	UserConstructionScript		0		134
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	UnregisterAsFocalPointInPhysicsReplicationLOD		0		135
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	TearOff		0		136
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetTickGroup	NewTickGroup ByteProperty	1		137
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		139
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetReplicates	bInReplicates BoolProperty	1		141
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetReplicateMovement	bInReplicateMovement BoolProperty	1		143
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetRayTracingGroupId	InRaytracingGroupId IntProperty	1		145
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetPhysicsReplicationMode	ReplicationMode EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		147
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetOwner	NewOwner ObjectProperty of /Script/Engine.Actor	1		149
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetNetUpdateFrequency	Frequency FloatProperty	1		151
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetNetDormancy	NewDormancy ByteProperty	1		153
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetNetCullDistanceSquared	DistanceSq FloatProperty	1		155
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetMinNetUpdateFrequency	MinFrequency FloatProperty	1		157
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetLifeSpan	InLifespan FloatProperty	1		159
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetAutoDestroyWhenFinished	bVal BoolProperty	1		161
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorTickInterval	TickInterval FloatProperty	1		163
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorTickEnabled	bEnabled BoolProperty	1		165
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorScale3D	NewScale3D StructProperty of /Script/CoreUObject.Vector	1		167
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorRelativeScale3D	NewRelativeScale StructProperty of /Script/CoreUObject.Vector	1		169
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorHiddenInGame	bNewHidden BoolProperty	1		171
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SetActorEnableCollision	bNewActorEnableCollision BoolProperty	1		173
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		175
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		177
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RegisterAsFocalPointInPhysicsReplicationLOD		0		179
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveTick	DeltaSeconds FloatProperty	1		180
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveRadialDamage	DamageReceived FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; Origin StructProperty of /Script/CoreUObject.Vector; HitInfo StructProperty of /Script/Engine.HitResult; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	6		182
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceivePointDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; HitComponent ObjectProperty of /Script/Engine.PrimitiveComponent; BoneName NameProperty; ShotFromDirection StructProperty of /Script/CoreUObject.Vector; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor; HitInfo StructProperty of /Script/Engine.HitResult	10		189
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveHit	MyComp ObjectProperty of /Script/Engine.PrimitiveComponent; Other ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; bSelfMoved BoolProperty; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; NormalImpulse StructProperty of /Script/CoreUObject.Vector; Hit StructProperty of /Script/Engine.HitResult	8		200
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveEndPlay	EndPlayReason ByteProperty	1		209
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveDestroyed		0		211
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveBeginPlay		0	Event, Protected, BlueprintEvent	212
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		213
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveAnyDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	4		216
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnReleased	ButtonReleased StructProperty of /Script/InputCore.Key	1		221
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnInputTouchLeave	FingerIndex ByteProperty	1		223
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnInputTouchEnter	FingerIndex ByteProperty	1		225
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnInputTouchEnd	FingerIndex ByteProperty	1		227
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnInputTouchBegin	FingerIndex ByteProperty	1		229
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorOnClicked	ButtonPressed StructProperty of /Script/InputCore.Key	1		231
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorEndOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		233
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorEndCursorOver		0		235
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorBeginOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		236
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReceiveActorBeginCursorOver		0		238
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PrestreamTextures	Seconds FloatProperty; bEnableStreaming BoolProperty; CinematicTextureGroups IntProperty	3		239
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnRep_ReplicateMovement		0		243
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnRep_ReplicatedMovement		0		244
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnRep_Owner		0		245
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnRep_Instigator		0		246
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnRep_AttachmentReplication		0		247
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MakeNoise	Loudness FloatProperty; NoiseInstigator ObjectProperty of /Script/Engine.Pawn; NoiseLocation StructProperty of /Script/CoreUObject.Vector; MaxRange FloatProperty; Tag NameProperty	5		248
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_TeleportTo	DestLocation StructProperty of /Script/CoreUObject.Vector; DestRotation StructProperty of /Script/CoreUObject.Rotator; ReturnValue BoolProperty	3		254
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		258
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorRotation	NewRotation StructProperty of /Script/CoreUObject.Rotator; bTeleportPhysics BoolProperty; ReturnValue BoolProperty	3		264
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorRelativeTransform	NewRelativeTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		268
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorRelativeRotation	NewRelativeRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		273
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorRelativeLocation	NewRelativeLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		278
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorLocationAndRotation	NewLocation StructProperty of /Script/CoreUObject.Vector; NewRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	6		283
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_SetActorLocation	NewLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		290
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_OnReset		0		296
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_OnEndViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		297
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_OnBecomeViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		299
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_GetRootComponent	ReturnValue ObjectProperty of /Script/Engine.SceneComponent	1		301
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_GetComponentsByClass	ComponentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:K2_GetComponentsByClass:ReturnValue	2		303
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_GetActorRotation	ReturnValue StructProperty of /Script/CoreUObject.Rotator	1		307
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_GetActorLocation	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		309
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_DetachFromActor	LocationRule EnumProperty of /Script/Engine.EDetachmentRule; RotationRule EnumProperty of /Script/Engine.EDetachmentRule; ScaleRule EnumProperty of /Script/Engine.EDetachmentRule	3		311
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_DestroyActor		0		315
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AttachToComponent	Parent ObjectProperty of /Script/Engine.SceneComponent; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		316
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AttachToActor	ParentActor ObjectProperty of /Script/Engine.Actor; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		324
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AttachRootComponentToActor	InParentActor ObjectProperty of /Script/Engine.Actor; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		332
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AttachRootComponentTo	InParent ObjectProperty of /Script/Engine.SceneComponent; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		337
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorWorldTransformKeepScale	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		342
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorWorldTransform	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		347
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorWorldRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		352
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorWorldOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		357
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorLocalTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		362
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorLocalRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		367
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	K2_AddActorLocalOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		372
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	IsOverlappingActor	Other ObjectProperty of /Script/Engine.Actor; ReturnValue BoolProperty	2		377
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	IsChildActor	ReturnValue BoolProperty	1		380
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	IsActorTickEnabled	ReturnValue BoolProperty	1		382
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	IsActorBeingDestroyed	ReturnValue BoolProperty	1		384
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	HasAuthority	ReturnValue BoolProperty	1		386
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetVerticalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		388
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetVelocity	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		391
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		393
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetTickableWhenPaused	ReturnValue BoolProperty	1		395
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetSquaredHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		397
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetSquaredDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		400
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetResimulationThreshold	ReturnValue FloatProperty	1		403
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetRemoteRole	ReturnValue ByteProperty	1		405
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetRayTracingGroupId	ReturnValue IntProperty	1		407
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetPhysicsReplicationMode	ReturnValue EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		409
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetParentComponent	ReturnValue ObjectProperty of /Script/Engine.ChildActorComponent	1		411
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		413
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		415
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetOverlappingComponents	OverlappingComponents ArrayProperty of OverlappingComponents./Script/Engine.Actor:GetOverlappingComponents:OverlappingComponents	1		417
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetOverlappingActors	OverlappingActors ArrayProperty of OverlappingActors./Script/Engine.Actor:GetOverlappingActors:OverlappingActors; ClassFilter ClassProperty	2		420
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetNetUpdateFrequency	ReturnValue FloatProperty	1		424
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetNetCullDistanceSquared	ReturnValue FloatProperty	1		426
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetMinNetUpdateFrequency	ReturnValue FloatProperty	1		428
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetLocalRole	ReturnValue ByteProperty	1		430
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetLifeSpan	ReturnValue FloatProperty	1		432
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetLevelTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		434
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetLevel	ReturnValue ObjectProperty of /Script/Engine.Level	1		436
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetInstigatorController	ReturnValue ObjectProperty of /Script/Engine.Controller	1		438
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetInstigator	ReturnValue ObjectProperty of /Script/Engine.Pawn	1		440
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetInputVectorAxisValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue StructProperty of /Script/CoreUObject.Vector	2		442
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetInputAxisValue	InputAxisName NameProperty; ReturnValue FloatProperty	2		445
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetInputAxisKeyValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue FloatProperty	2		448
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetHorizontalDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		451
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		454
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetGameTimeSinceCreation	ReturnValue FloatProperty	1		457
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		459
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		462
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetComponentsByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByTag:ReturnValue	3		465
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetComponentsByInterface	Interface ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByInterface:ReturnValue	2		470
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetComponentByClass	ComponentClass ClassProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	2		474
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetAttachParentSocketName	ReturnValue NameProperty	1		477
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetAttachParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		479
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetAttachedActors	OutActors ArrayProperty of OutActors./Script/Engine.Actor:GetAttachedActors:OutActors; bResetArray BoolProperty; bRecursivelyIncludeAttachedActors BoolProperty	3		481
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetAllChildActors	ChildActors ArrayProperty of ChildActors./Script/Engine.Actor:GetAllChildActors:ChildActors; bIncludeDescendants BoolProperty	2		486
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorUpVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		490
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorTimeDilation	ReturnValue FloatProperty	1		492
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorTickInterval	ReturnValue FloatProperty	1		494
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		496
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorRightVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		498
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorRelativeScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		500
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorForwardVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		502
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorEyesViewPoint	OutLocation StructProperty of /Script/CoreUObject.Vector; OutRotation StructProperty of /Script/CoreUObject.Rotator	2		504
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorEnableCollision	ReturnValue BoolProperty	1		507
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GetActorBounds	bOnlyCollidingComponents BoolProperty; Origin StructProperty of /Script/CoreUObject.Vector; BoxExtent StructProperty of /Script/CoreUObject.Vector; bIncludeFromChildActors BoolProperty	4		509
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ForceNetUpdate		0		514
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	FlushNetDormancy		0		515
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	FinishAddComponent	Component ObjectProperty of /Script/Engine.ActorComponent; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform	3		516
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	FindComponentByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	3		520
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	EnableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		524
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DisableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		526
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DetachRootComponentFromParent	bMaintainWorldPosition BoolProperty	1		528
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CreateInputComponent	InputComponentToCreate ClassProperty	1		530
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CanTriggerResimulation	ReturnValue BoolProperty	1		532
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		534
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		536
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AddComponentByClass	Class ClassProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	5		538
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AddComponent	TemplateName NameProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; ComponentTemplateContext ObjectProperty of /Script/CoreUObject.Object; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	6		544
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ActorHasTag	Tag NameProperty; ReturnValue BoolProperty	2		551
+/Script/CoreUObject.Object	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ExecuteUbergraph	EntryPoint IntProperty	1		3

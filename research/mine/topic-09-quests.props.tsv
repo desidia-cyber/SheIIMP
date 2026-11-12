@@ -1,0 +1,186 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.QuestObject	/Script/Sparta.QuestObject	QuestID	NameProperty	0x28	54174
+/Script/Sparta.QuestObject	/Script/Sparta.QuestObject	CurrentQuestStage	IntProperty	0x30	54175
+/Script/Sparta.QuestObject	/Script/Sparta.QuestObject	CurrentQuestObjectiveProgress	MapProperty	0x38	54176
+/Script/Sparta.QuestObject	/Script/Sparta.QuestObject	CurrentStageDetails	StructProperty of /Script/Sparta.QuestStage	0x88	54179
+/Script/Sparta.QuestObject	/Script/Sparta.QuestObject	QuestDetails	StructProperty of /Script/Sparta.QuestDetails	0x180	54180
+/Script/Sparta.QuestObjective	/Script/Sparta.QuestObjective	ObjectiveData	StructProperty of /Script/Sparta.QuestObjectives	0x28	54183
+/Script/Sparta.QuestObjective	/Script/Sparta.QuestObjective	QuestID	NameProperty	0x60	54184
+/Script/Sparta.QuestObjective	/Script/Sparta.QuestObjective	OnObjectiveCompleted	MulticastInlineDelegateProperty	0x68	54185
+/Script/Sparta.SpartaCompletionSubsystem	/Script/Sparta.SpartaCompletionSubsystem	CompletionSettings	SoftObjectProperty of /Script/Sparta.SpartaCompletionSettings	0x30	55765
+/Script/Sparta.SpartaCompletionSubsystem	/Script/Sparta.SpartaCompletionSubsystem	ResolvedSettings	ObjectProperty of /Script/Sparta.SpartaCompletionSettings	0x58	55766
+/Script/Sparta.SpartaCompletionSubsystem	/Script/Sparta.SpartaCompletionSubsystem	Snapshot	StructProperty of /Script/Sparta.SpartaCompletionResult	0x60	55767
+/Script/Sparta.SpartaCompletionSubsystem	/Script/Sparta.SpartaCompletionSubsystem	RunTimeSeconds	FloatProperty	0x88	55768
+/Script/Sparta.SpartaCompletionSubsystem	/Script/Sparta.SpartaCompletionSubsystem	bRunTimerPaused	BoolProperty	0x8C	55769
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	Categories	ArrayProperty of Categories./Script/Sparta.SpartaCompletionSettings:Categories	0x30	55746
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	OvaShareOfSurvivalOdds	FloatProperty	0x40	55748
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	OvaItemDefinition	SoftClassProperty	0x48	55749
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	TarstoneTables	ArrayProperty of TarstoneTables./Script/Sparta.SpartaCompletionSettings:TarstoneTables	0x70	55750
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	ShellTags	ArrayProperty of ShellTags./Script/Sparta.SpartaCompletionSettings:ShellTags	0x80	55752
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	WeaponTags	ArrayProperty of WeaponTags./Script/Sparta.SpartaCompletionSettings:WeaponTags	0x90	55754
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	SidearmTags	ArrayProperty of SidearmTags./Script/Sparta.SpartaCompletionSettings:SidearmTags	0xA0	55756
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	EquipmentUnlockStatePropertyName	NameProperty	0xB0	55758
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	ItemsTable	SoftObjectProperty of /Script/Engine.DataTable	0xB8	55759
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	ExcludedItemClasses	ArrayProperty of ExcludedItemClasses./Script/Sparta.SpartaCompletionSettings:ExcludedItemClasses	0xE0	55760
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	bExcludePermProgressionItems	BoolProperty	0xF0	55762
+/Script/Sparta.SpartaCompletionSettings	/Script/Sparta.SpartaCompletionSettings	PermProgressionPathFragment	StrProperty	0xF8	55763
+/Script/Engine.DataAsset	/Script/Sparta.SpartaCompletionSettings	NativeClass	ClassProperty	0x28	13635
+/Script/Sparta.PossibleWorldStateSet	/Script/Sparta.PossibleWorldStateSet	WorldStates	ArrayProperty of WorldStates./Script/Sparta.PossibleWorldStateSet:WorldStates	0x28	59392
+/Script/Sparta.PossibleActivity	/Script/Sparta.PossibleActivity	ActivityType	ObjectProperty of /Script/Sparta.SpartaActivityType	0x28	55027
+/Script/Sparta.PossibleActivity	/Script/Sparta.PossibleActivity	DataLayer	StrProperty	0x30	55028
+/Script/Sparta.PossibleActivity	/Script/Sparta.PossibleActivity	DataLayerAsset	ObjectProperty of /Script/Engine.DataLayerAsset	0x40	55029
+/Script/Sparta.PossibleActivity	/Script/Sparta.PossibleActivity	ActivityParameters	StructProperty of /Script/Sparta.ActivityParameters	0x48	55030
+/Script/Sparta.PossibleActivity	/Script/Sparta.PossibleActivity	AreaID	ObjectProperty of /Script/Sparta.SpartaAreaId	0x100	55031
+/Script/Sparta.SpartaActivityDescriptor	/Script/Sparta.SpartaActivityDescriptor	Area	ObjectProperty of /Script/Sparta.SpartaAreaId	0x2A8	54580
+/Script/Sparta.SpartaActivityDescriptor	/Script/Sparta.SpartaActivityDescriptor	SpriteComponent	ObjectProperty of /Script/Engine.BillboardComponent	0x2B0	54581
+/Script/Sparta.SpartaActivityDescriptor	/Script/Sparta.SpartaActivityDescriptor	TextComponent	ObjectProperty of /Script/Engine.TextRenderComponent	0x2B8	54582
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Script/Sparta.SpartaActivityDescriptor	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Script/Sparta.SpartaActivityType	/Script/Sparta.SpartaActivityType	Icon	ObjectProperty of /Script/Engine.Texture2D	0x30	55022
+/Script/Sparta.SpartaActivityType	/Script/Sparta.SpartaActivityType	DisplayName	TextProperty	0x38	55023
+/Script/Sparta.SpartaActivityType	/Script/Sparta.SpartaActivityType	AreaID	ObjectProperty of /Script/Sparta.SpartaAreaId	0x48	55024
+/Script/Sparta.SpartaActivityType	/Script/Sparta.SpartaActivityType	bRequiredCompletionEvent	BoolProperty	0x50	55025
+/Script/Engine.DataAsset	/Script/Sparta.SpartaActivityType	NativeClass	ClassProperty	0x28	13635
+/Script/Sparta.WorldMapObjectiveComponent	/Script/Sparta.WorldMapObjectiveComponent	RevealType	EnumProperty of /Script/Sparta.ERevealType	0x120	59400
+/Script/Sparta.WorldMapObjectiveComponent	/Script/Sparta.WorldMapObjectiveComponent	RevealDistance	FloatProperty	0x124	59401
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	SaveObjectClass	ClassProperty	0xC0	53884
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	OnSaveLoaded	MulticastInlineDelegateProperty	0xC8	53885
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	OnPreSave	MulticastInlineDelegateProperty	0xD8	53886
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	OnSessionReset	MulticastInlineDelegateProperty	0xE8	53887
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	SaveProtocol	EnumProperty of /Script/Sparta.ESaveObjectProtocol	0xF8	53888
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	bApplyPrologueSkipPreset	BoolProperty	0xF9	53889
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	Guid	StructProperty of /Script/CoreUObject.Guid	0xFC	53890
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	RuntimeData	ObjectProperty of /Script/Sparta.SpartaSaveObject	0x110	53891
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.WorldMapObjectiveComponent	bSaveLoaded	BoolProperty	0x118	53892
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.WorldMapObjectiveComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	QuestName	TextProperty	0x8	122015
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	LogDescription	TextProperty	0x18	122016
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	TrackingDescription	TextProperty	0x28	122017
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	bIsMainQuest	BoolProperty	0x38	122018
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	Stages	ArrayProperty of Stages./Script/Sparta.QuestDetails:Stages	0x40	122019
+/Script/Sparta.QuestDetails	/Script/Sparta.QuestDetails	bAutoAccept	BoolProperty	0x50	122021
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	StageName	TextProperty	0x0	121999
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	Description	TextProperty	0x10	122000
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	Objectives	ArrayProperty of Objectives./Script/Sparta.QuestStage:Objectives	0x20	122001
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	ObjectiveObjects	ArrayProperty of ObjectiveObjects./Script/Sparta.QuestStage:ObjectiveObjects	0x30	122003
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	XPReward	IntProperty	0x40	122005
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	ItemRewards	MapProperty	0x48	122006
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	CurrencyReward	IntProperty	0x98	122009
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	EnemyRewards	MapProperty	0xA0	122010
+/Script/Sparta.QuestStage	/Script/Sparta.QuestStage	RelationshipReward	IntProperty	0xF0	122013
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	312652
+/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	NarrativeTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xC0	312653
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	NarrativeEventTimeTracking	MapProperty	0xB8	156528
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	Trackers	MapProperty	0xB8	161958
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	ObjectiveGUID	StrProperty	0x108	161961
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IsInsideObjective	BoolProperty	0x118	161962
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	LastPlayerLocation	StructProperty of /Script/CoreUObject.Vector	0x120	161963
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WorldMap.BPSO_WorldMap_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0xB8	162014
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Visible	BoolProperty	0xC0	162015
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Revealed	BoolProperty	0xC1	162016
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	Completed	BoolProperty	0xC2	162017
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	ShowArea	BoolProperty	0xC3	162018
+/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	PlayedRevealScript	BoolProperty	0xC4	162019
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/UI/World/Map/Blueprints/BPSO_WordMapObjective.BPSO_WordMapObjective_C	bIsSessionSaveData	BoolProperty	0xB1	53848

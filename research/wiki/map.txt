@@ -1,0 +1,54 @@
+Mortal Shell II Map — Known Regions Overview 
+Skip to content
+ Mortal Shell II Map: Known Regions Overview
+ Mortal Shell II world map overview with officially named Open Beta regions, Marrow Keep, Magdalena, beacons, and the retail-build verification boundary.
+Last verified 2026-10-15 
+ This is an Open Beta map archive and region overview , not a finished interactive retail collectibles map. Use it to orient the historical early-game path while every named landmark remains tied to a confirmation status.
+ World map overview
+ World layout overview used for early-game orientation. Fogged islands and incomplete edges are not treated as confirmed retail locations. 
+ The overview above is a world-layout reference for the Open Beta route. Fogged or incomplete areas on that image are still unconfirmed . Current-build region routes, Shell pickups, and weapon tables now live on the linked pages below — this image is not a pin map.
+ Officially named early-game structure
+ From the Open Beta Steam page :
+ Prologue 
+ First explorable region of the open world
+ Beacons you can cleanse
+ Optional dungeons with hidden mini-bosses and challenges
+ Progress toward Magdalena, the Lady of the Woods 
+ Marrow Keep — progress threshold for the prologue-skip unlock
+ How to use this map with the released game
+ Player goal What to do 
+ Compare the historical opening route
+ Open Beta archive → official Steam record
+ Reach prologue-skip unlock
+ Progress beyond Marrow Keep 
+ Track checkpoints
+ Read Beacons 
+ Plan first hours
+ Read first hours and the region walkthroughs 
+ Trailer-only environment labels
+ These are visual labels from trailer footage, not confirmed map names:
+ Ruined cathedral / sanctuary combat space
+ Blighted wetland / fog-heavy exterior
+ Subterranean amber-lit passages
+ What a complete retail map still needs
+ When a current-build result is documented, this page can show:
+ Every Shell pickup location with acquisition route
+ Weapon locations and the region they are found in
+ Beacon / checkpoint positions
+ Tarstone and collectible markers
+ Boss arena entrances
+ Each marker will carry a confirmation status so you can tell current-build locations from historical Beta data.
+ Region walkthroughs {#region-walkthroughs}
+ Glutted Mire – Vrannic, the Wandering Shepherd, Magdalena
+ Sanguine Caverns – Lucian, Tarblighted Stoner, The Lost Child
+ Prisoner’s Domain – Vrago, Tishina’s Confessor, The Nameless Captive
+ Withered Shoals – Infested Miner, Hexapod
+ Conquered Temple – Sesters, Urrig, Droeg
+ Faded Citadel – Starved Harridan, Solnir, Sir Isaac
+ The Unfound Path – Malborn Offspring, The Monolith, Orrem, Zmey
+ Related pages
+ Download Open Beta 
+ Open Beta guide 
+ Beacons 
+ Bosses 
+ Shells

@@ -1,0 +1,31 @@
+Mortal Shell 2 Map and Fast Travel: Why the Corridors Feel Worse Than the Fights 
+Skip to content
+ The map is the friction, not the parry
+ Mortal Shell 2 map and fast travel: how Mether's Breath unlocks travel, beacons, Bone Portals and jump gates, and habits that stop you getting lost.
+Last verified 2026-10-15 
+ Players who love Mortal Shell 2’s combat still complain about its map. The complaint is specific: interior routes twist back on themselves and the world map does not show how corridors connect. Here is how fast travel actually works and the habits that save time.
+ How fast travel unlocks
+ You cannot fast travel at first. Siphon about five more Ova at Marrow Keep to earn Mether’s Breath . It unlocks fast travel between cleansed beacons and lets you clear corrupted growths in the overworld. The 6 September update added icons for smaller beacons in the Mether’s Breath menu, and the 13 October hotfix added extra warnings when you use Mether’s Breath (backing out no longer soft-locks).
+ The travel network
+ Tool What it does 
+ Beacons (49)
+ Checkpoints; cleansed ones are fast-travel points. Three start pre-cleansed: Marrow Keep, Widow’s Overlook, Outskirts of Mammon
+ Return to Marrow Keep
+ Available from any cleansed beacon menu
+ Bone Portals
+ Fixed teleports across regions (e.g. Citadel of Penance to Desolate Peak)
+ Jump gates / springs
+ One-way leaps across ravines (Forgotten Tower, Silent Steps)
+ Map fragments
+ Fill in the map; Merrick sells maps marking specific items
+ Habits that save time
+ Cleanse the beacon you just reached before exploring the spoke. A death run through an unmapped loop costs more than the fight.
+ Use Glimpse markers sparingly. Marking a Shell costs 3 Glimpse; buy Merrick’s maps for weapons instead.
+ Follow Ruk. After the 6 September update he appears at map stations when you warp to an overlapping beacon.
+ Treat Corrupted Gates as levels. Each has 3 beacons in a straight line; the last one appears only after its boss.
+ Region pages
+ Glutted Mire · Sanguine Caverns · Prisoner’s Domain · Withered Shoals · Conquered Temple · Faded Citadel · The Unfound Path 
+ Related pages
+ World map 
+ All beacons 
+ Region map guide

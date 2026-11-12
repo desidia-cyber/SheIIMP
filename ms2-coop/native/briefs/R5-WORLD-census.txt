@@ -1,0 +1,25 @@
+# store-A2 census: live instances, resolved fields and current values
+# role=host kinds=36 typed=10
+BPSO_FC_FinalBossManager_C.ClensedCores type=i merge=max instances=1 field=off:188 size:4 value=0 owner=BP_FinalBossManager_C_UAID_D4E98A7EF567F43902_1195328269_1195328270
+BPSO_WoodenElevator_C.StartingFloor type=i merge=host instances=1 field=off:184 size:4 value=0 owner=BP_EndDungeonRewardDoor_C_UAID_D4E98A7EF567E19302_1693709662_1693709663
+BPSO_TavernArena_C.ArenaCombatLVL type=i merge=max instances=0 field=off:-1 size:-1 value=- owner=-
+BPSO_ShellGhost_C.StateIndex type=i merge=max instances=0 field=off:-1 size:-1 value=- owner=-
+BPSO_Egon_C.GloomDonated type=i merge=max instances=0 field=off:-1 size:-1 value=- owner=-
+BPSO_Tarforge_C.StoredTarcores type=i merge=host instances=1 field=off:184 size:4 value=0 owner=BP_Tarforge_C_UAID_D4E98A7EF5679A0902_83a1dc45e2a01438_1524855487_1524855488
+BPSO_BossDLManager_C.CurrentBoss type=i merge=host instances=0 field=off:-1 size:-1 value=- owner=-
+BP_SO_SavedKeys_C.SavedKeyIDs type=s merge=union instances=0 field=off:-1 size:-1 value=- owner=-
+BP_SO_SavedLockedDoors_C.SavedDoorIDs type=s merge=union instances=0 field=off:-1 size:-1 value=- owner=-
+BPSO_SavedLockedChests_C.SavedChestIDs type=s merge=union instances=0 field=off:-1 size:-1 value=- owner=-
+BPSO_CraftingItemPickup_C instances=29 owner=BPSO_CraftingItemPickup_C  BPSO_CraftingItemPickup_C.ItemInitialized(off:185 size:1 val:false)
+BPSO_TarGate_C instances=55 owner=BPSO_TarGate_C  BPSO_TarGate_C.PlayerClensed(off:185 size:1 val:false)
+BPSO_EridrimUnlockManager_C instances=0 owner=-  BPSO_EridrimUnlockManager_C.ShellClaimed(off:-1 size:-1 val:-)
+BPSO_EvilStatue_C instances=0 owner=-  BPSO_EvilStatue_C.RewardGiven(off:-1 size:-1 val:-)
+BPSO_Ovum_C instances=3 owner=BPSO_Ovum_C  BPSO_Ovum_C.OvumCollected(off:185 size:1 val:true)
+BPSO_NPC_C instances=19 owner=BPSO_NPC_C  BPSO_NPC_C.HasTriggeredInitialGreeting(off:184 size:1 val:false) BPSO_NPC_C.WasEverKilled(off:185 size:1 val:false)
+BPSO_ShellRevive_C instances=0 owner=-  BPSO_ShellRevive_C.StationUsed(off:-1 size:-1 val:-)
+BPSO_PlayerTrapDungeon_C instances=0 owner=-  BPSO_PlayerTrapDungeon_C.TrappedOnce(off:-1 size:-1 val:-)
+BPSO_PetrifiedCultistManager_C instances=0 owner=-  BPSO_PetrifiedCultistManager_C.Harros(off:-1 size:-1 val:-)
+BPSO_MovingObject_C instances=2 owner=BPSO_MovingObject_C  BPSO_MovingObject_C.MovedToEnd(off:184 size:1 val:false)
+BPSO_TavernArena_C instances=0 owner=-  BPSO_TavernArena_C.WagerPlaced(off:-1 size:-1 val:-) BPSO_TavernArena_C.RewardGiven(off:-1 size:-1 val:-)
+BPSO_SavedLockedChests_C instances=0 owner=-  BPSO_SavedLockedChests_C.HasBeenOpened(off:-1 size:-1 val:-)
+BPSO_WoodenElevator_C instances=6 owner=BPSO_WoodenElevator_C  BPSO_WoodenElevator_C.HasBrokenOnce(off:188 size:1 val:false)

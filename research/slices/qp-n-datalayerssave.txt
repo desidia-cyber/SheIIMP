@@ -1,0 +1,14 @@
+﻿### Class /Script/Sparta.DataLayersSave  [00007FF46F045338]
+    super: /Script/Sparta.SpartaSaveObject
+    1 members:
+      PRP SavedDataLayerStates : MapProperty [o:0xb8]
+
+### EnumProperty SavedDataLayerStates./Script/Sparta.DataLayersSave:SavedDataLayerStates  [000001F4ACDA3300]
+
+### MapProperty /Script/Sparta.DataLayersSave:SavedDataLayerStates  [000001F49CD2DDA0]
+    2 members:
+      PRP SavedDataLayerStates_Key : NameProperty [o:0x0]
+      PRP SavedDataLayerStates : EnumProperty of /Script/Engine.EDataLayerRuntimeState [o:0x8]
+
+### NameProperty SavedDataLayerStates./Script/Sparta.DataLayersSave:SavedDataLayerStates_Key  [000001F4ACD689E0]
+

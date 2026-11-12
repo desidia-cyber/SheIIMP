@@ -1,0 +1,102 @@
+﻿### ArrayProperty /Script/Sparta.SpartaZoneVolumeManager:ZoneVolumeStack  [000001F4ACE15700]
+    1 members:
+      PRP ZoneVolumeStack : WeakObjectProperty of /Script/Sparta.SpartaZoneVolume [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_bFromSweep  [000001F4ACE15B80]
+
+### Class /Script/Sparta.SpartaZoneData  [00007FF46F060938]
+    super: /Script/Engine.DataAsset
+    3 members:
+      PRP ZoneId : NameProperty [o:0x30]
+      PRP AmbienceData : StructProperty of /Script/Sparta.SpartaZoneAmbienceData [o:0x38]
+      PRP MusicData : StructProperty of /Script/Sparta.SpartaZoneMusicData [o:0x40]
+
+### Class /Script/Sparta.SpartaZoneVolume  [00007FF46F060B38]
+    super: /Script/Engine.TriggerVolume
+    5 members:
+      PRP ZoneData : ObjectProperty of /Script/Sparta.SpartaZoneData [o:0x2e0]
+      PRP Priority : IntProperty [o:0x2e8]
+      PRP CollisionProfile : StructProperty of /Script/Engine.CollisionProfileName [o:0x2ec]
+      FUN EndOverlap 
+          param in_OverlappedComponent : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x0]
+          param in_OtherActor : ObjectProperty of /Script/Engine.Actor [o:0x8]
+          param in_OtherComp : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x10]
+          param in_OtherBodyIndex : IntProperty [o:0x18]
+      FUN BeginOverlap 
+          param in_OverlappedComponent : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x0]
+          param in_OtherActor : ObjectProperty of /Script/Engine.Actor [o:0x8]
+          param in_OtherComp : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x10]
+          param in_OtherBodyIndex : IntProperty [o:0x18]
+          param in_bFromSweep : BoolProperty [o:0x1c]
+          param in_SweepResult : StructProperty of /Script/Engine.HitResult [o:0x20]
+
+### Class /Script/Sparta.SpartaZoneVolumeManager  [00007FF46F060D38]
+    super: /Script/Engine.GameInstanceSubsystem
+    2 members:
+      PRP HighestPriorityZoneVolumeUpdated : MulticastInlineDelegateProperty [o:0x30]
+      PRP ZoneVolumeStack : ArrayProperty of ZoneVolumeStack./Script/Sparta.SpartaZoneVolumeManager:ZoneVolumeStack [o:0x40]
+
+### Function /Script/Sparta.SpartaZoneVolume:BeginOverlap  [00007FF46F71F018]
+    6 members:
+      PRP in_OverlappedComponent : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x0]
+      PRP in_OtherActor : ObjectProperty of /Script/Engine.Actor [o:0x8]
+      PRP in_OtherComp : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x10]
+      PRP in_OtherBodyIndex : IntProperty [o:0x18]
+      PRP in_bFromSweep : BoolProperty [o:0x1c]
+      PRP in_SweepResult : StructProperty of /Script/Engine.HitResult [o:0x20]
+
+### Function /Script/Sparta.SpartaZoneVolume:EndOverlap  [00007FF46F71F0F8]
+    4 members:
+      PRP in_OverlappedComponent : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x0]
+      PRP in_OtherActor : ObjectProperty of /Script/Engine.Actor [o:0x8]
+      PRP in_OtherComp : ObjectProperty of /Script/Engine.PrimitiveComponent [o:0x10]
+      PRP in_OtherBodyIndex : IntProperty [o:0x18]
+
+### IntProperty /Script/Sparta.SpartaZoneAmbienceData:Test  [000001F4E2C80C50]
+
+### IntProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_OtherBodyIndex  [000001F4ACDE7BE0]
+
+### IntProperty /Script/Sparta.SpartaZoneVolume:EndOverlap:in_OtherBodyIndex  [000001F4ACDE7B70]
+
+### IntProperty /Script/Sparta.SpartaZoneVolume:Priority  [000001F4ACDE7B00]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaZoneVolumeManager:HighestPriorityZoneVolumeUpdated  [000001F4ACE15600]
+
+### NameProperty /Script/Sparta.SpartaZoneData:ZoneId  [000001F4ACDE7C50]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_OtherActor  [000001F4ACE15A80]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_OtherComp  [000001F4ACE15B00]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_OverlappedComponent  [000001F4ACE15A00]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:EndOverlap:in_OtherActor  [000001F4ACE15900]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:EndOverlap:in_OtherComp  [000001F4ACE15980]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:EndOverlap:in_OverlappedComponent  [000001F4ACE15880]
+
+### ObjectProperty /Script/Sparta.SpartaZoneVolume:ZoneData  [000001F4ACE15780]
+
+### ScriptStruct /Script/Sparta.SpartaZoneAmbienceData  [00007FF46F48CF38]
+    super: [n:
+    1 members:
+      PRP Test : IntProperty [o:0x0]
+
+### ScriptStruct /Script/Sparta.SpartaZoneMusicData  [00007FF46F48CFF8]
+    super: [n:
+    1 members:
+      PRP LocationSwitch : StructProperty of /Script/WaveWeaver.AudioSwitchState [o:0x0]
+
+### StructProperty /Script/Sparta.SpartaZoneData:AmbienceData  [000001F4ACE15C80]
+
+### StructProperty /Script/Sparta.SpartaZoneData:MusicData  [000001F4ACE15D00]
+
+### StructProperty /Script/Sparta.SpartaZoneMusicData:LocationSwitch  [000001F4A887AD80]
+
+### StructProperty /Script/Sparta.SpartaZoneVolume:BeginOverlap:in_SweepResult  [000001F4ACE15C00]
+
+### StructProperty /Script/Sparta.SpartaZoneVolume:CollisionProfile  [000001F4ACE15800]
+
+### WeakObjectProperty ZoneVolumeStack./Script/Sparta.SpartaZoneVolumeManager:ZoneVolumeStack  [000001F4ACE15680]
+

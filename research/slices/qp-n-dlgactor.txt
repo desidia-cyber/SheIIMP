@@ -1,0 +1,26 @@
+﻿### Class /Script/Sparta.SpartaDialogueActor  [00007FF46F045F38]
+    super: /Script/Engine.Actor
+    5 members:
+      PRP Mesh : ObjectProperty of /Script/Engine.SkeletalMeshComponent [o:0x2b0]
+      PRP CapsuleComponent : ObjectProperty of /Script/Engine.CapsuleComponent [o:0x2b8]
+      PRP AudioComponentMapInitialized : MulticastInlineDelegateProperty [o:0x2c0]
+      PRP GameplayTagToAudioComponentMap : MapProperty [o:0x2d0]
+      PRP AudioData : ObjectProperty of /Script/Sparta.SpartaCharacterAudioData [o:0x320]
+
+### MapProperty /Script/Sparta.SpartaDialogueActor:GameplayTagToAudioComponentMap  [000001F49CD2DC60]
+    2 members:
+      PRP GameplayTagToAudioComponentMap_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP GameplayTagToAudioComponentMap : ObjectProperty of /Script/Sparta.SpartaCharacterAudioComponent [o:0x8]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaDialogueActor:AudioComponentMapInitialized  [000001F4ACDA4880]
+
+### ObjectProperty /Script/Sparta.SpartaDialogueActor:AudioData  [000001F4ACDA4A00]
+
+### ObjectProperty /Script/Sparta.SpartaDialogueActor:CapsuleComponent  [000001F4ACDA4800]
+
+### ObjectProperty /Script/Sparta.SpartaDialogueActor:Mesh  [000001F4ACDA4780]
+
+### ObjectProperty GameplayTagToAudioComponentMap./Script/Sparta.SpartaDialogueActor:GameplayTagToAudioComponentMap  [000001F4ACDA4900]
+
+### StructProperty GameplayTagToAudioComponentMap./Script/Sparta.SpartaDialogueActor:GameplayTagToAudioComponentMap_Key  [000001F4ACDA4980]
+

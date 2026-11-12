@@ -1,0 +1,456 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	InputID	NameProperty	0x30	56692
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	Action	NameProperty	0x38	56693
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	OnInputStarted	DelegateProperty	0x40	56694
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	OnInputOngoing	DelegateProperty	0x50	56695
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	OnInputCompleted	DelegateProperty	0x60	56696
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	OnInputCancelled	DelegateProperty	0x70	56697
+/Script/Sparta.SpartaInputInteraction	/Script/Sparta.SpartaInputInteraction	OnProgressChanged	DelegateProperty	0x80	56698
+/Script/Sparta.PickupableActor	/Script/Sparta.PickupableActor	ItemDef	StructProperty of /Script/Sparta.PickupTemplate	0x2A8	53755
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Script/Sparta.PickupableActor	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GateOpened	BoolProperty	0xB8	173149
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	GotVarsOnce	BoolProperty	0xB9	173150
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	173151
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	EndingLoc	StructProperty of /Script/CoreUObject.Vector	0xD8	173152
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	StartingRot	StructProperty of /Script/CoreUObject.Rotator	0xF0	173153
+/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	EndingRot	StructProperty of /Script/CoreUObject.Rotator	0x108	173154
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Gate.BPSO_Gate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	CombatEncCompleted	BoolProperty	0xB8	173135
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CloseAndOpenGate.BPSO_CloseAndOpenGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	MovedToEnd	BoolProperty	0xB8	173478
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	GotVarsOnce	BoolProperty	0xB9	173479
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	173480
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	EndingLoc	StructProperty of /Script/CoreUObject.Vector	0xD8	173481
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	StartingRot	StructProperty of /Script/CoreUObject.Rotator	0xF0	173482
+/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	EndingRot	StructProperty of /Script/CoreUObject.Rotator	0x108	173483
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_MovingObject.BPSO_MovingObject_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	StartingFloor	IntProperty	0xB8	205400
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	HasBrokenOnce	BoolProperty	0xBC	205401
+/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	StartingLoc	StructProperty of /Script/CoreUObject.Vector	0xC0	205402
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_WoodenElevator.BPSO_WoodenElevator_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	ItemCollected	BoolProperty	0xB8	171340
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FlowerChest.BPSO_FlowerChest_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	Cleansed	BoolProperty	0xB8	173812
+/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	OvumCollected	BoolProperty	0xB9	173813
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Ovum.BPSO_Ovum_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	StationUsed	BoolProperty	0xB8	173875
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellRevive.BPSO_ShellRevive_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	StateIndex	IntProperty	0xB8	172559
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShellGhost.BPSO_ShellGhost_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	CachedItemsMap	MapProperty	0xB8	195737
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	TotalGoldSpent	IntProperty	0x108	195740
+/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	StolenItems	BoolProperty	0x10C	195741
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShopData.BPSO_ShopData_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	StoredTarcores	IntProperty	0xB8	596771
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_Tarforge.BPSO_Tarforge_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	Cleansed	BoolProperty	0xB8	196406
+/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	RewardGiven	BoolProperty	0xB9	196407
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EvilStatue.BPSO_EvilStatue_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	WardenJumped	BoolProperty	0xB8	619849
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	WardenDefeated	BoolProperty	0xB9	619850
+/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	ShellClaimed	BoolProperty	0xBA	619851
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_EridrimUnlockManager.BPSO_EridrimUnlockManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IsDisarmed	BoolProperty	0xB8	201626
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BearTrap.BPSO_BearTrap_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	GateClensed	BoolProperty	0xB8	203663
+/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	PlayerClensed	BoolProperty	0xB9	203664
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGate.BPSO_TarGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	StatueFallen	BoolProperty	0xB8	173461
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingStatue.BPSO_FallingStatue_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	ShotDown	BoolProperty	0xB8	205405
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FallingCorpse.BPSO_FallingCorpse_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ItemCollected	BoolProperty	0xB8	194897
+/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	ItemInitialized	BoolProperty	0xB9	194898
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_CraftingItemPickup.BPSO_CraftingItemPickup_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	SealBroken	BoolProperty	0xB8	172562
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_SlayerDungeonChalice.BPSO_SlayerDungeonChalice_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	Harros	BoolProperty	0xB8	193856
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_PetrifiedCultistManager.BPSO_PetrifiedCultistManager_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	SensorClensed	BoolProperty	0xB8	654340
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GenessaSensor.BPSO_GenessaSensor_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	CageOpened	BoolProperty	0xB8	198135
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	OpenType	StructProperty of /Script/GameplayTags.GameplayTag	0xBC	198136
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaCage.BPSO_GrishaCage_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	BossDefeated	BoolProperty	0xB8	193853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_GrishaGhost.BPSO_GrishaGhost_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	GateOpened	BoolProperty	0xB8	194901
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_ShepherdSheepGate.BPSO_ShepherdSheepGate_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	HasTriggeredInitialGreeting	BoolProperty	0xB8	213480
+/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	WasEverKilled	BoolProperty	0xB9	213481
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_NPC.BPSO_NPC_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	DoorOpened	BoolProperty	0xB8	201623
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_DoorLockedDungeon.BPSO_DoorLockedDungeon_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	SavedChestIDs	ArrayProperty of SavedChestIDs./Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C:SavedChestIDs	0xB8	205412
+/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	HasBeenOpened	BoolProperty	0xC8	205414
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BPSO_SavedLockedChests.BPSO_SavedLockedChests_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	SavedKeyIDs	ArrayProperty of SavedKeyIDs./Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C:SavedKeyIDs	0xB8	201632
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedKeys.BP_SO_SavedKeys_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	SavedDoorIDs	ArrayProperty of SavedDoorIDs./Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C:SavedDoorIDs	0xB8	194904
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SavedLockedDoors.BP_SO_SavedLockedDoors_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	MyBool	BoolProperty	0xB8	198177
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/Interaction/SaveObjects/BP_SO_SimpleBool.BP_SO_SimpleBool_C	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	660733
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PressurePlateCollisionReverse	ObjectProperty of /Script/Engine.BoxComponent	0x2B0	660734
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PressurePlateCollision	ObjectProperty of /Script/Engine.BoxComponent	0x2B8	660735
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2C0	660736
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_0_Progress_241B19174DD7208AB688EB962990EA9E	FloatProperty	0x2C8	660737
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_0__Direction_241B19174DD7208AB688EB962990EA9E	ByteProperty	0x2CC	660738
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_0	ObjectProperty of /Script/Engine.TimelineComponent	0x2D0	660739
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline_Progress_ED2516B541E5214CCCE99480D346F50F	FloatProperty	0x2D8	660740
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline__Direction_ED2516B541E5214CCCE99480D346F50F	ByteProperty	0x2DC	660741
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Timeline	ObjectProperty of /Script/Engine.TimelineComponent	0x2E0	660742
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovePressurePlate_Progress_E74D35A84638B5664E5595B51B343FF6	FloatProperty	0x2E8	660743
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovePressurePlate__Direction_E74D35A84638B5664E5595B51B343FF6	ByteProperty	0x2EC	660744
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovePressurePlate	ObjectProperty of /Script/Engine.TimelineComponent	0x2F0	660745
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PressurePlate	ObjectProperty of /Script/Engine.StaticMeshActor	0x2F8	660746
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RaisedObject	ObjectProperty of /Script/Engine.StaticMeshActor	0x300	660747
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Spider	ObjectProperty of /Game/Sparta/Core/Interaction/BP_SpiderGiant.BP_SpiderGiant_C	0x308	660748
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PressurePateInitialLocation	StructProperty of /Script/CoreUObject.Vector	0x310	660749
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	InitLocationObjectBeingRaised	StructProperty of /Script/CoreUObject.Vector	0x328	660750
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RaisingAmount	StructProperty of /Script/CoreUObject.Vector	0x340	660751
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	CanBeReversed	BoolProperty	0x358	660752
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SendMessageAtEnd	BoolProperty	0x359	660753
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MessageText	TextProperty	0x360	660754
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NoReset	BoolProperty	0x370	660755
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MoveSpiderOnTrigger	BoolProperty	0x371	660756
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	FastAnimation	BoolProperty	0x372	660757
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OvumToActivate	ObjectProperty of /Game/Sparta/Core/Interaction/BP_Interaction_Ovum.BP_Interaction_Ovum_C	0x378	660758
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovingUpStartSFX	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x380	660759
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MainAudio	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x388	660760
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovementSWT1	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x390	660761
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovementSWT2	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x398	660762
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovingUpDistant	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x3A0	660763
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovementSWT3	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x3A8	660764
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AudioStopTreshold	DoubleProperty	0x3B0	660765
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MainLoopId	StructProperty of /Script/WaveWeaver.AudioEventId	0x3B8	660766
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MovingUpStopSFX	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x3C0	660767
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Button	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x3C8	660768
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAudioStopTriggered	BoolProperty	0x3D0	660769
+/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	TimeLeft	DoubleProperty	0x3D8	660770
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateDungeon.BP_PressurePlateDungeon_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	UberGraphFrame	StructProperty of /Script/Engine.PointerToUberGraphFrame	0x2A8	660881
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorAudioComponent	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x2B0	660882
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PlateAudioComponent	ObjectProperty of /Script/Sparta.SpartaAudioComponent	0x2B8	660883
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	WallMesh3	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2C0	660884
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	WallMesh2	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2C8	660885
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	WallMesh1	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2D0	660886
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	WallRaise	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2D8	660887
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Collision	ObjectProperty of /Script/Engine.BoxComponent	0x2E0	660888
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Plate	ObjectProperty of /Script/Engine.StaticMeshComponent	0x2E8	660889
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DefaultSceneRoot	ObjectProperty of /Script/Engine.SceneComponent	0x2F0	660890
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Timeline_Location_C47C20E54F9AD86C87999095B8596E8C	FloatProperty	0x2F8	660891
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Timeline__Direction_C47C20E54F9AD86C87999095B8596E8C	ByteProperty	0x2FC	660892
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Timeline	ObjectProperty of /Script/Engine.TimelineComponent	0x300	660893
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MoveDown_Move_097DCF5146684DC03235D690EF0156B0	FloatProperty	0x308	660894
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MoveDown__Direction_097DCF5146684DC03235D690EF0156B0	ByteProperty	0x30C	660895
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MoveDown	ObjectProperty of /Script/Engine.TimelineComponent	0x310	660896
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InitialLocationPlate	StructProperty of /Script/CoreUObject.Vector	0x318	660897
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ArrowOrigins	ArrayProperty of ArrowOrigins./Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C:ArrowOrigins	0x330	660898
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	GateOpenOffset	DoubleProperty	0x340	660900
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InitialLocationWall	StructProperty of /Script/CoreUObject.Vector	0x348	660901
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RemainOpenAfterFirstInteract	BoolProperty	0x360	660902
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Opened	BoolProperty	0x361	660903
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CheckHandle	StructProperty of /Script/Engine.TimerHandle	0x368	660904
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorOpenEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x370	660905
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PlatePressedEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x378	660906
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorAudioEventId	StructProperty of /Script/WaveWeaver.AudioEventId	0x380	660907
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorCloseEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x388	660908
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PlateResetEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x390	660909
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AudioStopTreshold	DoubleProperty	0x398	660910
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	TimeLeft	DoubleProperty	0x3A0	660911
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorStopEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x3A8	660912
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DoorStartEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0x3B0	660913
+/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	FadeOut	FloatProperty	0x3B8	660914
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Game/Sparta/Core/Interaction/BP_PressurePlateOpenDoor.BP_PressurePlateOpenDoor_C	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129

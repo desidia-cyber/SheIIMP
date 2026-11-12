@@ -1,0 +1,21 @@
+ws2 self test: 20 pass, 0 fail
+PASS hash stable
+PASS hash differs
+PASS json escape drops brackets
+PASS json escape keeps the text
+PASS json unescape
+PASS parse entries
+PASS parse peer rows
+PASS parse int value
+PASS parse int live
+PASS parse str value
+PASS parse str live
+PASS parse rejects a non-hex key
+PASS parse rejects a truncated entry
+PASS union appends
+PASS union keeps local order
+PASS union never removes
+PASS ledger split
+PASS ledger value
+PASS payload section
+PASS payload round trip

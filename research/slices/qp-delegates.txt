@@ -1,0 +1,3 @@
+﻿DelegateFunction	/Script/DlgSystem.OnDialogueEnded__DelegateSignature
+DelegateFunction	/Script/Sparta.OnDialogueStartedEvent__DelegateSignature
+DelegateFunction	/Script/Sparta.OnDlgNodeEvent__DelegateSignature

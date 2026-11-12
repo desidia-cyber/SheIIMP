@@ -1,0 +1,638 @@
+﻿### ArrayProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ActiveQuests  [000001F61C517080]
+    1 members:
+      PRP ActiveQuests : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x0]
+
+### ArrayProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompletedQuests  [000001F61C517100]
+    1 members:
+      PRP CompletedQuests : NameProperty [o:0x0]
+
+### ArrayProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CurrentActiveQuests  [000001F61C517180]
+    1 members:
+      PRP CurrentActiveQuests : NameProperty [o:0x0]
+
+### ArrayProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_BreakGameplayTagContainer_GameplayTags  [000001F6217C0500]
+    1 members:
+      PRP CallFunc_BreakGameplayTagContainer_GameplayTags : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+
+### ArrayProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:K2Node_MakeArray_Array  [000001F6217C2100]
+    1 members:
+      PRP K2Node_MakeArray_Array : StructProperty of /Script/Engine.FormatArgumentData [o:0x0]
+
+### BPC_QuestLogComponent_C /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.Default__BPC_QuestLogComponent_C  [000001F61B158DD0]
+
+### BlueprintGeneratedClass /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C  [000001F614CBDC60]
+    super: /Script/Sparta.SpartaSaveComponent
+    49 members:
+      PRP UberGraphFrame : StructProperty of /Script/Engine.PointerToUberGraphFrame [o:0x120]
+      PRP CurrentActiveQuests : ArrayProperty of CurrentActiveQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CurrentActiveQuests [o:0x128]
+      PRP CompletedQuests : ArrayProperty of CompletedQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompletedQuests [o:0x138]
+      PRP CurrentTrackedQuest : NameProperty [o:0x148]
+      PRP ActiveQuests : ArrayProperty of ActiveQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ActiveQuests [o:0x150]
+      PRP OnQuestStarted : MulticastInlineDelegateProperty [o:0x160]
+      PRP NPCRelationships : MapProperty [o:0x170]
+      PRP OnQuestCompleted : MulticastInlineDelegateProperty [o:0x1c0]
+      PRP PlayerChoice : StructProperty of /Script/GameplayTags.GameplayTag [o:0x1d0]
+      PRP OnItemQueried : MulticastInlineDelegateProperty [o:0x1d8]
+      PRP OnMemoryQueried : MulticastInlineDelegateProperty [o:0x1e8]
+      PRP NarrativeEvents : MapProperty [o:0x1f8]
+      PRP OnEventQueried : MulticastInlineDelegateProperty [o:0x248]
+      PRP NarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x258]
+      PRP OnNarrativeTagsLoaded : MulticastInlineDelegateProperty [o:0x278]
+      PRP BlisterBoiDonations : IntProperty [o:0x288]
+      PRP ImmortalBrigSpoils : MapProperty [o:0x290]
+      PRP WormfishGold : MapProperty [o:0x2e0]
+      PRP MemoryOverride : BoolProperty [o:0x330]
+      PRP MemoryOverrideRef : ObjectProperty of /Script/CoreUObject.Object [o:0x338]
+      PRP TotalGoldSpentMerchant : MapProperty [o:0x340]
+      PRP Array : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x390]
+      FUN ResetForNewGamePlus 
+          param NarrativeTagsToCheckRetain : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+          param RetainedNarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x20]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x40]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x44]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x48]
+          param CallFunc_BreakGameplayTagContainer_GameplayTags : ArrayProperty of CallFunc_BreakGameplayTagContainer_GameplayTags./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_BreakGameplayTagContainer_GameplayTags [o:0x50]
+          param CallFunc_Array_Get_Item : StructProperty of /Script/GameplayTags.GameplayTag [o:0x60]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x68]
+          param CallFunc_CheckNarrativeTag_ReturnValue : BoolProperty [o:0x6c]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x6d]
+      FUN RemoveNarrativeTag 
+          param Tag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SaveToDisk : BoolProperty [o:0x8]
+          param CallFunc_RemoveGameplayTag_ReturnValue : BoolProperty [o:0x9]
+          param CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0xa]
+      FUN AddNarrativeTag 
+          param Tag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SaveToDisk : BoolProperty [o:0x8]
+      FUN LoadNarrativeTags 
+          param CallFunc_GetSpartaPlayerCharacter_ReturnValue : ObjectProperty of /Script/Sparta.SpartaPlayerCharacter [o:0x0]
+          param CallFunc_GetRuntimeData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x8]
+          param K2Node_DynamicCast_AsBPSO_Quest_Log_Component : ObjectProperty of /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C [o:0x10]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+          param CallFunc_BroadcastEventNoData_ReturnValue : IntProperty [o:0x1c]
+      FUN Query 
+          param Query : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN Query 
+          param Query : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN QueryQuestItem 
+          param QuestItemData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN QueryCompletedQuests 
+          param QuestID : NameProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+          param TurnedIn : BoolProperty [o:0x9]
+          param CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x10]
+          param CallFunc_Array_Contains_ReturnValue : BoolProperty [o:0x18]
+          param CallFunc_IsValid_ReturnValue : BoolProperty [o:0x19]
+      FUN TurnInQuest 
+          param QuestID : NameProperty [o:0x0]
+          param CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x8]
+          param CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x10]
+          param CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Components/BPC_Player_Experience.BPC_Player_Experience_C [o:0x18]
+          param K2Node_MakeArray_Array : ArrayProperty of K2Node_MakeArray_Array./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:K2Node_MakeArray_Array [o:0x20]
+          param CallFunc_Conv_IntToDouble_ReturnValue : DoubleProperty [o:0x30]
+          param CallFunc_Conv_IntToText_ReturnValue : TextProperty [o:0x38]
+          param CallFunc_Format_ReturnValue : TextProperty [o:0x48]
+          param CallFunc_Conv_TextToString_ReturnValue : StrProperty [o:0x58]
+          param CallFunc_GrantExp_Exp_ImplicitCast : FloatProperty [o:0x68]
+      FUN GetQuestObject 
+          param QuestID : NameProperty [o:0x0]
+          param Array : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+          param Temp_int_Array_Index_Variable : IntProperty [o:0x10]
+          param Temp_int_Loop_Counter_Variable : IntProperty [o:0x14]
+          param CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x18]
+          param CallFunc_Array_Length_ReturnValue : IntProperty [o:0x1c]
+          param CallFunc_Array_Get_Item : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x20]
+          param CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x28]
+          param CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x29]
+      FUN TrackQuests 
+      FUN QueryActiveQuest 
+          param QuestID : NameProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+          param CallFunc_Array_Contains_ReturnValue : BoolProperty [o:0x9]
+      FUN CompleteQuest 
+          param QuestID : NameProperty [o:0x0]
+          param CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+          param CallFunc_Array_RemoveItem_ReturnValue : BoolProperty [o:0x10]
+          param CallFunc_Array_AddUnique_ReturnValue : IntProperty [o:0x14]
+      FUN AddNewQuest 
+          param QuestID : NameProperty [o:0x0]
+          param CallFunc_SpawnObject_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+          param CallFunc_Array_Add_ReturnValue : IntProperty [o:0x10]
+          param CallFunc_Array_AddUnique_ReturnValue : IntProperty [o:0x14]
+      FUN OnEventFired_F984C41B4CD4FA8DF0F86688F33678DD 
+          param EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN ReceiveBeginPlay 
+      FUN OnDeathOrBossDefeat 
+          param EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN ReceiveEndPlay 
+          param EndPlayReason : ByteProperty [o:0x0]
+      FUN SaveLoaded 
+          param SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+      FUN SetMemoryOverride 
+          param EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN ExecuteUbergraph_BPC_QuestLogComponent 
+          param EntryPoint : IntProperty [o:0x0]
+          param CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x8]
+          param K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x10]
+          param K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x20]
+          param K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+          param K2Node_CustomEvent_EventData_2 : ObjectProperty of /Script/CoreUObject.Object [o:0x38]
+          param CallFunc_GetIsPlayerSaveLoaded_ReturnValue : BoolProperty [o:0x40]
+          param Temp_object_Variable : ObjectProperty of /Script/CoreUObject.Object [o:0x48]
+          param CallFunc_CreateProxyObjectForSubscribeToEvent_ReturnValue : ObjectProperty of /Script/Sparta.SubscribeToEventCallbackProxy [o:0x50]
+          param K2Node_CreateDelegate_OutputDelegate_1 : DelegateProperty [o:0x58]
+          param CallFunc_IsValid_ReturnValue : BoolProperty [o:0x68]
+          param CallFunc_SubscribeToEvent_ReturnValue : BoolProperty [o:0x69]
+          param CallFunc_SubscribeToEvent_ReturnValue_1 : BoolProperty [o:0x6a]
+          param K2Node_CreateDelegate_OutputDelegate_2 : DelegateProperty [o:0x6c]
+          param CallFunc_GetObjectName_ReturnValue : StrProperty [o:0x80]
+          param CallFunc_SubscribeToEvent_ReturnValue_2 : BoolProperty [o:0x90]
+          param CallFunc_Conv_StringToName_ReturnValue : NameProperty [o:0x94]
+          param CallFunc_GetPlayerController_ReturnValue_1 : ObjectProperty of /Script/Engine.PlayerController [o:0xa0]
+          param K2Node_DynamicCast_AsBPI_Player_Controller_1 : InterfaceProperty [o:0xa8]
+          param K2Node_DynamicCast_bSuccess_1 : BoolProperty [o:0xb8]
+          param CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0xc0]
+          param K2Node_CustomEvent_EventData_1 : ObjectProperty of /Script/CoreUObject.Object [o:0xc8]
+          param CallFunc_CheckNarrativeTag_ReturnValue : BoolProperty [o:0xd0]
+          param K2Node_Event_EndPlayReason : ByteProperty [o:0xd1]
+          param CallFunc_UnsubscribeFromEvent_ReturnValue : BoolProperty [o:0xd2]
+          param CallFunc_UnsubscribeFromEvent_ReturnValue_1 : BoolProperty [o:0xd3]
+          param K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0xd8]
+          param K2Node_CustomEvent_EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x108]
+      FUN OnNarrativeTagsLoaded__DelegateSignature 
+          param NarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+          param QuestLog : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x20]
+      FUN OnEventQueried__DelegateSignature 
+          param EventData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN OnMemoryQueried__DelegateSignature 
+          param ShellMemoryData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN OnItemQueried__DelegateSignature 
+          param QuestItemData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+      FUN OnQuestCompleted__DelegateSignature 
+          param QuestObject : ObjectProperty of /Script/Sparta.QuestObject [o:0x0]
+      FUN OnQuestStarted__DelegateSignature 
+          param QuestID : NameProperty [o:0x0]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNarrativeTag:SaveToDisk  [000001F62179FE80]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompleteQuest:CallFunc_Array_RemoveItem_ReturnValue  [000001F62179FD00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_CheckNarrativeTag_ReturnValue  [000001F61C515400]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_GetIsPlayerSaveLoaded_ReturnValue  [000001F61C515B00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_IsValid_ReturnValue  [000001F61C515900]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_SubscribeToEvent_ReturnValue  [000001F61C515880]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_SubscribeToEvent_ReturnValue_1  [000001F61C515800]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_SubscribeToEvent_ReturnValue_2  [000001F61C515700]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_UnsubscribeFromEvent_ReturnValue  [000001F61C515300]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_UnsubscribeFromEvent_ReturnValue_1  [000001F61C517380]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_DynamicCast_bSuccess  [000001F61C515C00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_DynamicCast_bSuccess_1  [000001F61C515580]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:CallFunc_EqualEqual_NameName_ReturnValue  [000001F62179FB00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:CallFunc_Less_IntInt_ReturnValue  [000001F62179FB80]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags:K2Node_DynamicCast_bSuccess  [000001F62179F900]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:MemoryOverride  [000001F61C516B80]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryActiveQuest:CallFunc_Array_Contains_ReturnValue  [000001F6217C0C00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryActiveQuest:ReturnValue  [000001F6217C0C80]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:CallFunc_Array_Contains_ReturnValue  [000001F6217C0A00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:CallFunc_IsValid_ReturnValue  [000001F6217C0980]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:ReturnValue  [000001F6217C0B80]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:TurnedIn  [000001F6217C0B00]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:RemoveNarrativeTag:CallFunc_BooleanAND_ReturnValue  [000001F6217C0680]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:RemoveNarrativeTag:CallFunc_RemoveGameplayTag_ReturnValue  [000001F6217C0700]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:RemoveNarrativeTag:SaveToDisk  [000001F6217C0780]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_CheckNarrativeTag_ReturnValue  [000001F6217C0380]
+
+### BoolProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_Less_IntInt_ReturnValue  [000001F6217C0300]
+
+### ByteProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_Event_EndPlayReason  [000001F61C515380]
+
+### ByteProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ReceiveEndPlay:EndPlayReason  [000001F6217C0880]
+
+### DelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CreateDelegate_OutputDelegate  [000001F61C515D00]
+
+### DelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CreateDelegate_OutputDelegate_1  [000001F61C515980]
+
+### DelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CreateDelegate_OutputDelegate_2  [000001F61C515780]
+
+### DoubleProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_Conv_IntToDouble_ReturnValue  [000001F621788350]
+
+### FloatProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_GrantExp_Exp_ImplicitCast  [000001F621789E70]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNarrativeTag  [000001F61C3BBC00]
+    2 members:
+      PRP Tag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SaveToDisk : BoolProperty [o:0x8]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNewQuest  [000001F61C3BB100]
+    4 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP CallFunc_SpawnObject_ReturnValue : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+      PRP CallFunc_Array_Add_ReturnValue : IntProperty [o:0x10]
+      PRP CallFunc_Array_AddUnique_ReturnValue : IntProperty [o:0x14]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompleteQuest  [000001F61C3BB200]
+    4 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+      PRP CallFunc_Array_RemoveItem_ReturnValue : BoolProperty [o:0x10]
+      PRP CallFunc_Array_AddUnique_ReturnValue : IntProperty [o:0x14]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent  [000001F61C3BE600]
+    28 members:
+      PRP EntryPoint : IntProperty [o:0x0]
+      PRP CallFunc_GetPlayerController_ReturnValue : ObjectProperty of /Script/Engine.PlayerController [o:0x8]
+      PRP K2Node_CreateDelegate_OutputDelegate : DelegateProperty [o:0x10]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller : InterfaceProperty [o:0x20]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x30]
+      PRP K2Node_CustomEvent_EventData_2 : ObjectProperty of /Script/CoreUObject.Object [o:0x38]
+      PRP CallFunc_GetIsPlayerSaveLoaded_ReturnValue : BoolProperty [o:0x40]
+      PRP Temp_object_Variable : ObjectProperty of /Script/CoreUObject.Object [o:0x48]
+      PRP CallFunc_CreateProxyObjectForSubscribeToEvent_ReturnValue : ObjectProperty of /Script/Sparta.SubscribeToEventCallbackProxy [o:0x50]
+      PRP K2Node_CreateDelegate_OutputDelegate_1 : DelegateProperty [o:0x58]
+      PRP CallFunc_IsValid_ReturnValue : BoolProperty [o:0x68]
+      PRP CallFunc_SubscribeToEvent_ReturnValue : BoolProperty [o:0x69]
+      PRP CallFunc_SubscribeToEvent_ReturnValue_1 : BoolProperty [o:0x6a]
+      PRP K2Node_CreateDelegate_OutputDelegate_2 : DelegateProperty [o:0x6c]
+      PRP CallFunc_GetObjectName_ReturnValue : StrProperty [o:0x80]
+      PRP CallFunc_SubscribeToEvent_ReturnValue_2 : BoolProperty [o:0x90]
+      PRP CallFunc_Conv_StringToName_ReturnValue : NameProperty [o:0x94]
+      PRP CallFunc_GetPlayerController_ReturnValue_1 : ObjectProperty of /Script/Engine.PlayerController [o:0xa0]
+      PRP K2Node_DynamicCast_AsBPI_Player_Controller_1 : InterfaceProperty [o:0xa8]
+      PRP K2Node_DynamicCast_bSuccess_1 : BoolProperty [o:0xb8]
+      PRP CallFunc_GetPlayerSaveGameObject_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Save/BP_SpartaPlayerSaveObject.BP_SpartaPlayerSaveObject_C [o:0xc0]
+      PRP K2Node_CustomEvent_EventData_1 : ObjectProperty of /Script/CoreUObject.Object [o:0xc8]
+      PRP CallFunc_CheckNarrativeTag_ReturnValue : BoolProperty [o:0xd0]
+      PRP K2Node_Event_EndPlayReason : ByteProperty [o:0xd1]
+      PRP CallFunc_UnsubscribeFromEvent_ReturnValue : BoolProperty [o:0xd2]
+      PRP CallFunc_UnsubscribeFromEvent_ReturnValue_1 : BoolProperty [o:0xd3]
+      PRP K2Node_Event_SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0xd8]
+      PRP K2Node_CustomEvent_EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x108]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject  [000001F61C3BB500]
+    9 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP Array : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x8]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x10]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x14]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x18]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x1c]
+      PRP CallFunc_Array_Get_Item : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x20]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x28]
+      PRP CallFunc_EqualEqual_NameName_ReturnValue : BoolProperty [o:0x29]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags  [000001F61C3BBB00]
+    5 members:
+      PRP CallFunc_GetSpartaPlayerCharacter_ReturnValue : ObjectProperty of /Script/Sparta.SpartaPlayerCharacter [o:0x0]
+      PRP CallFunc_GetRuntimeData_ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x8]
+      PRP K2Node_DynamicCast_AsBPSO_Quest_Log_Component : ObjectProperty of /Game/Sparta/Core/SaveObjects/BPSO_QuestLogComponent.BPSO_QuestLogComponent_C [o:0x10]
+      PRP K2Node_DynamicCast_bSuccess : BoolProperty [o:0x18]
+      PRP CallFunc_BroadcastEventNoData_ReturnValue : IntProperty [o:0x1c]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnDeathOrBossDefeat  [000001F61C3BAE00]
+    1 members:
+      PRP EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnEventFired_F984C41B4CD4FA8DF0F86688F33678DD  [000001F61C3BB000]
+    1 members:
+      PRP EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnEventQueried__DelegateSignature  [000001F61C3BA900]
+    1 members:
+      PRP EventData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnItemQueried__DelegateSignature  [000001F61C3BA700]
+    1 members:
+      PRP QuestItemData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnMemoryQueried__DelegateSignature  [000001F61C3BA800]
+    1 members:
+      PRP ShellMemoryData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnNarrativeTagsLoaded__DelegateSignature  [000001F61C3BAA00]
+    2 members:
+      PRP NarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      PRP QuestLog : ObjectProperty of /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C [o:0x20]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestCompleted__DelegateSignature  [000001F61C3BA600]
+    1 members:
+      PRP QuestObject : ObjectProperty of /Script/Sparta.QuestObject [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestStarted__DelegateSignature  [000001F61C3BE700]
+    1 members:
+      PRP QuestID : NameProperty [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:Query  [000001F61C3BBA00]
+    1 members:
+      PRP Query : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:Query  [000001F61C3BB900]
+    1 members:
+      PRP Query : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryActiveQuest  [000001F61C3BB300]
+    3 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+      PRP CallFunc_Array_Contains_ReturnValue : BoolProperty [o:0x9]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests  [000001F61C3BB700]
+    6 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+      PRP TurnedIn : BoolProperty [o:0x9]
+      PRP CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x10]
+      PRP CallFunc_Array_Contains_ReturnValue : BoolProperty [o:0x18]
+      PRP CallFunc_IsValid_ReturnValue : BoolProperty [o:0x19]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryQuestItem  [000001F61C3BB800]
+    1 members:
+      PRP QuestItemData : StructProperty of /Script/Engine.DataTableRowHandle [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ReceiveBeginPlay  [000001F61C3BAF00]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ReceiveEndPlay  [000001F61C3BAD00]
+    1 members:
+      PRP EndPlayReason : ByteProperty [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:RemoveNarrativeTag  [000001F61C3BBD00]
+    4 members:
+      PRP Tag : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SaveToDisk : BoolProperty [o:0x8]
+      PRP CallFunc_RemoveGameplayTag_ReturnValue : BoolProperty [o:0x9]
+      PRP CallFunc_BooleanAND_ReturnValue : BoolProperty [o:0xa]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus  [000001F61C3BBE00]
+    10 members:
+      PRP NarrativeTagsToCheckRetain : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      PRP RetainedNarrativeTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x20]
+      PRP Temp_int_Array_Index_Variable : IntProperty [o:0x40]
+      PRP Temp_int_Loop_Counter_Variable : IntProperty [o:0x44]
+      PRP CallFunc_Add_IntInt_ReturnValue : IntProperty [o:0x48]
+      PRP CallFunc_BreakGameplayTagContainer_GameplayTags : ArrayProperty of CallFunc_BreakGameplayTagContainer_GameplayTags./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_BreakGameplayTagContainer_GameplayTags [o:0x50]
+      PRP CallFunc_Array_Get_Item : StructProperty of /Script/GameplayTags.GameplayTag [o:0x60]
+      PRP CallFunc_Array_Length_ReturnValue : IntProperty [o:0x68]
+      PRP CallFunc_CheckNarrativeTag_ReturnValue : BoolProperty [o:0x6c]
+      PRP CallFunc_Less_IntInt_ReturnValue : BoolProperty [o:0x6d]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:SaveLoaded  [000001F61C3BAC00]
+    1 members:
+      PRP SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:SetMemoryOverride  [000001F61C3BAB00]
+    1 members:
+      PRP EventData : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TrackQuests  [000001F61C3BB400]
+
+### Function /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest  [000001F61C3BB600]
+    10 members:
+      PRP QuestID : NameProperty [o:0x0]
+      PRP CallFunc_GetPlayerCharacter_ReturnValue : ObjectProperty of /Script/Engine.Character [o:0x8]
+      PRP CallFunc_GetQuestObject_Array_Element : ObjectProperty of /Game/Sparta/Dialogue/Blueprints/BP_QuestObject.BP_QuestObject_C [o:0x10]
+      PRP CallFunc_GetComponentByClass_ReturnValue : ObjectProperty of /Game/Sparta/Core/Player/Components/BPC_Player_Experience.BPC_Player_Experience_C [o:0x18]
+      PRP K2Node_MakeArray_Array : ArrayProperty of K2Node_MakeArray_Array./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:K2Node_MakeArray_Array [o:0x20]
+      PRP CallFunc_Conv_IntToDouble_ReturnValue : DoubleProperty [o:0x30]
+      PRP CallFunc_Conv_IntToText_ReturnValue : TextProperty [o:0x38]
+      PRP CallFunc_Format_ReturnValue : TextProperty [o:0x48]
+      PRP CallFunc_Conv_TextToString_ReturnValue : StrProperty [o:0x58]
+      PRP CallFunc_GrantExp_Exp_ImplicitCast : FloatProperty [o:0x68]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNewQuest:CallFunc_Array_AddUnique_ReturnValue  [000001F621788AC0]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNewQuest:CallFunc_Array_Add_ReturnValue  [000001F621788B30]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:BlisterBoiDonations  [000001F61C38F9E0]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompleteQuest:CallFunc_Array_AddUnique_ReturnValue  [000001F6217889E0]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:EntryPoint  [000001F61C38FE40]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:CallFunc_Add_IntInt_ReturnValue  [000001F621788820]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:CallFunc_Array_Length_ReturnValue  [000001F6217887B0]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:Temp_int_Array_Index_Variable  [000001F621788900]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:Temp_int_Loop_Counter_Variable  [000001F621788890]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags:CallFunc_BroadcastEventNoData_ReturnValue  [000001F621788740]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_Add_IntInt_ReturnValue  [000001F6217884A0]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_Array_Length_ReturnValue  [000001F621788430]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:Temp_int_Array_Index_Variable  [000001F621788580]
+
+### IntProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:Temp_int_Loop_Counter_Variable  [000001F621788510]
+
+### IntProperty ImmortalBrigSpoils./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ImmortalBrigSpoils_Value  [000001F61C38F900]
+
+### IntProperty NPCRelationships./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NPCRelationships_Value  [000001F61C38FB30]
+
+### IntProperty NarrativeEvents./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeEvents_Value  [000001F61C38FA50]
+
+### IntProperty TotalGoldSpentMerchant./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TotalGoldSpentMerchant_Value  [000001F61C38F740]
+
+### IntProperty WormfishGold./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:WormfishGold_Value  [000001F61C38F820]
+
+### InterfaceProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_DynamicCast_AsBPI_Player_Controller  [000001F61C515C80]
+
+### InterfaceProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_DynamicCast_AsBPI_Player_Controller_1  [000001F61C515600]
+
+### MapProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ImmortalBrigSpoils  [000001F614CE8120]
+    2 members:
+      PRP ImmortalBrigSpoils : StrProperty [o:0x0]
+      PRP ImmortalBrigSpoils_Value : IntProperty [o:0x10]
+
+### MapProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NPCRelationships  [000001F614CE8300]
+    2 members:
+      PRP NPCRelationships : StrProperty [o:0x0]
+      PRP NPCRelationships_Value : IntProperty [o:0x10]
+
+### MapProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeEvents  [000001F614CE81C0]
+    2 members:
+      PRP NarrativeEvents : StrProperty [o:0x0]
+      PRP NarrativeEvents_Value : IntProperty [o:0x10]
+
+### MapProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TotalGoldSpentMerchant  [000001F614CE7FE0]
+    2 members:
+      PRP TotalGoldSpentMerchant : StrProperty [o:0x0]
+      PRP TotalGoldSpentMerchant_Value : IntProperty [o:0x10]
+
+### MapProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:WormfishGold  [000001F614CE8080]
+    2 members:
+      PRP WormfishGold : StrProperty [o:0x0]
+      PRP WormfishGold_Value : IntProperty [o:0x10]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnEventQueried  [000001F61C516D00]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnItemQueried  [000001F61C516E00]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnMemoryQueried  [000001F61C516D80]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnNarrativeTagsLoaded  [000001F61C516C00]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestCompleted  [000001F61C516F00]
+
+### MulticastInlineDelegateProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestStarted  [000001F61C516F80]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNewQuest:QuestID  [000001F621788CF0]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompleteQuest:QuestID  [000001F621788A50]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CurrentTrackedQuest  [000001F61C38FC10]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_Conv_StringToName_ReturnValue  [000001F61C38FD60]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:QuestID  [000001F621788970]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestStarted__DelegateSignature:QuestID  [000001F6217886D0]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryActiveQuest:QuestID  [000001F621788660]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:QuestID  [000001F6217885F0]
+
+### NameProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:QuestID  [000001F6217883C0]
+
+### NameProperty CompletedQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompletedQuests  [000001F61C38FC80]
+
+### NameProperty CurrentActiveQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CurrentActiveQuests  [000001F61C38FCF0]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNewQuest:CallFunc_SpawnObject_ReturnValue  [000001F62179FE00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:CompleteQuest:CallFunc_GetQuestObject_Array_Element  [000001F62179FD80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_CreateProxyObjectForSubscribeToEvent_ReturnValue  [000001F61C515A00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_GetPlayerController_ReturnValue  [000001F61C515D80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_GetPlayerController_ReturnValue_1  [000001F61C515680]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_GetPlayerSaveGameObject_ReturnValue  [000001F61C515500]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CustomEvent_EventData  [000001F61C517280]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CustomEvent_EventData_1  [000001F61C515480]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_CustomEvent_EventData_2  [000001F61C515B80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:Temp_object_Variable  [000001F61C515A80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:Array  [000001F62179FC80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:GetQuestObject:CallFunc_Array_Get_Item  [000001F62179FC00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags:CallFunc_GetRuntimeData_ReturnValue  [000001F62179FA00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags:CallFunc_GetSpartaPlayerCharacter_ReturnValue  [000001F62179FA80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:LoadNarrativeTags:K2Node_DynamicCast_AsBPSO_Quest_Log_Component  [000001F62179F980]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:MemoryOverrideRef  [000001F61C516B00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnDeathOrBossDefeat:EventData  [000001F62179F880]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnEventFired_F984C41B4CD4FA8DF0F86688F33678DD:EventData  [000001F62179F800]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnNarrativeTagsLoaded__DelegateSignature:QuestLog  [000001F6217C0E80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnQuestCompleted__DelegateSignature:QuestObject  [000001F6217C0E00]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryCompletedQuests:CallFunc_GetQuestObject_Array_Element  [000001F6217C0A80]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:SetMemoryOverride:EventData  [000001F6217C0200]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_GetComponentByClass_ReturnValue  [000001F6217C0080]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_GetPlayerCharacter_ReturnValue  [000001F6217C0180]
+
+### ObjectProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_GetQuestObject_Array_Element  [000001F6217C0100]
+
+### ObjectProperty ActiveQuests./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ActiveQuests  [000001F61C517000]
+
+### Package /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent  [000001F4C586B5A0]
+    2 members:
+      PRP None : BlueprintGeneratedClass 
+      PRP None : BPC_QuestLogComponent_C 
+
+### StrProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:CallFunc_GetObjectName_ReturnValue  [000001F61C38FDD0]
+
+### StrProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_Conv_TextToString_ReturnValue  [000001F621788200]
+
+### StrProperty ImmortalBrigSpoils./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ImmortalBrigSpoils  [000001F61C38F970]
+
+### StrProperty NPCRelationships./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NPCRelationships  [000001F61C38FBA0]
+
+### StrProperty NarrativeEvents./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeEvents  [000001F61C38FAC0]
+
+### StrProperty TotalGoldSpentMerchant./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TotalGoldSpentMerchant  [000001F61C38F7B0]
+
+### StrProperty WormfishGold./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:WormfishGold  [000001F61C38F890]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:AddNarrativeTag:Tag  [000001F62179FF00]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:Array  [000001F61C516A80]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ExecuteUbergraph_BPC_QuestLogComponent:K2Node_Event_SaveContext  [000001F61C517300]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:NarrativeTags  [000001F61C516C80]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnEventQueried__DelegateSignature:EventData  [000001F6217C1080]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnItemQueried__DelegateSignature:QuestItemData  [000001F6217C1000]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnMemoryQueried__DelegateSignature:ShellMemoryData  [000001F6217C0F80]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:OnNarrativeTagsLoaded__DelegateSignature:NarrativeTags  [000001F6217C0F00]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:PlayerChoice  [000001F61C516E80]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:Query  [000001F6217C0D80]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:Query  [000001F6217C0D00]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:QueryQuestItem:QuestItemData  [000001F6217C0900]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:RemoveNarrativeTag:Tag  [000001F6217C0800]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_Array_Get_Item  [000001F6217C0400]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:NarrativeTagsToCheckRetain  [000001F6217C0600]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:RetainedNarrativeTags  [000001F6217C0580]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:SaveLoaded:SaveContext  [000001F6217C0280]
+
+### StructProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:UberGraphFrame  [000001F61C517200]
+
+### StructProperty CallFunc_BreakGameplayTagContainer_GameplayTags./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:ResetForNewGamePlus:CallFunc_BreakGameplayTagContainer_GameplayTags  [000001F6217C0480]
+
+### StructProperty K2Node_MakeArray_Array./Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:K2Node_MakeArray_Array  [000001F6217C2080]
+
+### TextProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_Conv_IntToText_ReturnValue  [000001F6217882E0]
+
+### TextProperty /Game/Sparta/Dialogue/QuestSystem/BPC_QuestLogComponent.BPC_QuestLogComponent_C:TurnInQuest:CallFunc_Format_ReturnValue  [000001F621788270]
+

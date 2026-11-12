@@ -1,0 +1,18 @@
+﻿### Class /Script/Sparta.SpartaLevelScript  [00007FF46F04E538]
+    super: /Script/Engine.Actor
+    3 members:
+      PRP WorldStateTags : StructProperty of /Script/GameplayTags.GameplayTagQuery [o:0x2a8]
+      FUN OnEncounterStarted 
+          param Context : StructProperty of /Script/Sparta.LevelScriptContext [o:0x0]
+      FUN OnEncounterFinished 
+
+### Function /Script/Sparta.SpartaLevelScript:OnEncounterFinished  [00007FF46F705D98]
+
+### Function /Script/Sparta.SpartaLevelScript:OnEncounterStarted  [00007FF46F705E78]
+    1 members:
+      PRP Context : StructProperty of /Script/Sparta.LevelScriptContext [o:0x0]
+
+### StructProperty /Script/Sparta.SpartaLevelScript:OnEncounterStarted:Context  [000001F4ACDB4980]
+
+### StructProperty /Script/Sparta.SpartaLevelScript:WorldStateTags  [000001F4ACDB4900]
+

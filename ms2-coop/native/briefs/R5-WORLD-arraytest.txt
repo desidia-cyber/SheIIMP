@@ -1,0 +1,2 @@
+PASS ws2 array: ParseIntoArray built 3 engine FString element(s) [CoopArrayTest_A|CoopArrayTest_B|CoopArrayTest_C]
+        (no BP_SO_SavedKeys_C instance loaded: the property write half of the union is unexercised in this save)

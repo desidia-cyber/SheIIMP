@@ -1,0 +1,2 @@
+SELECT p.path, p.type, r.path AS refd, p.off FROM obj p LEFT JOIN obj r ON r.addr=UPPER(p.ref) WHERE p.path LIKE '/Game/Sparta/Core/Player/BPFL_Player_Equipment.BPFL_Player_Equipment_C:ChangeShell:%' ORDER BY p.line;;
+SELECT p.path, p.type, r.path AS refd, p.off FROM obj p LEFT JOIN obj r ON r.addr=UPPER(p.ref) WHERE p.path LIKE '/Game/Sparta/Core/Player/BP_PlayerController.BP_PlayerController_C:SetShellItem%' OR p.path LIKE '/Game/Sparta/Core/Player/BP_PlayerController.BP_PlayerController_C:SetDarkformItem%' ORDER BY p.line

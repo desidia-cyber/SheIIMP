@@ -1,0 +1,44 @@
+﻿### ArrayProperty /Script/Sparta.PossibleWorldState:NestedWorldStateSets  [000001F4A887BD00]
+    1 members:
+      PRP NestedWorldStateSets : ObjectProperty of /Script/Sparta.PossibleWorldStateSet [o:0x0]
+
+### ArrayProperty /Script/Sparta.PossibleWorldStateSet:WorldStates  [000001F4ACE1CC80]
+    1 members:
+      PRP WorldStates : StructProperty of /Script/Sparta.PossibleWorldState [o:0x0]
+
+### Class /Script/Sparta.PossibleActivity  [00007FF46F03EF38]
+    super: /Script/CoreUObject.Object
+    5 members:
+      PRP ActivityType : ObjectProperty of /Script/Sparta.SpartaActivityType [o:0x28]
+      PRP DataLayer : StrProperty [o:0x30]
+      PRP DataLayerAsset : ObjectProperty of /Script/Engine.DataLayerAsset [o:0x40]
+      PRP ActivityParameters : StructProperty of /Script/Sparta.ActivityParameters [o:0x48]
+      PRP AreaID : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x100]
+
+### Class /Script/Sparta.PossibleWorldStateSet  [00007FF46F064138]
+    super: /Script/CoreUObject.Object
+    1 members:
+      PRP WorldStates : ArrayProperty of WorldStates./Script/Sparta.PossibleWorldStateSet:WorldStates [o:0x28]
+
+### ObjectProperty /Script/Sparta.PossibleActivity:ActivityType  [000001F4ACD95700]
+
+### ObjectProperty /Script/Sparta.PossibleActivity:AreaID  [000001F4ACD95880]
+
+### ObjectProperty /Script/Sparta.PossibleActivity:DataLayerAsset  [000001F4ACD95780]
+
+### ObjectProperty NestedWorldStateSets./Script/Sparta.PossibleWorldState:NestedWorldStateSets  [000001F4A887BC80]
+
+### ScriptStruct /Script/Sparta.PossibleWorldState  [00007FF46F48DCB8]
+    super: [n:
+    2 members:
+      PRP WorldState : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP NestedWorldStateSets : ArrayProperty of NestedWorldStateSets./Script/Sparta.PossibleWorldState:NestedWorldStateSets [o:0x8]
+
+### StrProperty /Script/Sparta.PossibleActivity:DataLayer  [000001F4ACD63F80]
+
+### StructProperty /Script/Sparta.PossibleActivity:ActivityParameters  [000001F4ACD95800]
+
+### StructProperty /Script/Sparta.PossibleWorldState:WorldState  [000001F4A887BC00]
+
+### StructProperty WorldStates./Script/Sparta.PossibleWorldStateSet:WorldStates  [000001F4ACE1CC00]
+

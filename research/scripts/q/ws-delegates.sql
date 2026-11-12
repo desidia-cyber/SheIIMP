@@ -1,0 +1,7 @@
+SELECT o.type, o.path FROM obj o WHERE o.addr IN
+ ('00007FF46F3D02E8','00007FF46F3D0208','00007FF46F3D3EC8','00007FF46F3D3DE8')
+ORDER BY o.addr;;
+SELECT f.type AS ftype, f.path AS fpath, p.type AS ptype, p.path AS ppath
+FROM obj f LEFT JOIN obj p ON p.owner = f.addr
+WHERE f.addr IN ('00007FF46F3D02E8','00007FF46F3D0208','00007FF46F3D3EC8','00007FF46F3D3DE8')
+ORDER BY f.addr, p.line

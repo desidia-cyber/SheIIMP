@@ -1,0 +1,12 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CameraStateFramework	FCSCameraStateModifier	0x0004	0x0008	class FName	Source	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x0010	0x0080	struct FCSCameraTagQuery	CameraTags	(Edit, BlueprintVisible, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x0090	0x0010	struct FAlphaBlendArgs	BlendIn	(Edit, BlueprintVisible, NoDestructor, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00A0	0x0010	struct FAlphaBlendArgs	BlendOut	(Edit, BlueprintVisible, NoDestructor, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00B0	0x0001	bool	bCanStackWithSameSource	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00B1	0x0001	ECSCameraModifierFOVOperation	FOVOperation	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00B4	0x0004	float	FOV	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00B8	0x0001	ECSCameraModifierTranslationOperation	TranslationOperation	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00C0	0x0018	struct FVector	Translation	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00D8	0x0001	ECSCameraModifierRotationOperation	RotationOperation	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CameraStateFramework	FCSCameraStateModifier	0x00E0	0x0018	struct FRotator	Rotation	(Edit, BlueprintVisible, ZeroConstructor, IsPlainOldData, NoDestructor, NativeAccessSpecifierPublic)

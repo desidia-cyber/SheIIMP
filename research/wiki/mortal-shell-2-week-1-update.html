@@ -1,0 +1,179 @@
+<!DOCTYPE html><html lang="en" class="scroll-smooth"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mortal Shell 2 Week 1 Update — What Actually Changed</title><meta name="description" content="Mortal Shell 2 Week 1 Update patch notes: Glimpses and Tarcores are no longer finite, Shells can be respecced, and riposte damage finally scales."><link rel="canonical" href="https://mortalshell2.wiki/mortal-shell-2-week-1-update/"><meta property="og:type" content="article"><meta property="og:site_name" content="Mortal Shell 2 Wiki"><meta property="og:title" content="Mortal Shell 2 Week 1 Update — What Actually Changed"><meta property="og:description" content="Mortal Shell 2 Week 1 Update patch notes: Glimpses and Tarcores are no longer finite, Shells can be respecced, and riposte damage finally scales."><meta property="og:url" content="https://mortalshell2.wiki/mortal-shell-2-week-1-update/"><meta property="og:locale" content="en_US"><meta property="og:image" content="https://mortalshell2.wiki/images/mortalshell2-official-keyart-3.webp"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="article:published_time" content="2026-09-02"><meta property="article:modified_time" content="2026-09-02"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Mortal Shell 2 Week 1 Update — What Actually Changed"><meta name="twitter:description" content="Mortal Shell 2 Week 1 Update patch notes: Glimpses and Tarcores are no longer finite, Shells can be respecced, and riposte damage finally scales."><meta name="twitter:image" content="https://mortalshell2.wiki/images/mortalshell2-official-keyart-3.webp"><link rel="sitemap" type="application/xml" href="/sitemap-index.xml"><link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon-48.png" sizes="48x48" type="image/png"><link rel="icon" href="/favicon-96.png" sizes="96x96" type="image/png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><meta name="application-name" content="Mortal Shell 2 Wiki"><meta name="theme-color" content="#0a0a0b"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://mortalshell2.wiki/#organization","name":"Mortal Shell 2 Wiki","url":"https://mortalshell2.wiki/","logo":{"@type":"ImageObject","@id":"https://mortalshell2.wiki/#logo","url":"https://mortalshell2.wiki/logo-512.png","width":512,"height":512,"caption":"Mortal Shell 2 Wiki"}},{"@type":"NewsArticle","@id":"https://mortalshell2.wiki/mortal-shell-2-week-1-update/#article","headline":"Mortal Shell 2 Week 1 Update — What Actually Changed","description":"Mortal Shell 2 Week 1 Update patch notes: Glimpses and Tarcores are no longer finite, Shells can be respecced, and riposte damage finally scales.","inLanguage":"en","url":"https://mortalshell2.wiki/mortal-shell-2-week-1-update/","mainEntityOfPage":{"@type":"WebPage","@id":"https://mortalshell2.wiki/mortal-shell-2-week-1-update/"},"author":{"@type":"Organization","@id":"https://mortalshell2.wiki/#organization","name":"Mortal Shell 2 Wiki","url":"https://mortalshell2.wiki/"},"publisher":{"@id":"https://mortalshell2.wiki/#organization"},"image":["https://mortalshell2.wiki/images/mortalshell2-official-keyart-3.webp"],"datePublished":"2026-09-02","dateModified":"2026-09-02"},{"@type":"BreadcrumbList","@id":"https://mortalshell2.wiki/mortal-shell-2-week-1-update/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mortalshell2.wiki/"},{"@type":"ListItem","position":2,"name":"Mortal Shell 2 Week 1 Update: The Changes That Rewrite Launch-Week Advice","item":"https://mortalshell2.wiki/mortal-shell-2-week-1-update/"}]}]}</script><script async src="https://www.googletagmanager.com/gtag/js?id=G-FE8CNPWM8M"></script><script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-FE8CNPWM8M');
+          </script><link rel="stylesheet" href="/_astro/_slug_.C3WZxh3L.css"></head> <body class="flex min-h-screen flex-col"> <canvas id="ambient-particles" aria-hidden="true"></canvas> <script type="module">const o=document.querySelector("#ambient-particles");if(o instanceof HTMLCanvasElement){const e=o.getContext("2d"),d=window.matchMedia("(prefers-reduced-motion: reduce)"),r=["255, 52, 72","255, 196, 61","74, 214, 205"];let h=[],c=0,n=0,a=0,s=1;const m=(t=!0)=>({x:Math.random()*n,y:t?Math.random()*a:a+8,radius:.7+Math.random()*1.6,speedY:.08+Math.random()*.2,drift:(Math.random()-.5)*.12,phase:Math.random()*Math.PI*2,opacity:.22+Math.random()*.48,color:r[Math.floor(Math.random()*r.length)]}),M=()=>{const t=d.matches?14:n<640?28:58;h=Array.from({length:t},()=>m())},u=()=>{n=window.innerWidth,a=window.innerHeight,s=Math.min(window.devicePixelRatio||1,1.5),o.width=Math.round(n*s),o.height=Math.round(a*s),o.style.width=`${n}px`,o.style.height=`${a}px`,e?.setTransform(s,0,0,s,0,0),M()},i=()=>{e&&(e.clearRect(0,0,n,a),h.forEach(t=>{d.matches||(t.y-=t.speedY,t.x+=t.drift+Math.sin(t.phase+t.y*.012)*.04),(t.y<-10||t.x<-10||t.x>n+10)&&Object.assign(t,m(!1)),e.beginPath(),e.arc(t.x,t.y,t.radius,0,Math.PI*2),e.fillStyle=`rgba(${t.color}, ${t.opacity})`,e.shadowColor=`rgba(${t.color}, .7)`,e.shadowBlur=t.radius>1.4?9:4,e.fill()}),e.shadowBlur=0,!d.matches&&!document.hidden&&(c=requestAnimationFrame(i)))},l=()=>{cancelAnimationFrame(c),i()};u(),i(),window.addEventListener("resize",u,{passive:!0}),d.addEventListener("change",l),document.addEventListener("visibilitychange",l)}</script> <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-amber-glow focus:px-4 focus:py-2 focus:text-ash-950">
+Skip to content
+</a> <header class="sticky top-0 z-40 border-b border-white/5 bg-[#070709]/70 backdrop-blur-xl"> <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5" aria-label="Primary"> <a href="/" class="group flex min-w-0 items-center gap-3"> <span class="grid h-9 w-9 place-items-center rounded-lg border border-amber-glow/25 bg-amber-glow/10 text-amber-glow shadow-[0_0_24px_rgba(224,177,90,0.15)]" aria-hidden="true">
+◆
+</span> <span class="min-w-0 leading-tight"> <span class="block truncate text-[0.95rem] font-semibold tracking-[0.04em] text-ash-100 group-hover:text-amber-glow">
+Mortal Shell 2
+</span> <span class="block text-[0.65rem] font-medium tracking-[0.18em] text-ash-500 uppercase">
+Wiki & Guide
+</span> </span> </a> <ul class="hidden items-center gap-0.5 lg:flex"> <li> <a href="/guide/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Guide </a> </li><li> <a href="/beginner-guide/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Beginner Guide </a> </li><li> <a href="/shells/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Shells </a> </li><li> <a href="/weapons/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Weapons </a> </li><li> <a href="/bosses/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Bosses </a> </li><li> <a href="/map/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Map </a> </li><li> <a href="/mortal-shell-2-gloom-farming-guide/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Gloom </a> </li><li> <a href="/pc-requirements/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> PC Requirements </a> </li><li> <a href="/tools/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Tools </a> </li><li> <a href="/download/" class="rounded-md px-3 py-2 text-sm transition-colors text-ash-300 hover:bg-white/5 hover:text-ash-100"> Download </a> </li> </ul> <details class="relative lg:hidden"> <summary class="flex cursor-pointer list-none items-center rounded-md border border-white/10 p-2 text-ash-200 hover:bg-white/5" aria-label="Open menu"> <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"> <line x1="3" y1="6" x2="21" y2="6"></line> <line x1="3" y1="12" x2="21" y2="12"></line> <line x1="3" y1="18" x2="21" y2="18"></line> </svg> </summary> <ul class="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-ash-900/95 p-2 shadow-2xl backdrop-blur-xl"> <li> <a href="/guide/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Guide </a> </li><li> <a href="/beginner-guide/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Beginner Guide </a> </li><li> <a href="/shells/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Shells </a> </li><li> <a href="/weapons/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Weapons </a> </li><li> <a href="/bosses/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Bosses </a> </li><li> <a href="/map/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Map </a> </li><li> <a href="/mortal-shell-2-gloom-farming-guide/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Gloom </a> </li><li> <a href="/pc-requirements/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> PC Requirements </a> </li><li> <a href="/tools/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Tools </a> </li><li> <a href="/download/" class="block rounded-lg px-3 py-2.5 text-sm text-ash-300 hover:bg-white/5 hover:text-ash-100"> Download </a> </li> </ul> </details> </nav> </header> <main id="main" class="w-full flex-1 mx-auto max-w-6xl px-4 py-8 md:py-10">  <article class="mx-auto max-w-3xl"> <nav aria-label="Breadcrumb" class="mb-6 text-sm text-ash-500"> <ol class="flex flex-wrap items-center gap-1.5"> <li class="flex items-center gap-1.5"> <a href="/" class="transition-colors hover:text-amber-glow"> Home </a> <span class="text-ash-700">/</span> </li><li class="flex items-center gap-1.5"> <span aria-current="page" class="text-ash-300"> Mortal Shell 2 Week 1 Update: The Changes That Rewrite Launch-Week Advice </span>  </li> </ol> </nav>  <header class="mt-4 border-b border-white/5 pb-6"> <h1 class="text-3xl font-bold tracking-tight text-ash-100 md:text-4xl">Mortal Shell 2 Week 1 Update: The Changes That Rewrite Launch-Week Advice</h1> <p class="mt-3 text-lg text-ash-400">Mortal Shell 2 Week 1 Update patch notes: Glimpses and Tarcores are no longer finite, Shells can be respecced, and riposte damage finally scales.</p> <p class="mt-4 text-sm text-ash-500">
+Last verified <time datetime="2026-09-02">2026-09-02</time> </p> </header> <figure class="surface-card overflow-hidden mt-6"> <img src="/images/mortalshell2-official-keyart-3.webp" alt="Mortal Shell 2 Week 1 Update — What Actually Changed" width="1600" height="900" loading="eager" decoding="sync" fetchpriority="high" sizes="(max-width: 768px) 100vw, 960px" class="h-auto w-full object-cover">  </figure>  <div class="prose-body mt-8 space-y-4 text-ash-200">  <p>The <strong>Mortal Shell 2 Week 1 Update</strong> landed on <strong>August 29, 2026</strong>, nine days after launch, and it is not a minor stability pass. Three of its changes invalidate advice that was written during launch week, including advice on this site:</p>
+<ol>
+<li><strong>Glimpses and Tarcores are no longer finite.</strong> Every Shell and every Tarstone can be upgraded in a single playthrough.</li>
+<li><strong>Shells can be respecced.</strong> A new item refunds every Glimpse you spent on one.</li>
+<li><strong>Riposte damage now scales with enemy health</strong>, so the game’s signature move stops falling behind in the late game.</li>
+</ol>
+<p>If you read a build-planning guide before August 29 — anywhere, not just here — the scarcity it was built on no longer exists.</p>
+<figure>
+  <img src="/images/mortalshell2-official-keyart-3.webp" alt="Official Mortal Shell 2 key art used for the Week 1 Update patch notes page" width="1600" height="900" loading="lazy" decoding="async">
+  <figcaption>Official Steam key art. The Week 1 Update is the game's first major post-launch patch and the current build as of September 2, 2026.</figcaption>
+</figure>
+<p><strong>A note on spoilers.</strong> The official post warns that its changelog contains spoilers, and it hides boss names behind spoiler tags. This page names bosses in the boss section below, and nowhere else, so you can stop reading at that heading.</p>
+<h2 id="which-patch-is-which">Which patch is which</h2>
+<p>The naming confuses people, so it is worth ten seconds. There have been two post-launch posts:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Post</th><th>Date</th><th>Where it was published</th></tr></thead><tbody><tr><td>Balance Patch 1</td><td>August 20, 2026</td><td>A developer thread in the Steam discussions</td></tr><tr><td>Week 1 Update</td><td>August 29, 2026</td><td>An official Steam announcement</td></tr></tbody></table>
+<p>Cold Symmetry describes the Week 1 Update as “the first major patch,” which is the larger of the two by a wide margin. The earlier one is covered on the <a href="/mortal-shell-2-balance-patch-1/">Balance Patch 1 notes page</a>. No build or version number is published for either.</p>
+<h2 id="the-economy-change-is-the-big-one">The economy change is the big one</h2>
+<p>The patch states plainly that <strong>“Glimpses and Tarcores are no longer finite resources, allowing all shells and Tarstones to be upgraded in a single playthrough.”</strong></p>
+<p>That single line removes the premise behind most launch-week Shell advice. Before it, the community had counted a fixed total of Glimpses in a playthrough and treated Shell investment as a budget you could spend wrong. Now the total is the amount of bonding the achievement asks for, not a ceiling.</p>
+<p>Four supporting changes go with it:</p>
+<ul>
+<li><strong>Mether’s Severance</strong> is a Shell respec item. Give it to <strong>Zhirelle, the shell keeper</strong>, and she severs your bond with a Shell, resets it, and returns every Glimpse you spent on it.</li>
+<li><strong>Tarstones now yield more Tarcores when broken.</strong> If your save already has levelled-up Tarstones, the patch puts a compensatory cache of Tarcores in your inventory rather than leaving early players short.</li>
+<li><strong>Merrick sells both Tarstones and Mether’s Severance</strong>, and his stock restocks occasionally as you progress. His shelves also gained Glimpse Stones, Egon’s Stones and Tarcores once you have gathered enough Ova, and the Collector now carries Tarcores too.</li>
+<li><strong>Additional rewards, including Glimpses, were added to the gloom siphon.</strong></li>
+</ul>
+<p>One change goes the other way: <strong>Mini-Beacons no longer award a Glimpse.</strong> That is the only economy nerf in the post, and it matters mainly to anyone who was routing around the map to farm them.</p>
+<p>The knock-on effects are covered on the <a href="/shells/">Shells roster</a> and the <a href="/shell-selection-guide/">best Shell guide</a>, both of which now describe the post-patch economy. For the resource itself see the <a href="/gloom/">Gloom guide</a> and the <a href="/mortal-shell-2-gloom-farming-guide/">Gloom farming guide</a>.</p>
+<h2 id="four-new-stones">Four new stones</h2>
+<p>Fragile Tarstones are a new class: they break after losing durability, and <strong>when one breaks it also yields a Tarcore</strong>. They are not unique, so the same stone can be found more than once in a playthrough.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Item</th><th>What the patch says it does</th></tr></thead><tbody><tr><td><strong>Fragile Tarstones</strong> (class)</td><td>Break after losing durability; yield a Tarcore on breaking. Dropped by certain enemies, rewarded by several dungeons, and sold by Merrick.</td></tr><tr><td><strong>Glimpse Stone</strong></td><td>Wears down as you defeat enemies, then breaks into Glimpses.</td></tr><tr><td><strong>Egon’s Stone</strong></td><td>Revives you at a dungeon’s entrance at the cost of its durability. When it breaks, it prevents Gloom loss for that death.</td></tr><tr><td><strong>Justicar’s Stone / Gloombound Stone</strong></td><td>Both converted to Fragile, with increased passive effects and new on-break effects. Existing copies in your save were converted.</td></tr></tbody></table>
+<p>Egon’s Stone is the one with a real effect on how you play: dying inside a dungeon normally costs you a walk back and risks your Gloom, and this item removes both for one death. Pair it with the <a href="/mortal-shell-2-respawn-points/">respawn points guide</a> and the <a href="/mortal-shell-2-boss-runback/">boss runback guide</a>.</p>
+<h2 id="ripostes-got-a-full-pass">Ripostes got a full pass</h2>
+<p>This is the combat section that matters. The patch lists five riposte changes, and they read as a system that was not finished at launch:</p>
+<ul>
+<li><strong>Riposte damage now scales with enemy health</strong>, so it keeps up in the late game, in NG+, and in Night Mode. Previously it did not.</li>
+<li><strong>Invulnerability windows are consistent between ripostes</strong> and now last to the end of the animation instead of expiring partway through it.</li>
+<li><strong>Many riposte recoveries end sooner</strong>, returning control to you faster.</li>
+<li><strong>Riposte animations behave with your back to a wall</strong> across the whole enemy roster, rather than sliding you through it.</li>
+<li><strong>Riposte damage is now calculated and applied by the riposte itself</strong>, which fixes cases where it applied twice or not at all.</li>
+</ul>
+<p>Read that list together and the conclusion is uncomfortable: before this patch, the payoff for the game’s hardest defensive skill was sometimes not paid. If ripostes felt unrewarding to you in launch week, that was not a skill problem. The inputs themselves are in the <a href="/combat-system/">combat system guide</a> and the <a href="/mortal-shell-2-beginner-combat-tips/">beginner combat tips</a>.</p>
+<p>Two related retunes: <strong>base aggression and disengage ranges</strong> were adjusted across the game, and <strong>enemy tracking and magnetism maximums have been restricted</strong>, with the post saying they will keep being adjusted individually in future patches.</p>
+<h2 id="weapons">Weapons</h2>
+<p>The <a href="/mortal-shell-2-best-weapon/">best weapon guide</a> covers the recommendation; these are the published changes:</p>
+<ul>
+<li><strong>Obsidian Hammer</strong> had a full balance pass and “now hits substantially harder.”</li>
+<li><strong>Great Martyr’s Blade</strong> deals more damage — and the post admits the buff announced in Balance Patch 1 “didn’t actually make it in the last patch,” so it is stronger now to compensate. That episode has its own page: <a href="/mortal-shell-2-great-martyrs-blade-patch/">the buff that was announced twice</a>.</li>
+<li><strong>Heavy weapons in general</strong> had a poise and damage pass.</li>
+<li><strong>Salvaged Trebuchaxe: Tarred Fragment</strong> was redesigned, described as “simultaneously overpowered and broken.”</li>
+<li><strong>Axatana</strong>’s weapon ability now grants invulnerability frames and inflicts Fragile stacks, and its combat Tarstone active triggers correctly.</li>
+<li><strong>Weltcap</strong> is stronger in both active and passive forms.</li>
+</ul>
+<p>No percentages are published for any of these except the retracted +20% on the Blade. See the <a href="/weapons/">weapons roster</a> and the <a href="/mortal-shell-2-weapon-upgrade-guide/">weapon upgrade guide</a>.</p>
+<h2 id="the-save-file-fix-you-should-care-about-most">The save-file fix you should care about most</h2>
+<p>Buried under “Softlocks and Lost Progress” is the most important line in the changelog:</p>
+<blockquote>
+<p>Fixed an interrupted save being able to destroy your save file. Saves are now written so that a crash or a sudden shutdown cannot leave you with nothing.</p>
+</blockquote>
+<p>A crash at the wrong moment could take your whole run. If you have been playing since launch on a machine that crashes, that risk existed and is now gone. The related fix — <strong>players being permanently locked out of Vatra’s Temple</strong> after exploring it — closed another run-ending case. Missing-save problems from the beta era are a separate issue, covered in <a href="/mortal-shell-2-beta-save-missing/">beta save missing</a>.</p>
+<p>Also closed: getting stuck at the castle gates, in the opening region’s church, inside a house in the sunken village dungeon, in Castigator’s Keep by walking through a wall, in the snow approaching one boss arena, and in a hole in Eredrim’s castle jail. Collision holes and ground gaps were patched throughout the first two regions.</p>
+<h2 id="exploration">Exploration</h2>
+<ul>
+<li><strong>New Beacons in Fainweald and Mammon</strong>, and the patch is explicit that they are <strong>only active during the day</strong>. If you looked for one at night and found nothing, that is the design. See the <a href="/beacons/">Beacons guide</a> and the <a href="/mortal-shell-2-night-mode-guide/">Night Mode guide</a>.</li>
+<li><strong>A teleporter now appears in one dungeon after the Grisha pit fight</strong>, removing that walk back entirely.</li>
+<li><strong>Two new cosmetic rewards</strong> are placed in the world behind certain questlines.</li>
+<li>Dungeon reward chests across the first two regions were revised, reward placement in Mammon updated, missing arena-dungeon rewards restored, and some chests replaced with straightforward pickups. See <a href="/dungeon-exploration-guide/">dungeon exploration</a> and the <a href="/map/">map</a>.</li>
+<li>The developers add, unprompted: <strong>“You still haven’t found the second Trollweed.”</strong> As of this patch it is still officially undiscovered.</li>
+</ul>
+<h2 id="bosses-names-below-this-line">Bosses (names below this line)</h2>
+<p>Most bosses got a general polish pass. The specific ones worth knowing about:</p>
+<ul>
+<li><strong>The Monolith</strong> — laser and spin attacks now have consistent, readable timings and no longer spam, which the post confirms was a bug. A separate bug that made it <strong>deal double damage on certain hits</strong> is fixed.</li>
+<li><strong>Zmey</strong> — the Tail grab no longer takes both the Shell and the Harbinger from full to zero at once. The post notes it is still on in Night Mode.</li>
+<li><strong>Hexapod</strong> — deals considerably more splash damage with its area attack, can no longer interrupt its own shooting attack, one attack retimed to be fairer. Its <strong>arena is smaller and the beacon light is lit by default</strong>, which makes the fight much easier to read.</li>
+<li><strong>Urrig, the Executioner</strong> and <strong>The Warden</strong> — both reworked with retuned attacks and new ice attacks. Urrig’s spin now gives a proper warning that it <strong>cannot be parried</strong>.</li>
+<li><strong>The Lost Child</strong> — no longer launches you or himself across the arena, and now uses a finished walk animation instead of the placeholder that shipped.</li>
+<li><strong>Droeg, the Conquerer</strong> and <strong>Sir Isaac, the Scholar-Prince</strong> — arena navigation repaired and riposte alignment corrected on both.</li>
+<li><strong>Bloodcursed Lithopod</strong> — damage, turning and jump attacks retuned.</li>
+</ul>
+<p>For the difficulty picture see <a href="/mortal-shell-2-boss-difficulty/">boss difficulty</a> and the source-tracked <a href="/bosses/">boss roster</a>.</p>
+<h2 id="performance-options-and-controllers">Performance, options and controllers</h2>
+<ul>
+<li><strong>The shader compilation hitch is fixed.</strong> That work now happens while you are still in the menu instead of a few seconds into play.</li>
+<li><strong>Fewer enemies in the busiest areas</strong>, with the post saying the crowd was costing frame rate rather than adding difficulty. Spawners in the dense prison area were rebuilt.</li>
+<li><strong>Frame generation reworked.</strong> It now applies after a reload rather than conflicting in real time, and no longer switches on before the world has finished loading. NVIDIA frame generation can be selected on a much wider range of cards. See the <a href="/mortal-shell-2-frame-generation-fix/">frame generation fix</a>.</li>
+<li><strong>Increased Geometry Budgets</strong> is a new graphics option, off by default because the default uses less video memory. Turn it on if you have memory to spare. More in <a href="/pc-settings/">PC settings</a>.</li>
+<li><strong>Ray tracing options that were not working as intended</strong> are fixed, along with post-process options that had no effect.</li>
+<li><strong>The game now defaults to your monitor’s native resolution</strong> and pauses when a system overlay opens.</li>
+<li><strong>Switch Pro and Switch Pro 2 controllers are supported</strong>, with an option to swap their glyphs, and <strong>Steam Deck and Steam Controller now display the correct buttons.</strong> The Steamworks update also improves Steam Deck detection. That last point matters for the <a href="/mortal-shell-2-steam-deck/">Steam Deck compatibility page</a>, because Valve’s own report still lists a glyph warning that this patch says was addressed — Valve re-tests on its own schedule.</li>
+<li>Console builds got a meaningful amount of frame time back from reduced background work across weapons, hit detection and movement.</li>
+</ul>
+<h2 id="exploits-that-are-now-closed">Exploits that are now closed</h2>
+<p>If a farming route stopped working, this is why. The patch fixed <strong>an infinite Ossinite farm</strong>, <strong>an exploit that allowed unlimited healing</strong>, and <strong>shield-carrying enemies becoming effectively immortal against one type of projectile</strong>. Tarstones also no longer keep gathering experience after hitting maximum level.</p>
+<h2 id="known-issue">Known issue</h2>
+<p>One is listed: a <strong>possible Malborn Offspring bug when using the Grisha Remnant Summon during the boss fight.</strong> If you are fighting that boss, do not rely on that summon.</p>
+<p>And one line that is not a known issue: <strong>“Mutton is now immune to damage, he’s been through enough.”</strong></p>
+<h2 id="what-this-page-does-not-claim">What this page does not claim</h2>
+<ul>
+<li><strong>No version or build number.</strong> The post does not publish one.</li>
+<li><strong>No per-platform release timing.</strong> Unlike Balance Patch 1, this post does not say when each console receives the patch. It mentions console frame time and a console tutorial setting, but states no rollout schedule.</li>
+<li><strong>No numbers for the buffs.</strong> “Substantially harder” and “more damage” are the developer’s words; no percentages are given.</li>
+<li><strong>No frame rate measurements.</strong> The performance items are the developer’s descriptions, not benchmarks run here.</li>
+<li><strong>No parry or invulnerability frame counts.</strong> The riposte pass is described in words, not frame data, and this page does not invent any.</li>
+</ul>
+<p>The changelog was read on <strong>September 2, 2026</strong>, and the Week 1 Update was still the newest official post on the game’s Steam news feed at that point. For everything that shipped at launch see the <a href="/mortal-shell-2-launch-bugs/">launch bugs page</a>, and for how players have received the game overall, the <a href="/mortal-shell-2-steam-reviews/">Steam reviews breakdown</a>.</p>  </div> <nav class="mt-12 border-t border-white/10 pt-8" aria-labelledby="related-guides"><h2 id="related-guides" class="text-xl font-semibold text-ash-100">
+More news pages</h2><ul class="mt-4 grid gap-3 sm:grid-cols-2"><li class="surface-card p-4"><a href="/reviews-october-19/" class="font-semibold text-ash-100 hover:text-amber-glow">Very Positive: 8,435 of 10,162</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell 2 is Very Positive on October 19: 8,435 of 10,162 English reviews, still $49.99.</p></li><li class="surface-card p-4"><a href="/mortal-shell-2-hotfix-still-live/" class="font-semibold text-ash-100 hover:text-amber-glow">The current note is still Hotfix Live Now</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell II&#39;s Steam news still leads with Hotfix Live Now. What to retest before you report an old ledge or seal bug.</p></li><li class="surface-card p-4"><a href="/mortal-shell-2-october-13-hotfix/" class="font-semibold text-ash-100 hover:text-amber-glow">Mortal Shell 2 October 13 hotfix: Zmey nerfed, Tiltshot fixed</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell 2&#39;s 13 October 2026 hotfix lowers the final boss&#39;s HP, doubles Cosmic Disease resistance and fixes Tarstones, summons, dungeons and Tiel&#39;s clones.</p></li><li class="surface-card p-4"><a href="/mortal-shell-2-very-positive-october/" class="font-semibold text-ash-100 hover:text-amber-glow">Very Positive, with a last-boss argument attached</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell 2 Steam rating in October 2026: Very Positive in English (8,379/10,093), Mostly Positive overall, and what changed after the final boss hotfix.</p></li><li class="surface-card p-4"><a href="/mortal-shell-2-balance-patch-1/" class="font-semibold text-ash-100 hover:text-amber-glow">Mortal Shell 2 Patch 1: Official Balance and Weapon Changes</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell 2 Patch 1 notes cover Gloom, gold, Tarforge costs, boss health, weapon buffs, Guard changes and crash fixes from the official Steam post.</p></li><li class="surface-card p-4"><a href="/mortal-shell-2-steam-reviews/" class="font-semibold text-ash-100 hover:text-amber-glow">Mortal Shell 2 Steam Reviews: Launch-Day Player Feedback</a><p class="mt-1 text-sm leading-relaxed text-ash-400">Mortal Shell 2 Steam reviews from launch day: player feedback on combat, Shells, weapons, bosses, performance, crashes, runbacks and enemy aggro.</p></li></ul><p class="mt-4 text-sm text-ash-400">
+Or browse <a href="/guide/" class="text-amber-glow hover:underline">every Mortal Shell 2 guide</a>.
+</p></nav> </article>  </main> <footer class="mt-16 border-t border-white/5 bg-gradient-to-b from-ash-900/40 to-ash-950"> <div class="mx-auto max-w-6xl px-4 py-14"> <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4"> <div> <div class="flex items-center gap-3"> <span class="grid h-9 w-9 place-items-center rounded-lg border border-amber-glow/25 bg-amber-glow/10 text-amber-glow" aria-hidden="true">
+◆
+</span> <div class="leading-tight"> <div class="text-sm font-semibold tracking-[0.04em] text-ash-100">Mortal Shell 2</div> <div class="text-[0.65rem] font-medium tracking-[0.16em] text-ash-500 uppercase">Wiki & Guide</div> </div> </div> <p class="mt-4 max-w-xs text-sm leading-relaxed text-ash-400">
+A verified, source-tracked wiki for Mortal Shell II. Every fact carries a confirmation status and a source.
+</p> <a href="https://store.steampowered.com/app/4711740/Mortal_Shell_II__Open_Beta/" target="_blank" rel="nofollow noopener noreferrer" class="btn-primary mt-5 !px-3.5 !py-2 text-xs">
+Steam Open Beta ↗
+</a> </div> <nav aria-label="Guides"> <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ash-300">Guides</p> <ul class="mt-4 space-y-2.5"> <li> <a href="/release-date/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Release Date </a> </li><li> <a href="/beginner-guide/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Beginner Guide </a> </li><li> <a href="/shells/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> All Shells </a> </li><li> <a href="/tiel/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Tiel </a> </li><li> <a href="/bosses/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Boss Guide </a> </li><li> <a href="/map/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Map </a> </li> </ul> </nav><nav aria-label="Open Beta"> <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ash-300">Open Beta</p> <ul class="mt-4 space-y-2.5"> <li> <a href="/download/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Download Open Beta </a> </li><li> <a href="/open-beta/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Open Beta Guide </a> </li><li> <a href="/editions/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Editions </a> </li><li> <a href="/beta-progress/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Beta Save Progress </a> </li><li> <a href="/pc-settings/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> PC Settings </a> </li><li> <a href="/do-you-need-mortal-shell-1/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Need Mortal Shell 1? </a> </li> </ul> </nav><nav aria-label="Site"> <p class="text-xs font-semibold uppercase tracking-[0.16em] text-ash-300">Site</p> <ul class="mt-4 space-y-2.5"> <li> <a href="/about/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> About </a> </li><li> <a href="/contact/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Contact </a> </li><li> <a href="/privacy/" class="text-sm text-ash-400 transition-colors hover:text-amber-glow"> Privacy Policy </a> </li> </ul> </nav> </div> <div class="mt-12 space-y-3 border-t border-white/5 pt-7 text-xs leading-relaxed text-ash-500"> <p> <strong class="text-ash-400">Independent fan site.</strong> This is an independent fan site. Not affiliated with
+        or endorsed by Cold Symmetry / Playstack. All trademarks are the property of their respective owners.
+</p> <p> <strong class="text-ash-400">Sources &amp; imagery.</strong> Screenshots are captured in-game or taken from
+        official media kits. Every page notes the source and confirmation status of its information. To request removal
+        of any content, see our <a href="/contact/" class="underline hover:text-ash-300">contact page</a>.
+</p> <p class="pt-1 text-ash-600">&copy; 2026 Mortal Shell 2 Wiki. Content licensed for personal use.</p> </div> </div> </footer> </body></html>

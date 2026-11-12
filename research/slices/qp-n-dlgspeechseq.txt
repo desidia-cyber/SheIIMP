@@ -1,0 +1,38 @@
+﻿### ArrayProperty /Script/DlgSystem.DlgNode_SpeechSequence:GetNodeSpeechSequence:ReturnValue  [000001F4ACD21000]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgSpeechSequenceEntry [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgNode_SpeechSequence:InnerEdges  [000001F4ACD20E80]
+    1 members:
+      PRP InnerEdges : StructProperty of /Script/DlgSystem.DlgEdge [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgNode_SpeechSequence:SpeechSequence  [000001F4ACD20D80]
+    1 members:
+      PRP SpeechSequence : StructProperty of /Script/DlgSystem.DlgSpeechSequenceEntry [o:0x0]
+
+### BoolProperty /Script/DlgSystem.DlgNode_SpeechSequence:HasSpeechSequences:ReturnValue  [000001F4ACD20F00]
+
+### Class /Script/DlgSystem.DlgNode_SpeechSequence  [00007FF46F015F38]
+    super: /Script/DlgSystem.DlgNode
+    4 members:
+      PRP SpeechSequence : ArrayProperty of SpeechSequence./Script/DlgSystem.DlgNode_SpeechSequence:SpeechSequence [o:0x98]
+      PRP InnerEdges : ArrayProperty of InnerEdges./Script/DlgSystem.DlgNode_SpeechSequence:InnerEdges [o:0xa8]
+      FUN HasSpeechSequences 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetNodeSpeechSequence 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode_SpeechSequence:GetNodeSpeechSequence:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgNode_SpeechSequence:GetNodeSpeechSequence  [00007FF46F6CD698]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgNode_SpeechSequence:GetNodeSpeechSequence:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgNode_SpeechSequence:HasSpeechSequences  [00007FF46F6CD778]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### StructProperty InnerEdges./Script/DlgSystem.DlgNode_SpeechSequence:InnerEdges  [000001F4ACD20E00]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgNode_SpeechSequence:GetNodeSpeechSequence:ReturnValue  [000001F4ACD20F80]
+
+### StructProperty SpeechSequence./Script/DlgSystem.DlgNode_SpeechSequence:SpeechSequence  [000001F4ACD20D00]
+

@@ -1,0 +1,1693 @@
+// coop_combat.cpp -- native port of the combat half of CoopMod (main.lua).
+//
+// Ported ranges (READ-ONLY reference: mod\CoopMod\Scripts\main.lua, 4133 lines):
+//   1192-1408  hcCache / fillHealthCache / healthCompOf / healthNormOf /
+//              setHealthNorm / startDeath / MAX_NPC / NPC_RADIUS / NPC_MARGIN /
+//              PEER_CLAIMS / deadTails / hpSeen / collectNPCs / hpString /
+//              OWNED_TAILS / NPC_LAST / montagePath / npcJSON / nhpJSON /
+//              deadJSON / sampleCombat / killTail
+//   1766-1935  MIR / MIR_SKIP / MIR_STATS / mirrorTake / mirrorRelease /
+//              mirrorDrive / applyNPCs / applyHealth / applyDead
+//   3808-3956  MIRROR_ENABLED / SPN / AIT / PD / FT / spawnerScan / spawnReplay /
+//              aiTargetPeer / puppetDamage / applyPeerDamage / frameTime /
+//              enemyTick (+ streamStatus' enemy/perf lines, 3957-3966)
+//
+// Everything here is called from the game thread only (the whole mod runs inside
+// ue::OnTick); there is no locking and there must not be any UObject touched from
+// another thread.
+//
+// ---------------------------------------------------------------------------
+// CONTRACT-REQUEST (things coop_state.h still cannot express)
+// ---------------------------------------------------------------------------
+// 1. `CombatState::npcFirst` is `std::vector<NamedActor>` ("tail -> first
+//    position seen") but NamedActor has no position field, so the Lua's
+//    npcFirst[name] = {x,y,z} (main.lua:1770, 1868-1871) cannot be stored there.
+//    The positions live in this file (`g_firstPos`); `npcFirst` is populated with
+//    the tails (obj = nullptr) so the names are still visible to other modules.
+//    Please make it `std::vector<NpcFirst>` = { std::string tail; Vec3 pos; }.
+//    (spawnAlias was already fixed to StrStrMap -- thank you.)
+// 3. `ue::UClass` is forward-declared as an unrelated type in ms2_ue.h, so there
+//    is no way to ask for a class's full name: ClassFullName() below
+//    reinterpret_casts the UClass* to UObject* (a UClass IS a UObject in the
+//    engine) for the GetFullName call only. Either derive the declaration
+//    (`class UClass : public UObject;`) or add `std::string GetFullName(UClass*)`
+//    and this cast goes away.
+// 4. `ue::MakeFName` from the common brief is not in ms2_ue.h; PlayAnimMontage's
+//    StartSectionName is passed a zero FName, which is exactly the "None" FName
+//    the Lua passes (main.lua:1831).
+// 2. `CombatState::mirrors` is a bare vector of `MirrorEntry`, which has no name
+//    field, while the Lua keys MIR by the peer's enemy name (main.lua:1775-1781).
+//    The keys therefore live in this file (`g_mirrorKeys`, parallel to the
+//    vector) -- a destroyed actor must still be releasable. A `std::string key`
+//    on MirrorEntry would remove that shadow index.
+// ---------------------------------------------------------------------------
+
+#include "ms2_ue.h"
+#include "coop_state.h"
+
+#include <algorithm>
+#include <atomic>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <limits>
+#include <string>
+#include <vector>
+
+namespace coop {
+namespace combat {
+
+namespace {
+
+using ue::UObject;
+using ue::UFunction;
+
+// ---------------------------------------------------------------------------
+// literals from the Lua that are not in coop_state.h
+// ---------------------------------------------------------------------------
+constexpr double kInf          = std::numeric_limits<double>::infinity();
+constexpr double kDeadHp       = 0.01;   // main.lua:1392, 1849, 1908
+constexpr double kNoDamageHp   = 0.05;   // main.lua:3901 (puppetDamage floor)
+constexpr double kNearOwnMoved = 200.0;  // main.lua:1871 "the host really moved it"
+constexpr double kNearGood     = 30.0;   // main.lua:1878 npc verdict tolerance
+// kNpcRadius + 300, spelled out at main.lua:1298 and 1301
+constexpr double kClaimSlack   = kNpcFarMargin;
+constexpr int    kNpcVerdictN  = 20;     // main.lua:1879
+
+// ---------------------------------------------------------------------------
+// per-translation-unit state (the header cannot hold it, see CONTRACT-REQUEST)
+// ---------------------------------------------------------------------------
+
+// SPN_ALIAS: enemy tail -> "SP_<spawner tail>" (main.lua:636). The map itself is
+// state().combat.spawnAlias; see AliasOf().
+
+// npcFirst: tail -> first position the peer published for it (main.lua:1770, 1868)
+struct FirstPos {
+    std::string tail;
+    Vec3 pos;
+};
+std::vector<FirstPos> g_firstPos;
+
+// MIR keys, parallel to state().combat.mirrors (MirrorEntry has no name field).
+std::vector<std::string> g_mirrorKeys;
+
+// SPN.list / SPN.at / SPN.listAt (main.lua:3817, 3822-3828). `by` (the tail ->
+// spawner map) is mirrored into state().combat.spawners.
+std::vector<UObject*> g_spawnList;
+bool g_spawnListValid = false;
+double g_spawnScanAt = 0.0;
+
+// Cached COO of /Script/Engine.Default__GameplayStatics (main.lua:3927 re-finds
+// it every call; a hash lookup, so caching it changes nothing observable).
+UObject* g_gameStats = nullptr;
+
+// FGameplayAttributeData slot resolution (see SetHealthNorm).
+int  g_healthSlots[2] = {0, 1};
+bool g_healthSlotsKnown = false;
+bool g_healthVerifyDone = false;
+
+// net::Now() of the last FillHealthCache(). net calls it from its own 2 Hz step
+// (the Lua's healthCache step, main.lua:4120) as well as through Tick2(); the
+// guard keeps FindAllOf("SpartaHealthComponent") at one GObjects walk per tick.
+double g_hcCacheAt = -1.0e9;
+
+// ---------------------------------------------------------------------------
+// tiny utilities
+// ---------------------------------------------------------------------------
+const std::size_t kNpos = std::string::npos;
+
+template <class F>
+void Guarded(const char* label, F&& fn) {
+    try {
+        fn();
+    } catch (const std::exception& e) {
+        net::Log("ERR %s: %s", label, e.what());
+    } catch (...) {
+        net::Log("ERR %s: unknown exception", label);
+    }
+}
+
+bool Live(UObject* o) { return o != nullptr && ue::IsValid(o); }
+
+bool IsSpace(char c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' || c == '\f';
+}
+
+bool Contains(const std::string& s, const char* needle) {
+    return s.find(needle) != kNpos;
+}
+
+bool ParseNum(const std::string& s, double* out) {
+    if (s.empty() || !out) return false;
+    char* end = nullptr;
+    const double v = std::strtod(s.c_str(), &end);
+    if (end == s.c_str() || end == nullptr || *end != '\0') return false;
+    if (!std::isfinite(v)) return false;   // tonumber("inf") is nil in Lua
+    *out = v;
+    return true;
+}
+
+std::string Unquote(const std::string& s) {
+    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') return s.substr(1, s.size() - 2);
+    return s;
+}
+
+// Lua's `f[n]`: the n-th (1-based) comma separated field, "" when absent.
+std::string Field(const std::vector<std::string>& f, std::size_t n) {
+    return n < f.size() ? f[n] : std::string();
+}
+
+// Lua: `f[10]:match('^"(.*)"$')`
+std::string QuotedField(const std::vector<std::string>& f, std::size_t n) {
+    if (n >= f.size()) return std::string();
+    const std::string& s = f[n];
+    if (s.size() < 2 || s.front() != '"' || s.back() != '"') return std::string();
+    return s.substr(1, s.size() - 2);
+}
+
+// Split one array entry body ("...",1,2) on commas, keeping quoted strings
+// intact. Empty fields are dropped, exactly like the Lua's gmatch('[^,]+').
+void SplitFields(const std::string& body, std::vector<std::string>* out) {
+    std::string cur;
+    bool quoted = false;
+    for (std::size_t i = 0; i < body.size(); ++i) {
+        const char c = body[i];
+        if (c == '"') {
+            quoted = !quoted;
+            cur.push_back(c);
+            continue;
+        }
+        if (c == ',' && !quoted) {
+            if (!cur.empty()) out->push_back(cur);
+            cur.clear();
+            continue;
+        }
+        cur.push_back(c);
+    }
+    if (!cur.empty()) out->push_back(cur);
+}
+
+// If `s` is one bracketed group ("[...]"), strip the brackets.
+void StripOuterBrackets(std::string* s) {
+    if (s->size() < 2 || s->front() != '[') return;
+    int depth = 0;
+    for (std::size_t i = 0; i < s->size(); ++i) {
+        const char c = (*s)[i];
+        if (c == '[') {
+            ++depth;
+        } else if (c == ']') {
+            --depth;
+            if (depth == 0) {
+                if (i == s->size() - 1) *s = s->substr(1, s->size() - 2);
+                return;
+            }
+        }
+    }
+}
+
+// The "[" ... "]" groups at depth 1 of an array section (works with or without
+// the enclosing brackets). This is the Lua's gmatch('%["([%w_]+)",([^%]]*)%]')
+// entry list, scanned by depth instead of by pattern.
+void SplitEntries(const std::string& section, std::vector<std::string>* out) {
+    std::string body = section;
+    StripOuterBrackets(&body);
+    int depth = 0;
+    bool quoted = false;
+    std::size_t start = kNpos;
+    for (std::size_t i = 0; i < body.size(); ++i) {
+        const char c = body[i];
+        if (c == '"') {
+            quoted = !quoted;
+            continue;
+        }
+        if (quoted) continue;
+        if (c == '[') {
+            if (depth == 0) start = i;
+            ++depth;
+        } else if (c == ']') {
+            if (depth > 0) {
+                --depth;
+                if (depth == 0 && start != kNpos) {
+                    out->push_back(body.substr(start, i - start + 1));
+                    start = kNpos;
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// reflection calls (every one is "call the UFunction and read ReturnValue")
+// ---------------------------------------------------------------------------
+bool CallFloat(UObject* o, const char* fn, float* out) {
+    if (out) *out = 0.0f;
+    if (!o) return false;
+    UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return false;
+    if (out) *out = p.Get<float>("ReturnValue");
+    return true;
+}
+
+bool CallBool(UObject* o, const char* fn, bool* out) {
+    if (out) *out = false;
+    if (!o) return false;
+    UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return false;
+    if (out) *out = p.Get<bool>("ReturnValue");
+    return true;
+}
+
+UObject* CallObject(UObject* o, const char* fn) {
+    if (!o) return nullptr;
+    UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return nullptr;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return nullptr;
+    return p.Get<UObject*>("ReturnValue");
+}
+
+bool CallVector(UObject* o, const char* fn, ue::FVector* out) {
+    if (out) *out = ue::FVector();
+    if (!o) return false;
+    UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return false;
+    if (out) *out = p.Get<ue::FVector>("ReturnValue");
+    return true;
+}
+
+bool CallRotator(UObject* o, const char* fn, ue::FRotator* out) {
+    if (out) *out = ue::FRotator();
+    if (!o) return false;
+    UFunction* f = ue::FindFunction(o, fn);
+    if (!f) return false;
+    ue::Params p(f);
+    if (!ue::Call(o, f, p.data())) return false;
+    if (out) *out = p.Get<ue::FRotator>("ReturnValue");
+    return true;
+}
+
+// Lua's locOf(): nil on failure (never a fake 0,0,0).
+bool LocOf(UObject* o, Vec3* out) {
+    if (out) *out = Vec3();
+    if (!o) return false;
+    ue::FVector v;
+    if (!CallVector(o, "K2_GetActorLocation", &v)) return false;
+    if (out) {
+        out->X = v.X;
+        out->Y = v.Y;
+        out->Z = v.Z;
+    }
+    return true;
+}
+
+UObject* CharacterMovementOf(UObject* actor) {
+    UObject* cm = nullptr;
+    if (!actor) return nullptr;
+    if (!ue::Get<UObject*>(actor, "CharacterMovement", cm)) return nullptr;
+    return cm;
+}
+
+// main.lua:1790-1793 / 1808 / 1823: SetMovementMode(mode, 0) and Velocity.
+bool SetMovementMode(UObject* cm, int mode) {
+    if (!cm) return false;
+    UFunction* f = ue::FindFunction(cm, "SetMovementMode");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<std::uint8_t>("NewMovementMode", static_cast<std::uint8_t>(mode & 0xFF));
+    p.Set<std::uint8_t>("NewCustomMode", static_cast<std::uint8_t>(0));
+    return ue::Call(cm, f, p.data());
+}
+
+bool ReadMovementMode(UObject* cm, int* out) {
+    std::uint8_t v = 0;
+    if (!cm) return false;
+    if (!ue::Get<std::uint8_t>(cm, "MovementMode", v)) return false;
+    if (out) *out = static_cast<int>(v);
+    return true;
+}
+
+bool SetVelocity(UObject* cm, double x, double y, double z) {
+    if (!cm) return false;
+    ue::FVector v;
+    v.X = x;
+    v.Y = y;
+    v.Z = z;
+    return ue::Set<ue::FVector>(cm, "Velocity", v);
+}
+
+// UBrainComponent::StopLogic(const FString& Reason) -- the FString is a
+// TArray<wchar_t>; hand the engine a valid temporary it can copy from.
+struct TempFString {
+    wchar_t buf[96];
+    ue::FString str;
+
+    explicit TempFString(const char* ascii) {
+        std::size_t i = 0;
+        if (ascii) {
+            for (; ascii[i] && i + 1 < (sizeof(buf) / sizeof(buf[0])); ++i) buf[i] = (wchar_t)ascii[i];
+        }
+        buf[i] = 0;
+        str.Data = buf;
+        str.Num = static_cast<std::int32_t>(i + 1);
+        str.Max = static_cast<std::int32_t>(i + 1);
+    }
+};
+
+UObject* BrainComponentOf(UObject* controller) {
+    UObject* bc = nullptr;
+    if (!controller) return nullptr;
+    if (!ue::Get<UObject*>(controller, "BrainComponent", bc)) return nullptr;
+    return bc;
+}
+
+bool StopLogic(UObject* brain, const char* reason) {
+    if (!brain) return false;
+    UFunction* f = ue::FindFunction(brain, "StopLogic");
+    if (!f) return false;
+    TempFString why(reason);
+    ue::Params p(f);
+    p.Set<ue::FString>("Reason", why.str);
+    return ue::Call(brain, f, p.data());
+}
+
+bool RestartLogic(UObject* brain) {
+    if (!brain) return false;
+    UFunction* f = ue::FindFunction(brain, "RestartLogic");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(brain, f, p.data());
+}
+
+bool SetActorLocation(UObject* a, double x, double y, double z) {
+    if (!a) return false;
+    UFunction* f = ue::FindFunction(a, "K2_SetActorLocation");
+    if (!f) return false;
+    ue::Params p(f);   // SweepHitResult stays the zeroed FHitResult the Lua passes as {}
+    ue::FVector v;
+    v.X = x;
+    v.Y = y;
+    v.Z = z;
+    p.Set<ue::FVector>("NewLocation", v);
+    p.Set<bool>("bSweep", false);
+    p.Set<bool>("bTeleport", true);
+    return ue::Call(a, f, p.data());
+}
+
+bool SetActorRotationYaw(UObject* a, double yaw) {
+    if (!a) return false;
+    UFunction* f = ue::FindFunction(a, "K2_SetActorRotation");
+    if (!f) return false;
+    ue::Params p(f);
+    ue::FRotator r;
+    r.Pitch = 0.0;
+    r.Yaw = yaw;
+    r.Roll = 0.0;
+    p.Set<ue::FRotator>("NewRotation", r);
+    p.Set<bool>("bTeleportPhysics", true);
+    return ue::Call(a, f, p.data());
+}
+
+bool PlayAnimMontage(UObject* a, UObject* montage, float rate) {
+    if (!a || !montage) return false;
+    UFunction* f = ue::FindFunction(a, "PlayAnimMontage");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<UObject*>("AnimMontage", montage);
+    p.Set<float>("InPlayRate", rate);
+    // The Lua passes FName("None"); the None FName is (index 0, number 0), which
+    // is exactly a zero-initialised FName. (ms2_ue.h has no MakeFName yet --
+    // CONTRACT-REQUEST.)
+    p.Set<ue::FName>("StartSectionName", ue::FName());
+    return ue::Call(a, f, p.data());
+}
+
+bool StopAnimMontage(UObject* a) {
+    if (!a) return false;
+    UFunction* f = ue::FindFunction(a, "StopAnimMontage");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<UObject*>("AnimMontage", static_cast<UObject*>(nullptr));
+    return ue::Call(a, f, p.data());
+}
+
+// ---------------------------------------------------------------------------
+// actor tail helpers
+// ---------------------------------------------------------------------------
+UObject* FindTickTail(const std::string& tail) {
+    for (const auto& it : state().local.tickTails) {
+        if (it.tail == tail) return it.obj;
+    }
+    return nullptr;
+}
+
+// fullname(actor:GetClass()). ms2_ue.h forward-declares UClass as its own type
+// (it IS a UObject in the engine and there is no GetFullName(UClass*) overload),
+// so the pointer is viewed as UObject* for the name call only -- see
+// CONTRACT-REQUEST.
+std::string ClassFullName(UObject* o) {
+    if (!o) return std::string();
+    ue::UClass* cls = ue::GetClass(o);
+    if (!cls) return std::string();
+    return net::FullName(reinterpret_cast<UObject*>(cls));
+}
+
+// main.lua:1845-1846: `local a = tickTails[name]; if a and not isLive(a) then a = nil end`
+UObject* FindTickTailLive(const std::string& tail) {
+    UObject* a = FindTickTail(tail);
+    if (a && !Live(a)) return nullptr;
+    return a;
+}
+
+// SPN_ALIAS lives in state().combat.spawnAlias (StrStrMap, enemy tail ->
+// "SP_<spawner tail>"); local::RefreshChars() folds it into tickTails when it
+// rebuilds the cache (main.lua:646-649). Lookups copy the value: the map is a
+// vector underneath and a Set() would invalidate a held pointer.
+std::string AliasOf(const std::string& et) {
+    const std::string* key = state().combat.spawnAlias.Find(et);
+    return key ? *key : std::string();
+}
+
+// main.lua:1328-1331
+std::string MontagePath(UObject* o) {
+    if (!o) return std::string();
+    const std::string fn = net::FullName(o);
+    const std::size_t p = fn.find("/Game/");
+    if (p == kNpos) return std::string();
+    std::size_t e = p;
+    while (e < fn.size() && !IsSpace(fn[e])) ++e;
+    return fn.substr(p, e - p);
+}
+
+// main.lua:1319-1323
+std::string HpString(const std::string& tail) {
+    const double* v = state().combat.hpSeen.Find(tail);
+    if (!v) return std::string("1.0");
+    return net::Fmt("%.3f", *v);
+}
+
+// ---------------------------------------------------------------------------
+// health components (main.lua:1192-1248)
+// ---------------------------------------------------------------------------
+UObject* HealthCompOf(UObject* actor) {
+    if (!Live(actor)) return nullptr;
+    const std::string key = net::FullName(actor);
+    UObject* hc = nullptr;
+    for (const auto& it : state().combat.hcCache) {
+        if (it.tail == key) {
+            hc = it.obj;
+            break;
+        }
+    }
+    if (hc && !Live(hc)) return nullptr;
+    return hc;
+}
+
+// main.lua:1211-1225 -> nil means "not readable yet". Returns false for nil.
+bool HealthNormOf(UObject* actor, double* out, bool* dead) {
+    if (out) *out = 0.0;
+    if (dead) *dead = false;
+    UObject* hc = HealthCompOf(actor);
+    if (!hc) return false;
+
+    float maxhp = 0.0f;
+    if (!CallFloat(hc, "GetMaxHealth", &maxhp)) return false;
+    if (!(maxhp > 0.0f)) return false;   // attributes not initialised yet
+
+    float n = 0.0f;
+    if (!CallFloat(hc, "GetCurrentHealthNormalized", &n)) return false;
+
+    bool d = false;
+    CallBool(hc, "IsDeadOrDying", &d);
+
+    if (n <= 0.0f && !d) {
+        // a fresh actor can report 0 before its attributes are set up; never
+        // treat that as real damage (main.lua:1219-1223)
+        return false;
+    }
+    if (out) *out = static_cast<double>(n);
+    if (dead) *dead = d;
+    return true;
+}
+
+// Resolve which two floats of FGameplayAttributeData are BaseValue/CurrentValue.
+//
+// NOT USED ANY MORE -- kept as the record of a wrong assumption.  On this build the
+// struct is not {Base,Current} at +0/+4: the Dumper-7 SDK says an 8-byte prefix,
+// then BaseValue at +0x08 and CurrentValue at +0x0C.  The resolver below also
+// derived its slot indices from the MaxHealth property's window and applied them to
+// the Health property, which is why health writes went to the prefix / the next
+// attribute and DAMAGE sync never saw a change.
+constexpr std::int32_t kAttrBaseValue    = 0x08;
+constexpr std::int32_t kAttrCurrentValue = 0x0C;
+
+[[maybe_unused]] void ResolveHealthSlots(UObject* healthSet, UObject* hc) {
+    g_healthSlots[0] = 0;
+    g_healthSlots[1] = 1;
+    g_healthSlotsKnown = true;
+
+    float maxhp = 0.0f;
+    if (!CallFloat(hc, "GetMaxHealth", &maxhp)) return;
+    if (!(maxhp > 0.0f) || !std::isfinite(static_cast<double>(maxhp))) return;
+
+    const std::int32_t off = ue::PropOffset(healthSet, "MaxHealth");
+    if (off < 0) return;
+
+    float slots[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(healthSet) + off, slots, sizeof(slots))) return;
+
+    int current = -1;
+    for (int i = 0; i < 4; ++i) {
+        if (!std::isfinite(static_cast<double>(slots[i]))) continue;
+        if (std::fabs(static_cast<double>(slots[i]) - static_cast<double>(maxhp)) <=
+            0.01 * static_cast<double>(maxhp)) {
+            current = i;
+            break;
+        }
+    }
+    if (current < 0) return;
+
+    if (current == 0) {
+        g_healthSlots[0] = 0;
+        g_healthSlots[1] = 1;
+    } else {
+        g_healthSlots[0] = current;
+        g_healthSlots[1] = current - 1;
+    }
+}
+
+}  // namespace
+
+// ===========================================================================
+// public API (coop_state.h section 12)
+// ===========================================================================
+
+// main.lua:1194-1202
+void FillHealthCache() {
+    g_hcCacheAt = net::Now();
+    std::vector<NamedActor> fresh;
+    std::vector<UObject*> list = ue::FindAllOf("SpartaHealthComponent");
+    for (UObject* hc : list) {
+        if (!hc) continue;
+        UObject* owner = CallObject(hc, "GetOwner");
+        if (!owner) continue;
+        const std::string key = net::FullName(owner);
+        bool replaced = false;
+        for (auto& row : fresh) {
+            if (row.tail == key) {   // Lua's table assignment: last one wins
+                row.obj = hc;
+                replaced = true;
+                break;
+            }
+        }
+        if (!replaced) {
+            NamedActor row;
+            row.tail = key;
+            row.obj = hc;
+            fresh.push_back(row);
+        }
+    }
+    state().combat.hcCache.swap(fresh);
+}
+
+// main.lua:638-650. local::RefreshChars() owns the caches (it also folds
+// state().combat.spawnAlias into tickTails); this is the forward a combat caller
+// uses so the SPN_ALIAS write side and the read side stay one-way (5 -> 2).
+void RefreshChars() {
+    local::RefreshChars();
+}
+
+// main.lua:1211 via the shared signature: < 0 when the health is not readable.
+double HealthNorm(UObject* actor, bool* dead) {
+    double n = 0.0;
+    bool d = false;
+    if (!HealthNormOf(actor, &n, &d)) {
+        if (dead) *dead = false;
+        return -1.0;
+    }
+    if (dead) *dead = d;
+    return n;
+}
+
+// main.lua:1227-1241, with the layout MEASURED on this build instead of guessed.
+//
+// The Dumper-7 SDK generated from this exact exe (GameplayAbilities_structs.hpp,
+// "ScriptStruct GameplayAbilities.GameplayAttributeData", size 0x10) says:
+//
+//   0x00  uint8 Pad_0[0x8]     (an 8-byte prefix, NOT BaseValue)
+//   0x08  float BaseValue
+//   0x0C  float CurrentValue
+//
+// The port used to assume {BaseValue +0x00, CurrentValue +0x04} and then "resolve"
+// the slots by looking for a value equal to GetMaxHealth() -- but it resolved them
+// inside the *MaxHealth* property's window and applied the resulting indices to the
+// *Health* property, so the write landed on the attribute's prefix and on the next
+// attribute. GetHealth stayed 75 after "writing" 37.5, which is exactly what the
+// two-client DAMAGE verdict saw.  Writing +8/+12 needs no resolution at all, and it
+// is what the Lua did (ImportText set BaseValue and CurrentValue together).
+bool SetHealthNorm(UObject* actor, double norm) {
+    UObject* hc = HealthCompOf(actor);
+    if (!hc) return false;
+
+    UObject* healthSet = nullptr;
+    if (!ue::Get<UObject*>(hc, "HealthSet", healthSet) || !healthSet) return false;
+    if (!Live(healthSet)) return false;
+
+    float maxhp = 0.0f;
+    if (!CallFloat(hc, "GetMaxHealth", &maxhp)) return false;
+    if (!(maxhp > 0.0f)) return false;
+
+    const double v = norm * static_cast<double>(maxhp);
+    const std::int32_t off = ue::PropOffset(healthSet, "Health");
+    if (off < 0) return false;
+
+    const float f = static_cast<float>(v);
+    std::uint8_t* base = reinterpret_cast<std::uint8_t*>(healthSet) + off;
+    bool ok = ue::WriteMem(base + kAttrBaseValue, &f, sizeof(f));
+    ok = ue::WriteMem(base + kAttrCurrentValue, &f, sizeof(f)) && ok;
+
+    // One-shot diagnostic: confirm the two slots really are the attribute. A
+    // wrong layout would silently break DAMAGE sync, so say so once.
+    if (!g_healthVerifyDone) {
+        g_healthVerifyDone = true;
+        float readback = 0.0f;
+        if (CallFloat(hc, "GetHealth", &readback)) {
+            const double eps = std::max(1.0, std::fabs(v) * 0.02);
+            if (std::fabs(static_cast<double>(readback) - v) > eps) {
+                net::Log("WARN health write: GetHealth %.3f after writing %.3f (offsets 0x%X,0x%X)",
+                         static_cast<double>(readback), v, (unsigned)(off + kAttrBaseValue),
+                         (unsigned)(off + kAttrCurrentValue));
+            }
+        }
+    }
+    // Say what the slot looks like right after a write for the first few calls:
+    // "wrote 0.5*max, memory reads back 0.5*max, but GetCurrentHealthNormalized says
+    // 1.0" is a completely different bug from "the write went nowhere".
+    {
+        static std::atomic<int> rawLogs{0};
+        if (rawLogs.fetch_add(1) < 4) {
+            float raw[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+            ue::ReadMem(base, raw, sizeof(raw));
+            float norm = 0.0f;
+            const bool okNorm = CallFloat(hc, "GetCurrentHealthNormalized", &norm);
+            float gh = 0.0f;
+            const bool okGh = CallFloat(hc, "GetHealth", &gh);
+            net::Log("health write: off=0x%X (base@0x%X cur@0x%X) wrote=%.3f max=%.3f "
+                     "raw=[%.3f %.3f %.3f %.3f] GetHealth=%s(%.3f) normalized=%s(%.3f)",
+                     (unsigned)off, (unsigned)(off + kAttrBaseValue),
+                     (unsigned)(off + kAttrCurrentValue), v, static_cast<double>(maxhp),
+                     static_cast<double>(raw[0]), static_cast<double>(raw[1]),
+                     static_cast<double>(raw[2]), static_cast<double>(raw[3]),
+                     okGh ? "ok" : "fail", static_cast<double>(gh),
+                     okNorm ? "ok" : "fail", static_cast<double>(norm));
+        }
+    }
+    return ok;
+}
+
+// main.lua:1243-1248
+bool StartDeath(UObject* actor) {
+    UObject* hc = HealthCompOf(actor);
+    if (!hc) return false;
+    UFunction* f = ue::FindFunction(hc, "StartDeath");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(hc, f, p.data());
+}
+
+bool IsDeadTail(const std::string& tail) {
+    return state().combat.deadTails.Has(tail);
+}
+
+// ===========================================================================
+// enemies (main.lua:1250-1408)
+// ===========================================================================
+namespace {
+
+struct NpcRow {
+    UObject* a = nullptr;
+    Vec3 loc;
+    double d = 0.0;
+    double dp = kInf;
+    bool own = false;
+    std::string cls;
+    std::string tail;
+};
+
+const PeerClaim* FindClaim(const std::string& tail) {
+    for (const auto& c : state().combat.peerClaims) {
+        if (c.key == tail) return &c;
+    }
+    return nullptr;
+}
+
+double Dist3(const Vec3& a, const Vec3& b) {
+    const double dx = a.X - b.X;
+    const double dy = a.Y - b.Y;
+    const double dz = a.Z - b.Z;
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+// main.lua:1265-1317
+std::vector<NpcRow> CollectNpcs() {
+    std::vector<NpcRow> list;
+    UObject* pawn = net::Pawn();
+    if (!pawn) return list;
+    Vec3 me;
+    if (!LocOf(pawn, &me)) return list;
+
+    UObject* pup = puppet::Actor();
+    Vec3 pl;
+    bool hasPl = false;
+    if (pup) hasPl = LocOf(pup, &pl);
+
+    const bool host = (state().local.role == "host");
+
+    for (UObject* a : state().local.tickChars) {
+        if (!a || a == pawn || a == pup) continue;
+
+        const std::string cfn = ClassFullName(a);
+        if (Contains(cfn, "BP_PlayerCharacter") || Contains(cfn, "BP_MainMenuCharacter")) continue;
+
+        Vec3 loc;
+        if (!LocOf(a, &loc)) continue;
+
+        std::string tl = net::Tail(a);
+        {
+            const std::string alias = AliasOf(tl);   // tl = SPN_ALIAS[tl] or tl
+            if (!alias.empty()) tl = alias;
+        }
+
+        const double d = Dist3(loc, me);
+        double dp = kInf;
+        if (hasPl) dp = Dist3(loc, pl);
+
+        if (d <= kNpcRadius || dp <= kNpcRadius) {
+            bool own = false;
+            if (host) {
+                own = (d <= kNpcRadius) || (d <= dp + kNpcMargin);
+                // the guest claims it and its copy stands clearly on the guest's
+                // side: judge by that copy (ours may lag behind)
+                const PeerClaim* c = FindClaim(tl);
+                if (own && c && hasPl) {
+                    Vec3 cp;
+                    cp.X = c->pos.X;
+                    cp.Y = c->pos.Y;
+                    cp.Z = c->pos.Z;
+                    const double ch = Dist3(cp, me);
+                    const double cg = Dist3(cp, pl);
+                    if (ch > kNpcRadius + kClaimSlack && ch > cg + kNpcMargin) own = false;
+                }
+            } else {
+                own = (d <= kNpcRadius) && (dp > kNpcRadius + kClaimSlack) && (dp > d + kNpcMargin);
+            }
+            NpcRow row;
+            row.a = a;
+            row.loc = loc;
+            row.d = d;
+            row.dp = dp;
+            row.own = own;
+            row.cls = cfn;
+            row.tail = tl;
+            list.push_back(row);
+        }
+    }
+
+    // main.lua:1312-1315. Same comparator, same (unstable) ordering: the harness
+    // only relies on list[1] being the nearest enemy of this client.
+    std::sort(list.begin(), list.end(), [](const NpcRow& x, const NpcRow& y) {
+        const bool xi = x.d <= kNpcRadius;
+        const bool yi = y.d <= kNpcRadius;
+        if (xi != yi) return xi;
+        return std::min(x.d, x.dp) < std::min(y.d, y.dp);
+    });
+    return list;
+}
+
+// main.lua:1397-1408
+void KillTailLogged(const std::string& tail, const char* reason) {
+    if (state().combat.deadTails.Has(tail)) return;
+    state().combat.deadTails.Add(tail);
+    UObject* target = nullptr;
+    for (const auto& it : state().local.tickTails) {
+        if (it.tail == tail) {
+            target = it.obj;
+            break;
+        }
+    }
+    const char* why = (reason && *reason) ? reason : "sync";
+    if (target) {
+        const bool ok = StartDeath(target);
+        net::Log("killTail %s (%s): startDeath ok=%s %s", tail.c_str(), why, ok ? "true" : "false", "");
+    } else {
+        net::Log("killTail %s (%s): no local actor with that tail", tail.c_str(), why);
+    }
+}
+
+// MIR is keyed by the peer's enemy name (the tail the packet carried with the
+// spawner alias applied). MirrorEntry has no name field, so the keys are kept in
+// a parallel vector owned by this file -- a destroyed actor still has to be
+// releasable, which a recomputed GetFullName could not promise.
+std::string MirrorKeyOf(UObject* a) {
+    if (!a) return std::string();
+    std::string tail = net::Tail(a);
+    const std::string alias = AliasOf(tail);
+    if (!alias.empty()) tail = alias;
+    return tail;
+}
+
+// Self-heal if the two vectors ever disagree (nothing else may touch `mirrors`).
+void SyncMirrorKeys() {
+    std::vector<MirrorEntry>& v = state().combat.mirrors;
+    if (g_mirrorKeys.size() == v.size()) return;
+    g_mirrorKeys.clear();
+    for (const auto& m : v) g_mirrorKeys.push_back(MirrorKeyOf(m.actor));
+}
+
+int MirrorIndex(const std::string& name) {
+    SyncMirrorKeys();
+    for (std::size_t i = 0; i < g_mirrorKeys.size(); ++i) {
+        if (g_mirrorKeys[i] == name) return static_cast<int>(i);
+    }
+    return -1;
+}
+
+MirrorEntry* FindMirror(const std::string& name) {
+    const int i = MirrorIndex(name);
+    return (i < 0) ? nullptr : &state().combat.mirrors[static_cast<std::size_t>(i)];
+}
+
+// Snapshot of the keys, for the release loop in enemyTick (which mutates MIR).
+std::vector<std::string> MirrorNames() {
+    SyncMirrorKeys();
+    return g_mirrorKeys;
+}
+
+// main.lua:1779-1799
+MirrorEntry* MirrorTake(UObject* a, const std::string& name) {
+    CombatState& c = state().combat;
+
+    int idx = MirrorIndex(name);
+    if (idx >= 0 && c.mirrors[static_cast<std::size_t>(idx)].actor == a) {
+        return &c.mirrors[static_cast<std::size_t>(idx)];   // MIR[name] already drives it
+    }
+    if (c.mirrorSkip.Has(name)) return nullptr;
+
+    const std::string cfn = ClassFullName(a);
+    if (Contains(cfn, "NPC")) {
+        // friendly NPCs (vendors, quest givers) keep their own AI: only their
+        // position is shared (main.lua:1783-1786)
+        c.mirrorSkip.Add(name);
+        return nullptr;
+    }
+
+    net::Log("mir take %s (%s)", name.c_str(), cfn.c_str());
+
+    UObject* ctrl = CallObject(a, "GetController");
+    // a freshly spawned enemy gets its controller a moment later: retried in mirrorDrive
+    bool aiOff = false;
+    if (ctrl) {
+        UObject* bc = BrainComponentOf(ctrl);
+        if (bc) aiOff = StopLogic(bc, "coop mirror");
+    }
+
+    int mode = 1;
+    UObject* cm = CharacterMovementOf(a);
+    if (!ReadMovementMode(cm, &mode)) mode = 1;
+    // MOVE_None: no gravity or braking fights the positions we write, and the
+    // velocity we set stays put for the anim BP's locomotion blend
+    SetMovementMode(cm, 0);
+
+    MirrorEntry m;
+    m.actor = a;
+    m.savedMode = mode;
+    m.mont.clear();
+    m.seen = net::Now();
+    m.aiOff = aiOff;
+
+    if (idx >= 0) {
+        c.mirrors[static_cast<std::size_t>(idx)] = m;      // MIR[name] = m (replaces)
+        g_mirrorKeys[static_cast<std::size_t>(idx)] = name;
+    } else {
+        c.mirrors.push_back(m);
+        g_mirrorKeys.push_back(name);
+        idx = static_cast<int>(c.mirrors.size()) - 1;
+    }
+    c.mirTaken += 1;
+
+    net::Log("enemy %s now driven by the peer (AI paused, mode %d -> 0)", name.c_str(), mode);
+    return &c.mirrors[static_cast<std::size_t>(idx)];
+}
+
+// main.lua:1801-1813
+void MirrorRelease(const std::string& name, const char* why) {
+    CombatState& c = state().combat;
+    const int idx = MirrorIndex(name);
+    if (idx < 0) return;
+
+    const std::size_t i = static_cast<std::size_t>(idx);
+    const MirrorEntry m = c.mirrors[i];
+    c.mirrors[i] = c.mirrors.back();
+    c.mirrors.pop_back();
+    g_mirrorKeys[i] = g_mirrorKeys.back();
+    g_mirrorKeys.pop_back();
+    c.mirReleased += 1;
+
+    UObject* a = m.actor;
+    if (!Live(a)) return;
+
+    SetMovementMode(CharacterMovementOf(a), m.savedMode);
+    if (!c.deadTails.Has(name)) {
+        // dead / no controller: nothing to restart
+        UObject* ctrl = CallObject(a, "GetController");
+        UObject* bc = BrainComponentOf(ctrl);
+        if (bc) RestartLogic(bc);
+    }
+    net::Log("enemy %s back under local AI (%s)", name.c_str(), (why && *why) ? why : "");
+}
+
+// main.lua:1815-1836
+void MirrorDrive(MirrorEntry* m, double vx, double vy, double vz, double yaw, const std::string& mont) {
+    if (!m) return;
+    UObject* a = m->actor;
+    if (!Live(a)) return;
+    m->seen = net::Now();
+
+    if (!m->aiOff) {
+        UObject* ctrl = CallObject(a, "GetController");
+        UObject* bc = BrainComponentOf(ctrl);
+        if (bc) m->aiOff = StopLogic(bc, "coop mirror");
+    }
+
+    SetActorRotationYaw(a, yaw);
+    SetVelocity(CharacterMovementOf(a), vx, vy, vz);
+
+    if (mont != m->mont) {
+        m->mont = mont;
+        if (mont.empty()) {
+            StopAnimMontage(a);
+        } else {
+            UObject* mo = ue::FindObject(mont.c_str());
+            if (mo && Live(mo)) {
+                PlayAnimMontage(a, mo, 1.0f);
+                state().combat.mirMontages += 1;
+            }
+        }
+    }
+}
+
+// main.lua:1838-1891
+void ApplyNpcs(const std::string& line) {
+    std::string sec;
+    if (!net::Section(line, "npc", &sec)) return;
+
+    std::vector<std::string> entries;
+    SplitEntries(sec, &entries);
+
+    std::vector<PeerClaim> claims;
+    CombatState& c = state().combat;
+
+    for (const std::string& entry : entries) {
+        std::vector<std::string> f;
+        std::string body = entry;
+        StripOuterBrackets(&body);
+        SplitFields(body, &f);
+        if (f.empty()) continue;
+
+        const std::string name = Unquote(f[0]);
+        UObject* a = FindTickTailLive(name);
+
+        double tx = 0.0, ty = 0.0, tz = 0.0;
+        const bool hasPos = ParseNum(Field(f, 1), &tx) && ParseNum(Field(f, 2), &ty) &&
+                            ParseNum(Field(f, 3), &tz);
+
+        const std::string hpTok = Field(f, 4);
+        const std::string deadTok = Field(f, 5);
+        bool isDead = (deadTok == "1");
+        if (!isDead) {
+            double hpv = 0.0;
+            if (!ParseNum(hpTok, &hpv)) hpv = 1.0;   // (tonumber(hp) or 1)
+            if (hpv <= kDeadHp) isDead = true;
+        }
+
+        double vx = 0.0, vy = 0.0, vz = 0.0, yaw = 0.0;
+        if (!ParseNum(Field(f, 6), &vx)) vx = 0.0;
+        if (!ParseNum(Field(f, 7), &vy)) vy = 0.0;
+        if (!ParseNum(Field(f, 8), &vz)) vz = 0.0;
+        const bool hasYaw = ParseNum(Field(f, 9), &yaw);
+        const std::string mont = QuotedField(f, 10);
+
+        if (!hasPos) continue;
+
+        PeerClaim claim;
+        claim.key = name;
+        claim.pos.X = tx;
+        claim.pos.Y = ty;
+        claim.pos.Z = tz;
+        claims.push_back(claim);
+
+        if (a && !c.ownedTails.Has(name) && !c.mirroredOnce.Has(name)) {
+            c.mirroredOnce.Add(name);
+            net::Log("mirroring peer-owned enemy %s at %.0f %.0f %.0f", name.c_str(), tx, ty, tz);
+        }
+
+        if (a && !c.deadTails.Has(name) && !isDead && !c.ownedTails.Has(name)) {
+            c.npcMirrored += 1;
+            MirrorEntry* m = ::coop::toggles().mirrorEnabled ? MirrorTake(a, name) : nullptr;
+
+            SetActorLocation(a, tx, ty, tz);
+            if (m && hasYaw) MirrorDrive(m, vx, vy, vz, yaw, mont);
+
+            // a pass only counts after the host really moved this NPC: with
+            // identical saves two copies match trivially without any sync
+            Vec3 first;
+            bool haveFirst = false;
+            for (const auto& fp : g_firstPos) {
+                if (fp.tail == name) {
+                    first = fp.pos;
+                    haveFirst = true;
+                    break;
+                }
+            }
+            if (!haveFirst) {
+                FirstPos fp;
+                fp.tail = name;
+                fp.pos.X = tx;
+                fp.pos.Y = ty;
+                fp.pos.Z = tz;
+                g_firstPos.push_back(fp);
+                first = fp.pos;
+                haveFirst = true;
+            }
+            bool firstListed = false;
+            for (const auto& row : c.npcFirst) {
+                if (row.tail == name) {
+                    firstListed = true;
+                    break;
+                }
+            }
+            if (!firstListed) {
+                NamedActor row;
+                row.tail = name;
+                row.obj = nullptr;   // the position lives in g_firstPos
+                c.npcFirst.push_back(row);
+            }
+
+            const double mx = tx - first.X;
+            const double my = ty - first.Y;
+            const double mz = tz - first.Z;
+            if (std::sqrt(mx * mx + my * my + mz * mz) > kNearOwnMoved) c.npcMoved = true;
+
+            Vec3 got;
+            if (LocOf(a, &got) && c.npcMoved && state().local.role != "host") {
+                const double dd = Dist3(got, Vec3{tx, ty, tz});
+                c.npcTicks += 1;
+                if (dd < kNearGood) c.npcGood += 1;
+                if (c.npcTicks >= kNpcVerdictN && !c.npcVerdictDone) {
+                    c.npcVerdictDone = true;
+                    net::WriteFile("result_npc.txt",
+                                   net::Fmt("%s npc mirror after host move %d/20 within 30u (last %.1f, %s)\n",
+                                            (c.npcGood >= 18) ? "PASS" : "FAIL", c.npcGood, dd, name.c_str()));
+                    net::Log("npc verdict: %d/20 good", c.npcGood);
+                }
+            }
+        }
+    }
+
+    c.peerClaims.swap(claims);
+}
+
+// main.lua:1895-1924
+void ApplyHealth(const std::string& line) {
+    std::string sec;
+    if (!net::Section(line, "nhp", &sec)) return;
+
+    std::vector<std::string> entries;
+    SplitEntries(sec, &entries);
+    CombatState& c = state().combat;
+
+    for (const std::string& entry : entries) {
+        std::vector<std::string> f;
+        std::string body = entry;
+        StripOuterBrackets(&body);
+        SplitFields(body, &f);
+        if (f.size() < 2) continue;
+
+        const std::string tail = Unquote(f[0]);
+        double peerHp = 0.0;
+        if (!ParseNum(f[1], &peerHp)) continue;
+        if (peerHp < 0.0) continue;
+
+        UObject* a = FindTickTailLive(tail);
+        if (!a) continue;
+
+        double mine = 0.0;
+        bool dead = false;
+        if (!HealthNormOf(a, &mine, &dead)) continue;
+
+        if (peerHp < mine - kHpAdoptEps) {
+            SetHealthNorm(a, peerHp);
+            c.hpSeen.Set(tail, peerHp);
+            if (peerHp <= kDeadHp && !c.deadTails.Has(tail)) {
+                c.deadTails.Add(tail);
+                const bool ok = StartDeath(a);
+                net::Log("peer damage killed %s: startDeath ok=%s %s", tail.c_str(),
+                         ok ? "true" : "false", "");
+            }
+        } else if (c.deadTails.Has(tail) && peerHp >= kHpRespawn && !dead) {
+            // peer says this enemy is alive again (respawn after a wipe)
+            c.deadTails.Erase(tail);
+            SetHealthNorm(a, peerHp);
+            c.hpSeen.Set(tail, peerHp);
+            net::Log("peer respawn adopted: %s (%.2f)", tail.c_str(), peerHp);
+        }
+    }
+}
+
+// main.lua:1926-1934
+void ApplyDead(const std::string& line) {
+    std::string sec;
+    if (!net::Section(line, "dead", &sec)) return;
+
+    // sec:gmatch('"([%w_]+)"') -- quoted word tokens only
+    std::size_t i = 0;
+    while (i < sec.size()) {
+        if (sec[i] != '"') {
+            ++i;
+            continue;
+        }
+        std::size_t j = i + 1;
+        std::string tok;
+        while (j < sec.size() && sec[j] != '"') {
+            const unsigned char ch = static_cast<unsigned char>(sec[j]);
+            const bool word = (ch >= '0' && ch <= '9') || (ch >= 'A' && ch <= 'Z') ||
+                              (ch >= 'a' && ch <= 'z') || ch == '_';
+            if (!word) {
+                tok.clear();
+                break;
+            }
+            tok.push_back(static_cast<char>(ch));
+            ++j;
+        }
+        if (j < sec.size() && sec[j] == '"' && !tok.empty()) {
+            if (!state().combat.deadTails.Has(tok)) KillTailLogged(tok, "peer");
+            i = j + 1;
+            continue;
+        }
+        i = (j > i) ? j + 1 : i + 1;
+    }
+}
+
+// main.lua:3909-3924
+void ApplyPeerDamage(double total) {
+    CombatState& c = state().combat;
+    if (!c.hasPdGot) {
+        c.hasPdGot = true;
+        c.pdGot = total;   // baseline, never replay old hits
+        return;
+    }
+    if (total <= c.pdGot + kPdEps) return;
+    const double delta = total - c.pdGot;
+    c.pdGot = total;
+
+    UObject* pawn = net::Pawn();
+    if (!pawn) return;
+    const double hp = HealthNorm(pawn, nullptr);
+    if (hp < 0.0) return;
+
+    const double now = std::max(0.0, hp - delta);
+    SetHealthNorm(pawn, now);
+    c.pdApplied += 1;
+    net::Log("hit on us by the peer's enemy: %.3f -> %.3f", hp, now);
+    net::WriteFile("result_pd.txt",
+                   net::Fmt("PASS peer-side hit applied to own body: %.3f -> %.3f\n", hp, now));
+    if (now <= 0.0) {
+        net::SetLocalHold(3.0);   // LOCAL_HOLD = os.time() + 3
+        const bool ok = StartDeath(pawn);
+        net::Log("killed by the peer's enemy: startDeath ok=%s", ok ? "true" : "false");
+    }
+}
+
+// main.lua:3926-3935
+void FrameTime() {
+    if (!g_gameStats) g_gameStats = ue::FindObject("/Script/Engine.Default__GameplayStatics");
+    UObject* pawn = net::Pawn();
+    if (!g_gameStats || !pawn) return;
+
+    if (!Live(g_gameStats)) {
+        g_gameStats = nullptr;
+        return;
+    }
+    UFunction* f = ue::FindFunction(g_gameStats, "GetWorldDeltaSeconds");
+    if (!f) return;
+    ue::Params p(f);
+    p.Set<UObject*>("WorldContextObject", pawn);
+    if (!ue::Call(g_gameStats, f, p.data())) return;
+    const double dt = p.Get<double>("ReturnValue");
+    if (!(dt > 0.0) || dt > 1.0) return;
+
+    Vec3 me;
+    const bool hasMe = LocOf(pawn, &me);
+    Vec3 pl;
+    bool hasPl = false;
+    UObject* pup = puppet::Actor();
+    if (pup) hasPl = LocOf(pup, &pl);
+
+    const bool far = hasMe && hasPl &&
+                     std::sqrt((me.X - pl.X) * (me.X - pl.X) + (me.Y - pl.Y) * (me.Y - pl.Y)) > 30000.0;
+    CombatState& c = state().combat;
+    if (far) {
+        c.ftFarSum += dt;
+        c.ftFarN += 1;
+    } else {
+        c.ftNearSum += dt;
+        c.ftNearN += 1;
+    }
+}
+
+// main.lua:3822-3852
+void SpawnerScan(double now) {
+    CombatState& c = state().combat;
+    if (now - g_spawnScanAt < 2.0) return;
+    g_spawnScanAt = now;
+
+    if (!g_spawnListValid || now - c.spawnListAt > 10.0) {
+        g_spawnList = ue::FindAllOf("UnitSpawner");
+        c.spawnListAt = now;
+        g_spawnListValid = true;
+    }
+
+    std::vector<NamedActor> by;
+    for (UObject* sp : g_spawnList) {
+        if (!sp || !ue::IsValid(sp)) continue;
+        const std::string st = net::Tail(sp);
+
+        NamedActor row;
+        row.tail = st;
+        row.obj = sp;
+        by.push_back(row);
+
+        UObject* e = nullptr;
+        if (!ue::Get<UObject*>(sp, "SpawnedEnemy", e) || !e) continue;
+        if (!Live(e)) continue;
+
+        const std::string key = "SP_" + st;
+        const std::string et = net::Tail(e);
+        if (c.spawnAlias.Get(et) != key) {
+            c.spawnAlias.Set(et, key);
+            if (c.spawnReq.Find(key) && !c.spawnDone.Has(key)) {
+                c.spawnDone.Add(key);
+                c.spawnOk += 1;
+                net::Log("spawn replayed: %s -> local %s", key.c_str(), et.c_str());
+                net::WriteFile("result_spawn.txt",
+                               net::Fmt("PASS enemy spawned by the peer appeared here too: %s -> %s\n",
+                                        key.c_str(), et.c_str()));
+            }
+        }
+    }
+    c.spawners.swap(by);
+}
+
+UObject* FindSpawnerAt(const std::string& tail) {
+    for (const auto& row : state().combat.spawners) {
+        if (row.tail == tail) return row.obj;
+    }
+    return nullptr;
+}
+
+bool TickTailsHas(const std::string& tail) {
+    for (const auto& row : state().local.tickTails) {
+        if (row.tail == tail) return true;
+    }
+    return false;
+}
+
+// main.lua:3856-3875
+void SpawnReplay(double now) {
+    CombatState& c = state().combat;
+    std::vector<std::string> keys;
+    for (const auto& claim : c.peerClaims) keys.push_back(claim.key);
+
+    for (const std::string& key : keys) {
+        if (key.size() < 4 || key.compare(0, 3, "SP_") != 0) continue;
+        if (TickTailsHas(key)) continue;
+
+        UObject* sp = FindSpawnerAt(key.substr(3));
+        if (!sp) continue;
+        if (!Live(sp)) continue;
+
+        const double* last = c.spawnReq.Find(key);
+        if (last && now - *last <= 10.0) continue;
+
+        c.spawnReq.Set(key, now);
+        c.spawnAsked += 1;
+
+        // the proximity spawner's own trigger event, with our player as the one
+        // who walked in (the puppet does not count as a player; lab sp15:
+        // spawned 20k away from the real player)
+        UObject* pawn = net::Pawn();
+        bool ok = false;
+        if (pawn) {
+            UObject* trigger = nullptr;
+            UObject* capsule = nullptr;
+            ue::Get<UObject*>(sp, "PlayerTrigger", trigger);
+            ue::Get<UObject*>(pawn, "CapsuleComponent", capsule);
+
+            UFunction* f = ue::FindFunction(
+                sp, "BndEvt__BP_Spawner_Proximity_Sphere_K2Node_ComponentBoundEvent_1_ComponentBeginOverlapSignature__DelegateSignature");
+            if (f) {
+                ue::Params p(f);
+                p.Set<UObject*>("OverlappedComponent", trigger);
+                p.Set<UObject*>("OtherActor", pawn);
+                p.Set<UObject*>("OtherComp", capsule);
+                p.Set<std::int32_t>("OtherBodyIndex", 0);
+                p.Set<bool>("bFromSweep", false);
+                // SweepResult is the zeroed FHitResult the Lua passes as {}
+                ok = ue::Call(sp, f, p.data());
+            }
+        }
+        net::Log("spawn replay requested for %s (trigger event ok=%s %s)", key.c_str(),
+                 ok ? "true" : "false", ok ? "" : "call failed");
+    }
+}
+
+// main.lua:3879-3895
+void AiTargetPeer() {
+    CombatState& c = state().combat;
+    if (!puppet::Actor()) return;
+    if (!state().peer.present || !state().peer.live) return;
+
+    UObject* pup = puppet::Actor();
+    if (!Live(pup)) return;
+
+    for (const auto& e : c.npcLast) {
+        if (!e.owned) continue;
+        if (c.deadTails.Has(e.tail)) continue;
+        if (!(e.distPeer < e.distSelf)) continue;
+        if (!(e.distPeer < kAiTargetRange)) continue;
+        if (!Live(e.actor)) continue;
+
+        UObject* ctrl = CallObject(e.actor, "GetController");
+        UObject* tsc = nullptr;
+        if (!ctrl || !ue::Get<UObject*>(ctrl, "TargetSelectionComponent", tsc) || !tsc) continue;
+
+        UObject* cur = nullptr;
+        if (!ue::Get<UObject*>(tsc, "CurrentTarget", cur) || !cur) continue;
+        if (!Live(cur)) continue;
+        if (net::FullName(cur) == net::FullName(pup)) continue;
+
+        UFunction* f = ue::FindFunction(tsc, "SetTargetOverride");
+        if (!f) continue;
+        ue::Params p(f);
+        p.Set<UObject*>("NewTarget", pup);
+        p.Set<float>("OverrideTime", 3.0f);
+        if (!ue::Call(tsc, f, p.data())) continue;
+
+        c.aiRedirects += 1;
+        if (!c.aiLogged.Has(e.tail)) {
+            c.aiLogged.Add(e.tail);
+            net::Log("enemy %s retargeted to the peer's body (peer nearer: %.0f < %.0f)",
+                     e.tail.c_str(), e.distPeer, e.distSelf);
+        }
+    }
+}
+
+// main.lua:3898-3906
+void PuppetDamage() {
+    UObject* pup = puppet::Actor();
+    if (!pup) return;
+
+    double hp = 0.0;
+    bool dead = false;
+    if (!HealthNormOf(pup, &hp, &dead)) return;
+    if (!(hp < kHpFreshGuard && hp > kNoDamageHp && !dead)) return;
+
+    CombatState& c = state().combat;
+    c.pdSent += (1.0 - hp);
+    SetHealthNorm(pup, 1.0);
+    net::Log("peer body took %.3f damage (total %.3f)", 1.0 - hp, c.pdSent);
+}
+
+// main.lua:3938-3955
+void EnemyTick() {
+    CombatState& c = state().combat;
+    const double now = net::Now();
+
+    // the first ticks are traced: a call that blocks leaves no error, only the
+    // last label it reached
+    c.enemyTrace += 1;
+    const int tr = c.enemyTrace;
+    const bool trace = tr <= 40;
+
+    if (trace) net::Log("et%d spawnerScan", tr);
+    SpawnerScan(now);
+    if (trace) net::Log("et%d spawnReplay", tr);
+    SpawnReplay(now);
+    if (trace) net::Log("et%d aiTargetPeer", tr);
+    AiTargetPeer();
+    if (trace) net::Log("et%d puppetDamage", tr);
+    PuppetDamage();
+    if (trace) net::Log("et%d frameTime", tr);
+    FrameTime();
+    if (trace) net::Log("et%d done", tr);
+
+    // hand enemies back to local AI when the peer stops publishing them
+    const std::vector<std::string> names = MirrorNames();
+    for (const std::string& name : names) {
+        if (c.ownedTails.Has(name)) {
+            MirrorRelease(name, "now ours");
+            continue;
+        }
+        MirrorEntry* m = FindMirror(name);
+        if (!m) continue;
+        const double seen = m->seen;
+        if (now - seen > kMirrorTimeout) MirrorRelease(name, "peer stopped publishing it");
+    }
+}
+
+// main.lua:1377-1395
+void SampleCombat() {
+    RefreshChars();
+    std::vector<NpcRow> list = CollectNpcs();
+    CombatState& c = state().combat;
+    for (const NpcRow& e : list) {
+        double hp = 0.0;
+        bool dead = false;
+        if (!HealthNormOf(e.a, &hp, &dead)) continue;
+
+        double* prev = c.hpSeen.Find(e.tail);
+        if (!prev) {
+            c.hpSeen.Set(e.tail, hp);
+        } else if (hp >= kHpRespawn && c.deadTails.Has(e.tail) && !dead) {
+            c.hpSeen.Set(e.tail, hp);
+            c.deadTails.Erase(e.tail);
+            net::Log("local respawn: %s (hp=%.2f)", e.tail.c_str(), hp);
+        } else if (hp < *prev - kHpLocalEps) {
+            c.hpSeen.Set(e.tail, hp);
+        }
+        if (dead || hp <= kDeadHp) {
+            if (!c.deadTails.Has(e.tail)) c.deadTails.Add(e.tail);
+        }
+    }
+}
+
+}  // namespace
+
+// ===========================================================================
+// public API: ticks, wire
+// ===========================================================================
+
+// main.lua:4082-4127 2 Hz: healthCache -> combat -> enemy (each its own step()).
+void Tick2() {
+    // net::Frame() also runs FillHealthCache in its own "healthCache" step; do not
+    // walk GObjects twice in the same tick.
+    if (net::Now() - g_hcCacheAt >= 0.2) Guarded("healthCache", [] { FillHealthCache(); });
+    Guarded("combat", [] { SampleCombat(); });
+    Guarded("enemy", [] { EnemyTick(); });
+}
+
+// main.lua:1979-1982: the peer line, in net's call order npc -> nhp -> dead -> pd.
+void OnPeerLine(const std::string& line) {
+    Guarded("npc", [&line] { ApplyNpcs(line); });
+    Guarded("nhp", [&line] { ApplyHealth(line); });
+    Guarded("dead", [&line] { ApplyDead(line); });
+    Guarded("pd", [&line] {
+        double pd = 0.0;
+        if (net::KvNum(line, "pd", &pd)) ApplyPeerDamage(pd);
+    });
+}
+
+// main.lua:1332-1354
+void SerializeNpc(std::string* out) {
+    if (!out) return;
+
+    // net::Publish() runs at 15 Hz right after coop_local refreshed the caches;
+    // if nothing refreshed them (no other module running) do it once here.
+    if (state().local.tickChars.empty()) RefreshChars();
+
+    CombatState& c = state().combat;
+    const std::vector<NpcRow> list = CollectNpcs();
+
+    c.ownedTails.Clear();
+    c.npcLast.clear();
+    for (const NpcRow& e : list) {
+        NpcEntry row;
+        row.actor = e.a;
+        row.tail = e.tail;
+        row.cls = e.cls;
+        row.pos = e.loc;
+        row.distSelf = e.d;
+        row.distPeer = e.dp;
+        row.owned = e.own;
+        c.npcLast.push_back(row);
+    }
+
+    std::string parts;
+    int owned = 0;
+    for (const NpcRow& e : list) {
+        if (owned >= kMaxNpc) break;
+        if (!e.own) continue;
+
+        c.ownedTails.Add(e.tail);
+        if (!Live(e.a)) continue;   // Lua's goto nextnpc
+
+        ue::FVector v;
+        const bool hasVel = CallVector(e.a, "GetVelocity", &v);
+        ue::FRotator r;
+        const bool hasRot = CallRotator(e.a, "K2_GetActorRotation", &r);
+        UObject* mo = CallObject(e.a, "GetCurrentMontage");
+        const std::string mp = (mo && Live(mo)) ? MontagePath(mo) : std::string();
+
+        if (owned) parts.push_back(',');
+        net::AppendFmt(&parts, "[\"%s\",%.1f,%.1f,%.1f,%s,%d,%.1f,%.1f,%.1f,%.1f,\"%s\"]",
+                       e.tail.c_str(), e.loc.X, e.loc.Y, e.loc.Z, HpString(e.tail).c_str(),
+                       c.deadTails.Has(e.tail) ? 1 : 0,
+                       hasVel ? v.X : 0.0, hasVel ? v.Y : 0.0, hasVel ? v.Z : 0.0,
+                       hasRot ? r.Yaw : 0.0, mp.c_str());
+        owned += 1;
+    }
+
+    c.npcOwned = owned;
+    // Concatenated, not passed through one %s: a full 16-entry list is ~1.5 kB and
+    // net::AppendFmt is a vsnprintf into a fixed buffer.
+    *out += ",\"npc\":[";
+    *out += parts;
+    *out += ']';
+}
+
+// main.lua:1604  `,"pd":%.3f` from PD.sent (cumulative)
+void SerializePd(std::string* out) {
+    if (!out) return;
+    net::AppendFmt(out, ",\"pd\":%.3f", state().combat.pdSent);
+}
+
+// main.lua:1356-1363
+void SerializeNhp(std::string* out) {
+    if (!out) return;
+    const std::vector<NpcEntry>& list = state().combat.npcLast;
+    const std::size_t n = std::min<std::size_t>(list.size(), static_cast<std::size_t>(kMaxNpc));
+
+    std::string parts;
+    for (std::size_t i = 0; i < n; ++i) {
+        if (i) parts.push_back(',');
+        net::AppendFmt(&parts, "[\"%s\",%s]", list[i].tail.c_str(), HpString(list[i].tail).c_str());
+    }
+    *out += ",\"nhp\":[";
+    *out += parts;
+    *out += ']';
+}
+
+// main.lua:1365-1373 (order is a hash walk in the Lua -- the harness counts only;
+// cap 40 emitted entries)
+void SerializeDead(std::string* out) {
+    if (!out) return;
+    std::string parts;
+    int n = 0;
+    for (const std::string& tail : state().combat.deadTails.Items()) {
+        n += 1;
+        if (n > kDeadListCap) break;
+        if (!parts.empty()) parts.push_back(',');
+        parts.push_back('"');
+        parts += tail;
+        parts.push_back('"');
+    }
+    *out += ",\"dead\":[";
+    *out += parts;
+    *out += ']';
+}
+
+// main.lua:3957-3966 (the stream= line belongs to coop_puppet's state)
+std::string Status() {
+    const PuppetState& p = state().puppet;
+    const CombatState& c = state().combat;
+
+    const std::string n0 = (p.streamN0 < 0) ? std::string("nil") : net::Fmt("%d", p.streamN0);
+    const std::string n1 = (p.streamN1 < 0) ? std::string("nil") : net::Fmt("%d", p.streamN1);
+
+    std::string out = net::Fmt("stream=src:%s n0:%s n1:%s npcown:%d npcmirror:%d\n",
+                               p.streamSrc.c_str(), n0.c_str(), n1.c_str(), c.npcOwned, c.npcMirrored);
+
+    net::AppendFmt(&out,
+                   "enemy=driven:%d taken:%d released:%d montages:%d spawnask:%d spawnok:%d "
+                   "retarget:%d pdsent:%.3f pdapplied:%d\n",
+                   static_cast<int>(c.mirrors.size()), c.mirTaken, c.mirReleased, c.mirMontages,
+                   c.spawnAsked, c.spawnOk, c.aiRedirects, c.pdSent, c.pdApplied);
+
+    const double nearMs = (c.ftNearN > 0) ? (c.ftNearSum / static_cast<double>(c.ftNearN) * 1000.0) : 0.0;
+    const double farMs = (c.ftFarN > 0) ? (c.ftFarSum / static_cast<double>(c.ftFarN) * 1000.0) : 0.0;
+    net::AppendFmt(&out, "perf=near:%.2fms(%d) far:%.2fms(%d)\n", nearMs, c.ftNearN, farMs, c.ftFarN);
+    return out;
+}
+
+// main.lua:2120-2122 (`kill`) and the tail of applyDead: record the tail and run
+// StartDeath on the local actor only once.
+bool KillTail(const std::string& tail, const char* reason) {
+    if (state().combat.deadTails.Has(tail)) return false;
+    KillTailLogged(tail, reason);
+    return true;
+}
+
+// ===========================================================================
+// Reset -- a world change frees every cached actor (HANDOFF.md 18)
+// ===========================================================================
+void Reset() {
+    CombatState& c = state().combat;
+
+    // pointers: never touched again without a fresh FindAllOf
+    c.hcCache.clear();
+    c.mirrors.clear();
+    c.npcLast.clear();
+    c.npcFirst.clear();
+    c.peerClaims.clear();
+    c.spawners.clear();
+    c.ownedTails.Clear();
+
+    g_firstPos.clear();
+    g_mirrorKeys.clear();
+    g_spawnList.clear();
+    g_spawnListValid = false;
+    g_spawnScanAt = 0.0;
+    g_gameStats = nullptr;
+    g_healthSlots[0] = 0;
+    g_healthSlots[1] = 1;
+    g_healthSlotsKnown = false;
+    g_hcCacheAt = -1.0e9;   // the next tick refills immediately after a map load
+
+    c.spawnListAt = 0.0;
+    c.npcOwned = 0;
+    c.npcMirrored = 0;
+
+    // tail-keyed bookkeeping survives, exactly like the Lua's globals: after a
+    // death reload the peers' enemies come back with the same tails.
+    // (hpSeen, deadTails, spawnAlias, spawnReq, spawnDone, mirroredOnce,
+    //  mirrorSkip, aiLogged and every counter stay.)
+}
+
+}  // namespace combat
+}  // namespace coop

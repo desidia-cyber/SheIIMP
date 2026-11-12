@@ -1,0 +1,107 @@
+﻿### BoolProperty /Script/Sparta.SpartaSaveObject:IgnoreSaveGameMetaSpecifier  [000001F4ACD71580]
+
+### BoolProperty /Script/Sparta.SpartaSaveObject:IsSessionSaveData:ReturnValue  [000001F4ACD71980]
+
+### BoolProperty /Script/Sparta.SpartaSaveObject:IsTickEnabled:ReturnValue  [000001F4ACD71900]
+
+### BoolProperty /Script/Sparta.SpartaSaveObject:SetTickEnabled:bEnabled  [000001F4ACD71800]
+
+### BoolProperty /Script/Sparta.SpartaSaveObject:UpdateFrom:ReturnValue  [000001F4ACD71780]
+
+### BoolProperty /Script/Sparta.SpartaSaveObject:bIsSessionSaveData  [000001F4ACD71600]
+
+### Class /Script/Sparta.SpartaSaveObject  [00007FF46F038338]
+    super: /Script/CoreUObject.Object
+    15 members:
+      PRP PrimarySaveObjectTick : StructProperty of /Script/Sparta.SaveObjectTickFunction [o:0x28]
+      PRP IgnoreSaveGameMetaSpecifier : BoolProperty [o:0x58]
+      PRP bIsSessionSaveData : BoolProperty [o:0xb1]
+      FUN UpdateFrom 
+          param SaveObject : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+          param Events : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x8]
+          param ReturnValue : BoolProperty [o:0x28]
+      FUN SetTickInterval 
+          param TickInterval : FloatProperty [o:0x0]
+      FUN SetTickEnabled 
+          param bEnabled : BoolProperty [o:0x0]
+      FUN ReceiveTick 
+          param DeltaTime : FloatProperty [o:0x0]
+      FUN ReceiveSpartaPreSave 
+          param SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+      FUN ReceiveOnLoaded 
+      FUN ReceiveApplySkipProloguePreset 
+      FUN IsTickEnabled 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN IsSessionSaveData 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetTickInterval 
+          param ReturnValue : FloatProperty [o:0x0]
+      FUN GetOwningSaveComponent 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveComponent [o:0x0]
+      FUN GetOwningActor 
+          param ReturnValue : ObjectProperty of /Script/Engine.Actor [o:0x0]
+
+### FloatProperty /Script/Sparta.SpartaSaveObject:GetTickInterval:ReturnValue  [000001F4ACD60470]
+
+### FloatProperty /Script/Sparta.SpartaSaveObject:ReceiveTick:DeltaTime  [000001F4ACD60400]
+
+### FloatProperty /Script/Sparta.SpartaSaveObject:SetTickInterval:TickInterval  [000001F4ACD60390]
+
+### Function /Script/Sparta.SpartaSaveObject:GetOwningActor  [00007FF46F6E7A98]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.Actor [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:GetOwningSaveComponent  [00007FF46F6E7B78]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveComponent [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:GetTickInterval  [00007FF46F6E7C58]
+    1 members:
+      PRP ReturnValue : FloatProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:IsSessionSaveData  [00007FF46F6E7D38]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:IsTickEnabled  [00007FF46F6E7E18]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:ReceiveApplySkipProloguePreset  [00007FF46F6E7EF8]
+
+### Function /Script/Sparta.SpartaSaveObject:ReceiveOnLoaded  [00007FF46F6E7FD8]
+
+### Function /Script/Sparta.SpartaSaveObject:ReceiveSpartaPreSave  [00007FF46F6E80B8]
+    1 members:
+      PRP SaveContext : StructProperty of /Script/Sparta.SpartaSaveContext [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:ReceiveTick  [00007FF46F6E8198]
+    1 members:
+      PRP DeltaTime : FloatProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:SetTickEnabled  [00007FF46F6E8278]
+    1 members:
+      PRP bEnabled : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:SetTickInterval  [00007FF46F6E8358]
+    1 members:
+      PRP TickInterval : FloatProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveObject:UpdateFrom  [00007FF46F6E8438]
+    3 members:
+      PRP SaveObject : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+      PRP Events : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x28]
+
+### ObjectProperty /Script/Sparta.SpartaSaveObject:GetOwningActor:ReturnValue  [000001F4ACD71A80]
+
+### ObjectProperty /Script/Sparta.SpartaSaveObject:GetOwningSaveComponent:ReturnValue  [000001F4ACD71A00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveObject:UpdateFrom:SaveObject  [000001F4ACD71680]
+
+### StructProperty /Script/Sparta.SpartaSaveObject:PrimarySaveObjectTick  [000001F4ACD71500]
+
+### StructProperty /Script/Sparta.SpartaSaveObject:ReceiveSpartaPreSave:SaveContext  [000001F4ACD71880]
+
+### StructProperty /Script/Sparta.SpartaSaveObject:UpdateFrom:Events  [000001F4ACD71700]
+

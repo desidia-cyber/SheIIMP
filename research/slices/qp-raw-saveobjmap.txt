@@ -1,0 +1,2 @@
+﻿[000001F4ACDF5200] StructProperty SaveObjects./Script/Sparta.SpartaSaveSubSystem:SaveObjects_Key[o: 0] [n: 5891A5] [c: 00007FF721DF9890] [owr: 000001F49CD2F2E0] [ss: 00007FF46F2E3578]
+[000001F4ACDF5180] ObjectProperty SaveObjects./Script/Sparta.SpartaSaveSubSystem:SaveObjects[o: 10] [n: 58919E] [c: 00007FF721DE9420] [owr: 000001F49CD2F2E0] [pc: 00007FF46F038338]

@@ -1,0 +1,45 @@
+Mortal Shell II Guides — Page 20 
+Skip to content
+ Latest guides first
+ Mortal Shell II guides — page 20
+ Page 20 of 21; entries are sorted by their latest verified update.
+ Available now. 
+Mortal Shell II released on August 20, 2026. This page keeps Open Beta, trailer, and
+ prequel observations labelled as historical context; current retail guides are linked
+ separately where the shipped build has been checked.
+ Overview • 2026-08-20 
+ Mortal Shell 2 Blurry Graphics Fix: PC Checks to Try 
+ Mortal Shell 2 blurry graphics are reported by launch players; use this reversible PC checklist without assuming one universal fix.
+Read guide →
+ Overview • 2026-08-20 
+ Mortal Shell 2 Reflex Stutter Fix: What Steam Players Report 
+ Mortal Shell 2 Reflex stutter is reported in early Steam feedback; compare latency, frame time and settings before changing files.
+Read guide →
+ Overview • 2026-08-20 
+ Mortal Shell 2 Frame Generation Fix: Test the Option Safely 
+ Mortal Shell 2 frame generation is reported to behave inconsistently for some launch PC players; use a controlled settings test.
+Read guide →
+ Overview • 2026-08-20 
+ Mortal Shell 2 Engine.ini Settings: What to Know Before Editing 
+ Mortal Shell 2 engine.ini edits are mentioned in player feedback for stutter and image settings; use backups and reversible checks first.
+Read guide →
+ News • 2026-08-20 
+ Mortal Shell 2 Launch Bugs: Reports, Scope and First Checks 
+ Mortal Shell 2 launch bugs reported on Steam include stutter, blur, camera and crash concerns; separate player reports from confirmed fixes.
+Read guide →
+ Walkthrough • 2026-08-18 
+ Mortal Shell II Open Beta Walkthrough: Prologue, Tiel, Beacons and Marrow Keep 
+ A source-backed Mortal Shell II Open Beta walkthrough covering the Prologue, first region, Tiel, beacons, optional dungeons, mini-bosses, Magdalena and Marrow Keep.
+Read guide →
+ Weapons • 2026-08-18 
+ Mortal Shell II Open Beta Weapons Guide: Axe, Dagger and Upgrade Planning 
+ What the Mortal Shell II Open Beta officially confirms about the Axe and Dagger objective, weapon discovery, upgrades, carry-over rules and missing retail details.
+Read guide →
+ News • 2026-08-18 
+ Mortal Shell II Open Beta Review: Player Experience, Performance and Reported Issues 
+ A transparent Mortal Shell II Open Beta review based on the current Steam player-review sample: combat feel, performance, crashes, camera issues and Beta scope.
+Read guide →
+ Overview • 2026-08-18 
+ Will Mortal Shell 2 Have a Physical Disc for Xbox? 
+ Does Mortal Shell 2 have a physical Xbox disc? Official Playstack and Mortal Shell site details on the digital Xbox launch and PS5 Revered Edition.
+Read guide →

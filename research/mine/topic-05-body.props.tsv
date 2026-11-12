@@ -1,0 +1,932 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnDamageReceived	MulticastInlineDelegateProperty	0xB8	60669
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnHealingReceived	MulticastInlineDelegateProperty	0xC8	60670
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnMaxHealthChanged	MulticastInlineDelegateProperty	0xD8	60671
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnShellHealthDepleted	MulticastInlineDelegateProperty	0xE8	60672
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnDeathStarted	MulticastInlineDelegateProperty	0xF8	60673
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	OnDeathFinished	MulticastInlineDelegateProperty	0x108	60674
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	AbilitySystemComponent	ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent	0x118	60675
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	HealthSet	ObjectProperty of /Script/Sparta.SpartaHealthSet	0x120	60676
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	DeathState	EnumProperty of /Script/Sparta.ESpartaDeathState	0x128	60677
+/Script/Sparta.SpartaHealthComponent	/Script/Sparta.SpartaHealthComponent	LastDamageTimeMap	MapProperty	0x130	60678
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaHealthComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Health	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	60583
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MaxHealth	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x70	60584
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ShellHealth	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x80	60585
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MaxShellHealth	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x90	60586
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MinHealth	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xA0	60587
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MinShellHealth	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xB0	60588
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Armor	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xC0	60589
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Resolve	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xD0	60590
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MaxResolve	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xE0	60591
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Poise	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xF0	60592
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MaxPoise	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x100	60593
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	BleedResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x110	60594
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	BleedResistanceMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x120	60595
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	FrostResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x130	60596
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	FrostResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x140	60597
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ShockResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x150	60598
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ShockResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x160	60599
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	WaspsResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x170	60600
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	WaspsResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x180	60601
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	CurseResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x190	60602
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	CurseResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1A0	60603
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ConfusionResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1B0	60604
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ConfusionResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1C0	60605
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ConfusionBreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1D0	60606
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	CosmicDiseaseResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1E0	60607
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	CosmicDiseaseResistanceIncrement	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1F0	60608
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	StasisWeakness	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x200	60609
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	BreakResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x210	60610
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	MaxBreakResistance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x220	60611
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	RiposteWeakness	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x230	60612
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	StoneStunTime	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x240	60613
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Healing	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x258	60614
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	Damage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x268	60615
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	PoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x278	60616
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	BreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x288	60617
+/Script/Sparta.SpartaHealthSet	/Script/Sparta.SpartaHealthSet	ResolveModify	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x298	60618
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	60517
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseHeal	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	60518
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	60519
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseBreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	60520
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	AttackSpeedBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x70	60521
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseWindedCounters	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x80	60522
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePoisonDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x90	60523
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePoisonDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xA0	60524
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseBleedDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xB0	60525
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseBurnDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xC0	60526
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseBurnDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xD0	60527
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseFrostDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xE0	60528
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseFreezeDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xF0	60529
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseLightningDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x100	60530
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseLightningDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x110	60531
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseShockDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x120	60532
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseShockRadius	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x130	60533
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseWaspsDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x140	60534
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseWaspsDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x150	60535
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseFragileDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x160	60536
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePerforationDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x170	60537
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePhantomDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x180	60538
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePhantomHealthDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x190	60539
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BasePhantomPoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1A0	60540
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseChaosDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1B0	60541
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseChaosDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1C0	60542
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseCurseStackDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1D0	60543
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseCursedStateDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1E0	60544
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseTraumaDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1F0	60545
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseTraumaDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x200	60546
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseConfusionDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x210	60547
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseKnockbackMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x220	60548
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseKnockbackStrength	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x230	60549
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	PoisonMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x240	60550
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BleedMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x250	60551
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	LightningMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x260	60552
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BurnMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x270	60553
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	FrostMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x280	60554
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	CurseMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x290	60555
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	StasisMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2A0	60556
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	PhantomMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2B0	60557
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	ChaosMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2C0	60558
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	WaspsMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2D0	60559
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	ConfusionMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2E0	60560
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseCosmicDiseaseDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x2F0	60561
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	CosmicDiseaseMitigation	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x300	60562
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	RiposteDamageMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x310	60563
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseDamageReduction	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x320	60564
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	BaseBreakDamageReduction	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x330	60565
+/Script/Sparta.SpartaCombatSet	/Script/Sparta.SpartaCombatSet	IncomingDamageMultiplayer	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x340	60566
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	CurrentEXP	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	53759
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ModifyEXP	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	53760
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	CriticalChance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	53761
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	CriticalBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	53762
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	BaseSynergyGain	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x70	53763
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	BaseSynergyDrain	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x80	53764
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	BaseSynergyDetachCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x90	53765
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	BaseResolveGain	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xA0	53766
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	BaseResolveLost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xB0	53767
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	PrimaryMeleeAbilityCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xC0	53768
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	SecondaryMeleeAbilityCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xD0	53769
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	HealCurrentCharges	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xE0	53770
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	HealMaxCharges	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xF0	53771
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	HealAmountPerCharge	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x100	53772
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	GloomMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x110	53773
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	GloomBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x120	53774
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	GoldMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x130	53775
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	GoldBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x140	53776
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ShellReviveCurrentProgress	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x150	53777
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ShellReviveMaxProgress	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x160	53778
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ShellReviveProgressGain	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x170	53779
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ShellReviveMaxProgressMultiplier	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x180	53780
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	PPItemResource	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x190	53781
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	PPItemMaxResource	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1A0	53782
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	PPItemCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1B0	53783
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemMaxHealthBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1C0	53784
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemMaxResolveBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1D0	53785
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemPoisonMitigationBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1E0	53786
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemBleedMitigationBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1F0	53787
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemBurnMitigationBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x200	53788
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemLightningMitigationBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x210	53789
+/Script/Sparta.PlayerAttributeSet	/Script/Sparta.PlayerAttributeSet	ItemFrostMitigationBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x220	53790
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	PrimaryEnergyCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	54196
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	SecondaryEnergyCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	54197
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	duration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	54198
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Cooldown	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	54199
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Damage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x70	54200
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	DamageBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x80	54201
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	DamageReduction	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x90	54202
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MinAmount	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xA0	54203
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MaxAmount	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xB0	54204
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CurrentAmount	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xC0	54205
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Stacks	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xD0	54206
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CriticalHitChanceBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xE0	54207
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CriticalHitDamageBonus	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xF0	54208
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	AttacksNumber	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x100	54209
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	PoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x110	54210
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CustomDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x120	54211
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MaxDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x130	54212
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MaxPoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x140	54213
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Cost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x150	54214
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Radius	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x160	54215
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CustomCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x170	54216
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	HealingMeter	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x180	54217
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MaxHealingMeter	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x190	54218
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	CustomHealingFactor	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1A0	54219
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Chance	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1B0	54220
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	Threshold	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1C0	54221
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	ResolveGainBoost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1D0	54222
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	BreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1E0	54223
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	MaxBreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x1F0	54224
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	SecondaryDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x200	54225
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	SecondaryPoiseDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x210	54226
+/Script/Sparta.ShellAbilityAttributeSet	/Script/Sparta.ShellAbilityAttributeSet	SecondaryBreakDamage	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x220	54227
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	CurrentAmmo	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	54230
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	MaxAmmo	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	54231
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	ReloadDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	54232
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	ActivationCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	54233
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	PrimaryEnergyCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x70	54234
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	MinRequiredEnergy	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x80	54235
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	SecondaryEnergyCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x90	54236
+/Script/Sparta.SidearmAttributeSet	/Script/Sparta.SidearmAttributeSet	BuffEnergyCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0xA0	54237
+/Script/Sparta.DarkPowerAttributeSet	/Script/Sparta.DarkPowerAttributeSet	CurrentAmmo	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	53410
+/Script/Sparta.DarkPowerAttributeSet	/Script/Sparta.DarkPowerAttributeSet	MaxAmmo	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	53411
+/Script/Sparta.DarkPowerAttributeSet	/Script/Sparta.DarkPowerAttributeSet	ReloadDuration	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	53412
+/Script/Sparta.DarkPowerAttributeSet	/Script/Sparta.DarkPowerAttributeSet	ActivationCost	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x60	53413
+/Script/Sparta.EnemyAttributeSet	/Script/Sparta.EnemyAttributeSet	WindedCounters	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x30	53530
+/Script/Sparta.EnemyAttributeSet	/Script/Sparta.EnemyAttributeSet	ModifyWindedCounters	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x40	53531
+/Script/Sparta.EnemyAttributeSet	/Script/Sparta.EnemyAttributeSet	TarstoneEXP	StructProperty of /Script/GameplayAbilities.GameplayAttributeData	0x50	53532
+/Script/Sparta.SpartaAttributeStackLimitComponent	/Script/Sparta.SpartaAttributeStackLimitComponent	StackLimitAttribute	StructProperty of /Script/GameplayAbilities.GameplayAttribute	0x28	55170
+/Script/Sparta.SpartaAttributeStackLimitComponent	/Script/Sparta.SpartaAttributeStackLimitComponent	FallbackStackLimit	IntProperty	0x60	55171
+/Script/Sparta.SpartaAttributeStackLimitComponent	/Script/Sparta.SpartaAttributeStackLimitComponent	bRefreshAtCap	BoolProperty	0x64	55172
+/Script/Sparta.ArmorComponent	/Script/Sparta.ArmorComponent	CurrentArmorTag	StructProperty of /Script/GameplayTags.GameplayTag	0xB8	53232
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.ArmorComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	WeaponActor	ObjectProperty of /Script/Engine.Actor	0xB8	54263
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	StowedAttachParent	ObjectProperty of /Script/Engine.SceneComponent	0xC0	54264
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	StowedSocketName	NameProperty	0xC8	54265
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	StowedRelativeTransform	StructProperty of /Script/CoreUObject.Transform	0xD0	54266
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	TargetActor	ObjectProperty of /Script/Engine.Actor	0x130	54267
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	TargetWorldOffset	StructProperty of /Script/CoreUObject.Vector	0x138	54268
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	ArrivalDistance	FloatProperty	0x150	54269
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	TrackingDuration	FloatProperty	0x154	54270
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	TrackingInterpSpeed	FloatProperty	0x158	54271
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	LaunchSpeed	FloatProperty	0x15C	54272
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	RecallSpeed	FloatProperty	0x160	54273
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	LaunchArcHeight	FloatProperty	0x164	54274
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	RecallArcHeight	FloatProperty	0x168	54275
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	ArcSideOffset	FloatProperty	0x16C	54276
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	TangentScale	FloatProperty	0x170	54277
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	HomingPathRefreshInterval	FloatProperty	0x174	54278
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	bRefreshRecallPathToMovingSocket	BoolProperty	0x178	54279
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	bSpinWhileActive	BoolProperty	0x179	54280
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	LocalSpinAxis	StructProperty of /Script/CoreUObject.Vector	0x180	54281
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	SpinDegreesPerSecond	FloatProperty	0x198	54282
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	bOrientToMovement	BoolProperty	0x19C	54283
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	bDrawDebugPath	BoolProperty	0x19D	54284
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	DebugDrawDuration	FloatProperty	0x1A0	54285
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	OnSlayerSealStateChanged	MulticastInlineDelegateProperty	0x1A8	54286
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	OnSealLaunched	MulticastInlineDelegateProperty	0x1B8	54287
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	OnSealReachedTarget	MulticastInlineDelegateProperty	0x1C8	54288
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	OnSealRecalled	MulticastInlineDelegateProperty	0x1D8	54289
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	RuntimeSpline	ObjectProperty of /Script/Engine.SplineComponent	0x1E8	54290
+/Script/Sparta.SlayerSealComponent	/Script/Sparta.SlayerSealComponent	SealState	EnumProperty of /Script/Sparta.ESlayerSealState	0x1F0	54291
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SlayerSealComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaHoldExpirationComponent	/Script/Sparta.SpartaHoldExpirationComponent	HoldExpirationTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x28	56524
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	HealthDamage	StructProperty of /Script/Sparta.HealthDamageOption	0x28	56255
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PoiseDamageOption	StructProperty of /Script/Sparta.HealthDamageOption	0x34	56256
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	BreakDamageOption	StructProperty of /Script/Sparta.HealthDamageOption	0x40	56257
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	DamageEffect	ClassProperty	0x50	56258
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	AdditionalEffects	ArrayProperty of AdditionalEffects./Script/Sparta.SpartaHitPayload:AdditionalEffects	0x58	56259
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	DamageDataTag	StructProperty of /Script/GameplayTags.GameplayTag	0x68	56261
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	ReactionTag	StructProperty of /Script/GameplayTags.GameplayTag	0x70	56262
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	StrikeDirection	EnumProperty of /Script/Sparta.ESpartaStrikeDirection	0x78	56263
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PoiseDamage	FloatProperty	0x7C	56264
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PoiseDamageEffect	ClassProperty	0x80	56265
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	BreakDamage	FloatProperty	0x88	56266
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	BreakDamageEffect	ClassProperty	0x90	56267
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PoiseBrokenEffect	ClassProperty	0x98	56268
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PoiseDamageDataTag	StructProperty of /Script/GameplayTags.GameplayTag	0xA0	56269
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	BreakDamageDataTag	StructProperty of /Script/GameplayTags.GameplayTag	0xA8	56270
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	ChosenReactionTag	StructProperty of /Script/GameplayTags.GameplayTag	0xB0	56271
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	PayloadTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xB8	56272
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CustomElementalStacks	IntProperty	0xD8	56273
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	DamageDealt	FloatProperty	0xDC	56274
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CalculatedDamage	FloatProperty	0xE0	56275
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CalculatedPoiseDamage	FloatProperty	0xE4	56276
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CalculatedBreakDamage	FloatProperty	0xE8	56277
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CachedTargetTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xF0	56278
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CachedSourceTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x110	56279
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	CachedTargetTagsPostApply	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x130	56280
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	MergedPayloads	IntProperty	0x150	56281
+/Script/Sparta.SpartaHitPayload	/Script/Sparta.SpartaHitPayload	bIsCDO	BoolProperty	0x154	56282
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	BlockInputGameplayEffect	ClassProperty	0x1260	54491
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	UnblockableInputBlockTags	MapProperty	0x1268	54492
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	AdditionalTagContainers	MapProperty	0x12B8	54495
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnStatusEffectRemoved	MulticastInlineDelegateProperty	0x1308	54498
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnStatusEffectAdded	MulticastInlineDelegateProperty	0x1318	54499
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnUpgradeStatChanged	MulticastInlineDelegateProperty	0x1328	54500
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnStackChanged	MulticastInlineDelegateProperty	0x1338	54501
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnGameplayEffectFailedToApply	MulticastInlineDelegateProperty	0x1348	54502
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	TagRelationshipMapping	ObjectProperty of /Script/Sparta.SpartaAbilityTagRelationshipMapping	0x13C0	54503
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActivePayloadModifiersArray	ArrayProperty of ActivePayloadModifiersArray./Script/Sparta.SpartaAbilitySystemComponent:ActivePayloadModifiersArray	0x1448	54504
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActiveIncomingPayloadModifiersArray	ArrayProperty of ActiveIncomingPayloadModifiersArray./Script/Sparta.SpartaAbilitySystemComponent:ActiveIncomingPayloadModifiersArray	0x14A8	54506
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActiveExecutionModifiersArray	ArrayProperty of ActiveExecutionModifiersArray./Script/Sparta.SpartaAbilitySystemComponent:ActiveExecutionModifiersArray	0x1508	54508
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActiveExecutionValueModifiersArray	ArrayProperty of ActiveExecutionValueModifiersArray./Script/Sparta.SpartaAbilitySystemComponent:ActiveExecutionValueModifiersArray	0x1568	54510
+/Script/Sparta.SpartaAbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	UpgradeStats	MapProperty	0x15F8	54512
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	DefaultStartingData	ArrayProperty of DefaultStartingData./Script/GameplayAbilities.AbilitySystemComponent:DefaultStartingData	0x140	36864
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	AffectedAnimInstanceTag	NameProperty	0x150	36866
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OutgoingDuration	FloatProperty	0x300	36867
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	IncomingDuration	FloatProperty	0x304	36868
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ClientDebugStrings	ArrayProperty of ClientDebugStrings./Script/GameplayAbilities.AbilitySystemComponent:ClientDebugStrings	0x328	36869
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ServerDebugStrings	ArrayProperty of ServerDebugStrings./Script/GameplayAbilities.AbilitySystemComponent:ServerDebugStrings	0x338	36871
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	UserAbilityActivationInhibited	BoolProperty	0x3A0	36873
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ReplicationProxyEnabled	BoolProperty	0x3A1	36874
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	bSuppressGrantAbility	BoolProperty	0x3A2	36875
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	bSuppressGameplayCues	BoolProperty	0x3A3	36876
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	SpawnedTargetActors	ArrayProperty of SpawnedTargetActors./Script/GameplayAbilities.AbilitySystemComponent:SpawnedTargetActors	0x3A8	36877
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	OwnerActor	ObjectProperty of /Script/Engine.Actor	0x3E0	36879
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	AvatarActor	ObjectProperty of /Script/Engine.Actor	0x3E8	36880
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActivatableAbilities	StructProperty of /Script/GameplayAbilities.GameplayAbilitySpecContainer	0x400	36881
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	AllReplicatedInstancedAbilities	ArrayProperty of AllReplicatedInstancedAbilities./Script/GameplayAbilities.AbilitySystemComponent:AllReplicatedInstancedAbilities	0x550	36882
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	RepAnimMontageInfo	StructProperty of /Script/GameplayAbilities.GameplayAbilityRepAnimMontage	0x780	36884
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	bCachedIsNetSimulated	BoolProperty	0x7C0	36885
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	bPendingMontageRep	BoolProperty	0x7C1	36886
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	LocalAnimMontageInfo	StructProperty of /Script/GameplayAbilities.GameplayAbilityLocalAnimMontage	0x7C8	36887
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActiveGameplayEffects	StructProperty of /Script/GameplayAbilities.ActiveGameplayEffectsContainer	0x890	36888
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ActiveGameplayCues	StructProperty of /Script/GameplayAbilities.ActiveGameplayCueContainer	0xB90	36889
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	MinimalReplicationGameplayCues	StructProperty of /Script/GameplayAbilities.ActiveGameplayCueContainer	0xCB8	36890
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	BlockedAbilityBindings	ArrayProperty of BlockedAbilityBindings./Script/GameplayAbilities.AbilitySystemComponent:BlockedAbilityBindings	0xF08	36891
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	MinimalReplicationTags	StructProperty of /Script/GameplayAbilities.MinimalReplicationTagCountMap	0x1040	36893
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	SpawnedAttributes	ArrayProperty of SpawnedAttributes./Script/GameplayAbilities.AbilitySystemComponent:SpawnedAttributes	0x10A8	36894
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ReplicatedLooseTags	StructProperty of /Script/GameplayAbilities.MinimalReplicationTagCountMap	0x10C8	36896
+/Script/GameplayAbilities.AbilitySystemComponent	/Script/Sparta.SpartaAbilitySystemComponent	ReplicatedPredictionKeyMap	StructProperty of /Script/GameplayAbilities.ReplicatedPredictionKeyMap	0x1138	36897
+/Script/GameplayTasks.GameplayTasksComponent	/Script/Sparta.SpartaAbilitySystemComponent	TaskPriorityQueue	ArrayProperty of TaskPriorityQueue./Script/GameplayTasks.GameplayTasksComponent:TaskPriorityQueue	0xD0	35235
+/Script/GameplayTasks.GameplayTasksComponent	/Script/Sparta.SpartaAbilitySystemComponent	TickingTasks	ArrayProperty of TickingTasks./Script/GameplayTasks.GameplayTasksComponent:TickingTasks	0xF0	35237
+/Script/GameplayTasks.GameplayTasksComponent	/Script/Sparta.SpartaAbilitySystemComponent	KnownTasks	ArrayProperty of KnownTasks./Script/GameplayTasks.GameplayTasksComponent:KnownTasks	0x100	35239
+/Script/GameplayTasks.GameplayTasksComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnClaimedResourcesChange	MulticastInlineDelegateProperty	0x110	35241
+/Script/GameplayTasks.GameplayTasksComponent	/Script/Sparta.SpartaAbilitySystemComponent	SimulatedTasks	ArrayProperty of SimulatedTasks./Script/GameplayTasks.GameplayTasksComponent:SimulatedTasks	0x120	35242
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaAbilitySystemComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	LockOnComponent	ObjectProperty of /Script/Sparta.SpartaTargetLockComponent	0xAE8	57499
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	PlayerExpComponent	ObjectProperty of /Script/Sparta.PlayerExpComponent	0xAF0	57500
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	TarstoneComponent	ObjectProperty of /Script/Sparta.TarstoneComponent	0xAF8	57501
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	ArtifactComponent	ObjectProperty of /Script/Sparta.ArtifactComponent	0xB00	57502
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	SidearmProjectileCacheComponent	ObjectProperty of /Script/Sparta.SidearmProjectileCacheComponent	0xB08	57503
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	PathFollowingComponent	ObjectProperty of /Script/Sparta.SpartaPathFollowingComponent	0xB10	57504
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	NavigationInvokerComponent	ObjectProperty of /Script/NavigationSystem.NavigationInvokerComponent	0xB18	57505
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	DefaultInputMappingContexts	ArrayProperty of DefaultInputMappingContexts./Script/Sparta.SpartaPlayerCharacter:DefaultInputMappingContexts	0xB20	57506
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	DarkformClass	ClassProperty	0xB30	57508
+/Script/Sparta.SpartaPlayerCharacter	/Script/Sparta.SpartaPlayerCharacter	ShellClass	ClassProperty	0xB38	57509
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	HealthComponent	ObjectProperty of /Script/Sparta.SpartaHealthComponent	0x6A0	54584
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	HitReactionAnimSet	ObjectProperty of /Script/Sparta.SpartaHitReactionAnimSet	0x6A8	54585
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	ItemManagerComponent	ObjectProperty of /Script/Sparta.SpartaItemManagerComponent	0x6B0	54586
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	WeaponsComponent	ObjectProperty of /Script/Sparta.WeaponsComponent	0x6B8	54587
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	HitTraceComponent	ObjectProperty of /Script/Sparta.SpartaHitTraceComponent	0x6C0	54588
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FoleyComponent	ObjectProperty of /Script/Sparta.SpartaCharacterFoleyComponent	0x6C8	54589
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	VoxComponent	ObjectProperty of /Script/Sparta.SpartaCharacterVoxComponent	0x6D0	54590
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	MotionWarpingComponent	ObjectProperty of /Script/CSMotionWarpingExtensions.CSMotionWarpingComponent	0x6D8	54591
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	ArmorComponent	ObjectProperty of /Script/Sparta.ArmorComponent	0x6E0	54592
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterId	StructProperty of /Script/GameplayTags.GameplayTag	0x6E8	54593
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FootPlacement	StructProperty of /Script/CSAnimationLibrary.CSFootPlacement	0x6F0	54594
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FootstepFX	ObjectProperty of /Script/Sparta.SpartaFootstepFXData	0x778	54595
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CurrentWaterColliders	ArrayProperty of CurrentWaterColliders./Script/Sparta.SpartaCharacter:CurrentWaterColliders	0x780	54596
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AudioDataUpdated	MulticastInlineDelegateProperty	0x790	54598
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FootDown	MulticastInlineDelegateProperty	0x7A0	54599
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FootUp	MulticastInlineDelegateProperty	0x7B0	54600
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FootDownInWater	MulticastInlineDelegateProperty	0x7C0	54601
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AudioData	ObjectProperty of /Script/Sparta.SpartaCharacterAudioData	0x820	54602
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AudioComponentMapInitialized	MulticastInlineDelegateProperty	0x828	54603
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	GameplayTagToAudioComponentMap	MapProperty	0x838	54604
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnHitApplied	MulticastInlineDelegateProperty	0x8D8	54607
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnHitReceived	MulticastInlineDelegateProperty	0x8E8	54608
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnHealthDamageCaused	MulticastInlineDelegateProperty	0x8F8	54609
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	DefaultAbilitySet	StructProperty of /Script/Sparta.SpartaAbilitySet	0x908	54610
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AbilitySetReferences	ArrayProperty of AbilitySetReferences./Script/Sparta.SpartaCharacter:AbilitySetReferences	0x938	54611
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	bFootstepsEnabled	BoolProperty	0x948	54613
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterAggro	MulticastInlineDelegateProperty	0x950	54614
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterDodge	MulticastInlineDelegateProperty	0x960	54615
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterRoll	MulticastInlineDelegateProperty	0x970	54616
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterAttack	MulticastInlineDelegateProperty	0x980	54617
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterHit	MulticastInlineDelegateProperty	0x990	54618
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterDeath	MulticastInlineDelegateProperty	0x9A0	54619
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterTeleport	MulticastInlineDelegateProperty	0x9B0	54620
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnSetCharacterData	MulticastInlineDelegateProperty	0x9C0	54621
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnTargetedBy	MulticastInlineDelegateProperty	0x9D0	54622
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnAttackInitiatedAgainstSelf	MulticastInlineDelegateProperty	0x9E0	54623
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	OnTeamChanged	MulticastInlineDelegateProperty	0x9F0	54624
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterDataStore	MapProperty	0xA00	54625
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	GrantedCharacterAbilityHandles	StructProperty of /Script/Sparta.SpartaAbilitySet_GrantedHandles	0xA50	54628
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	SpawnedInitialCharacterAttributes	ArrayProperty of SpawnedInitialCharacterAttributes./Script/Sparta.SpartaCharacter:SpawnedInitialCharacterAttributes	0xA88	54629
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	SpawnedChangableCharacterAttributes	ArrayProperty of SpawnedChangableCharacterAttributes./Script/Sparta.SpartaCharacter:SpawnedChangableCharacterAttributes	0xA98	54631
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AbilitySystemComponent	ObjectProperty of /Script/Sparta.SpartaAbilitySystemComponent	0xAA8	54633
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	Team	StructProperty of /Script/GameplayTags.GameplayTag	0xAB0	54634
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CharacterData	ObjectProperty of /Script/Sparta.SpartaCharacterData	0xAC0	54635
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	CurrentTarget	ObjectProperty of /Script/Engine.Actor	0xAC8	54636
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	FoleyLoopEventHandle	StructProperty of /Script/WaveWeaver.AudioEventId	0xAD0	54637
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	LodCategory	EnumProperty of /Script/Sparta.ESpartaAudioLodCategory	0xAD8	54638
+/Script/Sparta.SpartaCharacter	/Script/Sparta.SpartaPlayerCharacter	AnimSet	ObjectProperty of /Script/CSAnimationLibrary.CSAnimSet	0xAE0	54639
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	Mesh	ObjectProperty of /Script/Engine.SkeletalMeshComponent	0x328	18792
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	CharacterMovement	ObjectProperty of /Script/Engine.CharacterMovementComponent	0x330	18793
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	CapsuleComponent	ObjectProperty of /Script/Engine.CapsuleComponent	0x338	18794
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	BasedMovement	StructProperty of /Script/Engine.BasedMovementInfo	0x340	18795
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ReplicatedBasedMovement	StructProperty of /Script/Engine.BasedMovementInfo	0x388	18796
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ReplicatedServerLastTransformUpdateTimeStamp	FloatProperty	0x3D0	18797
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ReplayLastTransformUpdateTimeStamp	FloatProperty	0x3D4	18798
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	BaseRotationOffset	StructProperty of /Script/CoreUObject.Quat	0x3E0	18799
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	BaseTranslationOffset	StructProperty of /Script/CoreUObject.Vector	0x400	18800
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ReplicatedGravityDirection	StructProperty of /Script/Engine.Vector_NetQuantizeNormal	0x418	18801
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	AnimRootMotionTranslationScale	FloatProperty	0x448	18802
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	CrouchedEyeHeight	FloatProperty	0x44C	18803
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bInBaseReplication	BoolProperty	0x450	18804
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bIsCrouched	BoolProperty	0x450	18805
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bProxyIsJumpForceApplied	BoolProperty	0x450	18806
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bPressedJump	BoolProperty	0x450	18807
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bClientUpdating	BoolProperty	0x450	18808
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bClientWasFalling	BoolProperty	0x450	18809
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bClientResimulateRootMotion	BoolProperty	0x450	18810
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bClientResimulateRootMotionSources	BoolProperty	0x450	18811
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bSimGravityDisabled	BoolProperty	0x451	18812
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bClientCheckEncroachmentOnNetUpdate	BoolProperty	0x451	18813
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bServerMoveIgnoreRootMotion	BoolProperty	0x451	18814
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	bWasJumping	BoolProperty	0x451	18815
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ReplicatedMovementMode	ByteProperty	0x452	18816
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpKeyHoldTime	FloatProperty	0x454	18817
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpForceTimeRemaining	FloatProperty	0x458	18818
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ProxyJumpForceStartedTime	FloatProperty	0x45C	18819
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpMaxHoldTime	FloatProperty	0x460	18820
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpMaxCount	IntProperty	0x464	18821
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpCurrentCount	IntProperty	0x468	18822
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	JumpCurrentCountPreJump	IntProperty	0x46C	18823
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	OnReachedJumpApex	MulticastInlineDelegateProperty	0x478	18824
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	LandedDelegate	MulticastInlineDelegateProperty	0x488	18825
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	MovementModeChangedDelegate	MulticastInlineDelegateProperty	0x498	18826
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	OnCharacterMovementUpdated	MulticastInlineDelegateProperty	0x4A8	18827
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	SavedRootMotion	StructProperty of /Script/Engine.RootMotionSourceGroup	0x4B8	18828
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	ClientRootMotionParams	StructProperty of /Script/Engine.RootMotionMovementParams	0x500	18829
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	RootMotionRepMoves	ArrayProperty of RootMotionRepMoves./Script/Engine.Character:RootMotionRepMoves	0x570	18830
+/Script/Engine.Character	/Script/Sparta.SpartaPlayerCharacter	RepRootMotion	StructProperty of /Script/Engine.RepRootMotionMontage	0x580	18832
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	bUseControllerRotationPitch	BoolProperty	0x2B0	18702
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	bUseControllerRotationYaw	BoolProperty	0x2B0	18703
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	bUseControllerRotationRoll	BoolProperty	0x2B0	18704
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	bCanAffectNavigationGeneration	BoolProperty	0x2B0	18705
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	bIsLocalViewTarget	BoolProperty	0x2B0	18706
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	BaseEyeHeight	FloatProperty	0x2B4	18707
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	AutoPossessPlayer	ByteProperty	0x2B8	18708
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	AutoPossessAI	EnumProperty of /Script/Engine.EAutoPossessAI	0x2B9	18709
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	RemoteViewPitch16	UInt16Property	0x2BA	18710
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	RemoteViewPitch	ByteProperty	0x2BC	18711
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	AIControllerClass	ClassProperty	0x2C0	18712
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	PlayerState	ObjectProperty of /Script/Engine.PlayerState	0x2C8	18713
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	LastHitBy	ObjectProperty of /Script/Engine.Controller	0x2D0	18714
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	Controller	ObjectProperty of /Script/Engine.Controller	0x2D8	18715
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	PreviousController	ObjectProperty of /Script/Engine.Controller	0x2E0	18716
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	ReceiveControllerChangedDelegate	MulticastSparseDelegateProperty	0x2EC	18717
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	ReceiveRestartedDelegate	MulticastSparseDelegateProperty	0x2ED	18718
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	ControlInputVector	StructProperty of /Script/CoreUObject.Vector	0x2F0	18719
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	LastControlInputVector	StructProperty of /Script/CoreUObject.Vector	0x308	18720
+/Script/Engine.Pawn	/Script/Sparta.SpartaPlayerCharacter	OverrideInputComponentClass	ClassProperty	0x320	18721
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Script/Sparta.SpartaPlayerCharacter	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Script/Sparta.SpartaMontageInterrupterComponent	/Script/Sparta.SpartaMontageInterrupterComponent	OnMontageInterrupted	MulticastInlineDelegateProperty	0xB8	57048
+/Script/Sparta.SpartaMontageInterrupterComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bDebugForceEnabled	BoolProperty	0xC8	57049
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaMontageInterrupterComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	OnLockedTargetChanged	MulticastInlineDelegateProperty	0xB8	58265
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	LockOnTargeter	ClassProperty	0xC8	58266
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	LockOnTargeterInstance	ObjectProperty of /Script/Sparta.SpartaTargeter	0xD0	58267
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	SwitchTargeter	ClassProperty	0xD8	58268
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	SwitchTargeterInstance	ObjectProperty of /Script/Sparta.SpartaTargeter	0xE0	58269
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	LockedTarget	ObjectProperty of /Script/Engine.Actor	0xE8	58270
+/Script/Sparta.SpartaTargetLockComponent	/Script/Sparta.SpartaTargetLockComponent	LockOnControlRotationRate	FloatProperty	0xF0	58271
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaTargetLockComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Base	AudioComponentName	NameProperty	0xB8	58582
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Base	WeaponAudioComponent	ObjectProperty of /Script/WaveWeaver.AdvancedAudioComponent	0xC0	58583
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Base	Weapon	ObjectProperty of /Script/Sparta.SpartaWeapon	0xC8	58584
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Base	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	DamageTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xE0	58667
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	bShouldUseDynamicWhooshAudioTriggers	BoolProperty	0x100	58668
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	Hit	MulticastInlineDelegateProperty	0x108	58669
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	WhooshStarted	MulticastInlineDelegateProperty	0x118	58670
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	WhooshStopped	MulticastInlineDelegateProperty	0x128	58671
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	ChargeStarted	MulticastInlineDelegateProperty	0x138	58672
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	ChargeCompleted	MulticastInlineDelegateProperty	0x148	58673
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	ChargeCanceled	MulticastInlineDelegateProperty	0x158	58674
+/Script/Sparta.SpartaWeaponComponent_Melee	/Script/Sparta.SpartaWeaponComponent_Melee	MeleeAudioData	ObjectProperty of /Script/Sparta.SpartaMeleeWeaponAudioBehavior	0x168	58675
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Melee	AudioComponentName	NameProperty	0xB8	58582
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Melee	WeaponAudioComponent	ObjectProperty of /Script/WaveWeaver.AdvancedAudioComponent	0xC0	58583
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Melee	Weapon	ObjectProperty of /Script/Sparta.SpartaWeapon	0xC8	58584
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Melee	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	DamageTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xE0	58707
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	Fired	MulticastInlineDelegateProperty	0x100	58708
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	FireStarted	MulticastInlineDelegateProperty	0x110	58709
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	FireEnded	MulticastInlineDelegateProperty	0x120	58710
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	DryFired	MulticastInlineDelegateProperty	0x130	58711
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	ChargeBegin	MulticastInlineDelegateProperty	0x140	58712
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	ChargeEnd	MulticastInlineDelegateProperty	0x150	58713
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	ChargeCanceled	MulticastInlineDelegateProperty	0x160	58714
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	RangedAudioBehavior	ObjectProperty of /Script/Sparta.SpartaRangedWeaponAudioBehavior	0x170	58715
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	FiringEventId	StructProperty of /Script/WaveWeaver.AudioEventId	0x178	58716
+/Script/Sparta.SpartaWeaponComponent_Ranged	/Script/Sparta.SpartaWeaponComponent_Ranged	ChargeAudioPlayingId	StructProperty of /Script/WaveWeaver.AudioEventId	0x180	58717
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Ranged	AudioComponentName	NameProperty	0xB8	58582
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Ranged	WeaponAudioComponent	ObjectProperty of /Script/WaveWeaver.AdvancedAudioComponent	0xC0	58583
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Ranged	Weapon	ObjectProperty of /Script/Sparta.SpartaWeapon	0xC8	58584
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Ranged	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaWeaponComponent_Effect	/Script/Sparta.SpartaWeaponComponent_Effect	EffectAudioData	ObjectProperty of /Script/Sparta.SpartaWeaponEffectsAudioData	0xD8	58606
+/Script/Sparta.SpartaWeaponComponent_Effect	/Script/Sparta.SpartaWeaponComponent_Effect	EquippedPlayingId	StructProperty of /Script/WaveWeaver.AudioEventId	0xE0	58607
+/Script/Sparta.SpartaWeaponComponent_Effect	/Script/Sparta.SpartaWeaponComponent_Effect	WhooshPlayingId	StructProperty of /Script/WaveWeaver.AudioEventId	0xE8	58608
+/Script/Sparta.SpartaWeaponComponent_Effect	/Script/Sparta.SpartaWeaponComponent_Effect	ChargePlayingId	StructProperty of /Script/WaveWeaver.AudioEventId	0xF0	58609
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Effect	AudioComponentName	NameProperty	0xB8	58582
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Effect	WeaponAudioComponent	ObjectProperty of /Script/WaveWeaver.AdvancedAudioComponent	0xC0	58583
+/Script/Sparta.SpartaWeaponComponent_Base	/Script/Sparta.SpartaWeaponComponent_Effect	Weapon	ObjectProperty of /Script/Sparta.SpartaWeapon	0xC8	58584
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaWeaponComponent_Effect	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SidearmProjectileCacheComponent	/Script/Sparta.SidearmProjectileCacheComponent	CachedProjectiles	MapProperty	0xB8	54239
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SidearmProjectileCacheComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/GameplayAbilities.GameplayEffectExecutionCalculation	/Script/Sparta.SpartaHealExecution	bRequiresPassedInTags	BoolProperty	0x38	37395
+/Script/GameplayAbilities.GameplayEffectCalculation	/Script/Sparta.SpartaHealExecution	RelevantAttributesToCapture	ArrayProperty of RelevantAttributesToCapture./Script/GameplayAbilities.GameplayEffectCalculation:RelevantAttributesToCapture	0x28	37386
+/Script/GameplayAbilities.GameplayEffectExecutionCalculation	/Script/Sparta.SpartaDamageExecution	bRequiresPassedInTags	BoolProperty	0x38	37395
+/Script/GameplayAbilities.GameplayEffectCalculation	/Script/Sparta.SpartaDamageExecution	RelevantAttributesToCapture	ArrayProperty of RelevantAttributesToCapture./Script/GameplayAbilities.GameplayEffectCalculation:RelevantAttributesToCapture	0x28	37386
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RunCollisionChecksWhenIdle	BoolProperty	0x1038	55542
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AccelerationInputScaling	EnumProperty of /Script/Sparta.ESpartaAccelerationInputScaling	0x1039	55543
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AccelerationInputSmoothing	EnumProperty of /Script/Sparta.ESpartaAccelerationInputSmoothing	0x103A	55544
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AccelerationInputSpring	StructProperty of /Script/CSFoundations.CSVectorSpring	0x1040	55545
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AccelerationInputSmoothingFactor	FloatProperty	0x1090	55546
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RotationMethod	EnumProperty of /Script/Sparta.ESpartaCharacterRotationMethod	0x1094	55547
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RotationSpring	StructProperty of /Script/CSFoundations.CSFloatSpring	0x1098	55548
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	VelocityTracker	StructProperty of /Script/CSFoundations.CSTargetVelocityTracker	0x10C8	55549
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BlockedMovementTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x1160	55550
+/Script/Sparta.SpartaCharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavWalkingSizeOnScreen	FloatProperty	0x1180	55551
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	CharacterOwner	ObjectProperty of /Script/Engine.Character	0x198	20151
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GravityScale	FloatProperty	0x1A0	20152
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxStepHeight	FloatProperty	0x1A4	20153
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	JumpZVelocity	FloatProperty	0x1A8	20154
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	JumpOffJumpZFactor	FloatProperty	0x1AC	20155
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	WalkableFloorAngle	FloatProperty	0x1CC	20156
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	WalkableFloorZ	FloatProperty	0x1D0	20157
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bDoWalkableFloorAreaAverageCheck	BoolProperty	0x1D4	20158
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	WalkableFloorAreaAverageCheckRadius	FloatProperty	0x1D8	20159
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GravityDirection	StructProperty of /Script/CoreUObject.Vector	0x1E0	20160
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	WorldToGravityTransform	StructProperty of /Script/CoreUObject.Quat	0x200	20161
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GravityToWorldTransform	StructProperty of /Script/CoreUObject.Quat	0x220	20162
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MovementMode	ByteProperty	0x241	20163
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	CustomMovementMode	ByteProperty	0x242	20164
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkSmoothingMode	EnumProperty of /Script/Engine.ENetworkSmoothingMode	0x243	20165
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GroundFriction	FloatProperty	0x244	20166
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxWalkSpeed	FloatProperty	0x288	20167
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxWalkSpeedCrouched	FloatProperty	0x28C	20168
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxSwimSpeed	FloatProperty	0x290	20169
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxFlySpeed	FloatProperty	0x294	20170
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxCustomMovementSpeed	FloatProperty	0x298	20171
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxAcceleration	FloatProperty	0x29C	20172
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MinAnalogWalkSpeed	FloatProperty	0x2A0	20173
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingFrictionFactor	FloatProperty	0x2A4	20174
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingFriction	FloatProperty	0x2A8	20175
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingSubStepTime	FloatProperty	0x2AC	20176
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingDecelerationWalking	FloatProperty	0x2B0	20177
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingDecelerationFalling	FloatProperty	0x2B4	20178
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingDecelerationSwimming	FloatProperty	0x2B8	20179
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	BrakingDecelerationFlying	FloatProperty	0x2BC	20180
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AirControl	FloatProperty	0x2C0	20181
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AirControlBoostMultiplier	FloatProperty	0x2C4	20182
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AirControlBoostVelocityThreshold	FloatProperty	0x2C8	20183
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	FallingLateralFriction	FloatProperty	0x2CC	20184
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	CrouchedHalfHeight	FloatProperty	0x2D0	20185
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	Buoyancy	FloatProperty	0x2D4	20186
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PerchRadiusThreshold	FloatProperty	0x2D8	20187
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PerchAdditionalHeight	FloatProperty	0x2DC	20188
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RotationRate	StructProperty of /Script/CoreUObject.Rotator	0x2E0	20189
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseSeparateBrakingFriction	BoolProperty	0x2F8	20190
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bDontFallBelowJumpZVelocityDuringJump	BoolProperty	0x2F8	20191
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bApplyGravityWhileJumping	BoolProperty	0x2F8	20192
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseControllerDesiredRotation	BoolProperty	0x2F8	20193
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bOrientRotationToMovement	BoolProperty	0x2F8	20194
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bSweepWhileNavWalking	BoolProperty	0x2F8	20195
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bMovementInProgress	BoolProperty	0x2F8	20196
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bEnableScopedMovementUpdates	BoolProperty	0x2F9	20197
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bEnableServerDualMoveScopedMovementUpdates	BoolProperty	0x2F9	20198
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bForceMaxAccel	BoolProperty	0x2F9	20199
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bRunPhysicsWithNoController	BoolProperty	0x2F9	20200
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bForceNextFloorCheck	BoolProperty	0x2F9	20201
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bShrinkProxyCapsule	BoolProperty	0x2F9	20202
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bCanWalkOffLedges	BoolProperty	0x2F9	20203
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bCanWalkOffLedgesWhenCrouching	BoolProperty	0x2F9	20204
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetworkSkipProxyPredictionOnNetUpdate	BoolProperty	0x2FA	20205
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetworkAlwaysReplicateTransformUpdateTimestamp	BoolProperty	0x2FA	20206
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bDeferUpdateMoveComponent	BoolProperty	0x2FA	20207
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bEnablePhysicsInteraction	BoolProperty	0x2FA	20208
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bTouchForceScaledToMass	BoolProperty	0x2FA	20209
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bPushForceScaledToMass	BoolProperty	0x2FA	20210
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bPushForceUsingZOffset	BoolProperty	0x2FB	20211
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bScalePushForceToVelocity	BoolProperty	0x2FB	20212
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	DeferredUpdatedMoveComponent	ObjectProperty of /Script/Engine.SceneComponent	0x300	20213
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxOutOfWaterStepHeight	FloatProperty	0x308	20214
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	OutofWaterZ	FloatProperty	0x30C	20215
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	Mass	FloatProperty	0x310	20216
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	StandingDownwardForceScale	FloatProperty	0x314	20217
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	InitialPushForceFactor	FloatProperty	0x318	20218
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PushForceFactor	FloatProperty	0x31C	20219
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PushForcePointZOffsetFactor	FloatProperty	0x320	20220
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	TouchForceFactor	FloatProperty	0x324	20221
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MinTouchForce	FloatProperty	0x328	20222
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxTouchForce	FloatProperty	0x32C	20223
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RepulsionForce	FloatProperty	0x330	20224
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	Acceleration	StructProperty of /Script/CoreUObject.Vector	0x338	20225
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	LastUpdateRotation	StructProperty of /Script/CoreUObject.Quat	0x350	20226
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	LastUpdateLocation	StructProperty of /Script/CoreUObject.Vector	0x370	20227
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	LastUpdateVelocity	StructProperty of /Script/CoreUObject.Vector	0x388	20228
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ServerLastTransformUpdateTimeStamp	FloatProperty	0x3A0	20229
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ServerLastClientGoodMoveAckTime	FloatProperty	0x3A4	20230
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ServerLastClientAdjustmentTime	FloatProperty	0x3A8	20231
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PendingImpulseToApply	StructProperty of /Script/CoreUObject.Vector	0x3B0	20232
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PendingForceToApply	StructProperty of /Script/CoreUObject.Vector	0x3C8	20233
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AnalogInputModifier	FloatProperty	0x3E0	20234
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxSimulationTimeStep	FloatProperty	0x3F0	20235
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxSimulationIterations	IntProperty	0x3F4	20236
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxJumpApexAttemptsPerSimulation	IntProperty	0x3F8	20237
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxDepenetrationWithGeometry	FloatProperty	0x3FC	20238
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxDepenetrationWithGeometryAsProxy	FloatProperty	0x400	20239
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxDepenetrationWithPawn	FloatProperty	0x404	20240
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MaxDepenetrationWithPawnAsProxy	FloatProperty	0x408	20241
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkSimulatedSmoothLocationTime	FloatProperty	0x40C	20242
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkSimulatedSmoothRotationTime	FloatProperty	0x410	20243
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ListenServerNetworkSimulatedSmoothLocationTime	FloatProperty	0x414	20244
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ListenServerNetworkSimulatedSmoothRotationTime	FloatProperty	0x418	20245
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetProxyShrinkRadius	FloatProperty	0x41C	20246
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetProxyShrinkHalfHeight	FloatProperty	0x420	20247
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkMaxSmoothUpdateDistance	FloatProperty	0x424	20248
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkNoSmoothUpdateDistance	FloatProperty	0x428	20249
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkMinTimeBetweenClientAckGoodMoves	FloatProperty	0x42C	20250
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkMinTimeBetweenClientAdjustments	FloatProperty	0x430	20251
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkMinTimeBetweenClientAdjustmentsLargeCorrection	FloatProperty	0x434	20252
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NetworkLargeClientCorrectionDistance	FloatProperty	0x438	20253
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	LedgeCheckThreshold	FloatProperty	0x43C	20254
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	JumpOutOfWaterPitch	FloatProperty	0x440	20255
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	CurrentFloor	StructProperty of /Script/Engine.FindFloorResult	0x448	20256
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	DefaultLandMovementMode	ByteProperty	0x558	20257
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	DefaultWaterMovementMode	ByteProperty	0x559	20258
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GroundMovementMode	ByteProperty	0x55A	20259
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bMaintainHorizontalGroundVelocity	BoolProperty	0x564	20260
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bImpartBaseVelocityX	BoolProperty	0x564	20261
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bImpartBaseVelocityY	BoolProperty	0x564	20262
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bImpartBaseVelocityZ	BoolProperty	0x564	20263
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bImpartBaseAngularVelocity	BoolProperty	0x564	20264
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bJustTeleported	BoolProperty	0x564	20265
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetworkUpdateReceived	BoolProperty	0x564	20266
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetworkMovementModeChanged	BoolProperty	0x564	20267
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetworkGravityDirectionChanged	BoolProperty	0x565	20268
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bIgnoreClientMovementErrorChecksAndCorrection	BoolProperty	0x565	20269
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bServerAcceptClientAuthoritativePosition	BoolProperty	0x565	20270
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNotifyApex	BoolProperty	0x565	20271
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bCheatFlying	BoolProperty	0x565	20272
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bWantsToCrouch	BoolProperty	0x565	20273
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bCrouchMaintainsBaseLocation	BoolProperty	0x565	20274
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bIgnoreBaseRotation	BoolProperty	0x565	20275
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bFastAttachedMove	BoolProperty	0x566	20276
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAlwaysCheckFloor	BoolProperty	0x566	20277
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseFlatBaseForFloorChecks	BoolProperty	0x566	20278
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bPerformingJumpOff	BoolProperty	0x566	20279
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bWantsToLeaveNavWalking	BoolProperty	0x566	20280
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseRVOAvoidance	BoolProperty	0x566	20281
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bRequestedMoveUseAcceleration	BoolProperty	0x566	20282
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bWasSimulatingRootMotion	BoolProperty	0x567	20283
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAllowPhysicsRotationDuringAnimRootMotion	BoolProperty	0x567	20284
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	FormerBaseVelocityDecayHalfLife	FloatProperty	0x568	20285
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bHasRequestedVelocity	BoolProperty	0x56C	20286
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bRequestedMoveWithMaxSpeed	BoolProperty	0x56C	20287
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bWasAvoidanceUpdated	BoolProperty	0x56C	20288
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bProjectNavMeshWalking	BoolProperty	0x56C	20289
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bProjectNavMeshOnBothWorldChannels	BoolProperty	0x56C	20290
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AvoidanceConsiderationRadius	FloatProperty	0x58C	20291
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RequestedVelocity	StructProperty of /Script/CoreUObject.Vector	0x590	20292
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	LastUpdateRequestedVelocity	StructProperty of /Script/CoreUObject.Vector	0x5A8	20293
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AvoidanceUID	IntProperty	0x5C0	20294
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AvoidanceGroup	StructProperty of /Script/Engine.NavAvoidanceMask	0x5C4	20295
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GroupsToAvoid	StructProperty of /Script/Engine.NavAvoidanceMask	0x5C8	20296
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	GroupsToIgnore	StructProperty of /Script/Engine.NavAvoidanceMask	0x5CC	20297
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AvoidanceWeight	FloatProperty	0x5D0	20298
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PendingLaunchVelocity	StructProperty of /Script/CoreUObject.Vector	0x5D8	20299
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMeshProjectionInterval	FloatProperty	0x740	20300
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMeshProjectionTimer	FloatProperty	0x744	20301
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMeshProjectionInterpSpeed	FloatProperty	0x748	20302
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMeshProjectionHeightScaleUp	FloatProperty	0x74C	20303
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMeshProjectionHeightScaleDown	FloatProperty	0x750	20304
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavWalkingFloorDistTolerance	FloatProperty	0x754	20305
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bBasedMovementIgnorePhysicsBase	BoolProperty	0x758	20306
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bBaseOnAttachmentRoot	BoolProperty	0x759	20307
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bStayBasedInAir	BoolProperty	0x75A	20308
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	StayBasedInAirHeight	FloatProperty	0x75C	20309
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PostPhysicsTickFunction	StructProperty of /Script/Engine.CharacterMovementComponentPostPhysicsTickFunction	0x790	20310
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MinTimeBetweenTimeStampResets	FloatProperty	0x7D8	20311
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	CurrentRootMotion	StructProperty of /Script/Engine.RootMotionSourceGroup	0xD38	20312
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	ServerCorrectionRootMotion	StructProperty of /Script/Engine.RootMotionSourceGroup	0xD80	20313
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	RootMotionParams	StructProperty of /Script/Engine.RootMotionMovementParams	0xF30	20314
+/Script/Engine.CharacterMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	AnimRootMotionVelocity	StructProperty of /Script/CoreUObject.Vector	0xFA0	20315
+/Script/Engine.PawnMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PawnOwner	ObjectProperty of /Script/Engine.Pawn	0x180	20122
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	FixedPathBrakingDistance	FloatProperty	0x128	20101
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUpdateNavAgentWithOwnersCollision	BoolProperty	0x12C	20102
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseAccelerationForPaths	BoolProperty	0x12C	20103
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUseFixedBrakingDistanceForPaths	BoolProperty	0x12C	20104
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavMovementProperties	StructProperty of /Script/Engine.NavMovementProperties	0x130	20105
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	NavAgentProps	StructProperty of /Script/Engine.NavAgentProperties	0x138	20106
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	MovementState	StructProperty of /Script/Engine.MovementProperties	0x170	20107
+/Script/Engine.NavMovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PathFollowingComp	ObjectProperty of /Script/CoreUObject.Object	0x178	20108
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	UpdatedComponent	ObjectProperty of /Script/Engine.SceneComponent	0xB8	20038
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	UpdatedPrimitive	ObjectProperty of /Script/Engine.PrimitiveComponent	0xC0	20039
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	Velocity	StructProperty of /Script/CoreUObject.Vector	0xD0	20040
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PlaneConstraintNormal	StructProperty of /Script/CoreUObject.Vector	0xE8	20041
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PlaneConstraintOrigin	StructProperty of /Script/CoreUObject.Vector	0x100	20042
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bUpdateOnlyIfRendered	BoolProperty	0x118	20043
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAutoUpdateTickRegistration	BoolProperty	0x118	20044
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bTickBeforeOwner	BoolProperty	0x118	20045
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAutoRegisterUpdatedComponent	BoolProperty	0x118	20046
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bConstrainToPlane	BoolProperty	0x118	20047
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bSnapToPlaneAtStart	BoolProperty	0x118	20048
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAutoRegisterPhysicsVolumeUpdates	BoolProperty	0x118	20049
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	bComponentShouldUpdatePhysicsVolume	BoolProperty	0x118	20050
+/Script/Engine.MovementComponent	/Script/Sparta.SpartaCharacterMovementComponent	PlaneConstraintAxisSetting	EnumProperty of /Script/Engine.EPlaneConstraintAxisSetting	0x11B	20051
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaCharacterMovementComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaAnimInstance	/Script/Sparta.SpartaAnimInstance	GameplayTagPropertyMap	StructProperty of /Script/GameplayAbilities.GameplayTagBlueprintPropertyMap	0x3F0	54931
+/Script/Sparta.SpartaAnimInstance	/Script/Sparta.SpartaAnimInstance	GroundDistance	FloatProperty	0x410	54932
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	CurrentSkeleton	ObjectProperty of /Script/Engine.Skeleton	0x28	6547
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	RootMotionMode	ByteProperty	0x30	6548
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bUseMultiThreadedAnimationUpdate	BoolProperty	0x31	6549
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bUsingCopyPoseFromMesh	BoolProperty	0x31	6550
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bReceiveNotifiesFromLinkedInstances	BoolProperty	0x31	6551
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bPropagateNotifiesToLinkedInstances	BoolProperty	0x31	6552
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bUseMainInstanceMontageEvaluationData	BoolProperty	0x31	6553
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	bQueueMontageEvents	BoolProperty	0x33	6554
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnMontageBlendingOut	MulticastInlineDelegateProperty	0x38	6555
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnMontageBlendedIn	MulticastInlineDelegateProperty	0x48	6556
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnMontageStarted	MulticastInlineDelegateProperty	0x58	6557
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnMontageEnded	MulticastInlineDelegateProperty	0x68	6558
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnAllMontageInstancesEnded	MulticastInlineDelegateProperty	0x78	6559
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	OnMontageSectionChanged	MulticastInlineDelegateProperty	0x88	6560
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	SlotGroupInertializationRequestDataMap	MapProperty	0x148	6561
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	NotifyQueue	StructProperty of /Script/Engine.AnimNotifyQueue	0x1E0	6564
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	ActiveAnimNotifyState	ArrayProperty of ActiveAnimNotifyState./Script/Engine.AnimInstance:ActiveAnimNotifyState	0x250	6565
+/Script/Engine.AnimInstance	/Script/Sparta.SpartaAnimInstance	ActiveAnimNotifyEventReference	ArrayProperty of ActiveAnimNotifyEventReference./Script/Engine.AnimInstance:ActiveAnimNotifyEventReference	0x260	6567
+/Script/Sparta.CharacterAnimationData	/Script/Sparta.CharacterAnimationData	AdditivePoseAdjustment	SoftObjectProperty of /Script/Engine.AnimSequence	0x28	55458
+/Script/Sparta.CharacterAnimationData	/Script/Sparta.CharacterAnimationData	PelvisIKCorrection	FloatProperty	0x50	55459
+/Script/Sparta.CharacterAnimationData	/Script/Sparta.CharacterAnimationData	FootIKCorrection	FloatProperty	0x54	55460
+/Script/Sparta.CharacterAnimationData	/Script/Sparta.CharacterAnimationData	AimOffsetAdjustment	MapProperty	0x58	55461

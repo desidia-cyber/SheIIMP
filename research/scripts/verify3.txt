@@ -1,0 +1,19 @@
+# verify3 — world-state save objects, boss gate, level travel, darkform, save path
+scan BP_HubDoubleDoor_C props=DoorIsOpen,DoorIsOpenName max=2@5
+callf BP_HubDoubleDoor_C CloseDoor@6
+scan BP_HubDoubleDoor_C props=DoorIsOpen max=2@5
+scan BPSO_BossGate_C props=Unlocked max=8@5
+scan BPSO_LandingArea_Boss_C props=BeaconRisen max=8@5
+scan BPSO_FC_FinalBossManager_C props=EndStrandingCompleted,AllCorruptionCoresClensed,ClensedCores,TotalCoresNeeded max=3@5
+scan BPSO_WordMapObjective_C props=Visible,Revealed,Completed,ShowArea max=4@6
+scan BPSO_PlayerSession_C props=Health,ShellHealth,Resolve,HealCurrentCharges,IsInDarkform max=2@5
+scan BP_TeleportLocation_C props=LocationName,Category max=4@6
+callf BP_TeleportLocation_C Teleport@12
+scan BP_TeleportLocation_C props=LocationName max=2@5
+scan BPFL_Player_Equipment_C max=1@4
+callf BPFL_Player_Equipment_C ActivateDarkForm@8
+scan SpartaSkeletalMeshComponent props=SkeletalMesh,AnimClass max=2@5
+console SaveSessionNow@12
+scan BPSO_PlayerSession_C props=Health,ShellHealth,Resolve,HealCurrentCharges,IsInDarkform max=2@5
+kill@6
+hcinfo@4

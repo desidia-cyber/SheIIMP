@@ -1,0 +1,50 @@
+Mortal Shell 2 Shells — Harros Prologue and All 8 Unlock Routes 
+Skip to content
+ Mortal Shell 2 Shells Guide
+Nine named bodies, eight you keep. Harros teaches the loop and is destroyed after Tar Golem. The
+ eight below swap at Zhirelle. Bond caps at Tier IV. Glimpses are no longer finite
+ after the Week 1 update; Merrick sells Mether's Severance to respec.
+ Harros, the Vassal
+ Automatic in the prologue. After the opening statue you inhabit the body in the lone realm. Inventory starts with Iconoclast, Naylshotte, and Untarnished Seal.
+ Stone Stun petrifies a target and feeds Break for a Riposte.
+ Tar Golem calcifies the body. You cannot recover Harros in the main game or NG+. Harden and the Seal remain. Do not add him to the eight-Shell swap list.
+ Harros, the Vassal – full prologue Shell page · All Shell locations 
+ Shell Role How to get it Notes 
+ Tiel, the Acolyte 
+ Agile stealth. High mobility.
+ SE from Widow's Overlook Beacon, downhill to a fenced camp or graveyard. Body half-buried in a shallow grave.
+ Shadow: invisibility plus stagger.
+ Proxima, the Broodseeker 
+ Lightning grapple melee.
+ North from Widow's Overlook to Blackridge Cliffs, past cultists and the white spider, into Shattered Beacon.
+ Grapple pull or zip, then a lightning hit.
+ Eredrim, the Venerable 
+ Heavy armor. Break control.
+ Citadel of Penance elevator. Floor collapse into The Warden. Beat the Warden; the body is in the arena.
+ Shoulder Bash, Ethereal Diapason, Executioner.
+ Smert 
+ Low-health berserker with a freeze window.
+ Western Fainweald swamp near Outskirts of Nochte. Three blood pools around the altar — one is already full, offer in the other two. Offering knocks you out of the Shell; never offer as Harbinger.
+ Temporal Solidification stores hits then explodes them.
+ Gragu 
+ Exploration and self-heal.
+ One-Legged Wolf Tavern after Mether's Breath. He wants the Heart of Vatra from the temple east of the cliffs. Hand it over; he dies and leaves the Shell.
+ Heart of Vatra. Lute is on the same tavern stage.
+ Lazlo 
+ Heat-armor tank.
+ West of Outskirts of Mammon to High Lord's Courtyard, underground cathedral, beat Vellen, interact with the sarcophagus in the crypt behind him.
+ Retribution heat aura. Overheat dumps the armor bonus for a few seconds.
+ Sariel 
+ Alchemy / lightning caster.
+ SE Mammon. Beat Sariel on the Silent Steps platform, then Chamber of Becoming. Destroy the tombstones or lightning rods or she resurrects.
+ Same run as Clockwork Scythe and Caged Hystrix.
+ Sester Genessa 
+ Summon doubles. Dual form.
+ Talk Genessa out at Marrow Keep, then Sester Censer SE of Outskirts of Mammon. Beat Sester Secundus, bring the censer back, play the memory.
+ Faithful Doubles and Duality. Bond with Genessa herself, not only Zhirelle.
+ Bond and Glimpses
+Max Bond is Tier IV, about 27 Glimpses per Shell.
+ Seeking the Past wants that on all eight. The Week 1 Update, published the same day as that guide, states that "Glimpses and Tarcores are no longer finite resources, allowing all shells and Tarstones to be upgraded in a single playthrough." So 216 is the amount of bonding the achievement asks for, not a budget you can run out of. The same patch adds Mether's Severance, a Shell respec item given to Zhirelle, the shell keeper: she severs your bond with a Shell, resets it, and returns every Glimpse you spent. It is sold by Merrick and restocks as you progress. 
+ Unlock rates
+Steam snapshot from 1 September 2026, useful as find-order, not as a ranking:
+Tiel 79.7% · Proxima 78% · Eredrim 56.7% · Smert 49.1% · Gragu 48.3% · Sariel 35.2% · Sester Genessa 33.9% · Lazlo 31.4%.

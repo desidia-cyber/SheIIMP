@@ -1,0 +1,12 @@
+module	struct	field_offset	field_size	field_type	field	flags
+CoreUObject	FDateTime	0x0000	0x0008	int64	Ticks	(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FTransform	0x0000	0x0020	struct FQuat	Rotation	(Edit, BlueprintVisible, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FTransform	0x0020	0x0018	struct FVector	Translation	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FTransform	0x0040	0x0018	struct FVector	Scale3D	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0000	0x0008	double	X	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0008	0x0008	double	Y	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+CoreUObject	FVector	0x0010	0x0008	double	Z	(Edit, BlueprintVisible, ZeroConstructor, SaveGame, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+GameplayTags	FGameplayTag	0x0000	0x0008	class FName	TagName	(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0000	0x0010	TArray<struct FGameplayTag>	GameplayTags	(Edit, BlueprintVisible, ZeroConstructor, EditConst, SaveGame, Protected, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0010	0x0010	TArray<struct FGameplayTag>	ParentTags	(ZeroConstructor, Transient, Protected, NativeAccessSpecifierProtected)
+Sparta	FPermanentStats	0x0000	0x0050	TMap<struct FGameplayTag, int32>	PermanentStats	(BlueprintVisible, BlueprintReadOnly, SaveGame, NativeAccessSpecifierPublic)

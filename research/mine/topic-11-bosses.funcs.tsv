@@ -1,0 +1,354 @@
+declared_in	class	function	params	nparams	flags	dump_line
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	HandleAggro		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276331
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	HandleDeaggro		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276338
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	IsAlreadyAggroed	ReturnValue BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	276345
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BroadcastFightEndEvent		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276350
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BroadcastFightStartEvent		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276359
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CacheCharacter	Success BoolProperty	1	Public, HasOutParams, BlueprintCallable, BlueprintEvent	276368
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CacheController	Success BoolProperty; MyController ObjectProperty of /Script/Engine.Controller	2	Public, HasOutParams, BlueprintCallable, BlueprintEvent	276373
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	StopFight		0	Public, BlueprintCallable, BlueprintEvent	276381
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	StartFight		0	Public, BlueprintCallable, BlueprintEvent	276382
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetTempBossHealth	InDamage DoubleProperty	1	Public, BlueprintCallable, BlueprintEvent	276383
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ShouldStartThirdPhase		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276391
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetBossAncientVestigesEffects		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276399
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	RemoveBossFightCameraModifier		0	Public, BlueprintCallable, BlueprintEvent	276411
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	AddBossFightCameraModifier		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276414
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ShouldStartSecondPhase		0	Public, HasDefaults, BlueprintCallable, BlueprintEvent	276418
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	HideEnemyUI		0	Public, BlueprintCallable, BlueprintEvent	276427
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	CheckAggroState		0	BlueprintCallable, BlueprintEvent	276428
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BindOnDamageEvent		0	BlueprintCallable, BlueprintEvent	276429
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BindOnDeathEvent		0	BlueprintCallable, BlueprintEvent	276430
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDamageEvent	HealthComponent ObjectProperty of /Script/Sparta.SpartaHealthComponent; Value FloatProperty; Instigator ObjectProperty of /Script/Engine.Actor; EffectSpec StructProperty of /Script/GameplayAbilities.GameplayEffectSpec	4	HasOutParams, BlueprintCallable, BlueprintEvent	276431
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveEndPlay	EndPlayReason ByteProperty	1	Event, Public, BlueprintEvent	276436
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnAggroEvent	in_Payload StructProperty of /Script/Sparta.SpartaEngagementData	1	HasOutParams, BlueprintCallable, BlueprintEvent	276438
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BindOnAggro		0	BlueprintCallable, BlueprintEvent	276440
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BindOnDeAggro		0	BlueprintCallable, BlueprintEvent	276441
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnDeaggroEvent	in_Payload StructProperty of /Script/Sparta.SpartaEngagementData	1	HasOutParams, BlueprintCallable, BlueprintEvent	276442
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	StopFightEvent		0	BlueprintCallable, BlueprintEvent	276444
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	StartFightEvent		0	BlueprintCallable, BlueprintEvent	276445
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDeathEvent	OwningActor ObjectProperty of /Script/Engine.Actor	1	BlueprintCallable, BlueprintEvent	276446
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDestroyedEvent	DestroyedActor ObjectProperty of /Script/Engine.Actor	1	BlueprintCallable, BlueprintEvent	276448
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	BindOnDestroyedEvent		0	BlueprintCallable, BlueprintEvent	276450
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	PostPossess		0	BlueprintCallable, BlueprintEvent	276451
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveBeginPlay		0	Event, Public, BlueprintEvent	276452
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ExecuteUbergraph_BPC_BossAI	EntryPoint IntProperty	1	Final, UbergraphFunction, HasDefaults	276453
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnThirdPhaseStarted__DelegateSignature		0		276485
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDeaggro__DelegateSignature		0		276486
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnSecondPhaseStarted__DelegateSignature		0		276487
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossAggro__DelegateSignature		0		276488
+/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnBossDeath__DelegateSignature		0		276489
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ToggleActive		0		2334
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetTickGroup	NewTickGroup ByteProperty	1		2335
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		2337
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetIsReplicated	ShouldReplicate BoolProperty	1		2339
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetComponentTickIntervalAndCooldown	TickInterval FloatProperty	1		2341
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetComponentTickInterval	TickInterval FloatProperty	1		2343
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetComponentTickEnabled	bEnabled BoolProperty	1		2345
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetAutoActivate	bNewAutoActivate BoolProperty	1		2347
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	SetActive	bNewActive BoolProperty; bReset BoolProperty	2		2349
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2352
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2354
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveTick	DeltaSeconds FloatProperty	1		2356
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveEndPlay	EndPlayReason ByteProperty	1	Event, Public, BlueprintEvent	2358
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveBeginPlay		0	Event, Public, BlueprintEvent	2360
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		2361
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	OnRep_IsActive		0		2364
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	K2_DestroyComponent	Object ObjectProperty of /Script/CoreUObject.Object	1		2365
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	IsComponentTickEnabled	ReturnValue BoolProperty	1		2367
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	IsBeingDestroyed	ReturnValue BoolProperty	1		2369
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	IsActive	ReturnValue BoolProperty	1		2371
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		2373
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	GetComponentTickInterval	ReturnValue FloatProperty	1		2375
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	Deactivate		0		2377
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ComponentHasTag	Tag NameProperty; ReturnValue BoolProperty	2		2378
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		2381
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		2383
+/Script/Engine.ActorComponent	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	Activate	bReset BoolProperty	1		2385
+/Script/CoreUObject.Object	/Game/Sparta/Core/AI/Components/BPC_BossAI.BPC_BossAI_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BossDLManager.BPSO_BossDLManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_BossGate.BPSO_BossGate_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_FinalBossManager.BPSO_FC_FinalBossManager_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_CorruptionCore.BPSO_FC_CorruptionCore_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_FC_TarRoots.BPSO_FC_TarRoots_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_HutchbackBossTrigger.BPSO_HutchbackBossTrigger_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_LandingArea_Boss.BPSO_LandingArea_Boss_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	205409
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ReceiveApplySkipProloguePreset		0	Event, Public, BlueprintCallable, BlueprintEvent	53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TarGolemLevelScript.BPSO_TarGolemLevelScript_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	UpdateFrom	SaveObject ObjectProperty of /Script/Sparta.SpartaSaveObject; Events StructProperty of /Script/GameplayTags.GameplayTagContainer; ReturnValue BoolProperty	3		53849
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	SetTickInterval	TickInterval FloatProperty	1		53853
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	SetTickEnabled	bEnabled BoolProperty	1		53855
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveTick	DeltaTime FloatProperty	1		53857
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveSpartaPreSave	SaveContext StructProperty of /Script/Sparta.SpartaSaveContext	1		53859
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveOnLoaded		0		53861
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ReceiveApplySkipProloguePreset		0		53862
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IsTickEnabled	ReturnValue BoolProperty	1		53863
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	IsSessionSaveData	ReturnValue BoolProperty	1		53865
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetTickInterval	ReturnValue FloatProperty	1		53867
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetOwningSaveComponent	ReturnValue ObjectProperty of /Script/Sparta.SpartaSaveComponent	1		53869
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	GetOwningActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		53871
+/Script/CoreUObject.Object	/Game/Sparta/Core/SaveObjects/BPSO_TavernArena.BPSO_TavernArena_C	ExecuteUbergraph	EntryPoint IntProperty	1		3
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnUnloadingComplete		0	Public, BlueprintCallable, BlueprintEvent	268696
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnLoadingFailed		0	Public, BlueprintCallable, BlueprintEvent	268697
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DebugMessage	Prefix StrProperty; Message StrProperty	2	Public, BlueprintCallable, BlueprintEvent	268700
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DrawDebugData	Show BoolProperty; Widget ObjectProperty of /Game/Sparta/UI/Common/WBP_Text.WBP_Text_C	2	Public, HasDefaults, BlueprintCallable, BlueprintEvent	268708
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnLevelShown		0	Public, BlueprintCallable, BlueprintEvent	268729
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UnloadLevel		0	Public, BlueprintCallable, BlueprintEvent	268730
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadLevel	SelectedEvent ObjectProperty of /Script/Sparta.SpartaEventDataAsset	1	Public, HasDefaults, BlueprintCallable, BlueprintEvent	268733
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SelectLevel	Success BoolProperty; ReturnValue ObjectProperty of /Script/Sparta.SpartaEventDataAsset; ErrorMsg StrProperty; SelectedLevelEvent ObjectProperty of /Script/Sparta.SpartaEventDataAsset	4	Public, HasOutParams, BlueprintCallable, BlueprintEvent	268746
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetEventTransform	Event ObjectProperty of /Script/Sparta.SpartaEventDataAsset; NewParam StructProperty of /Script/CoreUObject.Transform	2	Public, HasOutParams, HasDefaults, BlueprintCallable, BlueprintEvent, BlueprintPure	268763
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ShowPreviewTile		0	Public, BlueprintCallable, BlueprintEvent	268773
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Clear	Clear ArrayProperty of PreviewLevelsToCleanup./Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C:Clear; Clear ArrayProperty of CallFunc_GetAttachedActors_OutActors./Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C:Clear; Clear IntProperty; Clear IntProperty; Clear ObjectProperty of /Script/Engine.Actor; Clear IntProperty; Clear ObjectProperty of /Script/Engine.LevelInstance; Clear BoolProperty; Clear BoolProperty; Clear IntProperty; Clear InterfaceProperty	11		268775
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Show	Show BoolProperty; Show StrProperty; Show TextProperty; Show StructProperty of /Script/Engine.FormatArgumentData; Show NameProperty; Show TextProperty; Show StructProperty of /Script/Engine.FormatArgumentData; Show ArrayProperty of K2Node_MakeArray_Array./Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C:Show; Show StructProperty of /Script/CoreUObject.Transform; Show TextProperty; Show StrProperty; Show ObjectProperty of /Script/Engine.Actor; Show ObjectProperty of /Script/Engine.LevelInstance; Show InterfaceProperty; Show BoolProperty; Show InterfaceProperty; Show BoolProperty	17		268789
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UserConstructionScript	Scale StructProperty of /Script/CoreUObject.Vector	1	Event, Public, HasDefaults, BlueprintCallable, BlueprintEvent	268808
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	Event_Trigger		0	Public, BlueprintCallable, BlueprintEvent	268824
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveBeginPlay		0	Event, Protected, BlueprintEvent	268825
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveEndPlay	EndPlayReason ByteProperty	1	Event, Protected, BlueprintEvent	268826
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	LoadMe		0	BlueprintCallable, BlueprintEvent	268828
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UnloadMe		0	BlueprintCallable, BlueprintEvent	268829
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ExecuteUbergraph_BP_LevelInstanceSelector	EntryPoint IntProperty	1	Final, UbergraphFunction	268830
+/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnFailedLoad__DelegateSignature		0		268835
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	WasRecentlyRendered	Tolerance FloatProperty; ReturnValue BoolProperty	2		131
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UserConstructionScript		0	Event, Public, HasDefaults, BlueprintCallable, BlueprintEvent	134
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	UnregisterAsFocalPointInPhysicsReplicationLOD		0		135
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	TearOff		0		136
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetTickGroup	NewTickGroup ByteProperty	1		137
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetTickableWhenPaused	bTickableWhenPaused BoolProperty	1		139
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetReplicates	bInReplicates BoolProperty	1		141
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetReplicateMovement	bInReplicateMovement BoolProperty	1		143
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetRayTracingGroupId	InRaytracingGroupId IntProperty	1		145
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetPhysicsReplicationMode	ReplicationMode EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		147
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetOwner	NewOwner ObjectProperty of /Script/Engine.Actor	1		149
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetNetUpdateFrequency	Frequency FloatProperty	1		151
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetNetDormancy	NewDormancy ByteProperty	1		153
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetNetCullDistanceSquared	DistanceSq FloatProperty	1		155
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetMinNetUpdateFrequency	MinFrequency FloatProperty	1		157
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetLifeSpan	InLifespan FloatProperty	1		159
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetAutoDestroyWhenFinished	bVal BoolProperty	1		161
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorTickInterval	TickInterval FloatProperty	1		163
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorTickEnabled	bEnabled BoolProperty	1		165
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorScale3D	NewScale3D StructProperty of /Script/CoreUObject.Vector	1		167
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorRelativeScale3D	NewRelativeScale StructProperty of /Script/CoreUObject.Vector	1		169
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorHiddenInGame	bNewHidden BoolProperty	1		171
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	SetActorEnableCollision	bNewActorEnableCollision BoolProperty	1		173
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RemoveTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		175
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RemoveTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		177
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	RegisterAsFocalPointInPhysicsReplicationLOD		0		179
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveTick	DeltaSeconds FloatProperty	1		180
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveRadialDamage	DamageReceived FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; Origin StructProperty of /Script/CoreUObject.Vector; HitInfo StructProperty of /Script/Engine.HitResult; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	6		182
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceivePointDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; HitComponent ObjectProperty of /Script/Engine.PrimitiveComponent; BoneName NameProperty; ShotFromDirection StructProperty of /Script/CoreUObject.Vector; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor; HitInfo StructProperty of /Script/Engine.HitResult	10		189
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveHit	MyComp ObjectProperty of /Script/Engine.PrimitiveComponent; Other ObjectProperty of /Script/Engine.Actor; OtherComp ObjectProperty of /Script/Engine.PrimitiveComponent; bSelfMoved BoolProperty; HitLocation StructProperty of /Script/CoreUObject.Vector; HitNormal StructProperty of /Script/CoreUObject.Vector; NormalImpulse StructProperty of /Script/CoreUObject.Vector; Hit StructProperty of /Script/Engine.HitResult	8		200
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveEndPlay	EndPlayReason ByteProperty	1	Event, Protected, BlueprintEvent	209
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveDestroyed		0		211
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveBeginPlay		0	Event, Protected, BlueprintEvent	212
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveAsyncPhysicsTick	DeltaSeconds FloatProperty; SimSeconds FloatProperty	2		213
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveAnyDamage	Damage FloatProperty; DamageType ObjectProperty of /Script/Engine.DamageType; InstigatedBy ObjectProperty of /Script/Engine.Controller; DamageCauser ObjectProperty of /Script/Engine.Actor	4		216
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnReleased	ButtonReleased StructProperty of /Script/InputCore.Key	1		221
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnInputTouchLeave	FingerIndex ByteProperty	1		223
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnInputTouchEnter	FingerIndex ByteProperty	1		225
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnInputTouchEnd	FingerIndex ByteProperty	1		227
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnInputTouchBegin	FingerIndex ByteProperty	1		229
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorOnClicked	ButtonPressed StructProperty of /Script/InputCore.Key	1		231
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorEndOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		233
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorEndCursorOver		0		235
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorBeginOverlap	OtherActor ObjectProperty of /Script/Engine.Actor	1		236
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ReceiveActorBeginCursorOver		0		238
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	PrestreamTextures	Seconds FloatProperty; bEnableStreaming BoolProperty; CinematicTextureGroups IntProperty	3		239
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnRep_ReplicateMovement		0		243
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnRep_ReplicatedMovement		0		244
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnRep_Owner		0		245
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnRep_Instigator		0		246
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	OnRep_AttachmentReplication		0		247
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	MakeNoise	Loudness FloatProperty; NoiseInstigator ObjectProperty of /Script/Engine.Pawn; NoiseLocation StructProperty of /Script/CoreUObject.Vector; MaxRange FloatProperty; Tag NameProperty	5		248
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_TeleportTo	DestLocation StructProperty of /Script/CoreUObject.Vector; DestRotation StructProperty of /Script/CoreUObject.Rotator; ReturnValue BoolProperty	3		254
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		258
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorRotation	NewRotation StructProperty of /Script/CoreUObject.Rotator; bTeleportPhysics BoolProperty; ReturnValue BoolProperty	3		264
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorRelativeTransform	NewRelativeTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		268
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorRelativeRotation	NewRelativeRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		273
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorRelativeLocation	NewRelativeLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		278
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorLocationAndRotation	NewLocation StructProperty of /Script/CoreUObject.Vector; NewRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	6		283
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_SetActorLocation	NewLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty; ReturnValue BoolProperty	5		290
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_OnReset		0		296
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_OnEndViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		297
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_OnBecomeViewTarget	PC ObjectProperty of /Script/Engine.PlayerController	1		299
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_GetRootComponent	ReturnValue ObjectProperty of /Script/Engine.SceneComponent	1		301
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_GetComponentsByClass	ComponentClass ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:K2_GetComponentsByClass:ReturnValue	2		303
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_GetActorRotation	ReturnValue StructProperty of /Script/CoreUObject.Rotator	1		307
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_GetActorLocation	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		309
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_DetachFromActor	LocationRule EnumProperty of /Script/Engine.EDetachmentRule; RotationRule EnumProperty of /Script/Engine.EDetachmentRule; ScaleRule EnumProperty of /Script/Engine.EDetachmentRule	3		311
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_DestroyActor		0		315
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AttachToComponent	Parent ObjectProperty of /Script/Engine.SceneComponent; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		316
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AttachToActor	ParentActor ObjectProperty of /Script/Engine.Actor; SocketName NameProperty; LocationRule EnumProperty of /Script/Engine.EAttachmentRule; RotationRule EnumProperty of /Script/Engine.EAttachmentRule; ScaleRule EnumProperty of /Script/Engine.EAttachmentRule; bWeldSimulatedBodies BoolProperty; ReturnValue BoolProperty	7		324
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AttachRootComponentToActor	InParentActor ObjectProperty of /Script/Engine.Actor; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		332
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AttachRootComponentTo	InParent ObjectProperty of /Script/Engine.SceneComponent; InSocketName NameProperty; AttachLocationType ByteProperty; bWeldSimulatedBodies BoolProperty	4		337
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorWorldTransformKeepScale	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		342
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorWorldTransform	DeltaTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		347
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorWorldRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		352
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorWorldOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		357
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorLocalTransform	NewTransform StructProperty of /Script/CoreUObject.Transform; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		362
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorLocalRotation	DeltaRotation StructProperty of /Script/CoreUObject.Rotator; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		367
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	K2_AddActorLocalOffset	DeltaLocation StructProperty of /Script/CoreUObject.Vector; bSweep BoolProperty; SweepHitResult StructProperty of /Script/Engine.HitResult; bTeleport BoolProperty	4		372
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	IsOverlappingActor	Other ObjectProperty of /Script/Engine.Actor; ReturnValue BoolProperty	2		377
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	IsChildActor	ReturnValue BoolProperty	1		380
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	IsActorTickEnabled	ReturnValue BoolProperty	1		382
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	IsActorBeingDestroyed	ReturnValue BoolProperty	1		384
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	HasAuthority	ReturnValue BoolProperty	1		386
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetVerticalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		388
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetVelocity	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		391
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		393
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetTickableWhenPaused	ReturnValue BoolProperty	1		395
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetSquaredHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		397
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetSquaredDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		400
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetResimulationThreshold	ReturnValue FloatProperty	1		403
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetRemoteRole	ReturnValue ByteProperty	1		405
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetRayTracingGroupId	ReturnValue IntProperty	1		407
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetPhysicsReplicationMode	ReturnValue EnumProperty of /Script/Engine.EPhysicsReplicationMode	1		409
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetParentComponent	ReturnValue ObjectProperty of /Script/Engine.ChildActorComponent	1		411
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		413
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetOwner	ReturnValue ObjectProperty of /Script/Engine.Actor	1		415
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetOverlappingComponents	OverlappingComponents ArrayProperty of OverlappingComponents./Script/Engine.Actor:GetOverlappingComponents:OverlappingComponents	1		417
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetOverlappingActors	OverlappingActors ArrayProperty of OverlappingActors./Script/Engine.Actor:GetOverlappingActors:OverlappingActors; ClassFilter ClassProperty	2		420
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetNetUpdateFrequency	ReturnValue FloatProperty	1		424
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetNetCullDistanceSquared	ReturnValue FloatProperty	1		426
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetMinNetUpdateFrequency	ReturnValue FloatProperty	1		428
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetLocalRole	ReturnValue ByteProperty	1		430
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetLifeSpan	ReturnValue FloatProperty	1		432
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetLevelTransform	ReturnValue StructProperty of /Script/CoreUObject.Transform	1		434
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetLevel	ReturnValue ObjectProperty of /Script/Engine.Level	1		436
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetInstigatorController	ReturnValue ObjectProperty of /Script/Engine.Controller	1		438
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetInstigator	ReturnValue ObjectProperty of /Script/Engine.Pawn	1		440
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetInputVectorAxisValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue StructProperty of /Script/CoreUObject.Vector	2		442
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetInputAxisValue	InputAxisName NameProperty; ReturnValue FloatProperty	2		445
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetInputAxisKeyValue	InputAxisKey StructProperty of /Script/InputCore.Key; ReturnValue FloatProperty	2		448
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetHorizontalDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		451
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetHorizontalDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		454
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetGameTimeSinceCreation	ReturnValue FloatProperty	1		457
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetDotProductTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		459
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetDistanceTo	OtherActor ObjectProperty of /Script/Engine.Actor; ReturnValue FloatProperty	2		462
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetComponentsByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByTag:ReturnValue	3		465
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetComponentsByInterface	Interface ClassProperty; ReturnValue ArrayProperty of ReturnValue./Script/Engine.Actor:GetComponentsByInterface:ReturnValue	2		470
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetComponentByClass	ComponentClass ClassProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	2		474
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetAttachParentSocketName	ReturnValue NameProperty	1		477
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetAttachParentActor	ReturnValue ObjectProperty of /Script/Engine.Actor	1		479
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetAttachedActors	OutActors ArrayProperty of OutActors./Script/Engine.Actor:GetAttachedActors:OutActors; bResetArray BoolProperty; bRecursivelyIncludeAttachedActors BoolProperty	3		481
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetAllChildActors	ChildActors ArrayProperty of ChildActors./Script/Engine.Actor:GetAllChildActors:ChildActors; bIncludeDescendants BoolProperty	2		486
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorUpVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		490
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorTimeDilation	ReturnValue FloatProperty	1		492
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorTickInterval	ReturnValue FloatProperty	1		494
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		496
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorRightVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		498
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorRelativeScale3D	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		500
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorForwardVector	ReturnValue StructProperty of /Script/CoreUObject.Vector	1		502
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorEyesViewPoint	OutLocation StructProperty of /Script/CoreUObject.Vector; OutRotation StructProperty of /Script/CoreUObject.Rotator	2		504
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorEnableCollision	ReturnValue BoolProperty	1		507
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	GetActorBounds	bOnlyCollidingComponents BoolProperty; Origin StructProperty of /Script/CoreUObject.Vector; BoxExtent StructProperty of /Script/CoreUObject.Vector; bIncludeFromChildActors BoolProperty	4		509
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ForceNetUpdate		0		514
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	FlushNetDormancy		0		515
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	FinishAddComponent	Component ObjectProperty of /Script/Engine.ActorComponent; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform	3		516
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	FindComponentByTag	ComponentClass ClassProperty; Tag NameProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	3		520
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	EnableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		524
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DisableInput	PlayerController ObjectProperty of /Script/Engine.PlayerController	1		526
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	DetachRootComponentFromParent	bMaintainWorldPosition BoolProperty	1		528
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	CreateInputComponent	InputComponentToCreate ClassProperty	1		530
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	CanTriggerResimulation	ReturnValue BoolProperty	1		532
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AddTickPrerequisiteComponent	PrerequisiteComponent ObjectProperty of /Script/Engine.ActorComponent	1		534
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AddTickPrerequisiteActor	PrerequisiteActor ObjectProperty of /Script/Engine.Actor	1		536
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AddComponentByClass	Class ClassProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	5		538
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	AddComponent	TemplateName NameProperty; bManualAttachment BoolProperty; RelativeTransform StructProperty of /Script/CoreUObject.Transform; ComponentTemplateContext ObjectProperty of /Script/CoreUObject.Object; bDeferredFinish BoolProperty; ReturnValue ObjectProperty of /Script/Engine.ActorComponent	6		544
+/Script/Engine.Actor	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ActorHasTag	Tag NameProperty; ReturnValue BoolProperty	2		551
+/Script/CoreUObject.Object	/Game/Sparta/Core/World/Levels/BP_LevelInstanceSelector.BP_LevelInstanceSelector_C	ExecuteUbergraph	EntryPoint IntProperty	1		3

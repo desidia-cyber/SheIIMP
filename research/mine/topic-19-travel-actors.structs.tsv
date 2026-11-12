@@ -1,0 +1,3 @@
+module	struct	field_offset	field_size	field_type	field	flags
+Engine	FTimerHandle	0x0000	0x0008	uint64	Handle	(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+GameplayTags	FGameplayTag	0x0000	0x0008	class FName	TagName	(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)

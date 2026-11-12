@@ -1,0 +1,1 @@
+SELECT substr(o.path, instr(o.path,':')+1) AS comp, o.type, COUNT(*) n FROM obj o WHERE o.path LIKE '/Game/Sparta/Core/Weapons/Player/%Default__%' AND o.path LIKE '%:%' GROUP BY comp, o.type ORDER BY n DESC LIMIT 40

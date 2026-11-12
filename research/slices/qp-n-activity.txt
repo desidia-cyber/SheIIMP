@@ -1,0 +1,29 @@
+﻿### BoolProperty /Script/Sparta.SpartaActivityType:bRequiredCompletionEvent  [000001F4ACD95A00]
+
+### Class /Script/Sparta.SpartaActivityDescriptor  [00007FF46F03C138]
+    super: /Script/Engine.Actor
+    3 members:
+      PRP Area : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x2a8]
+      PRP SpriteComponent : ObjectProperty of /Script/Engine.BillboardComponent [o:0x2b0]
+      PRP TextComponent : ObjectProperty of /Script/Engine.TextRenderComponent [o:0x2b8]
+
+### Class /Script/Sparta.SpartaActivityType  [00007FF46F03ED38]
+    super: /Script/Engine.DataAsset
+    4 members:
+      PRP Icon : ObjectProperty of /Script/Engine.Texture2D [o:0x30]
+      PRP DisplayName : TextProperty [o:0x38]
+      PRP AreaID : ObjectProperty of /Script/Sparta.SpartaAreaId [o:0x48]
+      PRP bRequiredCompletionEvent : BoolProperty [o:0x50]
+
+### ObjectProperty /Script/Sparta.SpartaActivityDescriptor:Area  [000001F4ACD7FA80]
+
+### ObjectProperty /Script/Sparta.SpartaActivityDescriptor:SpriteComponent  [000001F4ACD7FB00]
+
+### ObjectProperty /Script/Sparta.SpartaActivityDescriptor:TextComponent  [000001F4ACD7FB80]
+
+### ObjectProperty /Script/Sparta.SpartaActivityType:AreaID  [000001F4ACD95980]
+
+### ObjectProperty /Script/Sparta.SpartaActivityType:Icon  [000001F4ACD95900]
+
+### TextProperty /Script/Sparta.SpartaActivityType:DisplayName  [000001F4ACD63FF0]
+

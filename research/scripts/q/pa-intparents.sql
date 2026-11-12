@@ -1,0 +1,1 @@
+﻿SELECT substr(s.path, length(rtrim(s.path, replace(s.path,'/','')))+1) AS parent, COUNT(*) n FROM cls c LEFT JOIN obj s ON s.addr=UPPER(c.super) WHERE c.path LIKE '/Game/Sparta/Core/Player/Ability/Interactions/%' GROUP BY parent ORDER BY n DESC

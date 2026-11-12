@@ -1,0 +1,173 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnDlgStarted	MulticastInlineDelegateProperty	0x30	53434
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnDlgEnded	MulticastInlineDelegateProperty	0x40	53435
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	SpawnedParticipants	ArrayProperty of SpawnedParticipants./Script/Sparta.DialogueSubsystem:SpawnedParticipants	0x50	53436
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnDlgNodeEnterEvent	MulticastInlineDelegateProperty	0x60	53438
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnDlgNodeExitEvent	MulticastInlineDelegateProperty	0x70	53439
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnAudioEventFinished	MulticastInlineDelegateProperty	0x80	53440
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	OnDlgAudioStarted	MulticastInlineDelegateProperty	0x90	53441
+/Script/Sparta.DialogueSubsystem	/Script/Sparta.DialogueSubsystem	ActiveDialogues	ArrayProperty of ActiveDialogues./Script/Sparta.DialogueSubsystem:ActiveDialogues	0xA0	53442
+/Script/Sparta.DialogueNodeData	/Script/Sparta.DialogueNodeData	FacialAnimation	ObjectProperty of /Script/Engine.AnimSequence	0x28	53429
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bIsVirtualParent	BoolProperty	0x98	53492
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bVirtualParentFireDirectChildEnterEvents	BoolProperty	0x99	53493
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	Text	TextProperty	0xA0	53494
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	TextArguments	ArrayProperty of TextArguments./Script/Sparta.Dialogue_SpartaSpeechNode:TextArguments	0xB0	53495
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	SpeakerState	NameProperty	0xC0	53497
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	NodeData	ObjectProperty of /Script/DlgSystem.DlgNodeData	0xC8	53498
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	SoundWave	ObjectProperty of /Script/Engine.SoundWave	0xD0	53499
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	GenericData	ObjectProperty of /Script/CoreUObject.Object	0xD8	53500
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	AudioEvent	ObjectProperty of /Script/WaveWeaver.AudioEvent	0xF8	53501
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	FacialAnimation	ObjectProperty of /Script/Engine.AnimSequence	0x100	53502
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bAutoProceedToNextNode	BoolProperty	0x108	53503
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	AutoProceedDelayTimer	FloatProperty	0x10C	53504
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bAutoGenerateOptions	BoolProperty	0x110	53505
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bUseCustomSubtitleName	BoolProperty	0x111	53506
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	SubtitleSpeakerName	NameProperty	0x114	53507
+/Script/Sparta.Dialogue_SpartaSpeechNode	/Script/Sparta.Dialogue_SpartaSpeechNode	SubtitleSpeakerText	TextProperty	0x120	53508
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	OwnerName	NameProperty	0x40	51068
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	bCheckChildrenOnEvaluation	BoolProperty	0x48	51069
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	EnterConditions	ArrayProperty of EnterConditions./Script/DlgSystem.DlgNode:EnterConditions	0x50	51070
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	EnterRestriction	EnumProperty of /Script/DlgSystem.EDlgEntryRestriction	0x60	51072
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	EnterEvents	ArrayProperty of EnterEvents./Script/DlgSystem.DlgNode:EnterEvents	0x68	51073
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	NodeGuid	StructProperty of /Script/CoreUObject.Guid	0x78	51075
+/Script/DlgSystem.DlgNode	/Script/Sparta.Dialogue_SpartaSpeechNode	Children	ArrayProperty of Children./Script/DlgSystem.DlgNode:Children	0x88	51076
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	DlgParticipantName	StructProperty of /Script/DlgSystem.DlgParticipantName	0xB8	53417
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	ParticipantDisplayName	TextProperty	0xC0	53418
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	AdditionalDlgTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xD0	53419
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	AdditionalDlgCancelTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0xF0	53420
+/Script/Sparta.DialogueInstigatorComponent	/Script/Sparta.DialogueInstigatorComponent	AdditionalBlockingTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x110	53421
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.DialogueInstigatorComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaDialogueActor	/Script/Sparta.SpartaDialogueActor	Mesh	ObjectProperty of /Script/Engine.SkeletalMeshComponent	0x2B0	55876
+/Script/Sparta.SpartaDialogueActor	/Script/Sparta.SpartaDialogueActor	CapsuleComponent	ObjectProperty of /Script/Engine.CapsuleComponent	0x2B8	55877
+/Script/Sparta.SpartaDialogueActor	/Script/Sparta.SpartaDialogueActor	AudioComponentMapInitialized	MulticastInlineDelegateProperty	0x2C0	55878
+/Script/Sparta.SpartaDialogueActor	/Script/Sparta.SpartaDialogueActor	GameplayTagToAudioComponentMap	MapProperty	0x2D0	55879
+/Script/Sparta.SpartaDialogueActor	/Script/Sparta.SpartaDialogueActor	AudioData	ObjectProperty of /Script/Sparta.SpartaCharacterAudioData	0x320	55882
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	PrimaryActorTick	StructProperty of /Script/Engine.ActorTickFunction	0x28	47
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bNetTemporary	BoolProperty	0x58	48
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bOnlyRelevantToOwner	BoolProperty	0x58	49
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bAlwaysRelevant	BoolProperty	0x58	50
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bReplicateMovement	BoolProperty	0x58	51
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bCallPreReplication	BoolProperty	0x58	52
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bCallPreReplicationForReplay	BoolProperty	0x58	53
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bHidden	BoolProperty	0x58	54
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bTearOff	BoolProperty	0x59	55
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bForceNetAddressable	BoolProperty	0x59	56
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bExchangedRoles	BoolProperty	0x59	57
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bNetLoadOnClient	BoolProperty	0x59	58
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bNetUseOwnerRelevancy	BoolProperty	0x59	59
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bRelevantForNetworkReplays	BoolProperty	0x59	60
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bRelevantForLevelBounds	BoolProperty	0x59	61
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bReplayRewindable	BoolProperty	0x59	62
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bAllowTickBeforeBeginPlay	BoolProperty	0x5A	63
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bAutoDestroyWhenFinished	BoolProperty	0x5A	64
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bCanBeDamaged	BoolProperty	0x5A	65
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bBlockInput	BoolProperty	0x5A	66
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bCollideWhenPlacing	BoolProperty	0x5A	67
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bFindCameraComponentWhenViewTarget	BoolProperty	0x5A	68
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bGenerateOverlapEventsDuringLevelStreaming	BoolProperty	0x5A	69
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bIgnoresOriginShifting	BoolProperty	0x5A	70
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bEnableAutoLODGeneration	BoolProperty	0x5B	71
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bIsEditorOnlyActor	BoolProperty	0x5B	72
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bReplicates	BoolProperty	0x5B	73
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bCanBeInCluster	BoolProperty	0x5B	74
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bAllowReceiveTickEventOnDedicatedServer	BoolProperty	0x5B	75
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x5B	76
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bActorEnableCollision	BoolProperty	0x5D	77
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bActorIsBeingDestroyed	BoolProperty	0x5D	78
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	bAsyncPhysicsTickEnabled	BoolProperty	0x5D	79
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	UpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5E	80
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	DefaultUpdateOverlapsMethodDuringLevelStreaming	EnumProperty of /Script/Engine.EActorUpdateOverlapsMethod	0x5F	81
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RemoteRole	ByteProperty	0x60	82
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	InitialLifeSpan	FloatProperty	0x64	83
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	CustomTimeDilation	FloatProperty	0x68	84
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RayTracingGroupId	IntProperty	0x6C	85
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AttachmentReplication	StructProperty of /Script/Engine.RepAttachment	0x70	86
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ReplicatedMovement	StructProperty of /Script/Engine.RepMovement	0xD0	87
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Owner	ObjectProperty of /Script/Engine.Actor	0x158	88
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetDriverName	NameProperty	0x160	89
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Role	ByteProperty	0x168	90
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetDormancy	ByteProperty	0x169	91
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	SpawnCollisionHandlingMethod	EnumProperty of /Script/Engine.ESpawnActorCollisionHandlingMethod	0x16A	92
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	AutoReceiveInput	ByteProperty	0x16B	93
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	InputPriority	IntProperty	0x16C	94
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	InputComponent	ObjectProperty of /Script/Engine.InputComponent	0x178	95
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetTag	IntProperty	0x180	96
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetCullDistanceSquared	FloatProperty	0x184	97
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetUpdateFrequency	FloatProperty	0x188	98
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	MinNetUpdateFrequency	FloatProperty	0x18C	99
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	NetPriority	FloatProperty	0x190	100
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	PhysicsReplicationMode	EnumProperty of /Script/Engine.EPhysicsReplicationMode	0x194	101
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Instigator	ObjectProperty of /Script/Engine.Pawn	0x1A0	102
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Children	ArrayProperty of Children./Script/Engine.Actor:Children	0x1A8	103
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	RootComponent	ObjectProperty of /Script/Engine.SceneComponent	0x1B8	105
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Layers	ArrayProperty of Layers./Script/Engine.Actor:Layers	0x1C8	106
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	ParentComponent	WeakObjectProperty of /Script/Engine.ChildActorComponent	0x1D8	108
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	Tags	ArrayProperty of Tags./Script/Engine.Actor:Tags	0x1E0	109
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnTakeAnyDamage	MulticastSparseDelegateProperty	0x1F0	111
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnTakePointDamage	MulticastSparseDelegateProperty	0x1F1	112
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnTakeRadialDamage	MulticastSparseDelegateProperty	0x1F2	113
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnActorBeginOverlap	MulticastSparseDelegateProperty	0x1F3	114
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnActorEndOverlap	MulticastSparseDelegateProperty	0x1F4	115
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnBeginCursorOver	MulticastSparseDelegateProperty	0x1F5	116
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnEndCursorOver	MulticastSparseDelegateProperty	0x1F6	117
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnClicked	MulticastSparseDelegateProperty	0x1F7	118
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnReleased	MulticastSparseDelegateProperty	0x1F8	119
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnInputTouchBegin	MulticastSparseDelegateProperty	0x1F9	120
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnInputTouchEnd	MulticastSparseDelegateProperty	0x1FA	121
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnInputTouchEnter	MulticastSparseDelegateProperty	0x1FB	122
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnInputTouchLeave	MulticastSparseDelegateProperty	0x1FC	123
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnActorHit	MulticastSparseDelegateProperty	0x1FD	124
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnDestroyed	MulticastSparseDelegateProperty	0x1FE	125
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	OnEndPlay	MulticastSparseDelegateProperty	0x1FF	126
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	InstanceComponents	ArrayProperty of InstanceComponents./Script/Engine.Actor:InstanceComponents	0x280	127
+/Script/Engine.Actor	/Script/Sparta.SpartaDialogueActor	BlueprintCreatedComponents	ArrayProperty of BlueprintCreatedComponents./Script/Engine.Actor:BlueprintCreatedComponents	0x290	129
+/Script/Sparta.SpartaDlgParticipant	/Script/Sparta.SpartaDlgParticipant	ParticipantName	NameProperty	0x30	55884
+/Script/Sparta.SpartaDlgParticipant	/Script/Sparta.SpartaDlgParticipant	DisplayName	TextProperty	0x38	55885
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	LocationOffset	StructProperty of /Script/CoreUObject.Vector	0x30	56000
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	RotationOffset	StructProperty of /Script/CoreUObject.Rotator	0x48	56001
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	bIsNarrativeEvent	BoolProperty	0x60	56002
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	LevelInstance	SoftObjectProperty of /Script/Engine.World	0x68	56003
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	EventName	TextProperty	0x90	56004
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	EventIcon	SoftObjectProperty of /Script/Engine.Texture2D	0xA0	56005
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	CompletedEventIcon	SoftObjectProperty of /Script/Engine.Texture2D	0xC8	56006
+/Script/Sparta.SpartaEventDataAsset	/Script/Sparta.SpartaEventDataAsset	EventImage	SoftObjectProperty of /Script/Engine.Texture2D	0xF0	56007
+/Script/Engine.DataAsset	/Script/Sparta.SpartaEventDataAsset	NativeClass	ClassProperty	0x28	13635
+/Script/Sparta.HubEventComponent	/Script/Sparta.HubEventComponent	CurrentHubEventPoints	FloatProperty	0xB8	53627
+/Script/Sparta.HubEventComponent	/Script/Sparta.HubEventComponent	TotalHubEventPoints	FloatProperty	0xBC	53628
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.HubEventComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaHubGiftEventData	/Script/Sparta.SpartaHubGiftEventData	GiftType	SoftClassProperty	0x8	121915
+/Script/Sparta.SpartaHubGiftEventData	/Script/Sparta.SpartaHubGiftEventData	GiftName	TextProperty	0x30	121916
+/Script/Sparta.SpartaHubGiftEventData	/Script/Sparta.SpartaHubGiftEventData	GiftDescription	TextProperty	0x40	121917
+/Script/Sparta.SpartaHubGiftEventData	/Script/Sparta.SpartaHubGiftEventData	GiftQuantity	IntProperty	0x50	121918
+/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	NarrativeEventTimeTracking	MapProperty	0xB8	156528
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Game/Sparta/Dialogue/QuestSystem/BPSO_NarrativeEventsTracker.BPSO_NarrativeEventsTracker_C	bIsSessionSaveData	BoolProperty	0xB1	53848

@@ -1,0 +1,47 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSaveObject	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	SaveObjectClass	ClassProperty	0xC0	53884
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	OnSaveLoaded	MulticastInlineDelegateProperty	0xC8	53885
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	OnPreSave	MulticastInlineDelegateProperty	0xD8	53886
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	OnSessionReset	MulticastInlineDelegateProperty	0xE8	53887
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	SaveProtocol	EnumProperty of /Script/Sparta.ESaveObjectProtocol	0xF8	53888
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	bApplyPrologueSkipPreset	BoolProperty	0xF9	53889
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	Guid	StructProperty of /Script/CoreUObject.Guid	0xFC	53890
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	RuntimeData	ObjectProperty of /Script/Sparta.SpartaSaveObject	0x110	53891
+/Script/Sparta.SpartaSaveComponent	/Script/Sparta.SpartaSaveComponent	bSaveLoaded	BoolProperty	0x118	53892
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaSaveComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	PrimarySaveObjectTick	StructProperty of /Script/Sparta.SaveObjectTickFunction	0x28	53846
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	IgnoreSaveGameMetaSpecifier	BoolProperty	0x58	53847
+/Script/Sparta.SpartaSaveObject	/Script/Sparta.SpartaSessionSaveObjectBase	bIsSessionSaveData	BoolProperty	0xB1	53848
+/Script/Sparta.SaveObjectTickFunction	/Script/Sparta.SaveObjectTickFunction	Target	ObjectProperty of /Script/Sparta.SpartaSaveObject	0x28	122522
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	TickGroup	ByteProperty	0x8	86445
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	EndTickGroup	ByteProperty	0x9	86446
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	bTickEvenWhenPaused	BoolProperty	0xA	86447
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	bCanEverTick	BoolProperty	0xA	86448
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	bStartWithTickEnabled	BoolProperty	0xA	86449
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	bAllowTickOnDedicatedServer	BoolProperty	0xA	86450
+/Script/Engine.TickFunction	/Script/Sparta.SaveObjectTickFunction	TickInterval	FloatProperty	0xC	86451
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	SaveSubsystem	ObjectProperty of /Script/Sparta.SpartaSaveSubSystem	0x0	99367
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	EventTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x8	99368
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	SlotIndex	IntProperty	0x28	99369
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	bSaveWholeObject	BoolProperty	0x2C	99370
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	IsSaving	BoolProperty	0x2D	99371
+/Script/Sparta.SpartaSaveContext	/Script/Sparta.SpartaSaveContext	IsSavingSession	BoolProperty	0x2E	99372
+/Script/Sparta.SpartaMetaSave	/Script/Sparta.SpartaMetaSave	ActiveSaveProfileSlot	IntProperty	0x28	57034
+/Script/Sparta.SpartaMetaSave	/Script/Sparta.SpartaMetaSave	ActiveSaveRecoverySlot	MapProperty	0x30	57035

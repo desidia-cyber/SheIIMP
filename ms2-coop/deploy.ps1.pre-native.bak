@@ -1,0 +1,42 @@
+# Deploy the MS2 co-op mods into a game install.
+# Usage: .\deploy.ps1 -GameDir "E:\Games\_MS2-coop-test" [-Enable] [-Probe]
+# Only writes under <GameDir>\MortalShell2\Binaries\Win64 (Mods + coop dir).
+
+param(
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    [switch]$Enable,
+    [switch]$Probe
+)
+
+$ErrorActionPreference = 'Stop'
+$src = $PSScriptRoot
+$w64 = Join-Path $GameDir 'MortalShell2\Binaries\Win64'
+if (-not (Test-Path $w64)) { throw "not a Mortal Shell II install: $GameDir" }
+
+$modsDst = Join-Path $w64 'Mods'
+New-Item -ItemType Directory -Force -Path $modsDst | Out-Null
+foreach ($mod in Get-ChildItem (Join-Path $src 'mod') -Directory) {
+    $dst = Join-Path $modsDst $mod.Name
+    New-Item -ItemType Directory -Force -Path $dst | Out-Null
+    Copy-Item (Join-Path $mod.FullName '*') $dst -Recurse -Force
+    Write-Host "deployed mod: $($mod.Name)"
+}
+
+if ($Enable) {
+    # exactly one of the two runs a session; the probe is opt-in
+    $modsTxt = Join-Path $modsDst 'mods.txt'
+    $content = @()
+    if (Test-Path $modsTxt) { $content = @(Get-Content $modsTxt | Where-Object { $_ -notmatch '^\s*(CoopMod|CoopProbe|CoopLab)\s*:' }) }
+    $content = $content + ("CoopMod : 1")
+    # the lab mod reads the same cmd.txt and would eat the harness commands
+    $content = $content + ("CoopLab : 0")
+    $content = $content + ("CoopProbe : " + $(if ($Probe) { "1" } else { "0" }))
+    Set-Content -Path $modsTxt -Value $content -Encoding ASCII
+    Write-Host "mods.txt: CoopMod=1 CoopProbe=$(if ($Probe) { 1 } else { 0 })"
+}
+
+# transport/state dir next to the exe, so two installs never share it
+$coopDir = Join-Path $w64 'coop'
+New-Item -ItemType Directory -Force -Path $coopDir | Out-Null
+Set-Content -Path (Join-Path $w64 'coop_dir.txt') -Value ($coopDir.Replace('\', '/') + '/') -Encoding ASCII -NoNewline
+Write-Host "state dir: $coopDir"

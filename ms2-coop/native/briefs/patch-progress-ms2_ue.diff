@@ -1,0 +1,203 @@
+--- a/native/src/ms2_ue.h
++++ b/native/src/ms2_ue.h
+@@ -241,6 +241,21 @@
+ // is genuinely absent, so the caller's failure path runs instead of a silent no-op.
+ bool MapAddNameInt(UObject* o, const char* prop, const char* key, int32 value);
+ bool MapAddStrInt(UObject* o, const char* prop, const char* key, int32 value);
++
++// OPT-IN MAP GROWTH (proposed by the progress lane; NOT part of the default build).
++//
++// The two functions above can only overwrite.  The Lua's `q.NPCRelationships:Add`
++// (main.lua:3011 / 3224) and `o.CurrentQuestObjectiveProgress:Add` (main.lua:2919)
++// INSERT, so QUEST2's `rel r|Gorf` step cannot be reproduced with the current
++// layer: the test save has no NPCRelationships keys at all (the Lua's own
++// `wp=b:4/4 q:8/8` line in local/test/run-two-r7a.txt proves it -- 8 entries and
++// every one a `t|` narrative tag), so there is nothing to overwrite.
++//
++// These do the insert *through the engine's own code*, so this layer never learns
++// the allocator, the TSet hash or the rehash rules:
++//   source = UBlueprintMapLibrary::Map_Add (Engine, CustomThunk wildcard)
++// One file toggle turns it on: MAP_GROW.txt next to the other *_OFF.txt toggles.
++// Off (the default) these delegate to the overwrite-only form.
++bool MapAddStrIntGrow(UObject* o, const char* prop, const char* key, int32 value);
++bool MapAddNameIntGrow(UObject* o, const char* prop, const char* key, int32 value);
+ 
+ // Guarded memory access (SEH inside).  Exposed because callers walking game
+ // structures need it as much as this header does.
+--- a/native/src/ms2_ue.cpp
++++ b/native/src/ms2_ue.cpp
+@@ -3589,6 +3589,108 @@
+     return false;
+ }
+ 
++// ---------------------------------------------------------------------------
++// OPT-IN TMap growth (progress lane).  See the header note.
++//
++// WHY NOT TSet DIRECTLY: a TMap<K,V> insert needs (a) the game's allocator to grow
++// the element array and the hash array, (b) UE5.6's exact TSet hash for the key type
++// and (c) a rehash when Num crosses the load factor.  Getting any of those wrong
++// corrupts the map silently; there is no SEH-visible fault to catch.  The engine
++// already implements all three in UBlueprintMapLibrary::Map_Add, a BlueprintCallable
++// CustomThunk whose exec reads a *wildcard* frame instead of a normal parameter
++// block.  That frame is what this code builds.
++//
++// FRAME LAYOUT (UE5 container wildcard convention -- P_GET_TMAP_REF /
++// P_GET_PROPERTY_REF in ObjectMacros.h): for every wildcard parameter the thunk
++// steps a property pointer followed by the address of the value, so the frame is
++// three (FProperty*, void*) pairs:
++//     +0x00 FMapProperty*     +0x08 void*  &(map)        the TMap inside the object
++//     +0x10 FIntProperty*     +0x18 void*  &keyValue
++//     +0x20 FIntProperty*     +0x28 void*  &newValue
++// UFunction::ParmsSize (0x58 here) describes the *declared* layout, not this frame;
++// Call() only checks that a block is present, so a 0x30 block is legal.
++//
++// VALIDATION REQUIRED BEFORE USE (this is why it is behind MAP_GROW.txt):
++//   * the target property must be exactly StrProperty/NameProperty -> IntProperty;
++//   * Num must be read before and after: a working insert is Num+1 and a findable
++//     key, anything else disables the feature for the session and logs.
++//   * build it up in CoopLab against a *throwaway* map first (any
++//     TMap<FString,int32> that the game does not read, e.g.
++//     UBPC_QuestLogComponent_C::WormfishGold), then against NPCRelationships.
++// ---------------------------------------------------------------------------
++namespace {
++
++std::atomic<int> g_mapGrowState{0};   // 0 untried, 1 enabled, 2 disabled
++std::atomic<int> g_mapGrowLog{0};
++
++bool MapGrowToggleOn() {
++    // Same shape as the module toggles: a file in the coop dir.
++    const wchar_t* name = L"MAP_GROW.txt";
++    const std::string dir = state().local.dir;
++    if (dir.empty()) return false;
++    std::wstring w(dir.begin(), dir.end());
++    w += name;
++    return GetFileAttributesW(w.c_str()) != INVALID_FILE_ATTRIBUTES;
++}
++
++// The engine's own map-add, on a wildcard frame.  Returns true when Num grew.
++bool MapGrowViaBlueprintLibrary(UObject* mapOwner, FProperty* mapProp, void* mapAddr,
++                               FProperty* keyProp, void* keyAddr, FProperty* valProp,
++                               void* valAddr) {
++    UClass* lib = FindClass("BlueprintMapLibrary");
++    if (!PlausiblePtr(lib)) return false;
++    UObject* cdo = nullptr;
++    if (!Read((uint8_t*)lib + kOffClassDefaultObj, cdo) || !PlausiblePtr(cdo)) return false;
++    UFunction* fn = FindFunction(cdo, "Map_Add");
++    if (!PlausiblePtr(fn)) return false;
++
++    struct Frame {
++        FProperty* mapProperty;
++        void*      mapAddress;
++        FProperty* keyProperty;
++        void*      keyAddress;
++        FProperty* valueProperty;
++        void*      valueAddress;
++    } frame{mapProp, mapAddr, keyProp, keyAddr, valProp, valAddr};
++
++    int32 before = 0, after = 0;
++    Read((uint8_t*)mapAddr + kOffMapPairNum, before);
++    if (!Call(cdo, fn, &frame)) return false;
++    Read((uint8_t*)mapAddr + kOffMapPairNum, after);
++    return after == before + 1;
++}
++
++bool MapGrowStrInt(UObject* o, const char* prop, const char* key, int32 value) {
++    if (!o || !prop || !key) return false;
++    if (g_mapGrowState.load(std::memory_order_acquire) == 2) return false;
++    if (g_mapGrowState.load(std::memory_order_acquire) == 0) {
++        if (!MapGrowToggleOn()) {
++            g_mapGrowState.store(2);
++            return false;
++        }
++        g_mapGrowState.store(1);
++    }
++
++    UClass* c = GetClass(o);
++    FProperty* p = PlausiblePtr(c) ? FindProperty((UStruct*)c, prop) : nullptr;
++    if (!PlausiblePtr(p)) return false;
++    FProperty* kp = nullptr;
++    FProperty* vp = nullptr;
++    if (!Read((const uint8_t*)p + kOffMapKeyProp, kp) || !PlausiblePtr(kp)) return false;
++    if (!Read((const uint8_t*)p + kOffMapValProp, vp) || !PlausiblePtr(vp)) return false;
++    // Only the two shapes this game has.  A wrong key type would make the engine's
++    // hash read past our buffer, so refuse rather than hope.
++    const std::string kcls = FieldClassOf(kp);
++    const std::string vcls = FieldClassOf(vp);
++    const bool strKey = (kcls == "StrProperty");
++    if (!strKey && kcls != "NameProperty") return false;
++    if (vcls != "IntProperty") return false;
++
++    const int32_t off = PropOffset(o, prop);
++    if (off < 0) return false;
++    uint8_t* mapAddr = (uint8_t*)o + off;
++
++    // The FString/FName key the wildcard frame points at: a stack FString over the
++    // caller's bytes (the engine only reads it) or a real FName.
++    wchar_t wbuf[256];
++    int n = 0;
++    for (; key[n] && n < 255; ++n) wbuf[n] = (wchar_t)(unsigned char)key[n];
++    wbuf[n] = 0;
++    FString in;
++    in.Data = wbuf;
++    in.Num = n;
++    in.Max = 256;
++    FName name = strKey ? FName() : MakeName(key);
++    if (!strKey && name.ComparisonIndex == 0) return false;
++
++    int32 v = value;
++    void* keyAddr = strKey ? (void*)&in : (void*)&name;
++    const bool ok = MapGrowViaBlueprintLibrary(o, p, mapAddr, kp, keyAddr, vp, &v);
++    if (!ok && g_mapGrowLog.fetch_add(1) < 3) {
++        ms2::Logf("MapAddStrIntGrow(%s, \"%s\"): the engine Map_Add frame did not grow the "
++                  "map -- disabling growth for this session", prop, key);
++        g_mapGrowState.store(2);
++    }
++    return ok;
++}
++
++}  // namespace
++
++bool MapAddStrIntGrow(UObject* o, const char* prop, const char* key, int32 value) {
++    if (MapAddStrInt(o, prop, key, value)) return true;      // key exists: overwrite
++    return MapGrowStrInt(o, prop, key, value);
++}
++
++bool MapAddNameIntGrow(UObject* o, const char* prop, const char* key, int32 value) {
++    if (MapAddNameInt(o, prop, key, value)) return true;     // key exists: overwrite
++    return MapGrowStrInt(o, prop, key, value);               // same engine path
++}
++
+ // ---------------------------------------------------------------------------
+ // Test-only: run the module's own scanner over a file image.  See ms2_ue_test.h.
+ //
+--- a/native/src/coop_progress.cpp
++++ b/native/src/coop_progress.cpp
+@@ (the consumer side, already written; shown for the reviewer)
+@@
+-                const bool ok = ue::MapAddStrInt(q, map, id.c_str(), e.v);
++                const bool ok = ue::MapAddStrIntGrow(q, map, id.c_str(), e.v);
+@@
+-    const bool okRel = ue::MapAddStrInt(q, "NPCRelationships", npc.c_str(), rel + 2);
++    const bool okRel = ue::MapAddStrIntGrow(q, "NPCRelationships", npc.c_str(), rel + 2);
+@@
+-            ue::MapAddNameInt(o, "CurrentQuestObjectiveProgress", obj.c_str(), peerV);
++            ue::MapAddNameIntGrow(o, "CurrentQuestObjectiveProgress", obj.c_str(), peerV);
+
+=== END OF PATCH ===
+
+Notes for whoever applies this
+-------------------------------
+1. It is OFF unless MAP_GROW.txt exists in the coop dir, so applying it changes
+   nothing until the file toggle is added.  That is deliberate: a wrong wildcard
+   frame would corrupt engine memory without a fault, and this must be built up in
+   CoopLab (throwaway map first) before a verdict depends on it.
+2. The header/impl hunks are self-contained; kOffMapPairNum / kOffClassDefaultObj /
+   kOffMapKeyProp / kOffMapValProp / FieldClassOf / FindProperty / FindFunction /
+   Call / PropOffset / GetClass / MakeName / Read / PlausiblePtr already exist in
+   ms2_ue.cpp's anonymous namespace or as ue:: functions.
+3. `state().local.dir` is the coop dir accessor the other modules use
+   (net::WriteFile builds its path from it), so the toggle reads the same folder as
+   QS_OFF.txt / DL_OFF.txt.
+4. The three coop_progress.cpp consumer lines are the ones that make QUEST2's
+   `rel` and the objective-counter fallback work; they are listed so the reviewer
+   can see the whole path, not applied by this file.

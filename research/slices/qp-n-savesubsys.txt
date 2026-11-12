@@ -1,0 +1,548 @@
+﻿### ArrayProperty /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveFileNames:ReturnValue  [000001F4ACDF2300]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveProfileSlotNames:ReturnValue  [000001F4ACDF2280]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNames:ReturnValue  [000001F4ACDF2180]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot:ReturnValue  [000001F4ACDF4180]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.SpartaSaveSubSystem:SaveInterfaces  [000001F4ACDF3280]
+    1 members:
+      PRP SaveInterfaces : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:AsyncSaveFinished:bSuccess  [000001F4ACDF2400]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:GetIsSaveLoaded:ReturnValue  [000001F4ACDF4000]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:HasAnyValidSaveProfile:ReturnValue  [000001F4ACDF3B80]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:HasValidMetaData:ReturnValue  [000001F4ACDF3B00]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:HasValidSaveForActiveProfileSlot:ReturnValue  [000001F4ACDF3A80]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:HasValidSaveForProfileSlot:ReturnValue  [000001F4ACDF3A00]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:HasValidSessionSave:ReturnValue  [000001F4ACDF3980]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:IsAsyncSaving:ReturnValue  [000001F4ACDF3900]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:IsProcessingPrologueSkip:ReturnValue  [000001F4ACDF3880]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByGuid:ReturnValue  [000001F4ACDF2200]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:SaveToDisk:bSaveAsync  [000001F4ACDF4200]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:SaveToDisk:bSaveImmediately  [000001F4ACDF3780]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:SetPreventFurtherSaves:bPreventSaving  [000001F4ACDF3680]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:bApplySkipProloguePresetOnNextLoad  [000001F4ACDF3500]
+
+### BoolProperty /Script/Sparta.SpartaSaveSubSystem:bSaveLoaded  [000001F4ACDF3480]
+
+### Class /Script/Sparta.SpartaSaveSubSystem  [00007FF46F057B38]
+    super: /Script/Engine.GameInstanceSubsystem
+    73 members:
+      PRP OnSaveGameLoaded : MulticastInlineDelegateProperty [o:0x30]
+      PRP PostSessionReset : MulticastInlineDelegateProperty [o:0x40]
+      PRP OnSaveSystemInitialized : MulticastInlineDelegateProperty [o:0x50]
+      PRP OnSaveStarted : MulticastInlineDelegateProperty [o:0x60]
+      PRP OnSaveFinished : MulticastInlineDelegateProperty [o:0x70]
+      PRP SaveObjects : MapProperty [o:0xb8]
+      PRP CurrentOnDiskWorldStateSave : ObjectProperty of /Script/Sparta.SpartaSaveGame [o:0x108]
+      PRP SaveInterfaces : ArrayProperty of SaveInterfaces./Script/Sparta.SpartaSaveSubSystem:SaveInterfaces [o:0x110]
+      PRP SessionSaveObject : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x120]
+      PRP RuntimeSessionSaveObject : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x128]
+      PRP MetaData : ObjectProperty of /Script/Sparta.SpartaMetaSave [o:0x140]
+      PRP bSaveLoaded : BoolProperty [o:0x14c]
+      PRP bApplySkipProloguePresetOnNextLoad : BoolProperty [o:0x14e]
+      FUN WriteCurrentSaveToTextFile 
+      FUN UnsubscribeSaveInterface 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN SubscribeSaveInterface 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN StopSkipPrologueRequest 
+      FUN SetValidActiveSaveProfileSlot 
+      FUN SetPreventFurtherSaves 
+          param bPreventSaving : BoolProperty [o:0x0]
+      FUN SaveToDisk 
+          param SaveEvents : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+          param bSaveImmediately : BoolProperty [o:0x20]
+          param bSaveAsync : BoolProperty [o:0x21]
+      FUN SaveSession 
+      FUN SaveMetaData 
+      FUN ResetSession 
+      FUN ResetSaveObjectByGuid 
+          param GuidString : StrProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ResetSaveObjectByClass 
+          param SaveObjectClass : ClassProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x8]
+      FUN ResetAutoSaveTimer 
+      FUN ResetAllSaveData 
+      FUN RequestSkipPrologueStart 
+      FUN RecoverSave 
+          param RecoverySlotName : StrProperty [o:0x0]
+      FUN OnEndPlayMap 
+      FUN IsProcessingPrologueSkip 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN IsAsyncSaving 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN HasValidSessionSave 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN HasValidSaveForProfileSlot 
+          param Slot : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN HasValidSaveForActiveProfileSlot 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN HasValidMetaData 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN HasAnyValidSaveProfile 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetSessionSaveSlotName 
+          param SlotIndex : IntProperty [o:0x0]
+          param ReturnValue : StrProperty [o:0x8]
+      FUN GetSessionSave 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+      FUN GetSaveRecoverySlotName 
+          param ProfileSlot : IntProperty [o:0x0]
+          param RecoverySlot : IntProperty [o:0x4]
+          param ReturnValue : StrProperty [o:0x8]
+      FUN GetSaveProfileSlotName 
+          param ProfileSlot : IntProperty [o:0x0]
+          param ReturnValue : StrProperty [o:0x8]
+      FUN GetSaveProfileSlotIndexFromName 
+          param SlotName : StrProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN GetSaveProfileDataAsStringFromSlot 
+          param Slot : IntProperty [o:0x0]
+          param ReturnValue : StrProperty [o:0x8]
+      FUN GetSaveProfileDataAsStringFromName 
+          param SlotName : StrProperty [o:0x0]
+          param ReturnValue : StrProperty [o:0x10]
+      FUN GetSaveObjectByClassFromSlotName 
+          param SlotName : StrProperty [o:0x0]
+          param SaveObjectClass : ClassProperty [o:0x10]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x18]
+      FUN GetSaveObjectByClassFromSlotIndex 
+          param SlotIndex : IntProperty [o:0x0]
+          param SaveObjectClass : ClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x10]
+      FUN GetPlayerSaveObjectFromSlotName 
+          param SlotName : StrProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x10]
+      FUN GetPlayerSaveObjectFromSlotIndex 
+          param SlotIndex : IntProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x8]
+      FUN GetMetaSaveDataAsString 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN GetMetaData 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaMetaSave [o:0x0]
+      FUN GetMaxSaveRecoverySlots 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetMaxSaveProfileSlots 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetIsSaveLoaded 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetInstance 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveSubSystem [o:0x8]
+      FUN GetExistingSaveRecoverySlotNamesForProfileSlot 
+          param ProfileSlot : IntProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot:ReturnValue [o:0x8]
+      FUN GetExistingSaveRecoverySlotNames 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNames:ReturnValue [o:0x0]
+      FUN GetExistingSaveProfileSlotNames 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveProfileSlotNames:ReturnValue [o:0x0]
+      FUN GetExistingSaveFileNames 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveFileNames:ReturnValue [o:0x0]
+      FUN GetCurrentWorldStateSave 
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveGame [o:0x0]
+      FUN GetActiveSaveProfileSlotName 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN GetActiveSaveProfileSlotIndex 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetActiveSaveProfileDataAsString 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN EnableSaveProfileBackup 
+      FUN EnableAutoSave 
+      FUN DisableSaveProfileBackup 
+      FUN DisableAutoSave 
+      FUN DeleteSaveProfile 
+          param ProfileSlot : IntProperty [o:0x0]
+      FUN DeleteActiveSaveProfile 
+      FUN ClearCache 
+      FUN ChangeActiveSaveProfileSlot 
+          param SlotIndex : IntProperty [o:0x0]
+      FUN BackupActiveSaveProfile 
+      FUN AutoSave 
+      FUN AsyncSaveFinished 
+          param SlotName : StrProperty [o:0x0]
+          param PlatformId : IntProperty [o:0x10]
+          param bSuccess : BoolProperty [o:0x14]
+
+### ClassProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotIndex:SaveObjectClass  [000001F4ACDF3D80]
+
+### ClassProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotName:SaveObjectClass  [000001F4ACDF3C80]
+
+### ClassProperty /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByClass:SaveObjectClass  [000001F4ACDF3800]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:AsyncSaveFinished  [00007FF46F70F258]
+    3 members:
+      PRP SlotName : StrProperty [o:0x0]
+      PRP PlatformId : IntProperty [o:0x10]
+      PRP bSuccess : BoolProperty [o:0x14]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:AutoSave  [00007FF46F70F338]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:BackupActiveSaveProfile  [00007FF46F70F418]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ChangeActiveSaveProfileSlot  [00007FF46F70F4F8]
+    1 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ClearCache  [00007FF46F70F5D8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:DeleteActiveSaveProfile  [00007FF46F70F6B8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:DeleteSaveProfile  [00007FF46F70F798]
+    1 members:
+      PRP ProfileSlot : IntProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:DisableAutoSave  [00007FF46F70F878]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:DisableSaveProfileBackup  [00007FF46F70F958]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:EnableAutoSave  [00007FF46F70FA38]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:EnableSaveProfileBackup  [00007FF46F70FB18]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileDataAsString  [00007FF46F70FBF8]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileSlotIndex  [00007FF46F70FCD8]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileSlotName  [00007FF46F70FDB8]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetCurrentWorldStateSave  [00007FF46F70FE98]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveGame [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveFileNames  [00007FF46F70FF78]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveFileNames:ReturnValue [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveProfileSlotNames  [00007FF46F710058]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveProfileSlotNames:ReturnValue [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNames  [00007FF46F710138]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNames:ReturnValue [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot  [00007FF46F710218]
+    2 members:
+      PRP ProfileSlot : IntProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot:ReturnValue [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetInstance  [00007FF46F7102F8]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveSubSystem [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetIsSaveLoaded  [00007FF46F7103D8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetMaxSaveProfileSlots  [00007FF46F7104B8]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetMaxSaveRecoverySlots  [00007FF46F710598]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetMetaData  [00007FF46F710678]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaMetaSave [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetMetaSaveDataAsString  [00007FF46F710758]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotIndex  [00007FF46F710838]
+    2 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotName  [00007FF46F710918]
+    2 members:
+      PRP SlotName : StrProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.PlayerSaveObject [o:0x10]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotIndex  [00007FF46F7109F8]
+    3 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+      PRP SaveObjectClass : ClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x10]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotName  [00007FF46F710AD8]
+    3 members:
+      PRP SlotName : StrProperty [o:0x0]
+      PRP SaveObjectClass : ClassProperty [o:0x10]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x18]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromName  [00007FF46F710BB8]
+    2 members:
+      PRP SlotName : StrProperty [o:0x0]
+      PRP ReturnValue : StrProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromSlot  [00007FF46F710C98]
+    2 members:
+      PRP Slot : IntProperty [o:0x0]
+      PRP ReturnValue : StrProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotIndexFromName  [00007FF46F710D78]
+    2 members:
+      PRP SlotName : StrProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotName  [00007FF46F710E58]
+    2 members:
+      PRP ProfileSlot : IntProperty [o:0x0]
+      PRP ReturnValue : StrProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSaveRecoverySlotName  [00007FF46F710F38]
+    3 members:
+      PRP ProfileSlot : IntProperty [o:0x0]
+      PRP RecoverySlot : IntProperty [o:0x4]
+      PRP ReturnValue : StrProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSessionSave  [00007FF46F711018]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:GetSessionSaveSlotName  [00007FF46F7110F8]
+    2 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+      PRP ReturnValue : StrProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:HasAnyValidSaveProfile  [00007FF46F7111D8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:HasValidMetaData  [00007FF46F7112B8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:HasValidSaveForActiveProfileSlot  [00007FF46F711398]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:HasValidSaveForProfileSlot  [00007FF46F711478]
+    2 members:
+      PRP Slot : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:HasValidSessionSave  [00007FF46F711558]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:IsAsyncSaving  [00007FF46F711638]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:IsProcessingPrologueSkip  [00007FF46F711718]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:OnEndPlayMap  [00007FF46F7117F8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:RecoverSave  [00007FF46F7118D8]
+    1 members:
+      PRP RecoverySlotName : StrProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:RequestSkipPrologueStart  [00007FF46F7119B8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ResetAllSaveData  [00007FF46F711A98]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ResetAutoSaveTimer  [00007FF46F711B78]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByClass  [00007FF46F711C58]
+    2 members:
+      PRP SaveObjectClass : ClassProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByGuid  [00007FF46F711D38]
+    2 members:
+      PRP GuidString : StrProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:ResetSession  [00007FF46F711E18]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SaveMetaData  [00007FF46F711EF8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SaveSession  [00007FF46F711FD8]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SaveToDisk  [00007FF46F7120B8]
+    3 members:
+      PRP SaveEvents : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      PRP bSaveImmediately : BoolProperty [o:0x20]
+      PRP bSaveAsync : BoolProperty [o:0x21]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SetPreventFurtherSaves  [00007FF46F712198]
+    1 members:
+      PRP bPreventSaving : BoolProperty [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SetValidActiveSaveProfileSlot  [00007FF46F712278]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:StopSkipPrologueRequest  [00007FF46F712358]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:SubscribeSaveInterface  [00007FF46F712438]
+    1 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:UnsubscribeSaveInterface  [00007FF46F712518]
+    1 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/Sparta.SpartaSaveSubSystem:WriteCurrentSaveToTextFile  [00007FF46F7125F8]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:AsyncSaveFinished:PlatformId  [000001F4ACDE0F60]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:ChangeActiveSaveProfileSlot:SlotIndex  [000001F4ACDE0E80]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:DeleteSaveProfile:ProfileSlot  [000001F4ACDE2AF0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileSlotIndex:ReturnValue  [000001F4ACDE2A10]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot:ProfileSlot  [000001F4ACDE2770]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetMaxSaveProfileSlots:ReturnValue  [000001F4ACDE2700]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetMaxSaveRecoverySlots:ReturnValue  [000001F4ACDE2690]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotIndex:SlotIndex  [000001F4ACDE25B0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotIndex:SlotIndex  [000001F4ACDE24D0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromSlot:Slot  [000001F4ACDE22A0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotIndexFromName:ReturnValue  [000001F4ACDE2230]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotName:ProfileSlot  [000001F4ACDE20E0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveRecoverySlotName:ProfileSlot  [000001F4ACDE1F90]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveRecoverySlotName:RecoverySlot  [000001F4ACDE2000]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:GetSessionSaveSlotName:SlotIndex  [000001F4ACDE1EB0]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:HasValidSaveForProfileSlot:Slot  [000001F4ACDE1E40]
+
+### IntProperty /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByClass:ReturnValue  [000001F4ACDE1D60]
+
+### MapProperty /Script/Sparta.SpartaSaveSubSystem:SaveObjects  [000001F49CD2F2E0]
+    2 members:
+      PRP SaveObjects_Key : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP SaveObjects : ObjectProperty of /Script/Sparta.SpartaSaveObject [o:0x10]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveSubSystem:OnSaveFinished  [000001F4ACDF5100]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveSubSystem:OnSaveGameLoaded  [000001F4ACDF4F00]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveSubSystem:OnSaveStarted  [000001F4ACDF5080]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveSubSystem:OnSaveSystemInitialized  [000001F4ACDF5000]
+
+### MulticastInlineDelegateProperty /Script/Sparta.SpartaSaveSubSystem:PostSessionReset  [000001F4ACDF4F80]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:CurrentOnDiskWorldStateSave  [000001F4ACDF5280]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetCurrentWorldStateSave:ReturnValue  [000001F4ACDF2380]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetInstance:ReturnValue  [000001F4ACDF4100]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetInstance:WorldContextObject  [000001F4ACDF4080]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetMetaData:ReturnValue  [000001F4ACDF3F80]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotIndex:ReturnValue  [000001F4ACDF3F00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotName:ReturnValue  [000001F4ACDF3E80]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotIndex:ReturnValue  [000001F4ACDF3E00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotName:ReturnValue  [000001F4ACDF3D00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:GetSessionSave:ReturnValue  [000001F4ACDF3C00]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:MetaData  [000001F4ACDF3400]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:RuntimeSessionSaveObject  [000001F4ACDF3380]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:SessionSaveObject  [000001F4ACDF3300]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:SubscribeSaveInterface:Object  [000001F4ACDF3600]
+
+### ObjectProperty /Script/Sparta.SpartaSaveSubSystem:UnsubscribeSaveInterface:Object  [000001F4ACDF3580]
+
+### ObjectProperty SaveInterfaces./Script/Sparta.SpartaSaveSubSystem:SaveInterfaces  [000001F4ACDF3200]
+
+### ObjectProperty SaveObjects./Script/Sparta.SpartaSaveSubSystem:SaveObjects  [000001F4ACDF5180]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:AsyncSaveFinished:SlotName  [000001F4ACDE0EF0]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileDataAsString:ReturnValue  [000001F4ACDE2A80]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetActiveSaveProfileSlotName:ReturnValue  [000001F4ACDE29A0]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetMetaSaveDataAsString:ReturnValue  [000001F4ACDE2620]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetPlayerSaveObjectFromSlotName:SlotName  [000001F4ACDE2540]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveObjectByClassFromSlotName:SlotName  [000001F4ACDE2460]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromName:ReturnValue  [000001F4ACDE23F0]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromName:SlotName  [000001F4ACDE2380]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileDataAsStringFromSlot:ReturnValue  [000001F4ACDE2310]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotIndexFromName:SlotName  [000001F4ACDE21C0]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveProfileSlotName:ReturnValue  [000001F4ACDE2150]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSaveRecoverySlotName:ReturnValue  [000001F4ACDE2070]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:GetSessionSaveSlotName:ReturnValue  [000001F4ACDE1F20]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:RecoverSave:RecoverySlotName  [000001F4ACDE1DD0]
+
+### StrProperty /Script/Sparta.SpartaSaveSubSystem:ResetSaveObjectByGuid:GuidString  [000001F4ACDE1CF0]
+
+### StrProperty ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveFileNames:ReturnValue  [000001F4ACDE2930]
+
+### StrProperty ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveProfileSlotNames:ReturnValue  [000001F4ACDE28C0]
+
+### StrProperty ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNames:ReturnValue  [000001F4ACDE2850]
+
+### StrProperty ReturnValue./Script/Sparta.SpartaSaveSubSystem:GetExistingSaveRecoverySlotNamesForProfileSlot:ReturnValue  [000001F4ACDE27E0]
+
+### StructProperty /Script/Sparta.SpartaSaveSubSystem:SaveToDisk:SaveEvents  [000001F4ACDF3700]
+
+### StructProperty SaveObjects./Script/Sparta.SpartaSaveSubSystem:SaveObjects_Key  [000001F4ACDF5200]
+

@@ -1,0 +1,855 @@
+﻿### ArrayProperty /Script/DlgSystem.DlgDialogue:GetMutableStartNodes:ReturnValue  [000001F4ACCFB280]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgDialogue:GetNodes:ReturnValue  [000001F4ACCFB080]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgDialogue:GetParticipantClasses:ReturnValue  [000001F4ACCFAF00]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgParticipantClass [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgDialogue:Nodes  [000001F4ACCFAA00]
+    1 members:
+      PRP Nodes : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgDialogue:ParticipantsClasses  [000001F4ACCFA700]
+    1 members:
+      PRP ParticipantsClasses : StructProperty of /Script/DlgSystem.DlgParticipantClass [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgDialogue:StartNodes  [000001F4ACCFA900]
+    1 members:
+      PRP StartNodes : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### BoolProperty /Script/DlgSystem.DlgDialogue:HasGUID:ReturnValue  [000001F4ACCFAC00]
+
+### BoolProperty /Script/DlgSystem.DlgDialogue:HasParticipant:ReturnValue  [000001F4ACCF9500]
+
+### BoolProperty /Script/DlgSystem.DlgDialogue:IsValidNodeGUID:ReturnValue  [000001F4ACCFB580]
+
+### BoolProperty /Script/DlgSystem.DlgDialogue:IsValidNodeIndex:ReturnValue  [000001F4ACCFAB00]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:CheckCondition:ReturnValue  [000001F4ACCFC500]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:GetBoolValue:ReturnValue  [000001F4ACCFC400]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyBoolValue:ReturnValue  [000001F4ACCFC100]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyBoolValue:bNewValue  [000001F4ACCFC080]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyFloatValue:ReturnValue  [000001F4ACCFC000]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyFloatValue:bDelta  [000001F4ACCFBF80]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyIntValue:ReturnValue  [000001F4ACCFBF00]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyIntValue:bDelta  [000001F4ACCFBE80]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyNameValue:ReturnValue  [000001F4ACCFBE00]
+
+### BoolProperty /Script/DlgSystem.DlgDialogueParticipant:OnDialogueEvent:ReturnValue  [000001F4ACCFBD80]
+
+### Class /Script/DlgSystem.DlgDialogue  [00007FF46F013B38]
+    super: /Script/CoreUObject.Object
+    65 members:
+      PRP DialogueTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x28]
+      PRP CancelDialogueTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x48]
+      PRP BlockingDialogueTags : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x68]
+      PRP Version : IntProperty [o:0x88]
+      PRP Name : NameProperty [o:0x8c]
+      PRP Guid : StructProperty of /Script/CoreUObject.Guid [o:0x94]
+      PRP ParticipantsClasses : ArrayProperty of ParticipantsClasses./Script/DlgSystem.DlgDialogue:ParticipantsClasses [o:0xa8]
+      PRP ParticipantsData : MapProperty [o:0xb8]
+      PRP AllSpeakerStates : SetProperty [o:0x108]
+      PRP StartNode : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x158]
+      PRP StartNodes : ArrayProperty of StartNodes./Script/DlgSystem.DlgDialogue:StartNodes [o:0x160]
+      PRP Nodes : ArrayProperty of Nodes./Script/DlgSystem.DlgDialogue:Nodes [o:0x170]
+      PRP NodesGUIDToIndexMap : MapProperty [o:0x180]
+      FUN IsValidNodeIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x4]
+      FUN IsValidNodeGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN HasParticipant 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN HasGUID 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN GetSpeakerStates 
+          param ReturnValue : SetProperty [o:0x0]
+      FUN GetParticipantsNum 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetParticipantsData 
+          param ReturnValue : MapProperty [o:0x0]
+      FUN GetParticipantNames 
+          param ReturnValue : SetProperty [o:0x0]
+      FUN GetParticipantIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantFNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantEventNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantCustomTextArguments 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantCustomEvents 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantCustomConditions 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantConditionNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClassIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClassFTextNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClassFNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClassFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClasses 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetParticipantClasses:ReturnValue [o:0x0]
+      FUN GetParticipantClassBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetParticipantClass 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ClassProperty [o:0x8]
+      FUN GetParticipantBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : SetProperty [o:0x8]
+      FUN GetNodes 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetNodes:ReturnValue [o:0x0]
+      FUN GetNodeIndexForGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN GetNodeGUIDForIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+      FUN GetNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetMutableStartNodes 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetMutableStartNodes:ReturnValue [o:0x0]
+      FUN GetMutableStartNode 
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+      FUN GetMutableNodeFromIndex 
+          param NodeIndex : IntProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x8]
+      FUN GetMutableNodeFromGUID 
+          param NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x10]
+      FUN GetIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetGUID 
+          param ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      FUN GetFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetEvents 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetDlgTags 
+          param ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      FUN GetDialogueVersion 
+          param ReturnValue : IntProperty [o:0x0]
+      FUN GetDialogueName 
+          param ReturnValue : StrProperty [o:0x0]
+      FUN GetDialogueFName 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetCustomEvents 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetConditions 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetClassTextNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetClassNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetClassIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetClassFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetClassBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetCancelDlgTags 
+          param ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      FUN GetBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param Outset : SetProperty [o:0x8]
+      FUN GetBlockingTags 
+          param ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+      FUN GetAllSpeakerStates 
+          param Outset : SetProperty [o:0x0]
+      FUN GetAllParticipantNames 
+          param Outset : SetProperty [o:0x0]
+
+### Class /Script/DlgSystem.DlgDialogueParticipant  [00007FF46F013D38]
+    super: /Script/CoreUObject.Interface
+    15 members:
+      FUN OnDialogueEvent 
+          param Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+          param EventName : NameProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ModifyNameValue 
+          param ValueName : NameProperty [o:0x0]
+          param NameValue : NameProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ModifyIntValue 
+          param ValueName : NameProperty [o:0x0]
+          param bDelta : BoolProperty [o:0x8]
+          param Value : IntProperty [o:0xc]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ModifyFloatValue 
+          param ValueName : NameProperty [o:0x0]
+          param bDelta : BoolProperty [o:0x8]
+          param Value : FloatProperty [o:0xc]
+          param ReturnValue : BoolProperty [o:0x10]
+      FUN ModifyBoolValue 
+          param ValueName : NameProperty [o:0x0]
+          param bNewValue : BoolProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x9]
+      FUN GetParticipantName 
+          param ReturnValue : NameProperty [o:0x0]
+      FUN GetParticipantIcon 
+          param ActiveSpeaker : NameProperty [o:0x0]
+          param ActiveSpeakerState : NameProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Engine.Texture2D [o:0x10]
+      FUN GetParticipantGender 
+          param ReturnValue : EnumProperty of /Script/Engine.ETextGender [o:0x0]
+      FUN GetParticipantDisplayName 
+          param ActiveSpeaker : NameProperty [o:0x0]
+          param ReturnValue : TextProperty [o:0x8]
+      FUN GetNameValue 
+          param ValueName : NameProperty [o:0x0]
+          param ReturnValue : NameProperty [o:0x8]
+      FUN GetIntValue 
+          param ValueName : NameProperty [o:0x0]
+          param ReturnValue : IntProperty [o:0x8]
+      FUN GetGameplayTagToAudioComponentMap 
+          param ReturnValue : MapProperty [o:0x0]
+      FUN GetFloatValue 
+          param ValueName : NameProperty [o:0x0]
+          param ReturnValue : FloatProperty [o:0x8]
+      FUN GetBoolValue 
+          param ValueName : NameProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN CheckCondition 
+          param Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+          param ConditionName : NameProperty [o:0x8]
+          param ReturnValue : BoolProperty [o:0x10]
+
+### ClassProperty /Script/DlgSystem.DlgDialogue:GetParticipantClass:ReturnValue  [000001F4ACCFAF80]
+
+### EnumProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantGender:ReturnValue  [000001F4ACCFC280]
+
+### FloatProperty /Script/DlgSystem.DlgDialogueParticipant:GetFloatValue:ReturnValue  [000001F4ACD01DD0]
+
+### FloatProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyFloatValue:Value  [000001F4ACD03570]
+
+### Function /Script/DlgSystem.DlgDialogue:GetAllParticipantNames  [00007FF46F6C6318]
+    1 members:
+      PRP Outset : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetAllSpeakerStates  [00007FF46F6C63F8]
+    1 members:
+      PRP Outset : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetBlockingTags  [00007FF46F6C64D8]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetBoolNames  [00007FF46F6C65B8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetCancelDlgTags  [00007FF46F6C6698]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetClassBoolNames  [00007FF46F6C6778]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetClassFloatNames  [00007FF46F6C6858]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetClassIntNames  [00007FF46F6C6938]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetClassNameNames  [00007FF46F6C6A18]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetClassTextNames  [00007FF46F6C6AF8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetConditions  [00007FF46F6C6BD8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetCustomEvents  [00007FF46F6C6CB8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetDialogueFName  [00007FF46F6C6D98]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetDialogueName  [00007FF46F6C6E78]
+    1 members:
+      PRP ReturnValue : StrProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetDialogueVersion  [00007FF46F6C6F58]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetDlgTags  [00007FF46F6C7038]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/GameplayTags.GameplayTagContainer [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetEvents  [00007FF46F6C7118]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetFloatNames  [00007FF46F6C71F8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetGUID  [00007FF46F6C72D8]
+    1 members:
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetIntNames  [00007FF46F6C73B8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetMutableNodeFromGUID  [00007FF46F6C7498]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogue:GetMutableNodeFromIndex  [00007FF46F6C7578]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetMutableStartNode  [00007FF46F6C7658]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgNode [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetMutableStartNodes  [00007FF46F6C7738]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetMutableStartNodes:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetNameNames  [00007FF46F6C7818]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP Outset : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetNodeGUIDForIndex  [00007FF46F6C78F8]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/CoreUObject.Guid [o:0x4]
+
+### Function /Script/DlgSystem.DlgDialogue:GetNodeIndexForGUID  [00007FF46F6C79D8]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogue:GetNodes  [00007FF46F6C7AB8]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetNodes:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantBoolNames  [00007FF46F6C7B98]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClass  [00007FF46F6C7C78]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ClassProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClassBoolNames  [00007FF46F6C7D58]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClassFNameNames  [00007FF46F6C7FF8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClassFTextNames  [00007FF46F6C80D8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClassFloatNames  [00007FF46F6C7F18]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClassIntNames  [00007FF46F6C81B8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantClasses  [00007FF46F6C7E38]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgDialogue:GetParticipantClasses:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantConditionNames  [00007FF46F6C8298]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantCustomConditions  [00007FF46F6C8378]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantCustomEvents  [00007FF46F6C8458]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantCustomTextArguments  [00007FF46F6C8538]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantEventNames  [00007FF46F6C8618]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantFNameNames  [00007FF46F6C87D8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantFloatNames  [00007FF46F6C86F8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantIntNames  [00007FF46F6C88B8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : SetProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantNames  [00007FF46F6C8998]
+    1 members:
+      PRP ReturnValue : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantsData  [00007FF46F6C8A78]
+    1 members:
+      PRP ReturnValue : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetParticipantsNum  [00007FF46F6C8B58]
+    1 members:
+      PRP ReturnValue : IntProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:GetSpeakerStates  [00007FF46F6C8C38]
+    1 members:
+      PRP ReturnValue : SetProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:HasGUID  [00007FF46F6C8D18]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogue:HasParticipant  [00007FF46F6C8DF8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogue:IsValidNodeGUID  [00007FF46F6C8ED8]
+    2 members:
+      PRP NodeGuid : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogue:IsValidNodeIndex  [00007FF46F6C8FB8]
+    2 members:
+      PRP NodeIndex : IntProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x4]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:CheckCondition  [00007FF46F6C9098]
+    3 members:
+      PRP Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+      PRP ConditionName : NameProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetBoolValue  [00007FF46F6C9178]
+    2 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetFloatValue  [00007FF46F6C9258]
+    2 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetGameplayTagToAudioComponentMap  [00007FF46F6C9338]
+    1 members:
+      PRP ReturnValue : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetIntValue  [00007FF46F6C9418]
+    2 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP ReturnValue : IntProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetNameValue  [00007FF46F6C94F8]
+    2 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP ReturnValue : NameProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetParticipantDisplayName  [00007FF46F6C95D8]
+    2 members:
+      PRP ActiveSpeaker : NameProperty [o:0x0]
+      PRP ReturnValue : TextProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetParticipantGender  [00007FF46F6C96B8]
+    1 members:
+      PRP ReturnValue : EnumProperty of /Script/Engine.ETextGender [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetParticipantIcon  [00007FF46F6C9798]
+    3 members:
+      PRP ActiveSpeaker : NameProperty [o:0x0]
+      PRP ActiveSpeakerState : NameProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Engine.Texture2D [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:GetParticipantName  [00007FF46F6C9878]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:ModifyBoolValue  [00007FF46F6C9958]
+    3 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP bNewValue : BoolProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x9]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:ModifyFloatValue  [00007FF46F6C9A38]
+    4 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP bDelta : BoolProperty [o:0x8]
+      PRP Value : FloatProperty [o:0xc]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:ModifyIntValue  [00007FF46F6C9B18]
+    4 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP bDelta : BoolProperty [o:0x8]
+      PRP Value : IntProperty [o:0xc]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:ModifyNameValue  [00007FF46F6C9BF8]
+    3 members:
+      PRP ValueName : NameProperty [o:0x0]
+      PRP NameValue : NameProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### Function /Script/DlgSystem.DlgDialogueParticipant:OnDialogueEvent  [00007FF46F6C9CD8]
+    3 members:
+      PRP Context : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x0]
+      PRP EventName : NameProperty [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x10]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:GetDialogueVersion:ReturnValue  [000001F4ACD01740]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:GetMutableNodeFromIndex:NodeIndex  [000001F4ACD01430]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:GetNodeGUIDForIndex:NodeIndex  [000001F4ACD012E0]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:GetNodeIndexForGUID:ReturnValue  [000001F4ACD01270]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:GetParticipantsNum:ReturnValue  [000001F4ACD022A0]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:IsValidNodeIndex:NodeIndex  [000001F4ACD02150]
+
+### IntProperty /Script/DlgSystem.DlgDialogue:Version  [000001F4ACD01F20]
+
+### IntProperty /Script/DlgSystem.DlgDialogueParticipant:GetIntValue:ReturnValue  [000001F4ACD01CF0]
+
+### IntProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyIntValue:Value  [000001F4ACD03490]
+
+### IntProperty NodesGUIDToIndexMap./Script/DlgSystem.DlgDialogue:NodesGUIDToIndexMap  [000001F4ACD020E0]
+
+### MapProperty /Script/DlgSystem.DlgDialogue:GetParticipantsData:ReturnValue  [000001F49C78A060]
+    2 members:
+      PRP ReturnValue_Key : NameProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgParticipantData [o:0x8]
+
+### MapProperty /Script/DlgSystem.DlgDialogue:NodesGUIDToIndexMap  [000001F49C78A100]
+    2 members:
+      PRP NodesGUIDToIndexMap_Key : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP NodesGUIDToIndexMap : IntProperty [o:0x10]
+
+### MapProperty /Script/DlgSystem.DlgDialogue:ParticipantsData  [000001F49C78A1A0]
+    2 members:
+      PRP ParticipantsData_Key : NameProperty [o:0x0]
+      PRP ParticipantsData : StructProperty of /Script/DlgSystem.DlgParticipantData [o:0x8]
+
+### MapProperty /Script/DlgSystem.DlgDialogueParticipant:GetGameplayTagToAudioComponentMap:ReturnValue  [000001F49C78A240]
+    2 members:
+      PRP ReturnValue_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Engine.AudioComponent [o:0x8]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetBoolNames:ParticipantName  [000001F4ACD00160]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetClassBoolNames:ParticipantName  [000001F4ACD00080]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetClassFloatNames:ParticipantName  [000001F4ACD01C80]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetClassIntNames:ParticipantName  [000001F4ACD01BA0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetClassNameNames:ParticipantName  [000001F4ACD01AC0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetClassTextNames:ParticipantName  [000001F4ACD019E0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetConditions:ParticipantName  [000001F4ACD01900]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetCustomEvents:ParticipantName  [000001F4ACD01890]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetDialogueFName:ReturnValue  [000001F4ACD01820]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetEvents:ParticipantName  [000001F4ACD01660]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetFloatNames:ParticipantName  [000001F4ACD01580]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetIntNames:ParticipantName  [000001F4ACD014A0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetNameNames:ParticipantName  [000001F4ACD01350]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantBoolNames:ParticipantName  [000001F4ACD01190]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClass:ParticipantName  [000001F4ACD01120]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassBoolNames:ParticipantName  [000001F4ACD01040]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFNameNames:ParticipantName  [000001F4ACD00E80]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFTextNames:ParticipantName  [000001F4ACD02A80]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFloatNames:ParticipantName  [000001F4ACD00F60]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassIntNames:ParticipantName  [000001F4ACD029A0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantConditionNames:ParticipantName  [000001F4ACD028C0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomConditions:ParticipantName  [000001F4ACD02850]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomEvents:ParticipantName  [000001F4ACD027E0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomTextArguments:ParticipantName  [000001F4ACD02770]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantEventNames:ParticipantName  [000001F4ACD02690]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantFNameNames:ParticipantName  [000001F4ACD024D0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantFloatNames:ParticipantName  [000001F4ACD025B0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:GetParticipantIntNames:ParticipantName  [000001F4ACD023F0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:HasParticipant:ParticipantName  [000001F4ACD021C0]
+
+### NameProperty /Script/DlgSystem.DlgDialogue:Name  [000001F4ACD01F90]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:CheckCondition:ConditionName  [000001F4ACD01EB0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetBoolValue:ValueName  [000001F4ACD01E40]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetFloatValue:ValueName  [000001F4ACD01D60]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetIntValue:ValueName  [000001F4ACD03960]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetNameValue:ReturnValue  [000001F4ACD038F0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetNameValue:ValueName  [000001F4ACD03880]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantDisplayName:ActiveSpeaker  [000001F4ACD037A0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantIcon:ActiveSpeaker  [000001F4ACD036C0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantIcon:ActiveSpeakerState  [000001F4ACD03730]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantName:ReturnValue  [000001F4ACD03650]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyBoolValue:ValueName  [000001F4ACD035E0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyFloatValue:ValueName  [000001F4ACD03500]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyIntValue:ValueName  [000001F4ACD03420]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyNameValue:NameValue  [000001F4ACD033B0]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:ModifyNameValue:ValueName  [000001F4ACD03340]
+
+### NameProperty /Script/DlgSystem.DlgDialogueParticipant:OnDialogueEvent:EventName  [000001F4ACD032D0]
+
+### NameProperty ParticipantsData./Script/DlgSystem.DlgDialogue:ParticipantsData_Key  [000001F4ACD02000]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgDialogue:GetParticipantsData:ReturnValue_Key  [000001F4ACD02310]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogue:GetMutableNodeFromGUID:ReturnValue  [000001F4ACCFB480]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogue:GetMutableNodeFromIndex:ReturnValue  [000001F4ACCFB380]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogue:GetMutableStartNode:ReturnValue  [000001F4ACCFB300]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogue:StartNode  [000001F4ACCFA800]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogueParticipant:CheckCondition:Context  [000001F4ACCFC480]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantIcon:ReturnValue  [000001F4ACCFC180]
+
+### ObjectProperty /Script/DlgSystem.DlgDialogueParticipant:OnDialogueEvent:Context  [000001F4ACCFBD00]
+
+### ObjectProperty Nodes./Script/DlgSystem.DlgDialogue:Nodes  [000001F4ACCFA980]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgDialogue:GetMutableStartNodes:ReturnValue  [000001F4ACCFB200]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgDialogue:GetNodes:ReturnValue  [000001F4ACCFB000]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgDialogueParticipant:GetGameplayTagToAudioComponentMap:ReturnValue  [000001F4ACCFC300]
+
+### ObjectProperty StartNodes./Script/DlgSystem.DlgDialogue:StartNodes  [000001F4ACCFA880]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:AllSpeakerStates  [000001F4A93E90A0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetAllParticipantNames:Outset  [000001F4A93E7C60]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetAllSpeakerStates:Outset  [000001F4A93E7BD0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetBoolNames:Outset  [000001F4A93E7B40]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetClassBoolNames:Outset  [000001F4A93E7AB0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetClassFloatNames:Outset  [000001F4A93E7A20]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetClassIntNames:Outset  [000001F4A93E7990]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetClassNameNames:Outset  [000001F4A93E7900]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetClassTextNames:Outset  [000001F4A93E7870]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetConditions:Outset  [000001F4A93E77E0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetCustomEvents:Outset  [000001F4A93E7750]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetEvents:Outset  [000001F4A93E76C0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetFloatNames:Outset  [000001F4A93E7630]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetIntNames:Outset  [000001F4A93E75A0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetNameNames:Outset  [000001F4A93E7510]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantBoolNames:ReturnValue  [000001F4A93E7480]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassBoolNames:ReturnValue  [000001F4A93E73F0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFNameNames:ReturnValue  [000001F4A93E72D0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFTextNames:ReturnValue  [000001F4A93E7240]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassFloatNames:ReturnValue  [000001F4A93E7360]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantClassIntNames:ReturnValue  [000001F4A93E71B0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantConditionNames:ReturnValue  [000001F4A93E7120]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomConditions:ReturnValue  [000001F4A93E7090]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomEvents:ReturnValue  [000001F4A93E7000]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantCustomTextArguments:ReturnValue  [000001F4A93E6F70]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantEventNames:ReturnValue  [000001F4A93E9400]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantFNameNames:ReturnValue  [000001F4A93E92E0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantFloatNames:ReturnValue  [000001F4A93E9370]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantIntNames:ReturnValue  [000001F4A93E9250]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetParticipantNames:ReturnValue  [000001F4A93E91C0]
+
+### SetProperty /Script/DlgSystem.DlgDialogue:GetSpeakerStates:ReturnValue  [000001F4A93E9130]
+
+### StrProperty /Script/DlgSystem.DlgDialogue:GetDialogueName:ReturnValue  [000001F4ACD017B0]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:BlockingDialogueTags  [000001F4ACCFA580]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:CancelDialogueTags  [000001F4ACCFC600]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:DialogueTags  [000001F4ACCFC580]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetBlockingTags:ReturnValue  [000001F4ACCF9700]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetCancelDlgTags:ReturnValue  [000001F4ACCF9680]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetDlgTags:ReturnValue  [000001F4ACCF9580]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetGUID:ReturnValue  [000001F4ACCFB500]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetMutableNodeFromGUID:NodeGuid  [000001F4ACCFB400]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetNodeGUIDForIndex:ReturnValue  [000001F4ACCFB180]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:GetNodeIndexForGUID:NodeGuid  [000001F4ACCFB100]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:Guid  [000001F4ACCFA600]
+
+### StructProperty /Script/DlgSystem.DlgDialogue:IsValidNodeGUID:NodeGuid  [000001F4ACCFAB80]
+
+### StructProperty NodesGUIDToIndexMap./Script/DlgSystem.DlgDialogue:NodesGUIDToIndexMap_Key  [000001F4ACCFAA80]
+
+### StructProperty ParticipantsClasses./Script/DlgSystem.DlgDialogue:ParticipantsClasses  [000001F4ACCFA680]
+
+### StructProperty ParticipantsData./Script/DlgSystem.DlgDialogue:ParticipantsData  [000001F4ACCFA780]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgDialogue:GetParticipantClasses:ReturnValue  [000001F4ACCFAE80]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgDialogue:GetParticipantsData:ReturnValue  [000001F4ACCFAC80]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgDialogueParticipant:GetGameplayTagToAudioComponentMap:ReturnValue_Key  [000001F4ACCFC380]
+
+### TextProperty /Script/DlgSystem.DlgDialogueParticipant:GetParticipantDisplayName:ReturnValue  [000001F4ACD03810]
+

@@ -1,0 +1,615 @@
+﻿### ArrayProperty /Script/DlgSystem.DlgManager:CanStartDialogue:Participants  [000001F4ACCFBA80]
+    1 members:
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames:OutArray  [000001F4ACCFB800]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames:OutArray  [000001F4ACCFB780]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesEventNames:OutArray  [000001F4ACCFB700]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames:OutArray  [000001F4ACCFB680]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesIntNames:OutArray  [000001F4ACCFB600]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesNameNames:OutArray  [000001F4ACCFD680]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesParticipantNames:OutArray  [000001F4ACCFD600]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetAllDialoguesSpeakerStates:OutArray  [000001F4ACCFD580]
+    1 members:
+      PRP OutArray : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames:ReturnValue  [000001F4ACCFD400]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames:ReturnValue  [000001F4ACCFD380]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames:ReturnValue  [000001F4ACCFD300]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames:ReturnValue  [000001F4ACCFD180]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames:ReturnValue  [000001F4ACCFD280]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames:ReturnValue  [000001F4ACCFD080]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantNames:ReturnValue  [000001F4ACCFD000]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetDialoguesSpeakerStates:ReturnValue  [000001F4ACCFCF80]
+    1 members:
+      PRP ReturnValue : NameProperty [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface:ReturnValue  [000001F4ACCFCD80]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:Participants  [000001F4ACCFE680]
+    1 members:
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:Participants  [000001F4ACCFE400]
+    1 members:
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### ArrayProperty /Script/DlgSystem.DlgManager:StartDialogue:Participants  [000001F4ACCFE080]
+    1 members:
+      PRP Participants : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### BoolProperty /Script/DlgSystem.DlgManager:CanStartDialogue:ReturnValue  [000001F4ACCFBB00]
+
+### BoolProperty /Script/DlgSystem.DlgManager:DoesObjectImplementDialogueParticipantInterface:ReturnValue  [000001F4ACCFB900]
+
+### BoolProperty /Script/DlgSystem.DlgManager:IsObjectACustomCondition:ReturnValue  [000001F4ACCFCC00]
+
+### BoolProperty /Script/DlgSystem.DlgManager:IsObjectACustomEvent:ReturnValue  [000001F4ACCFCB00]
+
+### BoolProperty /Script/DlgSystem.DlgManager:IsObjectACustomTextArgument:ReturnValue  [000001F4ACCFCA00]
+
+### BoolProperty /Script/DlgSystem.DlgManager:IsObjectANodeData:ReturnValue  [000001F4ACCFC900]
+
+### BoolProperty /Script/DlgSystem.DlgManager:RegisterDialogueConsoleCommands:ReturnValue  [000001F4ACCFC800]
+
+### BoolProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:bFireEnterEvents  [000001F4ACCFC700]
+
+### BoolProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:bFireEnterEvents  [000001F4ACCFE480]
+
+### BoolProperty /Script/DlgSystem.DlgManager:UnregisterDialogueConsoleCommands:ReturnValue  [000001F4ACCFF580]
+
+### Class /Script/DlgSystem.DlgManager  [00007FF46F014D38]
+    super: /Script/Engine.BlueprintFunctionLibrary
+    40 members:
+      FUN UnregisterDialogueConsoleCommands 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN StartMonologue 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participant : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x10]
+      FUN StartDialogueWithDefaultParticipants 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x10]
+      FUN StartDialogue4 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+          param Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+          param Participant2 : ObjectProperty of /Script/CoreUObject.Object [o:0x18]
+          param Participant3 : ObjectProperty of /Script/CoreUObject.Object [o:0x20]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x28]
+      FUN StartDialogue3 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+          param Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+          param Participant2 : ObjectProperty of /Script/CoreUObject.Object [o:0x18]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x20]
+      FUN StartDialogue2 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+          param Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x18]
+      FUN StartDialogue 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:StartDialogue:Participants [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x18]
+      FUN SetDialoguePersistentWorldContextObject 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      FUN SetDialogueHistory 
+          param DlgHistory : MapProperty [o:0x0]
+      FUN ResumeDialogueFromNodeIndex 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:Participants [o:0x8]
+          param StartIndex : IntProperty [o:0x18]
+          param AlreadyVisitedNodes : SetProperty [o:0x20]
+          param bFireEnterEvents : BoolProperty [o:0x70]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x78]
+      FUN ResumeDialogueFromNodeGUID 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:Participants [o:0x8]
+          param StartNodeGUID : StructProperty of /Script/CoreUObject.Guid [o:0x18]
+          param AlreadyVisitedNodes : SetProperty [o:0x28]
+          param bFireEnterEvents : BoolProperty [o:0x78]
+          param ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x80]
+      FUN RegisterDialogueConsoleCommands 
+          param ReturnValue : BoolProperty [o:0x0]
+      FUN IsObjectANodeData 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN IsObjectACustomTextArgument 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN IsObjectACustomEvent 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN IsObjectACustomCondition 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN GetObjectsWithDialogueParticipantInterface 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface:ReturnValue [o:0x8]
+      FUN GetObjectsMapWithDialogueParticipantInterface 
+          param WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : MapProperty [o:0x8]
+      FUN GetDialogueWorld 
+          param ReturnValue : ObjectProperty of /Script/Engine.World [o:0x0]
+      FUN GetDialoguesSpeakerStates 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesSpeakerStates:ReturnValue [o:0x0]
+      FUN GetDialoguesParticipantNames 
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantNames:ReturnValue [o:0x0]
+      FUN GetDialoguesParticipantIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames:ReturnValue [o:0x8]
+      FUN GetDialoguesParticipantFNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames:ReturnValue [o:0x8]
+      FUN GetDialoguesParticipantFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames:ReturnValue [o:0x8]
+      FUN GetDialoguesParticipantEventNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames:ReturnValue [o:0x8]
+      FUN GetDialoguesParticipantConditionNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames:ReturnValue [o:0x8]
+      FUN GetDialoguesParticipantBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames:ReturnValue [o:0x8]
+      FUN GetDialogueHistory 
+          param ReturnValue : MapProperty [o:0x0]
+      FUN GetAllDialoguesSpeakerStates 
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesSpeakerStates:OutArray [o:0x0]
+      FUN GetAllDialoguesParticipantNames 
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesParticipantNames:OutArray [o:0x0]
+      FUN GetAllDialoguesNameNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesNameNames:OutArray [o:0x8]
+      FUN GetAllDialoguesIntNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesIntNames:OutArray [o:0x8]
+      FUN GetAllDialoguesFloatNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames:OutArray [o:0x8]
+      FUN GetAllDialoguesEventNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesEventNames:OutArray [o:0x8]
+      FUN GetAllDialoguesConditionNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames:OutArray [o:0x8]
+      FUN GetAllDialoguesBoolNames 
+          param ParticipantName : NameProperty [o:0x0]
+          param OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames:OutArray [o:0x8]
+      FUN DoesObjectImplementDialogueParticipantInterface 
+          param Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN ClearDialoguePersistentWorldContextObject 
+      FUN ClearDialogueHistory 
+      FUN CanStartDialogue 
+          param Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+          param Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:CanStartDialogue:Participants [o:0x8]
+          param ReturnValue : BoolProperty [o:0x18]
+
+### Function /Script/DlgSystem.DlgManager:CanStartDialogue  [00007FF46F6C9F78]
+    3 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:CanStartDialogue:Participants [o:0x8]
+      PRP ReturnValue : BoolProperty [o:0x18]
+
+### Function /Script/DlgSystem.DlgManager:ClearDialogueHistory  [00007FF46F6CA058]
+
+### Function /Script/DlgSystem.DlgManager:ClearDialoguePersistentWorldContextObject  [00007FF46F6CA138]
+
+### Function /Script/DlgSystem.DlgManager:DoesObjectImplementDialogueParticipantInterface  [00007FF46F6CA218]
+    2 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames  [00007FF46F6CA2F8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames  [00007FF46F6CA3D8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesEventNames  [00007FF46F6CA4B8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesEventNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames  [00007FF46F6CA598]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesIntNames  [00007FF46F6CA678]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesIntNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesNameNames  [00007FF46F6CA758]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesNameNames:OutArray [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesParticipantNames  [00007FF46F6CA838]
+    1 members:
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesParticipantNames:OutArray [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetAllDialoguesSpeakerStates  [00007FF46F6CA918]
+    1 members:
+      PRP OutArray : ArrayProperty of OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesSpeakerStates:OutArray [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetDialogueHistory  [00007FF46F6CA9F8]
+    1 members:
+      PRP ReturnValue : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetDialogueWorld  [00007FF46F6CB1D8]
+    1 members:
+      PRP ReturnValue : ObjectProperty of /Script/Engine.World [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames  [00007FF46F6CAAD8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames  [00007FF46F6CABB8]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames  [00007FF46F6CAC98]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames  [00007FF46F6CAE58]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames  [00007FF46F6CAD78]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames  [00007FF46F6CAF38]
+    2 members:
+      PRP ParticipantName : NameProperty [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesParticipantNames  [00007FF46F6CB018]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantNames:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetDialoguesSpeakerStates  [00007FF46F6CB0F8]
+    1 members:
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesSpeakerStates:ReturnValue [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:GetObjectsMapWithDialogueParticipantInterface  [00007FF46F6CB2B8]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : MapProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface  [00007FF46F6CB398]
+    2 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface:ReturnValue [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:IsObjectACustomCondition  [00007FF46F6CB478]
+    2 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:IsObjectACustomEvent  [00007FF46F6CB558]
+    2 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:IsObjectACustomTextArgument  [00007FF46F6CB638]
+    2 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:IsObjectANodeData  [00007FF46F6CB718]
+    2 members:
+      PRP Object : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/DlgSystem.DlgManager:RegisterDialogueConsoleCommands  [00007FF46F6CB7F8]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID  [00007FF46F6CB8D8]
+    6 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:Participants [o:0x8]
+      PRP StartNodeGUID : StructProperty of /Script/CoreUObject.Guid [o:0x18]
+      PRP AlreadyVisitedNodes : SetProperty [o:0x28]
+      PRP bFireEnterEvents : BoolProperty [o:0x78]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x80]
+
+### Function /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex  [00007FF46F6CB9B8]
+    6 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:Participants [o:0x8]
+      PRP StartIndex : IntProperty [o:0x18]
+      PRP AlreadyVisitedNodes : SetProperty [o:0x20]
+      PRP bFireEnterEvents : BoolProperty [o:0x70]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x78]
+
+### Function /Script/DlgSystem.DlgManager:SetDialogueHistory  [00007FF46F6CBA98]
+    1 members:
+      PRP DlgHistory : MapProperty [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:SetDialoguePersistentWorldContextObject  [00007FF46F6CBB78]
+    1 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+
+### Function /Script/DlgSystem.DlgManager:StartDialogue  [00007FF46F6CBC58]
+    3 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participants : ArrayProperty of Participants./Script/DlgSystem.DlgManager:StartDialogue:Participants [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x18]
+
+### Function /Script/DlgSystem.DlgManager:StartDialogue2  [00007FF46F6CBD38]
+    4 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      PRP Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x18]
+
+### Function /Script/DlgSystem.DlgManager:StartDialogue3  [00007FF46F6CBE18]
+    5 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      PRP Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+      PRP Participant2 : ObjectProperty of /Script/CoreUObject.Object [o:0x18]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x20]
+
+### Function /Script/DlgSystem.DlgManager:StartDialogue4  [00007FF46F6CBEF8]
+    6 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participant0 : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      PRP Participant1 : ObjectProperty of /Script/CoreUObject.Object [o:0x10]
+      PRP Participant2 : ObjectProperty of /Script/CoreUObject.Object [o:0x18]
+      PRP Participant3 : ObjectProperty of /Script/CoreUObject.Object [o:0x20]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x28]
+
+### Function /Script/DlgSystem.DlgManager:StartDialogueWithDefaultParticipants  [00007FF46F6CBFD8]
+    3 members:
+      PRP WorldContextObject : ObjectProperty of /Script/CoreUObject.Object [o:0x0]
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x10]
+
+### Function /Script/DlgSystem.DlgManager:StartMonologue  [00007FF46F6CC0B8]
+    3 members:
+      PRP Dialogue : ObjectProperty of /Script/DlgSystem.DlgDialogue [o:0x0]
+      PRP Participant : ObjectProperty of /Script/CoreUObject.Object [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/DlgSystem.DlgContext [o:0x10]
+
+### Function /Script/DlgSystem.DlgManager:UnregisterDialogueConsoleCommands  [00007FF46F6CC198]
+    1 members:
+      PRP ReturnValue : BoolProperty [o:0x0]
+
+### IntProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:StartIndex  [000001F4ACD03EA0]
+
+### MapProperty /Script/DlgSystem.DlgManager:GetDialogueHistory:ReturnValue  [000001F49C78A2E0]
+    2 members:
+      PRP ReturnValue_Key : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgHistory [o:0x10]
+
+### MapProperty /Script/DlgSystem.DlgManager:GetObjectsMapWithDialogueParticipantInterface:ReturnValue  [000001F49C787CC0]
+    2 members:
+      PRP ReturnValue_Key : NameProperty [o:0x0]
+      PRP ReturnValue : StructProperty of /Script/DlgSystem.DlgObjectsArray [o:0x8]
+
+### MapProperty /Script/DlgSystem.DlgManager:SetDialogueHistory:DlgHistory  [000001F49C78A420]
+    2 members:
+      PRP DlgHistory_Key : StructProperty of /Script/CoreUObject.Guid [o:0x0]
+      PRP DlgHistory : StructProperty of /Script/DlgSystem.DlgHistory [o:0x10]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames:ParticipantName  [000001F4ACD02E70]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames:ParticipantName  [000001F4ACD02D90]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesEventNames:ParticipantName  [000001F4ACD02CB0]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames:ParticipantName  [000001F4ACD02BD0]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesIntNames:ParticipantName  [000001F4ACD047D0]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetAllDialoguesNameNames:ParticipantName  [000001F4ACD046F0]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames:ParticipantName  [000001F4ACD04530]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames:ParticipantName  [000001F4ACD04450]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames:ParticipantName  [000001F4ACD04370]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames:ParticipantName  [000001F4ACD041B0]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames:ParticipantName  [000001F4ACD04290]
+
+### NameProperty /Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames:ParticipantName  [000001F4ACD040D0]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesBoolNames:OutArray  [000001F4ACD02EE0]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesConditionNames:OutArray  [000001F4ACD02E00]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesEventNames:OutArray  [000001F4ACD02D20]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesFloatNames:OutArray  [000001F4ACD02C40]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesIntNames:OutArray  [000001F4ACD02B60]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesNameNames:OutArray  [000001F4ACD04760]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesParticipantNames:OutArray  [000001F4ACD04680]
+
+### NameProperty OutArray./Script/DlgSystem.DlgManager:GetAllDialoguesSpeakerStates:OutArray  [000001F4ACD04610]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantBoolNames:ReturnValue  [000001F4ACD045A0]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantConditionNames:ReturnValue  [000001F4ACD044C0]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantEventNames:ReturnValue  [000001F4ACD043E0]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFNameNames:ReturnValue  [000001F4ACD04220]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantFloatNames:ReturnValue  [000001F4ACD04300]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantIntNames:ReturnValue  [000001F4ACD04140]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesParticipantNames:ReturnValue  [000001F4ACD04060]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialoguesSpeakerStates:ReturnValue  [000001F4ACD03FF0]
+
+### NameProperty ReturnValue./Script/DlgSystem.DlgManager:GetObjectsMapWithDialogueParticipantInterface:ReturnValue_Key  [000001F4ACD03F80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:CanStartDialogue:Dialogue  [000001F4ACCFB980]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:DoesObjectImplementDialogueParticipantInterface:Object  [000001F4ACCFB880]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:GetDialogueWorld:ReturnValue  [000001F4ACCFCF00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:GetObjectsMapWithDialogueParticipantInterface:WorldContextObject  [000001F4ACCFCE00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface:WorldContextObject  [000001F4ACCFCC80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:IsObjectACustomCondition:Object  [000001F4ACCFCB80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:IsObjectACustomEvent:Object  [000001F4ACCFCA80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:IsObjectACustomTextArgument:Object  [000001F4ACCFC980]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:IsObjectANodeData:Object  [000001F4ACCFC880]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:Dialogue  [000001F4ACCFE580]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:ReturnValue  [000001F4ACCFC780]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:Dialogue  [000001F4ACCFE300]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:ReturnValue  [000001F4ACCFE500]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:SetDialoguePersistentWorldContextObject:WorldContextObject  [000001F4ACCFE180]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue2:Dialogue  [000001F4ACCFDD80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue2:Participant0  [000001F4ACCFDE00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue2:Participant1  [000001F4ACCFDE80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue2:ReturnValue  [000001F4ACCFDF00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue3:Dialogue  [000001F4ACCFDB00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue3:Participant0  [000001F4ACCFDB80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue3:Participant1  [000001F4ACCFDC00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue3:Participant2  [000001F4ACCFDC80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue3:ReturnValue  [000001F4ACCFDD00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:Dialogue  [000001F4ACCFD800]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:Participant0  [000001F4ACCFD880]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:Participant1  [000001F4ACCFD900]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:Participant2  [000001F4ACCFD980]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:Participant3  [000001F4ACCFDA00]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue4:ReturnValue  [000001F4ACCFDA80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue:Dialogue  [000001F4ACCFDF80]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogue:ReturnValue  [000001F4ACCFE100]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogueWithDefaultParticipants:Dialogue  [000001F4ACCFD700]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogueWithDefaultParticipants:ReturnValue  [000001F4ACCFD780]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartDialogueWithDefaultParticipants:WorldContextObject  [000001F4ACCFF780]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartMonologue:Dialogue  [000001F4ACCFF600]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartMonologue:Participant  [000001F4ACCFF680]
+
+### ObjectProperty /Script/DlgSystem.DlgManager:StartMonologue:ReturnValue  [000001F4ACCFF700]
+
+### ObjectProperty Participants./Script/DlgSystem.DlgManager:CanStartDialogue:Participants  [000001F4ACCFBA00]
+
+### ObjectProperty Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:Participants  [000001F4ACCFE600]
+
+### ObjectProperty Participants./Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:Participants  [000001F4ACCFE380]
+
+### ObjectProperty Participants./Script/DlgSystem.DlgManager:StartDialogue:Participants  [000001F4ACCFE000]
+
+### ObjectProperty ReturnValue./Script/DlgSystem.DlgManager:GetObjectsWithDialogueParticipantInterface:ReturnValue  [000001F4ACCFCD00]
+
+### SetProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:AlreadyVisitedNodes  [000001F4A93E9010]
+
+### SetProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeIndex:AlreadyVisitedNodes  [000001F4A93E8F80]
+
+### StructProperty /Script/DlgSystem.DlgManager:ResumeDialogueFromNodeGUID:StartNodeGUID  [000001F4ACCFE700]
+
+### StructProperty DlgHistory./Script/DlgSystem.DlgManager:SetDialogueHistory:DlgHistory  [000001F4ACCFE200]
+
+### StructProperty DlgHistory./Script/DlgSystem.DlgManager:SetDialogueHistory:DlgHistory_Key  [000001F4ACCFE280]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialogueHistory:ReturnValue  [000001F4ACCFD480]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgManager:GetDialogueHistory:ReturnValue_Key  [000001F4ACCFD500]
+
+### StructProperty ReturnValue./Script/DlgSystem.DlgManager:GetObjectsMapWithDialogueParticipantInterface:ReturnValue  [000001F4ACCFCE80]
+

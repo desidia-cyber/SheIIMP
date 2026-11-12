@@ -1,0 +1,2034 @@
+// coop_progress.cpp -- module 7: world progression (store B, quest log, data layers).
+//
+// Ported from ms2-coop\mod\CoopMod\Scripts\main.lua lines 2603-3343 (READ-ONLY reference).
+// Owns: coop::ProgressState (state().progress) -- WP.b / WP.q / WP.d, the SpartaWorldStateHelper
+// CDO, the quest log component, the DataLayerManager, the three test hooks and their verdicts.
+//
+// Behaviour is ported bug-for-bug from the Lua; every log line a harness greps is byte-identical.
+// See docs/NATIVE-PORT.md section 3.7 and section 4 items 16, 18, 19, 41.
+//
+// ---------------------------------------------------------------------------
+// CONTRACT-REQUEST -- engine-access primitives this module needs that
+// native\src\ms2_ue.h (the reflection core) does not have yet.
+//
+// The declarations below are repeated here ONLY so this translation unit compiles
+// and links against the assembled build. When the engine-access layer grows these,
+// delete the block: the signatures must match exactly.
+//
+//   1. ue::MapForEachRaw(const void* mapAddr, std::function<bool(void*, void*)>)
+//      Iterate ANY TMap by its address. Needed because USpartaSaveGame::ActorInts is a
+//      TMap<FName, FSpartaMapInt> and the real map is FSpartaMapInt::Map, i.e. a TMap at
+//      offset 0 INSIDE the value box -- it is not a property of any UObject, so the
+//      property-based ue::MapForEach() cannot reach it (main.lua:2716).
+//
+//   2. ue::MapAddNameInt(UObject*, const char* prop, const char* key, int32 value)
+//      TMap<FName,int32>::Add. The Lua adds to UQuestObject::CurrentQuestObjectiveProgress
+//      (main.lua:2919) -- a write, not a read.
+//
+//   3. ue::MapAddStrInt(UObject*, const char* prop, const char* key, int32 value)
+//      TMap<FString,int32>::Add. UQuestLogComponent_C::NPCRelationships and
+//      ::NarrativeEvents are FString-keyed (verified in the shipped SDK, see below),
+//      and the Lua adds to both (main.lua:3011, 3224).
+//
+// No other gap: everything else uses ue::MakeFName / ue::ToString / ue::ToUtf8 /
+// ue::TextToString / ue::MapForEach / ue::TArray / ue::Params, as the brief specifies.
+// ---------------------------------------------------------------------------
+//
+// SDK facts verified against research\raw\Dumper7\SDK (generated from this exact exe).
+// The four that contradict docs\NATIVE-PORT.md are marked (!):
+//
+//   USpartaSaveSubSystem::GetCurrentWorldStateSave() const -> USpartaSaveGame*
+//   USpartaSaveGame::ActorInts  TMap<FName, FSpartaMapInt >   (FSpartaMapInt ::Map = TMap<FName,int32>)
+//   USpartaSaveGame::ActorBools TMap<FName, FSpartaMapBool>   (FSpartaMapBool::Map = TMap<FName,bool>)
+//   SpartaWorldStateHelper (CDO) WriteAnInt(WorldContextObject, OwnerName, ValueName, Value, bModify)
+//                                ReadAnInt (WorldContextObject, OwnerName, ValueName, out OutValue) -> bool
+//                                WriteABool(WorldContextObject, OwnerName, ValueName, bValue)
+//                                ReadABool (WorldContextObject, OwnerName, ValueName, out OutValue) -> bool
+//   UBPC_QuestLogComponent_C::AddNarrativeTag(Tag: FGameplayTag, SaveToDisk: bool)
+//                            RemoveNarrativeTag(Tag, SaveToDisk)
+//                            AddNewQuest(QuestID: FName)   CompleteQuest(QuestID: FName)
+//                            TurnInQuest(QuestID: FName)   TrackQuests()
+//                            NarrativeTags: FGameplayTagContainer   (::GameplayTags = TArray<FGameplayTag>)
+//                            CurrentActiveQuests / CompletedQuests: TArray<FName>
+//                            ActiveQuests: TArray<UBP_QuestObject_C*>
+//                            CurrentTrackedQuest: FName
+//          (!) NPCRelationships and NarrativeEvents are TMap<**FString**,int32>, not TMap<FName,int32>.
+//   UQuestObject::QuestID: FName, CurrentQuestStage: int32,
+//                 CurrentQuestObjectiveProgress: TMap<FName,int32>,
+//                 CurrentStageDetails: FQuestStage (0x00 StageName FText, 0x20 TArray<FQuestObjectives>)
+//                 FQuestObjectives{0x28 ObjectiveID FName, 0x30 Quantity int32, 0x34 bOptional bool, size 0x38}
+//   UBP_QuestObject_C::IsTurnedIn: bool;  ::OnObjectiveIDHeard(ObjectiveID: FName); ::InitializeQuest()
+//   UDataLayerManager::GetDataLayerInstanceRuntimeState(InDataLayerInstance) -> EDataLayerRuntimeState
+//                     SetDataLayerInstanceRuntimeState(InDataLayerInstance, InState, bInIsRecursive) -> bool
+//   UDataLayerInstanceWithAsset::DataLayerAsset: UDataLayerAsset*   (asset name = the layer key)
+//   UDataTableFunctionLibrary::GetDataTableRowNames(Table, out OutRowNames: TArray<FName>)
+//
+// Toggles: QS_OFF.txt / DL_OFF.txt (main.lua:2622-2626) -> Toggles::qsEnabled / dlEnabled.
+// ---------------------------------------------------------------------------
+
+#include <algorithm>
+#include <cmath>
+#include <cstdarg>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "coop_state.h"
+#include "ms2_ue.h"
+
+// ---------------------------------------------------------------------------
+// Every engine-access primitive this module needs is now declared in ms2_ue.h
+// (MakeFName / ToString / ToUtf8 / TextToString / MapForEach / MapForEachRaw /
+// MapAddNameInt / MapAddStrInt).  The per-module redeclaration block that used to
+// live here was removed by the integrator once the layer grew them.
+// ---------------------------------------------------------------------------
+
+namespace coop {
+namespace progress {
+namespace {
+
+// ===========================================================================
+// small local containers (the header forbids <map> in coop_state.h; the module
+// keeps its own indices here, as section 3.8 of NATIVE-PORT.md prescribes)
+// ===========================================================================
+
+// string -> string, in discovery order (Lua's `t[name] = str` tables).
+class StrStrMap {
+public:
+    const std::string* Find(const std::string& key) const {
+        for (const auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    std::string* Find(const std::string& key) {
+        for (auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    std::string Get(const std::string& key, const char* def = "") const {
+        const std::string* p = Find(key);
+        return p ? *p : std::string(def ? def : "");
+    }
+    void Set(const std::string& key, const std::string& v) {
+        if (std::string* p = Find(key)) {
+            *p = v;
+            return;
+        }
+        items_.emplace_back(key, v);
+    }
+    bool Erase(const std::string& key) {
+        for (std::size_t i = 0; i < items_.size(); ++i) {
+            if (items_[i].first == key) {
+                items_[i] = items_.back();
+                items_.pop_back();
+                return true;
+            }
+        }
+        return false;
+    }
+    std::size_t Size() const { return items_.size(); }
+    void Clear() { items_.clear(); }
+    const std::vector<std::pair<std::string, std::string>>& Items() const { return items_; }
+
+private:
+    std::vector<std::pair<std::string, std::string>> items_;
+};
+
+// name -> UObject* (WP.d.inst: data-layer name -> instance)
+class ObjMap {
+public:
+    ue::UObject** Find(const std::string& key) {
+        for (auto& it : items_) {
+            if (it.first == key) return &it.second;
+        }
+        return nullptr;
+    }
+    ue::UObject* Get(const std::string& key) {
+        ue::UObject** p = Find(key);
+        return p ? *p : nullptr;
+    }
+    void Set(const std::string& key, ue::UObject* v) {
+        if (ue::UObject** p = Find(key)) {
+            *p = v;
+            return;
+        }
+        items_.emplace_back(key, v);
+    }
+    std::size_t Size() const { return items_.size(); }
+    void Clear() { items_.clear(); }
+
+private:
+    std::vector<std::pair<std::string, ue::UObject*>> items_;
+};
+
+// ---------------------------------------------------------------------------
+// module-private state that the shared ProgressState does not carry
+// (cleared by Reset() together with the pointers they belong to)
+// ---------------------------------------------------------------------------
+
+ObjMap    g_wdInst;          // WP.d.inst  : layer name -> UDataLayerInstanceWithAsset
+StrNumMap g_wdLast;          // WP.d.last  : layer name -> net::Now() of the last apply attempt
+StrStrMap g_wdOk;            // WP.d.ok    : layer name -> "2" / "23" accumulator (main.lua:3096)
+StrStrMap g_wbOk;            // WP.b.ok    : key -> "live" | "base"      (main.lua:2779)
+StrStrMap g_wqOk;            // WP.q.ok    : name -> "add"|"remove"|"count"|"countset"|"stage"|"turnin"|"set"
+StrStrMap g_qHist;           // WP.q.hist  : name -> the exact "+"/"-" sequence (main.lua:2890)
+                             // The shared WpSet::histMap keeps the bitmask the header documents
+                             // (bit0 = a "+" happened, bit1 = a "-" happened), but wpJudge's
+                             // "tag went away and came back" test is the literal substring "-+"
+                             // in that sequence (main.lua:3293), which a bitmask cannot express --
+                             // so the sequence itself lives here.
+
+// ===========================================================================
+// tiny helpers
+// ===========================================================================
+
+inline State& S() { return coop::state(); }
+inline ProgressState& PS() { return coop::state().progress; }
+inline bool IsHost() { return S().local.role == "host"; }
+
+// Lua `%w` is ASCII alphanumeric in the C locale.
+inline bool IsWordChar(char c) {
+    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+
+// "^[%w_]+$"
+bool MatchName(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_') return false;
+    }
+    return true;
+}
+
+// "^[%w_%.]+$"
+bool MatchNameDot(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_' && c != '.') return false;
+    }
+    return true;
+}
+
+// "^[%w_%. ]+$"
+bool MatchNameDotSpace(const std::string& s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!IsWordChar(c) && c != '_' && c != '.' && c != ' ') return false;
+    }
+    return true;
+}
+
+bool HasSub(const std::string& hay, const char* needle) {
+    return hay.find(needle) != std::string::npos;
+}
+
+bool HasPrefix(const std::string& hay, const char* prefix) {
+    const std::size_t n = std::strlen(prefix);
+    return hay.size() >= n && std::memcmp(hay.data(), prefix, n) == 0;
+}
+
+// WpSet::ok is an int map in coop_state.h while the Lua stored the `how` string in it.
+// These are the codes; the strings themselves are kept module-locally (g_wbOk/g_wqOk/g_wdOk)
+// because the two verdicts compare them literally ("live", "add", "turnin", "23", "-+").
+int HowCode(const char* how) {
+    if (!how) return 0;
+    if (std::strcmp(how, "live") == 0) return 1;
+    if (std::strcmp(how, "base") == 0) return 2;
+    if (std::strcmp(how, "add") == 0) return 3;
+    if (std::strcmp(how, "remove") == 0) return 4;
+    if (std::strcmp(how, "count") == 0) return 5;
+    if (std::strcmp(how, "countset") == 0) return 6;
+    if (std::strcmp(how, "stage") == 0) return 7;
+    if (std::strcmp(how, "turnin") == 0) return 8;
+    if (std::strcmp(how, "set") == 0) return 9;
+    return 10;
+}
+
+
+// main.lua:2628 wpStr -- every FName -> string conversion goes through here so a
+// dead pointer degrades to "no value" exactly like the Lua's pcall did.
+bool NameStr(const ue::FName& n, std::string* out) {
+    out->clear();
+    if (n.IsNone()) {
+        *out = "None";   // FName::ToString() of FName() is literally "None"
+        return true;
+    }
+    std::string s = ue::ToString(n);
+    if (s.empty()) return false;
+    *out = s;
+    return true;
+}
+
+bool FStringStr(const ue::FString& s, std::string* out) {
+    out->clear();
+    std::string v = ue::ToUtf8(s);
+    *out = v;
+    return !v.empty();
+}
+
+// A ue::FName parameter block value built from a std::string.
+inline ue::FName FN(const std::string& s) { return ue::MakeFName(s.c_str()); }
+
+// ===========================================================================
+// object caches (main.lua:2687 wpObj / 2696 wpHelper / 2576 reload)
+// ===========================================================================
+
+ue::UObject* RefreshFirstOf(ue::UObject*& slot, const char* cls) {
+    if (net::Valid(slot)) return slot;
+    slot = nullptr;
+    ue::UObject* o = ue::FindFirstOf(cls);
+    if (net::Valid(o)) {
+        slot = o;
+        return o;
+    }
+    return nullptr;
+}
+
+// main.lua:2696 wpHelper()
+//
+// NOTE: the helper is a CDO ("/Script/Sparta.Default__SpartaWorldStateHelper"). ue::IsValid
+// deliberately reports CDOs as invalid (ms2_ue.h), so net::Valid() must NOT be used here --
+// it would make every store-B apply a silent no-op. CDOs are never GC'd, so the pointer is
+// stable for the process lifetime; PlausiblePtr is the only check that is ever needed.
+ue::UObject* Helper() {
+    ProgressState& ps = PS();
+    if (!ps.helper || !ue::PlausiblePtr(ps.helper)) {
+        ps.helper = ue::FindObject("/Script/Sparta.Default__SpartaWorldStateHelper");
+    }
+    return ue::PlausiblePtr(ps.helper) ? ps.helper : nullptr;
+}
+
+ue::UObject* SaveSubSystem() { return RefreshFirstOf(PS().sub, "SpartaSaveSubSystem"); }
+ue::UObject* QuestLog() { return RefreshFirstOf(PS().qlog, "BPC_QuestLogComponent_C"); }
+ue::UObject* LayerManager() { return RefreshFirstOf(PS().dlm, "DataLayerManager"); }
+
+// ===========================================================================
+// call helpers -- parameter names come from research\raw\Dumper7\SDK
+// (Sparta_parameters.hpp / BPC_QuestLogComponent_parameters.hpp / Engine_parameters.hpp)
+// ===========================================================================
+
+struct FGameplayTag {
+    ue::FName TagName;
+};
+
+// main.lua:2733 wbRead -- ReadAnInt / ReadABool through the helper CDO.
+bool ReadAnInt(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+               int32_t* out) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "ReadAnInt");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    if (!ue::Call(h, f, p.data())) return false;
+    if (out) *out = p.Get<int32_t>("OutValue");
+    return true;
+}
+
+bool ReadABool(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+               bool* out) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "ReadABool");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    if (!ue::Call(h, f, p.data())) return false;
+    if (out) *out = p.Get<bool>("OutValue");
+    return true;
+}
+
+bool WriteAnInt(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+                int v, bool modify) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "WriteAnInt");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    p.Set<int32_t>("Value", (int32_t)v);
+    p.Set<bool>("bModify", modify);
+    return ue::Call(h, f, p.data());
+}
+
+bool WriteABool(ue::UObject* h, ue::UObject* ctx, const std::string& owner, const std::string& vn,
+                bool value) {
+    if (!h) return false;
+    ue::UFunction* f = ue::FindFunction(h, "WriteABool");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("WorldContextObject", ctx);
+    p.Set<ue::FName>("OwnerName", FN(owner));
+    p.Set<ue::FName>("ValueName", FN(vn));
+    p.Set<bool>("bValue", value);
+    return ue::Call(h, f, p.data());
+}
+
+// main.lua:2730 wbRead (the t == "i" / t == "b" wrapper). Returns false when the
+// call itself did not go through, which is the Lua's `pcall` failure.
+bool WbRead(ue::UObject* h, const std::string& owner, const std::string& vn, char t,
+            ue::UObject* ctx, int* out) {
+    if (t == 'i') {
+        int32_t v = 0;
+        if (!ReadAnInt(h, ctx, owner, vn, &v)) return false;
+        if (out) *out = (int)v;
+        return true;
+    }
+    bool b = false;
+    if (!ReadABool(h, ctx, owner, vn, &b)) return false;
+    if (out) *out = b ? 1 : 0;
+    return true;
+}
+
+// main.lua:3029 / 3128 / 3147 -- AddNarrativeTag / RemoveNarrativeTag({TagName=...}, false)
+bool TagCall(ue::UObject* q, const char* fnName, const std::string& tag) {
+    if (!q || tag.empty()) return false;
+    ue::UFunction* f = ue::FindFunction(q, fnName);
+    if (!f) return false;
+    ue::Params p(f);
+    FGameplayTag t;
+    t.TagName = FN(tag);
+    p.Set<FGameplayTag>("Tag", t);
+    p.Set<bool>("SaveToDisk", false);
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:2978 AddNewQuest / 2979 CompleteQuest / 2981 TurnInQuest / 3171 / 3180 / 3221
+bool QuestCall(ue::UObject* q, const char* fnName, const std::string& id) {
+    if (!q) return false;
+    ue::UFunction* f = ue::FindFunction(q, fnName);
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FName>("QuestID", FN(id));
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:2914 / 2951 o:OnObjectiveIDHeard(FName(obj))
+bool HearObjective(ue::UObject* o, const std::string& obj) {
+    if (!o) return false;
+    ue::UFunction* f = ue::FindFunction(o, "OnObjectiveIDHeard");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::FName>("ObjectiveID", FN(obj));
+    return ue::Call(o, f, p.data());
+}
+
+// main.lua:2966 / 3244 o:InitializeQuest()
+bool InitializeQuest(ue::UObject* o) {
+    if (!o) return false;
+    ue::UFunction* f = ue::FindFunction(o, "InitializeQuest");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(o, f, p.data());
+}
+
+// main.lua:3037 q:TrackQuests()
+bool TrackQuests(ue::UObject* q) {
+    if (!q) return false;
+    ue::UFunction* f = ue::FindFunction(q, "TrackQuests");
+    if (!f) return false;
+    ue::Params p(f);
+    return ue::Call(q, f, p.data());
+}
+
+// main.lua:3068 dlm:GetDataLayerInstanceRuntimeState(inst) -> EDataLayerRuntimeState
+bool LayerState(ue::UObject* dlm, ue::UObject* inst, int* out) {
+    if (!dlm || !inst) return false;
+    ue::UFunction* f = ue::FindFunction(dlm, "GetDataLayerInstanceRuntimeState");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("InDataLayerInstance", inst);
+    if (!ue::Call(dlm, f, p.data())) return false;
+    if (out) *out = (int)p.Get<uint8_t>("ReturnValue");
+    return true;
+}
+
+// main.lua:3091 dlm:SetDataLayerInstanceRuntimeState(inst, state, false)
+bool SetLayerState(ue::UObject* dlm, ue::UObject* inst, int state) {
+    if (!dlm || !inst || state < 0 || state > 255) return false;
+    ue::UFunction* f = ue::FindFunction(dlm, "SetDataLayerInstanceRuntimeState");
+    if (!f) return false;
+    ue::Params p(f);
+    p.Set<ue::UObject*>("InDataLayerInstance", inst);
+    p.Set<uint8_t>("InState", (uint8_t)state);
+    p.Set<bool>("bInIsRecursive", false);
+    return ue::Call(dlm, f, p.data());
+}
+
+// ===========================================================================
+// the WpSet algorithms (main.lua:2636-2685)
+// ===========================================================================
+
+// main.lua:2636 wpPut
+void Put(WpSet& set, const std::string& name, int v, bool primed) {
+    int* cur = set.mine.Find(name);
+    if (!cur) set.order.push_back(name);
+    if (!cur || *cur != v) {
+        if (primed) set.recent.Set(name, net::Now());
+        set.mine.Set(name, v);
+    }
+}
+
+// main.lua:2648 wpPrime -- a set is "primed" once it has been readable for 10 s.
+void Prime(WpSet& set) {
+    const double now = net::Now();
+    if (set.firstAt == 0.0) set.firstAt = now;
+    if (now - set.firstAt >= kWpSettle) set.primed = true;
+}
+
+// main.lua:2653 wpSection -- live ring (20 s) plus a rotating window over everything.
+// Format is frozen on the wire: ,"wb":[["name",value,0|1],...]
+std::string Section(WpSet& set, const char* key, int window) {
+    std::string parts;
+    StrSet sent;
+    const double tnow = net::Now();
+
+    // for name, at in pairs(set.recent) -- live entries (they may carry -1 removals)
+    for (const auto& it : set.recent.Items()) {
+        if (tnow - it.value <= kLiveSecs) {
+            const int* v = set.mine.Find(it.key);
+            if (v) {
+                if (!parts.empty()) parts += ',';
+                parts += net::Fmt("[\"%s\",%d,1]", it.key.c_str(), *v);
+                sent.Add(it.key);
+            }
+        }
+    }
+
+    const int n = (int)set.order.size();
+    const int lim = window < n ? window : n;
+    for (int i = 1; i <= lim; ++i) {
+        const int idx = ((set.rot + i - 2) % n + n) % n;
+        const std::string& name = set.order[(std::size_t)idx];
+        const int* v = set.mine.Find(name);
+        if (v && *v > 0 && !sent.Has(name)) {
+            if (!parts.empty()) parts += ',';
+            parts += net::Fmt("[\"%s\",%d,0]", name.c_str(), *v);
+            sent.Add(name);
+        }
+    }
+    if (n > 0) set.rot = (set.rot + window - 1) % n + 1;
+
+    return net::Fmt(",\"%s\":[", key) + parts + "]";
+}
+
+// main.lua:2672 wpRead -- one peer entry. Live entries replace unconditionally
+// (they carry removals); a baseline entry only ever raises.
+void PeerEntry(WpSet& set, const std::string& name, int v, bool live) {
+    const int* pv = set.peer.Find(name);
+    const bool plive = set.peerLive.Get(name, 0) != 0;
+    if (live) {
+        if (!pv || *pv != v || !plive) {
+            set.peer.Set(name, v);
+            set.peerLive.Set(name, 1);
+            set.done.Erase(name);
+        }
+    } else if (!pv || (!plive && v > *pv)) {
+        set.peer.Set(name, v);
+        set.peerLive.Set(name, 0);
+    }
+}
+
+// main.lua:2675 `sec:gmatch('%["([^"]+)",(%-?%d+),(%d)%]')`
+void Read(WpSet& set, const std::string& line, const char* key) {
+    std::string sec;
+    if (!net::Section(line, key, &sec)) return;
+
+    std::size_t i = 0;
+    while (i + 1 < sec.size()) {
+        if (sec[i] == '[' && sec[i + 1] == '"') {
+            std::size_t j = i + 2;
+            std::string name;
+            while (j < sec.size() && sec[j] != '"') name.push_back(sec[j++]);
+            // name, then `",`
+            if (j + 1 < sec.size() && sec[j] == '"' && sec[j + 1] == ',') {
+                std::size_t k = j + 2;
+                bool neg = false;
+                if (k < sec.size() && sec[k] == '-') {
+                    neg = true;
+                    ++k;
+                }
+                bool any = false;
+                long long v = 0;
+                while (k < sec.size() && sec[k] >= '0' && sec[k] <= '9') {
+                    any = true;
+                    if (v < 100000000LL) v = v * 10 + (sec[k] - '0');
+                    ++k;
+                }
+                if (any && k + 2 < sec.size() && sec[k] == ',' &&
+                    (sec[k + 1] == '0' || sec[k + 1] == '1') && sec[k + 2] == ']') {
+                    if (!name.empty()) {
+                        PeerEntry(set, name, (int)(neg ? -v : v), sec[k + 1] == '1');
+                    }
+                    i = k + 3;
+                    continue;
+                }
+            }
+        }
+        ++i;
+    }
+}
+
+// ===========================================================================
+// ---- store B (main.lua:2703-2790) ----
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// TMap walks -- why this module does not call ue::MapForEach(o, prop, ...)
+//
+// ms2_ue.cpp takes the map geometry from FProperty offsets that are the UE4
+// layout: MapLayout 0x70/0x74, KeyProp 0x78, ValueProp 0x80.  In THIS build's
+// SDK (research\raw\Dumper7\SDK\Basic.hpp, "Predefined struct FMapProperty",
+// 0x0080 - 0x0070) FMapProperty has NO MapLayout and the two pointers sit at
+//   KeyProperty  0x0070
+//   ValueProperty 0x0078
+// so the property-based walk reads the *int32 halves of KeyProperty's pointer* as
+// the key/value offsets and then reads a ValueProperty from the 8 bytes AFTER the
+// property object.  Depending on what lives there it either fails PlausiblePtr
+// (MapForEach -> false, silently) or yields a nonsense valueSize (ReadMapInfo ->
+// false).  That is why store B came out as `wp=b:0/0` where the Lua had `b:5/5`
+// while nothing in either log said a word.
+//
+// The property OFFSET is still read through reflection (`PropOffset`), which is
+// layout-independent and matches the SDK exactly (USpartaSaveGame::ActorInts
+// 0x00C8, ActorBools 0x0168), and the walk then uses ue::MapForEachRaw, which
+// needs only the map's address plus the pair's key/value sizes -- all of which the
+// SDK states.  native\briefs\TMAP-PATCH.diff fixes the property-based form as
+// well, so every other module stops being wrong too; this path works with either.
+// ---------------------------------------------------------------------------
+enum class MapWalk { none = 0, raw = 1, property = 2 };
+
+const char* MapWalkName(MapWalk w) {
+    if (w == MapWalk::raw) return "raw";
+    if (w == MapWalk::property) return "property";
+    return "NONE";
+}
+
+bool WalkMapProp(ue::UObject* o, const char* prop, int32_t keySize, int32_t valueSize,
+                 int32_t pairAlign, const std::function<bool(void*, void*)>& fn, MapWalk* how,
+                 int32_t* rows) {
+    if (how) *how = MapWalk::none;
+    if (rows) *rows = 0;
+    if (!o || !prop || !fn) return false;
+
+    // The sparse-array ELEMENT is TPair<Key,Value> padded to the pair's alignment,
+    // plus HashNextId/HashIndex.  ue::MapForEachRaw derives the stride from
+    // keySize+valueSize, so hand it a value size that already includes the pair's
+    // tail padding -- then s4 and s8 come out identical and no stride probe (which
+    // cannot tell an empty FString from garbage) is involved at all.  For every map
+    // here: FName+int32 -> 4 (pair 12, align 4), FName+bool -> 4 (pair 12, align 4),
+    // FString+int32 -> 8 (pair 24, align 8), FName+FSpartaMapInt -> 0x50 (pair 88,
+    // align 8).  Nothing ever reads the padding: callers read the value's own size.
+    int32_t padded = valueSize;
+    if (pairAlign > 1) {
+        const int32_t pairEnd = ((keySize + valueSize + pairAlign - 1) / pairAlign) * pairAlign;
+        padded = pairEnd - keySize;
+        if (padded < valueSize) padded = valueSize;
+    }
+
+    int32_t n = 0;
+    auto counting = [&](void* k, void* v) -> bool {
+        ++n;
+        return fn(k, v);
+    };
+
+    const int32_t off = ue::PropOffset(o, prop);
+    if (off >= 0) {
+        const void* map = reinterpret_cast<const uint8_t*>(o) + off;
+        if (ue::MapForEachRaw(map, keySize, padded, counting)) {
+            if (how) *how = MapWalk::raw;
+            if (rows) *rows = n;
+            return true;
+        }
+    }
+
+    n = 0;
+    if (ue::MapForEach(o, prop, counting)) {
+        if (how) *how = MapWalk::property;
+        if (rows) *rows = n;
+        return true;
+    }
+    return false;
+}
+
+// The box size of FSpartaMapInt / FSpartaMapBool (Sparta_structs.hpp: both are
+// "// 0x0050 (0x0050 - 0x0000)" with a TMap<FName,X> Map at 0x0000).  It is the
+// *value* size of the outer TMap<FName, FSpartaMapI/Bool>, and the inner TMap
+// starts at 0 inside it.
+constexpr int32_t kSpartaMapBox = 0x50;
+
+// One line per gate, throttled: a net::Log line flushes the file and wbScan runs
+// twice per 2 Hz tick.
+class Gate {
+public:
+    bool Due(double now, double every = 5.0, int maxN = 20) {
+        if (count_ >= maxN) return false;
+        // net::Now() is the world clock and restarts on a level load.
+        if (have_ && now < last_) have_ = false;
+        if (have_ && now - last_ < every) return false;
+        have_ = true;
+        last_ = now;
+        ++count_;
+        return true;
+    }
+    int count() const { return count_; }
+
+private:
+    double last_ = 0.0;
+    bool   have_ = false;
+    int    count_ = 0;
+};
+
+Gate g_gateWb;      // wbScan as a whole
+Gate g_gateWbMap;   // per ActorInts/ActorBools walk
+Gate g_gateWqMap;   // the quest-loop maps (same defect, same report)
+
+// main.lua:2710 the `for _, mp in ipairs({"ActorInts","ActorBools"})` body.
+void ScanSaveMap(ue::UObject* ws, const char* prop, char t, bool primed, int* rowsOut,
+                 int* keptOut) {
+    WpSet& b = PS().wb;
+    const bool isInt = (t == 'i');
+
+    int ownerRows = 0, ownerKept = 0, innerRows = 0, keptRows = 0;
+    MapWalk how = MapWalk::none;
+    int32_t outerRows = 0;
+
+    const bool entered = WalkMapProp(ws, prop, 8, kSpartaMapBox, 8,
+        [&](void* key, void* value) -> bool {
+            ++ownerRows;
+            ue::FName ownerName;
+            std::memset(&ownerName, 0, sizeof(ownerName));
+            if (!ue::ReadMem(key, &ownerName, sizeof(ownerName))) return true;
+            std::string owner;
+            if (!NameStr(ownerName, &owner)) return true;
+            // Sparta_Player is the local player's own record (tutorials, counters)
+            if (owner == "Sparta_Player") return true;
+            if (!MatchName(owner)) return true;
+            ++ownerKept;
+            // FSpartaMapInt/Bool::Map is the FIRST member (0x0000), so the inner
+            // TMap starts exactly at the value box.  valueSize 4 covers the pair's
+            // tail padding for BOTH shapes (FName+int32 and FName+bool are 12 bytes
+            // at align 4); the bool branch still reads exactly one byte.
+            ue::MapForEachRaw(value, 8, 4, [&](void* k2, void* v2) -> bool {
+                ++innerRows;
+                ue::FName vnName;
+                std::memset(&vnName, 0, sizeof(vnName));
+                if (!ue::ReadMem(k2, &vnName, sizeof(vnName))) return true;
+                std::string vn;
+                if (!NameStr(vnName, &vn)) return true;
+                if (!MatchName(vn)) return true;
+                int n = 0;
+                if (isInt) {
+                    int32_t raw = 0;
+                    if (!ue::ReadMem(v2, &raw, sizeof(raw))) return true;
+                    n = (int)raw;
+                } else {
+                    bool raw = false;   // TMap<FName,bool>: one byte, Lua's wsBool() is the identity
+                    if (!ue::ReadMem(v2, &raw, 1)) return true;
+                    n = raw ? 1 : 0;
+                }
+                Put(b, std::string(1, t) + "|" + owner + "|" + vn, n, primed);
+                ++keptRows;
+                return true;
+            });
+            return true;
+        },
+        &how, &outerRows);
+
+    if (rowsOut) *rowsOut = ownerRows;
+    if (keptOut) *keptOut = keptRows;
+
+    // The gate that was silent while store B was empty: did the walk enter the map
+    // at all, how many owner rows did it see, and how many key/value rows did the
+    // inner map give up?  `path=NONE` means the TMap header did not validate at
+    // the property offset either -- then the offset itself is the thing to doubt.
+    if (g_gateWbMap.Due(net::Now()) &&
+        (!entered || ownerRows == 0 || innerRows == 0 || keptRows == 0)) {
+        net::Log("wb: %s path=%s entered=%d owners=%d kept=%d inner=%d rows_kept=%d off=0x%X",
+                 prop, MapWalkName(how), entered ? 1 : 0, ownerRows, ownerKept, innerRows,
+                 keptRows, (unsigned)ue::PropOffset(ws, prop));
+    }
+}
+
+// main.lua:2704 wbScan
+void WbScan() {
+    WpSet& b = PS().wb;
+    ue::UObject* sub = SaveSubSystem();
+    if (!sub) {
+        if (g_gateWb.Due(net::Now(), 10.0, 8))
+            net::Log("wbScan: no SpartaSaveSubSystem instance -- store B is invisible");
+        return;
+    }
+
+    // main.lua:2707 sub:GetCurrentWorldStateSave()
+    ue::UObject* ws = nullptr;
+    if (ue::UFunction* f = ue::FindFunction(sub, "GetCurrentWorldStateSave")) {
+        ue::Params p(f);
+        if (ue::Call(sub, f, p.data())) ws = p.Get<ue::UObject*>("ReturnValue");
+    }
+    if (!net::Valid(ws)) {
+        if (g_gateWb.Due(net::Now(), 10.0, 8))
+            net::Log("wbScan: GetCurrentWorldStateSave -> %s (valid=%d) -- store B is invisible",
+                     ws ? net::FullName(ws).c_str() : "null",
+                     (ws != nullptr && ue::IsValid(ws)) ? 1 : 0);
+        return;
+    }
+
+    const bool primed = b.primed;
+    int rowsI = 0, keptI = 0, rowsB = 0, keptB = 0;
+    ScanSaveMap(ws, "ActorInts", 'i', primed, &rowsI, &keptI);
+    ScanSaveMap(ws, "ActorBools", 'b', primed, &rowsB, &keptB);
+    Prime(b);
+
+    // `entries` is what the harness prints as `wp=b:<entries>/<peer>`.
+    if (g_gateWb.Due(net::Now())) {
+        net::Log("wbScan: save=%s ActorInts=%d/%d ActorBools=%d/%d entries=%d peer=%d primed=%d",
+                 ue::GetClassName(ws).c_str(), rowsI, keptI, rowsB, keptB,
+                 (int)b.order.size(), (int)b.peer.Size(), b.primed ? 1 : 0);
+    }
+}
+
+// main.lua:2742 wbRefreshActor -- only a chest's TimesUsed has a live follow-up; the
+// chest itself is module 6's, so the whole body is one call into coop_world.
+void WbRefreshActor(const std::string& owner, const std::string& vn, int v, bool live) {
+    if (vn != "TimesUsed") return;
+    world::ChestRefreshFromStoreB(owner, vn, v, live);
+}
+
+// `^(%a)|([%w_]+)|([%w_]+)$`
+bool SplitStoreKey(const std::string& name, std::string* t, std::string* owner, std::string* vn) {
+    if (name.size() < 5) return false;
+    const char c = name[0];
+    if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) return false;
+    if (name[1] != '|') return false;
+    std::size_t p = 2;
+    std::string a;
+    while (p < name.size() && name[p] != '|') a.push_back(name[p++]);
+    if (p >= name.size() || name[p] != '|') return false;
+    ++p;
+    std::string bb;
+    while (p < name.size()) bb.push_back(name[p++]);
+    if (!MatchName(a) || !MatchName(bb)) return false;
+    *t = std::string(1, c);
+    *owner = a;
+    *vn = bb;
+    return true;
+}
+
+// main.lua:2755 wbApply -- budget 6 per tick, write through the game's own helper,
+// read back, and fall back from bModify=true (which may mean "add") to a plain set.
+void WbApply() {
+    WpSet& b = PS().wb;
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* h = Helper();
+    if (!net::Valid(pawn) || !h || !b.primed) return;
+
+    struct Ent {
+        std::string name;
+        int v;
+        bool live;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(b.peer.Size());
+    for (const auto& it : b.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        e.live = b.peerLive.Get(it.key, 0) != 0;
+        ents.push_back(e);
+    }
+
+    int budget = kWbApplyBudget;
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        const int mine = b.mine.Get(e.name, 0);
+        if (!(e.v > mine) || b.done.Has(e.name)) continue;
+
+        --budget;
+        b.done.Add(e.name);
+
+        std::string t, owner, vn;
+        if (!SplitStoreKey(e.name, &t, &owner, &vn)) continue;
+
+        bool ok;
+        if (t == "i") {
+            ok = WriteAnInt(h, pawn, owner, vn, e.v, true);
+        } else {
+            ok = WriteABool(h, pawn, owner, vn, true);
+        }
+
+        bool haveBack = false;
+        int back = 0;
+        if (ok && WbRead(h, owner, vn, t[0], pawn, &back)) haveBack = true;
+
+        // bModify=true may mean "add": fall back to a plain set
+        if (ok && t == "i" && (!haveBack || back != e.v)) {
+            WriteAnInt(h, pawn, owner, vn, e.v, false);
+            int tmp = 0;
+            if (WbRead(h, owner, vn, 'i', pawn, &tmp)) {
+                back = tmp;
+                haveBack = true;
+            }
+        }
+
+        if (haveBack && back == e.v) {
+            ++b.applied;
+            g_wbOk.Set(e.name, e.live ? "live" : "base");
+            b.ok.Set(e.name, HowCode(e.live ? "live" : "base"));
+            Put(b, e.name, e.v, false);
+            net::Log("wb apply %s %s = %d (read back %s)", e.live ? "live" : "base", e.name.c_str(),
+                     e.v, haveBack ? net::Fmt("%d", back).c_str() : "nil");
+            WbRefreshActor(owner, vn, e.v, e.live);
+        } else {
+            ++b.fail;
+            net::Log("wb apply %s FAILED ok=%s back=%s %s", e.name.c_str(),
+                     ok ? "true" : "false", haveBack ? net::Fmt("%d", back).c_str() : "nil", "");
+        }
+    }
+}
+
+// ===========================================================================
+// ---- quest log (main.lua:2792-3056) ----
+// ===========================================================================
+
+// main.lua:2799 wqObj -- the live BP_QuestObject_C with this QuestID.
+ue::UObject* WqObj(ue::UObject* q, const std::string& id) {
+    if (!q || id.empty()) return nullptr;
+    ue::TArray<ue::UObject*> arr;
+    if (!ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", arr)) return nullptr;
+    if (!arr.Data || arr.Num <= 0 || arr.Num > 4096) return nullptr;
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        ue::UObject* o = arr.Data[i];
+        if (!net::Valid(o)) continue;
+        ue::FName qid;
+        std::memset(&qid, 0, sizeof(qid));
+        std::string got;
+        if (!ue::Get<ue::FName>(o, "QuestID", qid)) continue;
+        if (!NameStr(qid, &got)) continue;
+        if (got == id) return o;
+    }
+    return nullptr;
+}
+
+// main.lua:2811 wqProgress -- CurrentQuestObjectiveProgress as a name -> count table.
+// TMap<FName,int32> (Sparta_classes.hpp:0x0038(0x0050)) -- same raw walk as store B.
+void WqProgress(ue::UObject* o, StrIntMap* out) {
+    out->Clear();
+    if (!o) return;
+    MapWalk how = MapWalk::none;
+    int32_t rows = 0;
+    WalkMapProp(o, "CurrentQuestObjectiveProgress", 8, 4, 4,
+                [&](void* key, void* value) -> bool {
+                    ue::FName n;
+                    std::memset(&n, 0, sizeof(n));
+                    if (!ue::ReadMem(key, &n, sizeof(n))) return true;
+                    std::string name;
+                    if (!NameStr(n, &name)) return true;
+                    int32_t v = 0;
+                    if (!ue::ReadMem(value, &v, sizeof(v))) return true;
+                    out->Set(name, (int)v);
+                    return true;
+                },
+                &how, &rows);
+    if (rows == 0 && g_gateWqMap.Due(net::Now(), 5.0, 10)) {
+        net::Log("wq: CurrentQuestObjectiveProgress path=%s rows=%d class=%s -- objective counters unreadable",
+                 MapWalkName(how), (int)rows, ue::GetClassName(o).c_str());
+    }
+}
+
+// FQuestStage / FQuestObjectives offsets -- research\raw\Dumper7\SDK\Sparta_structs.hpp:
+//   FQuestStage { 0x00 StageName FText; 0x10 Description FText; 0x20 TArray<FQuestObjectives> Objectives; ... }
+//   FQuestObjectives { 0x00 ObjectiveName FText; 0x10 Description FText; 0x20 ObjectiveClass;
+//                      0x28 ObjectiveID FName; 0x30 Quantity int32; 0x34 bOptional bool; 0x35 bBonusXP; size 0x38 }
+// These are struct-internal offsets: reflection can find the *property* CurrentStageDetails
+// (via ue::PropOffset) but there is no property-based path into a struct value, so the
+// SDK numbers are used directly, exactly like ms2_ue.h uses the SDK's FField layout.
+constexpr int32_t kStageNameOff = 0x00;
+constexpr int32_t kStageObjectivesOff = 0x20;
+constexpr int32_t kObjectiveIdOff = 0x28;
+constexpr int32_t kObjectiveQtyOff = 0x30;
+constexpr int32_t kObjectiveOptOff = 0x34;
+constexpr int32_t kObjectiveSize = 0x38;
+
+// main.lua:2965 / 3243 wpStr(o.CurrentStageDetails.StageName) -- the FText at the head of
+// the current stage struct, only ever used for log lines.
+std::string StageNameOf(ue::UObject* o) {
+    if (!o) return "nil";
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return "nil";
+    const std::string s = ue::TextToString(reinterpret_cast<uint8_t*>(o) + off + kStageNameOff);
+    return s;
+}
+
+struct StageObjective {
+    std::string id;
+    int quantity;
+    bool optional;
+};
+
+// main.lua:2940 o.CurrentStageDetails.Objectives
+void StageObjectivesOf(ue::UObject* o, std::vector<StageObjective>* out) {
+    out->clear();
+    if (!o) return;
+    const int32_t off = ue::PropOffset(o, "CurrentStageDetails");
+    if (off < 0) return;
+    ue::TArray<uint8_t> arr;
+    if (!ue::ReadMem(reinterpret_cast<uint8_t*>(o) + off + kStageObjectivesOff, &arr, sizeof(arr)))
+        return;
+    if (!arr.Data || arr.Num <= 0 || arr.Num > 256) return;
+    for (int32_t i = 0; i < arr.Num; ++i) {
+        const uint8_t* el = arr.Data + (std::size_t)i * kObjectiveSize;
+        ue::FName n;
+        std::memset(&n, 0, sizeof(n));
+        if (!ue::ReadMem(el + kObjectiveIdOff, &n, sizeof(n))) continue;
+        StageObjective so;
+        if (!NameStr(n, &so.id)) continue;
+        int32_t q = 0;
+        if (!ue::ReadMem(el + kObjectiveQtyOff, &q, sizeof(q))) continue;
+        bool opt = false;
+        if (!ue::ReadMem(el + kObjectiveOptOff, &opt, 1)) continue;
+        so.quantity = (int)q;
+        so.optional = opt;
+        out->push_back(so);
+    }
+}
+
+// main.lua:2822 WQ_PRESENCE
+inline bool WqPresence(char c) { return c == 't' || c == 'a' || c == 'c' || c == 'k'; }
+
+// main.lua:2824 wqScan -- narrative tags, active/completed quests, the tracked quest, the
+// live quest objects' stage + objective counters, and the two NPC relationship maps.
+void WqScan() {
+    ProgressState& ps = PS();
+    WpSet& qset = ps.wq;
+    ue::UObject* q = QuestLog();
+    if (!q) return;
+
+    const bool primed = qset.primed;
+    StrIntMap now;
+
+    // main.lua:2830 q.NarrativeTags.GameplayTags  (FGameplayTagContainer at the property,
+    // ::GameplayTags is a TArray<FGameplayTag> at offset 0, FGameplayTag is one FName)
+    {
+        const int32_t off = ue::PropOffset(q, "NarrativeTags");
+        if (off >= 0) {
+            ue::TArray<FGameplayTag> arr;
+            if (ue::ReadMem(reinterpret_cast<uint8_t*>(q) + off, &arr, sizeof(arr)) && arr.Data &&
+                arr.Num > 0 && arr.Num <= 8192) {
+                for (int32_t i = 0; i < arr.Num; ++i) {
+                    std::string tag;
+                    if (!NameStr(arr.Data[i].TagName, &tag)) continue;
+                    if (!MatchNameDot(tag)) continue;
+                    now.Set("t|" + tag, 1);
+                }
+            }
+        }
+    }
+
+    // main.lua:2836 CurrentActiveQuests -> "a|", CompletedQuests -> "c|"
+    {
+        static const char* kNames[2] = {"CurrentActiveQuests", "CompletedQuests"};
+        static const char* kPrefix[2] = {"a|", "c|"};
+        for (int k = 0; k < 2; ++k) {
+            ue::TArray<ue::FName> arr;
+            if (!ue::Get<ue::TArray<ue::FName>>(q, kNames[k], arr)) continue;
+            if (!arr.Data || arr.Num <= 0 || arr.Num > 8192) continue;
+            for (int32_t i = 0; i < arr.Num; ++i) {
+                std::string id;
+                if (!NameStr(arr.Data[i], &id)) continue;
+                if (!MatchNameDot(id)) continue;
+                now.Set(std::string(kPrefix[k]) + id, 1);
+            }
+        }
+    }
+
+    // main.lua:2845 the tracked quest
+    {
+        ue::FName tr;
+        std::memset(&tr, 0, sizeof(tr));
+        std::string s;
+        if (ue::Get<ue::FName>(q, "CurrentTrackedQuest", tr) && NameStr(tr, &s) && s != "None" &&
+            MatchNameDot(s)) {
+            now.Set("k|" + s, 1);
+        }
+    }
+
+    // main.lua:2848 the live quest objects (completed ones stay in ActiveQuests too)
+    {
+        ue::TArray<ue::UObject*> arr;
+        if (ue::Get<ue::TArray<ue::UObject*>>(q, "ActiveQuests", arr) && arr.Data && arr.Num > 0 &&
+            arr.Num <= 4096) {
+            for (int32_t i = 0; i < arr.Num; ++i) {
+                ue::UObject* o = arr.Data[i];
+                if (!net::Valid(o)) continue;
+                ue::FName qid;
+                std::memset(&qid, 0, sizeof(qid));
+                std::string id;
+                if (!ue::Get<ue::FName>(o, "QuestID", qid)) continue;
+                if (!NameStr(qid, &id)) continue;
+                if (!MatchNameDot(id)) continue;
+
+                int32_t st = 0;
+                ue::Get<int32_t>(o, "CurrentQuestStage", st);
+                const std::string stageKey = net::Fmt("s|%s", id.c_str());
+                now.Set(stageKey, (int)st + 1);
+
+                StrIntMap prog;
+                WqProgress(o, &prog);
+                for (const auto& it : prog.Items()) {
+                    if (it.value > 0 && MatchNameDot(it.key)) {
+                        now.Set(net::Fmt("o|%s|%d|%s", id.c_str(), (int)st, it.key.c_str()),
+                                it.value);
+                    }
+                }
+
+                bool turned = false;
+                if (ue::Get<bool>(o, "IsTurnedIn", turned) && turned) now.Set("u|" + id, 1);
+            }
+        }
+    }
+
+    // main.lua:2863 NPCRelationships -> "r|", NarrativeEvents -> "e|"  (TMap<FString,int32>)
+    {
+        static const char* kNames[2] = {"NPCRelationships", "NarrativeEvents"};
+        static const char* kPrefix[2] = {"r|", "e|"};
+        for (int k = 0; k < 2; ++k) {
+            MapWalk how = MapWalk::none;
+            int32_t rows = 0;
+            WalkMapProp(q, kNames[k], 16, 4, 8,
+                        [&](void* key, void* value) -> bool {
+                            ue::FString fs;
+                            std::memset(&fs, 0, sizeof(fs));
+                            if (!ue::ReadMem(key, &fs, sizeof(fs))) return true;
+                            std::string name;
+                            if (!FStringStr(fs, &name)) return true;
+                            if (!MatchNameDotSpace(name)) return true;
+                            int32_t v = 0;
+                            ue::ReadMem(value, &v, sizeof(v));
+                            now.Set(std::string(kPrefix[k]) + name, (int)v);
+                            return true;
+                        },
+                        &how, &rows);
+            // An FString key is 16 bytes, not 8 -- the wrong key size silently gives
+            // garbage keys (and a stride probe that can never win), so say it once
+            // per map when a walk produced no rows at all.
+            if (rows == 0 && g_gateWqMap.Due(net::Now(), 5.0, 10)) {
+                net::Log("wq: %s path=%s rows=%d class=%s -- relationships/events unreadable",
+                         kNames[k], MapWalkName(how), (int)rows, ue::GetClassName(q).c_str());
+            }
+        }
+    }
+
+    // main.lua:2871 `for name, v in pairs(now)` -- adopt what the log reports
+    for (const auto& it : now.Items()) {
+        if (primed && qset.mine.Get(it.key, 0) == -1) qset.removed.Erase(it.key);
+        Put(qset, it.key, it.value, primed);
+    }
+
+    // main.lua:2875 a presence key that is gone locally travels as -1
+    {
+        std::vector<std::string> names;
+        names.reserve(qset.mine.Size());
+        for (const auto& it : qset.mine.Items()) names.push_back(it.key);
+        for (const std::string& name : names) {
+            if (qset.mine.Get(name, 0) != 1) continue;
+            if (now.Find(name) != nullptr) continue;
+            if (name.empty() || !WqPresence(name[0])) continue;
+            Put(qset, name, -1, primed);
+            if (primed) {
+                qset.removed.Add(name);
+                net::Log("wq local removal %s", name.c_str());
+            }
+        }
+    }
+
+    if (now.Size() > 0) Prime(qset);
+}
+
+// main.lua:2886 wqAdopt -- adopt an applied value so the next scan does not call it a change.
+void WqAdopt(const std::string& name, int v, const char* how, bool peerLive) {
+    WpSet& qset = PS().wq;
+    ++qset.applied;
+    g_wqOk.Set(name, how);
+    qset.ok.Set(name, HowCode(how));
+    // WP.q.hist[name] = (WP.q.hist[name] or "") .. (how == "remove" and "-" or "+")
+    const bool remove = (std::strcmp(how, "remove") == 0);
+    if (std::string* h = g_qHist.Find(name)) {
+        h->push_back(remove ? '-' : '+');
+    } else {
+        g_qHist.Set(name, remove ? "-" : "+");
+    }
+    qset.histMap.Set(name, qset.histMap.Get(name, 0) | (remove ? 2 : 1));
+
+    if (!qset.mine.Find(name)) qset.order.push_back(name);
+    qset.mine.Set(name, v);
+    qset.recent.Erase(name);
+    net::Log("wq apply %s %s %s = %d", peerLive ? "live" : "base", how, name.c_str(), v);
+}
+
+// main.lua:2901 wqApplyQuest -- one quest-state entry. false = "not ready yet, retry".
+bool WqApplyQuest(ue::UObject* q, const std::string& name, char kind, const std::string& rest,
+                  int peerV, bool peerLive) {
+    WpSet& qset = PS().wq;
+    const int mine = qset.mine.Get(name, 0);
+
+    if (kind == 'o') {
+        // rest = "<quest>|<stage>|<objective>"
+        std::string id, stageS, obj;
+        {
+            const std::size_t p1 = rest.find('|');
+            if (p1 == std::string::npos) return true;
+            const std::size_t p2 = rest.find('|', p1 + 1);
+            if (p2 == std::string::npos) return true;
+            id = rest.substr(0, p1);
+            stageS = rest.substr(p1 + 1, p2 - p1 - 1);
+            obj = rest.substr(p2 + 1);
+            if (stageS.empty() || obj.empty()) return true;
+            for (char c : stageS) {
+                if (c < '0' || c > '9') return true;
+            }
+        }
+        const int stage = std::atoi(stageS.c_str());
+        ue::UObject* o = WqObj(q, id);
+        if (!o) return false;
+
+        int32_t cur = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+        bool turned = false;
+        ue::Get<bool>(o, "IsTurnedIn", turned);
+        // a counter of a stage this side has already left (or a turned-in quest) is history
+        if (turned || (int)cur > stage) return true;
+        if ((int)cur < stage) return false;
+
+        StrIntMap prog;
+        WqProgress(o, &prog);
+        int have = prog.Get(obj, 0);
+        if (have >= peerV) {
+            WqAdopt(name, have, "count", peerLive);
+            return true;
+        }
+        // the game's own path: one "objective heard" per missing step
+        int steps = peerV - have;
+        if (steps > 10) steps = 10;
+        for (int i = 0; i < steps; ++i) HearObjective(o, obj);
+
+        WqProgress(o, &prog);
+        int back = prog.Get(obj, 0);
+        if (back >= peerV) {
+            WqAdopt(name, back, "count", peerLive);
+        } else {
+            // not an objective of this stage's handler: write the counter
+            ue::MapAddNameInt(o, "CurrentQuestObjectiveProgress", obj.c_str(), peerV);
+            WqProgress(o, &prog);
+            back = prog.Get(obj, 0);
+            if (back >= peerV) {
+                WqAdopt(name, back, "countset", peerLive);
+            } else {
+                ++qset.fail;
+                net::Log("wq apply count %s FAILED (have %d)", name.c_str(), back);
+            }
+        }
+        return true;
+    }
+
+    if (kind == 's') {
+        ue::UObject* o = WqObj(q, rest);
+        if (!o) return false;
+        bool turned = false;
+        if (ue::Get<bool>(o, "IsTurnedIn", turned) && turned) return false;
+
+        int32_t curRaw = 0;
+        ue::Get<int32_t>(o, "CurrentQuestStage", curRaw);
+        const int cur = (int)curRaw + 1;
+        if (cur >= peerV) {
+            qset.behindSince.Erase(name);
+            WqAdopt(name, cur, "stage", peerLive);
+            return true;
+        }
+
+        // the peer finished this stage: hear its objectives here so the game advances
+        // the stage itself (rewards included)
+        const std::string hk = net::Fmt("%s@%d", name.c_str(), cur);
+        if (!qset.heard.Find(hk)) {
+            qset.heard.Set(hk, 1);
+            std::vector<StageObjective> objs;
+            StageObjectivesOf(o, &objs);
+            StrIntMap prog;
+            WqProgress(o, &prog);
+            for (const StageObjective& e : objs) {
+                if (e.id.empty() || e.optional) continue;
+                int steps = e.quantity - prog.Get(e.id, 0);
+                if (steps > 10) steps = 10;
+                for (int i = 0; i < steps; ++i) HearObjective(o, e.id);
+            }
+            net::Log("wq stage %s: heard %d objective(s) of stage %d", rest.c_str(),
+                     (int)objs.size(), cur - 1);
+            qset.stageHeard.Set(rest, qset.stageHeard.Get(rest, 0) + (int)objs.size());
+            return false;
+        }
+
+        // still behind: give the game a moment, then write the stage
+        const double now = net::Now();
+        double* since = qset.behindSince.Find(name);
+        if (!since) {
+            qset.behindSince.Set(name, now);
+            since = qset.behindSince.Find(name);
+        }
+        if (now - *since < kWqStageWait) return false;
+        qset.behindSince.Erase(name);
+
+        const std::string before = StageNameOf(o);
+        bool ok = ue::Set<int32_t>(o, "CurrentQuestStage", (int32_t)(peerV - 1));
+        if (ok) ok = InitializeQuest(o);
+        const std::string after = StageNameOf(o);
+        int back = 0;
+        {
+            int32_t v = 0;
+            ue::Get<int32_t>(o, "CurrentQuestStage", v);
+            back = (int)v + 1;
+        }
+        if (ok && back == peerV) {
+            WqAdopt(name, back, "stage", peerLive);
+            net::Log("wq stage %s -> %d (stage name '%s' -> '%s')", rest.c_str(), peerV - 1,
+                     before.c_str(), after.c_str());
+        } else {
+            ++qset.fail;
+            net::Log("wq apply stage %s FAILED %s", name.c_str(), ok ? "" : "call failed");
+        }
+        return true;
+    }
+
+    if (kind == 'u') {
+        if (peerV != 1 || mine == 1) return true;
+        bool ok = true;
+        if (qset.mine.Get("c|" + rest, 0) != 1) {
+            if (qset.mine.Get("a|" + rest, 0) != 1) ok = QuestCall(q, "AddNewQuest", rest);
+            if (ok) ok = QuestCall(q, "CompleteQuest", rest);
+        }
+        if (ok) ok = QuestCall(q, "TurnInQuest", rest);
+
+        ue::UObject* o = WqObj(q, rest);
+        bool turned = false;
+        if (o) ue::Get<bool>(o, "IsTurnedIn", turned);
+        if (ok && o && turned) {
+            WqAdopt(name, 1, "turnin", peerLive);
+        } else {
+            ++qset.fail;
+            net::Log("wq apply turnin %s FAILED ok=%s %s", rest.c_str(), ok ? "true" : "false",
+                     ok ? "" : "call failed");
+        }
+        return true;
+    }
+
+    return true;
+}
+
+// main.lua:2991 wqApply -- budget 4 per tick.
+void WqApply() {
+    ProgressState& ps = PS();
+    WpSet& qset = ps.wq;
+    ue::UObject* q = ps.qlog;
+    if (!net::Valid(q) || !qset.primed) return;
+
+    struct Ent {
+        std::string name;
+        int v;
+        bool live;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(qset.peer.Size());
+    for (const auto& it : qset.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        e.live = qset.peerLive.Get(it.key, 0) != 0;
+        ents.push_back(e);
+    }
+
+    int budget = kWqApplyBudget;
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        const bool hasMine = qset.mine.Find(e.name) != nullptr;
+        const int mine = qset.mine.Get(e.name, 0);
+
+        // `^(%a)|(.+)$`
+        if (e.name.size() < 3 || e.name[1] != '|') continue;
+        const char kind = e.name[0];
+        if (!((kind >= 'a' && kind <= 'z') || (kind >= 'A' && kind <= 'Z'))) continue;
+        const std::string id = e.name.substr(2);
+
+        if (kind == 'o' || kind == 's' || kind == 'u') {
+            if (e.v > (hasMine ? mine : 0) && qset.tried.Get(e.name, 0) != e.v) {
+                // not ready yet (quest object missing / earlier stage): retry later, no budget used
+                if (WqApplyQuest(q, e.name, kind, id, e.v, e.live)) {
+                    qset.tried.Set(e.name, e.v);
+                    --budget;
+                }
+            }
+        } else if (kind == 'r' || kind == 'e') {
+            const bool want = (e.live && e.v != (hasMine ? mine : 0)) ||
+                              (!e.live && e.v > (hasMine ? mine : 0));
+            if (want && qset.tried.Get(e.name, 0) != e.v) {
+                --budget;
+                qset.tried.Set(e.name, e.v);
+                const char* map = (kind == 'r') ? "NPCRelationships" : "NarrativeEvents";
+                const bool ok = ue::MapAddStrInt(q, map, id.c_str(), e.v);
+                if (ok) {
+                    WqAdopt(e.name, e.v, "set", e.live);
+                } else {
+                    ++qset.fail;
+                    net::Log("wq apply %s FAILED: %s", e.name.c_str(), "map add");
+                }
+            }
+        } else {
+            const char* want = nullptr;
+            if (e.v == 1 && (!hasMine || mine != 1) &&
+                (e.live || !qset.removed.Has(e.name))) {
+                want = "add";
+            } else if (e.v == -1 && e.live && hasMine && mine == 1) {
+                want = "remove";
+            }
+            // never re-open a quest this side has completed
+            if (want && kind == 'a' && qset.mine.Get("c|" + id, 0) == 1) want = nullptr;
+            if (want && kind != 't' && std::strcmp(want, "remove") == 0) want = nullptr;
+            // tracked quest: live changes both ways, the guest follows the host's baseline
+            if (want && kind == 'k' && !e.live && IsHost()) want = nullptr;
+
+            if (want && !qset.done.Has(e.name)) {
+                --budget;
+                qset.done.Add(e.name);
+
+                bool ok = true;
+                const bool isAdd = (std::strcmp(want, "add") == 0);
+                if (kind == 't') {
+                    ok = TagCall(q, isAdd ? "AddNarrativeTag" : "RemoveNarrativeTag", id);
+                } else if (kind == 'a') {
+                    ok = QuestCall(q, "AddNewQuest", id);
+                } else if (kind == 'c') {
+                    if (qset.mine.Get("a|" + id, 0) != 1) ok = QuestCall(q, "AddNewQuest", id);
+                    if (ok) ok = QuestCall(q, "CompleteQuest", id);
+                } else if (kind == 'k') {
+                    ok = ue::Set<ue::FName>(q, "CurrentTrackedQuest", FN(id));
+                    if (ok) ok = TrackQuests(q);
+                }
+
+                if (ok) {
+                    WqAdopt(e.name, isAdd ? 1 : -1, want, e.live);
+                    if (isAdd) {
+                        qset.removed.Erase(e.name);
+                    } else {
+                        qset.removed.Add(e.name);
+                    }
+                    if (kind == 'k') {
+                        // the quest tracked before is no longer tracked here
+                        std::vector<std::string> names;
+                        for (const auto& it : qset.mine.Items()) names.push_back(it.key);
+                        for (const std::string& n2 : names) {
+                            if (n2 == e.name) continue;
+                            if (qset.mine.Get(n2, 0) != 1) continue;
+                            if (!HasPrefix(n2, "k|")) continue;
+                            qset.mine.Set(n2, -1);
+                        }
+                    }
+                } else {
+                    ++qset.fail;
+                    net::Log("wq apply %s %s FAILED: %s", want, e.name.c_str(), "call failed");
+                }
+            }
+        }
+    }
+}
+
+// ===========================================================================
+// ---- data layers (main.lua:3058-3106) ----
+// ===========================================================================
+
+// main.lua:3059 wdScan -- every DataLayerInstanceWithAsset, state+1 so that
+// "unloaded" (0) still goes out through the rotating window.
+void WdScan() {
+    WpSet& d = PS().wd;
+    ue::UObject* dlm = LayerManager();
+    if (!dlm) return;
+
+    const bool primed = d.primed;
+    for (ue::UObject* inst : ue::FindAllOf("DataLayerInstanceWithAsset")) {
+        if (!net::Valid(inst)) continue;
+        ue::UObject* asset = nullptr;
+        if (!ue::Get<ue::UObject*>(inst, "DataLayerAsset", asset)) continue;
+        // The asset is a loaded /Game/ package object, not a CDO; PlausiblePtr is the right
+        // test here because net::Valid() (ue::IsValid) would refuse a CDO-like object and
+        // silently stop every layer from ever being named.
+        if (!asset || !ue::PlausiblePtr(asset)) continue;
+        const std::string name = net::NameOf(asset);
+        if (!MatchName(name)) continue;
+
+        g_wdInst.Set(name, inst);
+
+        int st = 0;
+        if (LayerState(dlm, inst, &st)) Put(d, name, st + 1, primed);
+    }
+    Prime(d);
+}
+
+// main.lua:3076 wdApply -- guest only, budget 2, 10 s cooldown per layer, and never
+// while the players are more than 15 000 uu apart (their regions load different layers).
+void WdApply() {
+    ProgressState& ps = PS();
+    WpSet& d = ps.wd;
+    if (IsHost() || !d.primed) return;
+    ue::UObject* dlm = ps.dlm;
+    if (!net::Valid(dlm)) return;
+
+    {
+        ue::UObject* pawn = net::Pawn();
+        ue::UObject* pp = puppet::Actor();
+        if (net::Valid(pawn) && net::Valid(pp)) {
+            const Vec3 me = net::Loc(pawn);
+            const Vec3 pl = net::Loc(pp);
+            const double dx = me.X - pl.X;
+            const double dy = me.Y - pl.Y;
+            if (std::sqrt(dx * dx + dy * dy) > kWdFarGate) return;
+        }
+    }
+
+    struct Ent {
+        std::string name;
+        int v;
+    };
+    std::vector<Ent> ents;
+    ents.reserve(d.peer.Size());
+    for (const auto& it : d.peer.Items()) {
+        Ent e;
+        e.name = it.key;
+        e.v = it.value;
+        ents.push_back(e);
+    }
+
+    int budget = kWdApplyBudget;
+    const double tnow = net::Now();
+    for (const Ent& e : ents) {
+        if (budget <= 0) break;
+        ue::UObject* inst = g_wdInst.Get(e.name);
+        if (!net::Valid(inst)) continue;
+        const int* mineP = d.mine.Find(e.name);
+        if (!mineP) continue;
+        const int mine = *mineP;
+        if (mine == e.v) continue;
+        if (!(tnow - g_wdLast.Get(e.name, -100.0) > kWdApplyCd)) continue;
+
+        --budget;
+        g_wdLast.Set(e.name, tnow);
+
+        const bool ok = SetLayerState(dlm, inst, e.v - 1);
+        int st = 0;
+        const bool okb = LayerState(dlm, inst, &st);
+        const bool haveBack = okb;
+        const int back = st + 1;
+
+        if (ok && haveBack && back == e.v) {
+            ++d.applied;
+            std::string acc = g_wdOk.Get(e.name, "");
+            acc += net::Fmt("%d", e.v);
+            g_wdOk.Set(e.name, acc);
+            d.ok.Set(e.name, e.v);
+            Put(d, e.name, back, false);
+            net::Log("wd apply %s %d -> %d ok", e.name.c_str(), mine - 1, e.v - 1);
+            net::SetWorldSettle(kWorldSettle);
+        } else {
+            ++d.fail;
+            net::Log("wd apply %s -> %d FAILED ok=%s r=%s back=%s", e.name.c_str(), e.v - 1,
+                     ok ? "true" : "false", "", haveBack ? net::Fmt("%d", back).c_str() : "nil");
+        }
+    }
+}
+
+// ===========================================================================
+// ---- test hooks (main.lua:3110-3253) ----
+// ===========================================================================
+
+// main.lua:3110 wpTest -- bump the nearest chest's TimesUsed in store B, drop a narrative
+// tag and bring it back, and flip one audio data layer for a while.
+void WpTest() {
+    ProgressState& ps = PS();
+    WpSet& b = ps.wb;
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* h = Helper();
+
+    const bool haveMe = net::Valid(pawn);
+    const Vec3 me = haveMe ? net::Loc(pawn) : Vec3{};
+    ue::UObject* best = nullptr;
+    std::string bestOwner;
+    double bd = 1e12;
+    for (ue::UObject* c : ue::FindAllOf("BP_Interactable_Chest_C")) {
+        if (!net::Valid(c)) continue;
+        const double dd = Dist(net::Loc(c), me);
+        const std::string owner = net::NameOf(c);
+        if (!haveMe || owner.empty()) continue;
+        if (dd < bd && b.mine.Get("i|" + owner + "|TimesUsed", 0) == 0) {
+            best = c;
+            bestOwner = owner;
+            bd = dd;
+        }
+    }
+
+    if (best && h) {
+        const bool ok = WriteAnInt(h, pawn, bestOwner, "TimesUsed", 1, true);
+        net::Log("wptest chest %s d=%.0f write ok=%s %s", bestOwner.c_str(), bd,
+                 ok ? "true" : "false", ok ? "" : "call failed");
+    } else {
+        net::Log("wptest: no unopened chest loaded");
+    }
+
+    std::string tag;
+    for (const auto& it : ps.wq.mine.Items()) {
+        if (it.value == 1 && HasPrefix(it.key, "t|")) {
+            tag = it.key.substr(2);
+            break;
+        }
+    }
+    if (net::Valid(ps.qlog) && !tag.empty()) {
+        const bool ok = TagCall(ps.qlog, "RemoveNarrativeTag", tag);
+        net::Log("wptest removed tag %s ok=%s (re-added in 12 s)", tag.c_str(),
+                 ok ? "true" : "false");
+    }
+
+    std::string dl;
+    for (const auto& it : ps.wd.mine.Items()) {
+        if (it.value == 3 && HasSub(it.key, "_AU")) {
+            dl = it.key;
+            break;
+        }
+    }
+    if (!dl.empty() && net::Valid(ps.dlm)) {
+        const bool ok = SetLayerState(ps.dlm, g_wdInst.Get(dl), 1);
+        net::Log("wptest layer %s -> loaded ok=%s (restored in 12 s)", dl.c_str(),
+                 ok ? "true" : "false");
+    }
+
+    ps.testActive = true;
+    ps.testAt = net::Now();
+    ps.testTag = tag;
+    ps.testLayer = dl;
+    ps.testFinished = false;
+}
+
+// main.lua:3142 wpTestFollowUp
+void WpTestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.testActive || ps.testFinished) return;
+    if (net::Now() - ps.testAt < 12.0) return;
+    ps.testFinished = true;
+
+    if (!ps.testTag.empty() && net::Valid(ps.qlog)) {
+        const bool ok = TagCall(ps.qlog, "AddNarrativeTag", ps.testTag);
+        net::Log("wptest re-added tag %s ok=%s", ps.testTag.c_str(), ok ? "true" : "false");
+    }
+    if (!ps.testLayer.empty() && net::Valid(ps.dlm)) {
+        const bool ok = SetLayerState(ps.dlm, g_wdInst.Get(ps.testLayer), 2);
+        net::Log("wptest layer %s -> activated ok=%s", ps.testLayer.c_str(),
+                 ok ? "true" : "false");
+    }
+}
+
+// main.lua:3159 qsTest -- start a quest from DT_QuestData1 this side has not seen, then
+// complete it 12 s later.
+void QsTest() {
+    ProgressState& ps = PS();
+    ue::UObject* q = ps.qlog;
+    if (!net::Valid(q)) {
+        net::Log("qstest: no quest log");
+        return;
+    }
+
+    ue::UObject* dt = ue::FindObject("/Game/Sparta/Dialogue/QuestSystem/DT_QuestData1.DT_QuestData1");
+    ue::UObject* lib = ue::FindObject("/Script/Engine.Default__DataTableFunctionLibrary");
+
+    int rows = 0;
+    std::string id;
+    if (dt && lib) {
+        if (ue::UFunction* f = ue::FindFunction(lib, "GetDataTableRowNames")) {
+            ue::Params p(f);
+            p.Set<ue::UObject*>("Table", dt);
+            if (ue::Call(lib, f, p.data())) {
+                ue::TArray<ue::FName> names = p.Get<ue::TArray<ue::FName>>("OutRowNames");
+                if (names.Data && names.Num >= 0 && names.Num <= 65536) {
+                    rows = (int)names.Num;
+                    for (int32_t i = 0; i < names.Num; ++i) {
+                        std::string n;
+                        if (!NameStr(names.Data[i], &n)) continue;
+                        if (n == "TestQuest") continue;
+                        if (ps.wq.mine.Get("a|" + n, 0) == 1) continue;
+                        if (ps.wq.mine.Get("c|" + n, 0) == 1) continue;
+                        id = n;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (id.empty()) {
+        net::Log("qstest: no unused quest (%d rows)", rows);
+        return;
+    }
+
+    const bool ok = QuestCall(q, "AddNewQuest", id);
+    net::Log("qstest added %s ok=%s %s (completed in 12 s)", id.c_str(), ok ? "true" : "false",
+             ok ? "" : "call failed");
+
+    ps.qtest = true;
+    ps.qtestAt = net::Now();
+    ps.qtestId = id;
+    ps.qtestFinished = false;
+}
+
+// main.lua:3176 qsTestFollowUp
+void QsTestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.qtest || ps.qtestFinished) return;
+    if (net::Now() - ps.qtestAt < 12.0) return;
+    ps.qtestFinished = true;
+    const bool ok = QuestCall(ps.qlog, "CompleteQuest", ps.qtestId);
+    net::Log("qstest completed %s ok=%s %s", ps.qtestId.c_str(), ok ? "true" : "false",
+             ok ? "" : "call failed");
+}
+
+// main.lua:3186 qsJudge -- guest verdict: a quest was added live and later completed live.
+void QsJudge() {
+    ProgressState& ps = PS();
+    if (ps.qsVerdict || IsHost()) return;
+
+    for (const auto& it : g_wqOk.Items()) {
+        if (it.second != "add") continue;
+        if (!HasPrefix(it.first, "c|")) continue;
+        const std::string id = it.first.substr(2);
+        const std::string aKey = "a|" + id;
+        const std::string cKey = "c|" + id;
+        if (g_wqOk.Get(aKey) != "add") continue;
+        if (ps.wq.mine.Get(cKey, 0) != 1) continue;
+
+        // read the log itself: the scan that adopts the completion runs next tick
+        bool active = false;
+        ue::UObject* q = ps.qlog;
+        if (net::Valid(q)) {
+            ue::TArray<ue::FName> arr;
+            if (ue::Get<ue::TArray<ue::FName>>(q, "CurrentActiveQuests", arr) && arr.Data &&
+                arr.Num > 0 && arr.Num <= 8192) {
+                for (int32_t i = 0; i < arr.Num; ++i) {
+                    std::string s;
+                    if (!NameStr(arr.Data[i], &s)) continue;
+                    if (s == id) active = true;
+                }
+            }
+        }
+
+        ps.qsVerdict = true;
+        const std::string text =
+            net::Fmt("%s quest %s added then completed (active now=%s, wq=%d/%d)\n",
+                     active ? "FAIL" : "PASS", id.c_str(), active ? "true" : "false",
+                     ps.wq.applied, ps.wq.fail);
+        net::WriteFile("result_qs.txt", text);
+
+        std::string flat = text;
+        flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+        net::Log("%s", flat.c_str());
+        return;
+    }
+}
+
+// main.lua:3210 qs2Test -- add+track a quest, raise the NPC relationship, then let the
+// follow-up walk the stage / complete / turn-in ladder.
+void Qs2Test() {
+    ProgressState& ps = PS();
+    ue::UObject* q = ps.qlog;
+    if (!net::Valid(q)) {
+        net::Log("qs2test: no quest log");
+        return;
+    }
+
+    static const char* kCandidates[4] = {"GorfQuest", "VlasQuest", "TielsQuest", "AutoQuest"};
+    std::string id;
+    for (int i = 0; i < 4; ++i) {
+        const std::string n = kCandidates[i];
+        if (ps.wq.mine.Get("a|" + n, 0) == 1) continue;
+        if (ps.wq.mine.Get("c|" + n, 0) == 1) continue;
+        id = n;
+        break;
+    }
+    if (id.empty()) {
+        net::Log("qs2test: no unused quest");
+        return;
+    }
+
+    // id:gsub("Quest$", "")
+    std::string npc = id;
+    if (npc.size() >= 5 && HasSub(npc, "Quest") &&
+        npc.compare(npc.size() - 5, 5, "Quest") == 0) {
+        npc.erase(npc.size() - 5);
+    }
+    const int rel = ps.wq.mine.Get("r|" + npc, 0);
+
+    bool ok = QuestCall(q, "AddNewQuest", id);
+    if (ok) ok = ue::Set<ue::FName>(q, "CurrentTrackedQuest", FN(id));
+    if (ok) ok = TrackQuests(q);
+    if (ok) ok = ue::MapAddStrInt(q, "NPCRelationships", npc.c_str(), rel + 2);
+
+    net::Log("qs2test %s added+tracked, rel %s %d -> %d ok=%s %s", id.c_str(), npc.c_str(), rel,
+             rel + 2, ok ? "true" : "false", ok ? "" : "call failed");
+
+    ps.q2test = true;
+    ps.q2testAt = net::Now();
+    ps.q2testId = id;
+    ps.q2testNpc = npc;
+    ps.q2testRel = rel + 2;
+    ps.q2testStep = 0;
+}
+
+// main.lua:3230 qs2TestFollowUp -- objective at 6 s, stage at 12 s, complete+turn in at 30 s.
+void Qs2TestFollowUp() {
+    ProgressState& ps = PS();
+    if (!ps.q2test || ps.q2testStep >= 3) return;
+    const double el = net::Now() - ps.q2testAt;
+    ue::UObject* q = ps.qlog;
+    ue::UObject* o = WqObj(q, ps.q2testId);
+
+    if (ps.q2testStep == 0 && el >= 6.0) {
+        ps.q2testStep = 1;
+        std::string obj;
+        {
+            std::vector<StageObjective> objs;
+            StageObjectivesOf(o, &objs);
+            if (!objs.empty()) obj = objs[0].id;
+        }
+        const bool ok = !obj.empty() && HearObjective(o, obj);
+        std::string nowS = "?";
+        if (!obj.empty() && o) {
+            StrIntMap prog;
+            WqProgress(o, &prog);
+            nowS = net::Fmt("%d", prog.Get(obj, 0));
+        }
+        net::Log("qs2test heard %s ok=%s now=%s", obj.empty() ? "nil" : obj.c_str(),
+                 ok ? "true" : "false", nowS.c_str());
+    } else if (ps.q2testStep == 1 && el >= 12.0) {
+        ps.q2testStep = 2;
+        const std::string before = StageNameOf(o);
+        int32_t cur = 0;
+        if (o) ue::Get<int32_t>(o, "CurrentQuestStage", cur);
+        bool ok = o && ue::Set<int32_t>(o, "CurrentQuestStage", cur + 1);
+        if (ok) ok = InitializeQuest(o);
+        int32_t back = 0;
+        if (o) ue::Get<int32_t>(o, "CurrentQuestStage", back);
+        net::Log("qs2test stage -> %d ok=%s %s (name '%s' -> '%s')", (int)back,
+                 ok ? "true" : "false", ok ? "" : "call failed", before.c_str(),
+                 StageNameOf(o).c_str());
+    } else if (ps.q2testStep == 2 && el >= 30.0) {
+        ps.q2testStep = 3;
+        bool ok = QuestCall(q, "CompleteQuest", ps.q2testId);
+        if (ok) ok = QuestCall(q, "TurnInQuest", ps.q2testId);
+        bool turned = false;
+        if (o) ue::Get<bool>(o, "IsTurnedIn", turned);
+        net::Log("qs2test completed+turned in %s ok=%s %s turnedin=%s", ps.q2testId.c_str(),
+                 ok ? "true" : "false", ok ? "" : "call failed", turned ? "true" : "false");
+    }
+}
+
+// main.lua:3257 qs2Judge -- guest verdict: counter, stage, tracked quest, relationship and
+// turn-in all arrived.
+void Qs2Judge() {
+    ProgressState& ps = PS();
+    if (ps.qs2Verdict || IsHost()) return;
+
+    static const char* kCandidates[4] = {"GorfQuest", "VlasQuest", "TielsQuest", "AutoQuest"};
+    std::string id;
+    for (int i = 0; i < 4; ++i) {
+        const std::string n = kCandidates[i];
+        if (g_wqOk.Get("u|" + n) == "turnin") id = n;
+    }
+    if (id.empty()) return;
+
+    if (ps.qs2Seen == 0.0) ps.qs2Seen = net::Now();
+
+    std::string count, rel;
+    for (const auto& it : g_wqOk.Items()) {
+        const std::string& name = it.first;
+        const std::string& how = it.second;
+        const std::string objPrefix = "o|" + id + "|";
+        if (HasPrefix(name, objPrefix.c_str())) count = name + "=" + how;
+        if (count.empty() && ps.wq.stageHeard.Get(id, 0) != 0) {
+            count = net::Fmt("heard %d objective(s)", ps.wq.stageHeard.Get(id, 0));
+        }
+        if (HasPrefix(name, "r|") && how == "set") {
+            rel = name + "=" + net::Fmt("%d", ps.wq.mine.Get(name, 0));
+        }
+    }
+
+    std::string stage;
+    if (g_wqOk.Get("s|" + id) == "stage") {
+        stage = net::Fmt("s=%d", ps.wq.mine.Get("s|" + id, 0));
+    }
+    const bool tracked = (ps.wq.mine.Get("k|" + id, 0) == 1) || (g_wqOk.Get("k|" + id) == "add");
+    const bool all = !count.empty() && !stage.empty() && tracked && !rel.empty();
+    if (!all && net::Now() - ps.qs2Seen < 15.0) return;
+
+    ps.qs2Verdict = true;
+    const std::string text =
+        net::Fmt("%s quest state %s: count %s, stage %s, %s, rel %s, turned in (wq=%d/%d)\n",
+                 all ? "PASS" : "FAIL", id.c_str(), count.empty() ? "nil" : count.c_str(),
+                 stage.empty() ? "nil" : stage.c_str(), tracked ? "tracked" : "not tracked",
+                 rel.empty() ? "nil" : rel.c_str(), ps.wq.applied, ps.wq.fail);
+    net::WriteFile("result_qs2.txt", text);
+
+    std::string flat = text;
+    flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+    net::Log("%s", flat.c_str());
+}
+
+// main.lua:3285 wpJudge -- guest verdict: a store B value arrived live, and a tag went away
+// and came back ("-+" in the history), and a layer dropped to loaded and returned.
+void WpJudge() {
+    ProgressState& ps = PS();
+    if (ps.wpVerdict || IsHost()) return;
+
+    std::string chest, tagCycle, layer;
+    for (const auto& it : g_wbOk.Items()) {
+        if (it.second == "live" && HasSub(it.first, "TimesUsed")) chest = it.first;
+    }
+    for (const auto& it : g_qHist.Items()) {
+        if (it.second.find("-+") != std::string::npos) tagCycle = it.first;
+    }
+    for (const auto& it : g_wdOk.Items()) {
+        if (HasSub(it.second, "23")) layer = it.first;
+    }
+
+    if (chest.empty() || tagCycle.empty() || layer.empty()) return;
+
+    ps.wpVerdict = true;
+    const std::string text =
+        net::Fmt("PASS world progression: %s, tag %s removed+restored, layer %s "
+                 "loaded+reactivated (wb=%d/%d wq=%d/%d wd=%d/%d)\n",
+                 chest.c_str(), tagCycle.c_str(), layer.c_str(), ps.wb.applied, ps.wb.fail,
+                 ps.wq.applied, ps.wq.fail, ps.wd.applied, ps.wd.fail);
+    net::WriteFile("result_wp.txt", text);
+
+    std::string flat = text;
+    flat.erase(std::remove(flat.begin(), flat.end(), '\n'), flat.end());
+    net::Log("%s", flat.c_str());
+}
+
+// count of a Lua table (wpStatus's local `cnt`)
+inline int CountOf(const StrIntMap& m) { return (int)m.Size(); }
+
+}  // namespace
+
+// ===========================================================================
+// ---- public contract ----
+// ===========================================================================
+
+// main.lua:3310 wpTick. Every step is guarded and logged as "ERR <label>: ..." by
+// net::Step, exactly like the Lua's wpStep.
+void Tick2() {
+    ProgressState& ps = PS();
+    ++ps.tickN;
+
+    const bool qs = S().toggles.qsEnabled;
+    const bool dl = S().toggles.dlEnabled;
+
+    net::Step("wbScan", Guard::None, [] { WbScan(); });
+    net::Step("wbApply", Guard::None, [] { WbApply(); });
+    if (qs) {
+        net::Step("wqScan", Guard::None, [] { WqScan(); });
+        net::Step("wqApply", Guard::None, [] { WqApply(); });
+    }
+    // the layer list is ~100 objects: every other tick is plenty
+    if (dl && (ps.tickN % 2) == 0) net::Step("wdScan", Guard::None, [] { WdScan(); });
+    if (dl) net::Step("wdApply", Guard::None, [] { WdApply(); });
+
+    // main.lua:3318-3321 -- built at 2 Hz, then appended verbatim at 15 Hz by
+    // Serialize(): rebuilding it there would rotate the windows 15 times a second.
+    ps.wb.payload = Section(ps.wb, "wb", kWbWindow);
+    ps.wq.payload = qs ? Section(ps.wq, "wq", kWqWindow) : std::string();
+    ps.wd.payload = (dl && IsHost()) ? Section(ps.wd, "wd", kWdWindow) : std::string();
+
+    if (IsHost()) net::Step("wpTestFollowUp", Guard::None, [] { WpTestFollowUp(); });
+    net::Step("wpJudge", Guard::None, [] { WpJudge(); });
+    if (qs) {
+        if (IsHost()) {
+            net::Step("qsTestFollowUp", Guard::None, [] { QsTestFollowUp(); });
+            net::Step("qs2TestFollowUp", Guard::None, [] { Qs2TestFollowUp(); });
+        }
+        net::Step("qsJudge", Guard::None, [] { QsJudge(); });
+        net::Step("qs2Judge", Guard::None, [] { Qs2Judge(); });
+    }
+}
+
+// Drops every cached pointer and the module-private indices. The set values themselves
+// (mine / order / peer / primed) are deliberately kept: the Lua kept them across a map
+// load too (WP is a session-long table), and WP_SETTLE only ever primes once per session.
+void Reset() {
+    ProgressState& ps = PS();
+    ps.helper = nullptr;
+    ps.sub = nullptr;
+    ps.qlog = nullptr;
+    ps.dlm = nullptr;
+    g_wdInst.Clear();
+    g_wdLast.Clear();
+    // The layer instances are gone with the world: their entries cannot be applied any
+    // more, and a stale pointer here is exactly the class of crash this port exists to stop.
+    ps.wd.lastAt = 0.0;
+    // Windows are constants (main.lua:3318-3320); recorded per set for the contract's sake.
+    ps.wb.window = kWbWindow;
+    ps.wq.window = kWqWindow;
+    ps.wd.window = kWdWindow;
+    ps.wb.payload.clear();
+    ps.wq.payload.clear();
+    ps.wd.payload.clear();
+}
+
+// main.lua:3331 wpReadPeer
+void OnPeerLine(const std::string& line) {
+    Read(PS().wb, line, "wb");
+    if (S().toggles.qsEnabled) Read(PS().wq, line, "wq");
+    if (S().toggles.dlEnabled && !IsHost()) Read(PS().wd, line, "wd");
+}
+
+// main.lua:3318-3321 -- appends the prebuilt ",wb":[...] then ",wq":[...] then ",wd":[...].
+// The Lua appends WP.payload (built once per 2 Hz tick); the same thing is done here by
+// concatenating the three per-set payloads so a disabled section stays empty.
+void Serialize(std::string* out) {
+    if (!out) return;
+    ProgressState& ps = PS();
+    *out += ps.wb.payload;
+    if (S().toggles.qsEnabled) *out += ps.wq.payload;
+    if (S().toggles.dlEnabled && IsHost()) *out += ps.wd.payload;
+}
+
+// main.lua:3337 wpStatus
+std::string Status() {
+    ProgressState& ps = PS();
+    return net::Fmt("wp=b:%d/%d+%d!%d q:%d/%d+%d!%d d:%d/%d+%d!%d\n", (int)ps.wb.order.size(),
+                    CountOf(ps.wb.peer), ps.wb.applied, ps.wb.fail, (int)ps.wq.order.size(),
+                    CountOf(ps.wq.peer), ps.wq.applied, ps.wq.fail, (int)ps.wd.order.size(),
+                    CountOf(ps.wd.peer), ps.wd.applied, ps.wd.fail);
+}
+
+// cmd.txt: wptest  (main.lua:3110)
+void TestWp() { WpTest(); }
+
+// cmd.txt: qstest  (main.lua:3159)
+void TestQs() { QsTest(); }
+
+// cmd.txt: qs2test (main.lua:3210)
+void TestQs2() { Qs2Test(); }
+
+}  // namespace progress
+}  // namespace coop

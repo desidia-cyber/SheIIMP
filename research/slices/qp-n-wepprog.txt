@@ -1,0 +1,136 @@
+﻿### ArrayProperty /Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews:OutViews  [000001F4ACE12D00]
+    1 members:
+      PRP OutViews : StructProperty of /Script/Sparta.StatCurveView [o:0x0]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews:bIncludeDisabled  [000001F4ACE12D80]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel:bIncludeDisabled  [000001F4ACE12A00]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:bAutoSyncCachedValuesAndCurves  [000001F4ACE12800]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:bDefaultConstantInterp  [000001F4ACE12780]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:bPrepopulateOnCreate  [000001F4ACE12700]
+
+### BoolProperty /Script/Sparta.SpartaWeaponProgressionData:bSyncConstantInterp  [000001F4ACE12880]
+
+### Class /Script/Sparta.SpartaWeaponProgressionData  [00007FF46F05EF38]
+    super: /Script/Engine.DataAsset
+    23 members:
+      PRP DamageMultiplier : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x30]
+      PRP PoiseDamageMultiplier : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x110]
+      PRP ElementalEfficiency : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x1f0]
+      PRP CritChance : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x2d0]
+      PRP CritDamage : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x3b0]
+      PRP EnergyGainMultiplier : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x490]
+      PRP EnergyConsumption : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x570]
+      PRP GuardMeterMultiplier : StructProperty of /Script/Sparta.ToggleableRuntimeCurve [o:0x650]
+      PRP PrepopulateMaxLevel : IntProperty [o:0x730]
+      PRP PrepopulateValue : FloatProperty [o:0x734]
+      PRP bPrepopulateOnCreate : BoolProperty [o:0x738]
+      PRP DefaultMinLevel : IntProperty [o:0x73c]
+      PRP DefaultMaxLevel : IntProperty [o:0x740]
+      PRP DefaultStartValue : FloatProperty [o:0x744]
+      PRP DefaultEndValue : FloatProperty [o:0x748]
+      PRP bDefaultConstantInterp : BoolProperty [o:0x74c]
+      PRP MirrorMaxLevel : IntProperty [o:0x750]
+      PRP bAutoSyncCachedValuesAndCurves : BoolProperty [o:0x754]
+      PRP bSyncConstantInterp : BoolProperty [o:0x755]
+      FUN GetValuesAtLevel 
+          param Level : IntProperty [o:0x0]
+          param OutValues : MapProperty [o:0x8]
+          param bIncludeDisabled : BoolProperty [o:0x58]
+      FUN GetStatValueAtLevel 
+          param Stat : EnumProperty of /Script/Sparta.EWeaponStatType [o:0x0]
+          param Level : IntProperty [o:0x4]
+          param ReturnValue : FloatProperty [o:0x8]
+      FUN GetNormalizedProgression 
+          param Stat : EnumProperty of /Script/Sparta.EWeaponStatType [o:0x0]
+          param Level : IntProperty [o:0x4]
+          param OverrideMaxLevel : IntProperty [o:0x8]
+          param ReturnValue : FloatProperty [o:0xc]
+      FUN GetAllStatCurveViews 
+          param OutViews : ArrayProperty of OutViews./Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews:OutViews [o:0x0]
+          param bIncludeDisabled : BoolProperty [o:0x10]
+
+### EnumProperty /Script/Sparta.SpartaWeaponProgressionData:GetNormalizedProgression:Stat  [000001F4ACE12C00]
+
+### EnumProperty /Script/Sparta.SpartaWeaponProgressionData:GetStatValueAtLevel:Stat  [000001F4ACE12B00]
+
+### EnumProperty OutValues./Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel:OutValues_Key  [000001F4ACE12980]
+
+### FloatProperty /Script/Sparta.SpartaWeaponProgressionData:DefaultEndValue  [000001F4ACDE5720]
+
+### FloatProperty /Script/Sparta.SpartaWeaponProgressionData:DefaultStartValue  [000001F4ACDE56B0]
+
+### FloatProperty /Script/Sparta.SpartaWeaponProgressionData:GetNormalizedProgression:ReturnValue  [000001F4ACDE5AA0]
+
+### FloatProperty /Script/Sparta.SpartaWeaponProgressionData:GetStatValueAtLevel:ReturnValue  [000001F4ACDE5950]
+
+### FloatProperty /Script/Sparta.SpartaWeaponProgressionData:PrepopulateValue  [000001F4ACDE7240]
+
+### FloatProperty OutValues./Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel:OutValues  [000001F4ACDE5870]
+
+### Function /Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews  [00007FF46F71D098]
+    2 members:
+      PRP OutViews : ArrayProperty of OutViews./Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews:OutViews [o:0x0]
+      PRP bIncludeDisabled : BoolProperty [o:0x10]
+
+### Function /Script/Sparta.SpartaWeaponProgressionData:GetNormalizedProgression  [00007FF46F71D178]
+    4 members:
+      PRP Stat : EnumProperty of /Script/Sparta.EWeaponStatType [o:0x0]
+      PRP Level : IntProperty [o:0x4]
+      PRP OverrideMaxLevel : IntProperty [o:0x8]
+      PRP ReturnValue : FloatProperty [o:0xc]
+
+### Function /Script/Sparta.SpartaWeaponProgressionData:GetStatValueAtLevel  [00007FF46F71D258]
+    3 members:
+      PRP Stat : EnumProperty of /Script/Sparta.EWeaponStatType [o:0x0]
+      PRP Level : IntProperty [o:0x4]
+      PRP ReturnValue : FloatProperty [o:0x8]
+
+### Function /Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel  [00007FF46F71D338]
+    3 members:
+      PRP Level : IntProperty [o:0x0]
+      PRP OutValues : MapProperty [o:0x8]
+      PRP bIncludeDisabled : BoolProperty [o:0x58]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:DefaultMaxLevel  [000001F4ACDE7320]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:DefaultMinLevel  [000001F4ACDE72B0]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:GetNormalizedProgression:Level  [000001F4ACDE59C0]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:GetNormalizedProgression:OverrideMaxLevel  [000001F4ACDE5A30]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:GetStatValueAtLevel:Level  [000001F4ACDE58E0]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel:Level  [000001F4ACDE5800]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:MirrorMaxLevel  [000001F4ACDE5790]
+
+### IntProperty /Script/Sparta.SpartaWeaponProgressionData:PrepopulateMaxLevel  [000001F4ACDE71D0]
+
+### MapProperty /Script/Sparta.SpartaWeaponProgressionData:GetValuesAtLevel:OutValues  [000001F49CD2ECA0]
+    2 members:
+      PRP OutValues_Key : EnumProperty of /Script/Sparta.EWeaponStatType [o:0x0]
+      PRP OutValues : FloatProperty [o:0x4]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:CritChance  [000001F4ACE12480]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:CritDamage  [000001F4ACE12500]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:DamageMultiplier  [000001F4ACE12300]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:ElementalEfficiency  [000001F4ACE12400]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:EnergyConsumption  [000001F4ACE12600]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:EnergyGainMultiplier  [000001F4ACE12580]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:GuardMeterMultiplier  [000001F4ACE12680]
+
+### StructProperty /Script/Sparta.SpartaWeaponProgressionData:PoiseDamageMultiplier  [000001F4ACE12380]
+
+### StructProperty OutViews./Script/Sparta.SpartaWeaponProgressionData:GetAllStatCurveViews:OutViews  [000001F4ACE12C80]
+

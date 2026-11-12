@@ -1,0 +1,2802 @@
+// ---------------------------------------------------------------------------
+// coop_dialog.cpp -- Round 7 dialogue + cinematics lane (gaps G8 / G10).
+//
+// Round 7b (owner decisions) makes the peer a PARTICIPANT, not a spectator:
+//
+//   CINEMA.  When A plays a level sequence, B plays the SAME sequence locally at
+//   the same moment (a late join tries to jump to A's position), and a skip/end on
+//   either side ends it for both.  Both players get the game's own treatment:
+//   player hidden, input and movement locked, camera driven by the sequence.
+//   B's copy has BroadcastEventAfterCinematic cleared, so the world effect
+//   (GlobalEvent / quest consequences) still happens exactly ONCE, through the
+//   existing sync.
+//
+//   DIALOGUE.  B hears A's conversation and sees its subtitles, driven by A's
+//   nodes -- B never starts an independent conversation and never applies an
+//   outcome itself (narrative tags / quests / PlayerChoice arrive through the
+//   existing sync).  At a choice node EVERY player votes; the owner (the player
+//   who started the conversation) resolves: most votes wins, a tie between
+//   different options goes to the HOST's vote, the window closes when everybody
+//   has voted or after `[Rules] dialog_vote_timeout` seconds (20 s default), a
+//   peer that is out of zone / absent abstains immediately, nobody voting leaves
+//   the game's own default (option 0).  The owner then applies the winner through
+//   the game's own select call, ONCE.
+//
+// WHAT THE GAME DOES (dump-proved offsets):
+//   UDialogueSubsystem (UWorldSubsystem): ActiveDialogues: TArray<FActiveDialogue>
+//   @0x00A0; FActiveDialogue is 0x88: Instigator @+0x00, DialogueContext @+0x08,
+//   DialogueAsset @+0x10, Tags @+0x18, BlockingTags @+0x38, SoundComp @+0x68,
+//   FacialAnimationInstance @+0x70, FacialAnimationMontage @+0x78.
+//   UDlgContext: GetActiveNodeIndex, GetOptionsNum, ChooseOption(int32),
+//   ChooseChild, ChooseSpeechSequenceOptionFromReplicated(int32).
+//   UDlgDialogue: Nodes: TArray<UDlgNode*> @0x170.  UDlgNode::Children:
+//   TArray<FDlgEdge> @0x88 and FDlgEdge{TargetIndex @0x0, Text @0x30 (FText), size
+//   0x60} -- the option labels.  UDialogue_SpartaSpeechNode: Text @0xA0 (FText),
+//   SoundWave @0xD0, AudioEvent @0xF8, SubtitleSpeakerName @0x114.  That is how the
+//   LISTENER gets the very same line text and voice asset with no string the mod
+//   had to build.
+//   ABP_CinematicPlayer_C: CutsceneActor @0x2C0, LevelSequenceToPlay @0x2C8,
+//   BroadcastEventAfterCinematic @0x2F8, ThisCinematicTag @0x320, StateGE @0x3A0,
+//   Skippable @0x3B0; functions PrepareCutscene/PlayCutscene/EndCutscene/
+//   ForceStopCinematic (no params).  ABP_DialogueActor_C / ABP_NPC_C hold the
+//   `Dialogue Instigator Component` (BPC_DialogueInstigator_C: DlgDialogue @0x148,
+//   Participants @0x150, bDisablePlayerInput @0x194) whose
+//   StartDialogue(3 tag containers, out Success) is the game's own way to start a
+//   conversation -- `dlgstart` uses it.
+//
+// WIRE (own top-level keys, appended LAST so no existing key moves):
+//   ,"dl":[<active>,<seq>,<node>,<opts>,"<dlgName>","<dlgAssetPath>"]
+//   ,"ct":[<outSeq>,"<PlayerChoice>"]
+//   ,"ci":[<active>,<seq>,<elapsedMs>,"<sequenceName>"]
+//   ,"dv":[<dSeq>,<node>,<opt>,"<playerId>"]          one vote   (repeated 4 s)
+//   ,"dr":[<dSeq>,<node>,<winner>,"<id:opt|id:opt>"]  resolution (repeated 6 s)
+// Every one carries a sequence/number and is repeated for a few seconds, so a lost
+// or repeated packet is harmless (R7 wire rule); sections are only emitted while
+// they are (or just were) non-zero.
+//
+// Kill switches: DIALOG_OFF.txt, CINE_OFF.txt.
+// ---------------------------------------------------------------------------
+
+#include "coop_state.h"
+#include "ms2_ue.h"
+
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace coop {
+
+namespace {
+
+using i32 = std::int32_t;
+
+inline State& St() { return state(); }
+inline const Toggles& TG() { return state().toggles; }
+inline dialog::State& D() { return state().dialog; }
+
+bool Valid(ue::UObject* o) { return o != nullptr && ue::IsValid(o); }
+double Now() { return net::Now(); }
+
+// Wall-clock milliseconds (system clock).  BOTH clients run on this one PC, so a
+// timestamp one side puts on the wire is directly comparable on the other -- that is
+// how the cinematic END lag is measured instead of guessed.
+int64_t WallMs() {
+    using namespace std::chrono;
+    return (int64_t)duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
+
+// ---------------------------------------------------------------------------
+// dump-proved offsets
+// ---------------------------------------------------------------------------
+constexpr i32 kActiveDialogues   = 0x00A0;
+constexpr i32 kDlgInstigator     = 0x00;
+constexpr i32 kDlgContext        = 0x08;
+constexpr i32 kDlgAsset          = 0x10;
+constexpr i32 kDlgElemSize       = 0x88;
+constexpr i32 kDlgElemMax        = 32;
+constexpr i32 kPlayerChoice      = 0x01D0;
+constexpr i32 kSpeechText        = 0x00A0;
+constexpr i32 kSpeechSound       = 0x00D0;
+constexpr i32 kSpeechAudioEvent  = 0x00F8;
+constexpr i32 kSpeechSpeakerName = 0x0114;
+constexpr i32 kNodeChildren      = 0x0088;
+constexpr i32 kEdgeText          = 0x0030;
+constexpr i32 kEdgeSize          = 0x0060;
+constexpr i32 kDlgNodes          = 0x0170;
+constexpr i32 kMaxEdges          = 8;
+constexpr i32 kHudSubtitles      = 0x0380;
+
+constexpr double kLinger       = 4.0;
+constexpr double kDlgPeerStale = 5.0;
+constexpr double kVoteWindow   = 20.0;
+
+// ---------------------------------------------------------------------------
+// strings / parsing
+// ---------------------------------------------------------------------------
+std::string Clean(const std::string& s, std::size_t maxLen = 60) {
+    std::string v = s;
+    if (v.size() > maxLen) v.resize(maxLen);
+    for (char& c : v) {
+        if (c == '"' || c == '\\' || c == '|' || (unsigned char)c < ' ') c = '_';
+    }
+    return v;
+}
+
+std::vector<std::string> Tokens(const std::string& sec) {
+    std::vector<std::string> out;
+    std::string cur;
+    bool inStr = false;
+    bool any = false;
+    for (std::size_t i = 0; i < sec.size(); ++i) {
+        const char c = sec[i];
+        if (inStr) {
+            if (c == '"') {
+                inStr = false;
+            } else {
+                cur.push_back(c);
+            }
+            continue;
+        }
+        if (c == '"') {
+            inStr = true;
+            any = true;
+            continue;
+        }
+        if (c == ',') {
+            out.push_back(cur);
+            cur.clear();
+            any = false;
+            continue;
+        }
+        if (c == '[' || c == ']' || (unsigned char)c <= ' ') continue;
+        cur.push_back(c);
+        any = true;
+    }
+    if (any || !cur.empty()) out.push_back(cur);
+    return out;
+}
+
+int ToInt(const std::string& s, int def) {
+    if (s.empty()) return def;
+    char* stop = nullptr;
+    const long v = strtol(s.c_str(), &stop, 10);
+    if (stop == s.c_str()) return def;
+    return (int)v;
+}
+
+struct ObjArr {
+    void* data = nullptr;
+    i32 num = 0;
+    i32 max = 0;
+};
+
+bool ReadArr(ue::UObject* o, const char* prop, i32 fallbackOff, ObjArr* out) {
+    if (out) *out = ObjArr();
+    if (!Valid(o) || prop == nullptr) return false;
+    i32 off = ue::PropOffset(o, prop);
+    if (off < 0) off = fallbackOff;
+    if (off < 0) return false;
+    ObjArr a;
+    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(o) + off, &a, sizeof(a))) return false;
+    if (a.num < 0 || a.num > 4096 || a.max < a.num || a.max > 65536 || a.data == nullptr) return false;
+    if (!ue::PlausiblePtr(a.data)) return false;
+    if (out) *out = a;
+    return true;
+}
+
+class Fn {
+public:
+    Fn(ue::UObject* obj, const char* name) {
+        if (!Valid(obj) || name == nullptr) return;
+        obj_ = obj;
+        fn_ = ue::FindFunction(obj, name);
+        if (fn_ != nullptr) p_ = new ue::Params(fn_);
+    }
+    ~Fn() { delete p_; }
+    Fn(const Fn&) = delete;
+    Fn& operator=(const Fn&) = delete;
+
+    bool ok() const { return obj_ != nullptr && fn_ != nullptr && p_ != nullptr; }
+    bool run() { return ok() && ue::Call(obj_, fn_, p_->data()); }
+
+    template <class T>
+    void set(const char* n, const T& v) {
+        if (p_ != nullptr) p_->Set<T>(n, v);
+    }
+    template <class T>
+    T get(const char* n) {
+        T t{};
+        if (p_ != nullptr) t = p_->Get<T>(n);
+        return t;
+    }
+
+private:
+    ue::UObject* obj_ = nullptr;
+    ue::UFunction* fn_ = nullptr;
+    ue::Params* p_ = nullptr;
+};
+
+struct TagContainerZero {
+    std::uint64_t w[4] = {0, 0, 0, 0};
+};
+
+// FText is a shared-ref struct.  This module never builds one from a string it
+// made up by hand-allocating engine memory: it either COPIES the FText an asset
+// already holds, or goes FName -> UKismetStringLibrary::Conv_NameToString ->
+// UKismetTextLibrary::Conv_StringToText (both engine-allocated).
+struct FTextRaw {
+    std::uint64_t w[2] = {0, 0};
+};
+struct PlaybackParamsRaw {
+    std::uint8_t b[0x40] = {0};
+};
+
+bool ReadFTextBytes(const void* addr, FTextRaw* out) {
+    if (out) *out = FTextRaw();
+    if (addr == nullptr) return false;
+    FTextRaw t;
+    if (!ue::ReadMem(addr, &t, sizeof(t))) return false;
+    if (t.w[0] == 0 || !ue::PlausiblePtr(reinterpret_cast<const void*>(t.w[0]))) return false;
+    if (out) *out = t;
+    return true;
+}
+
+std::string TextAt(const void* addr) {
+    if (addr == nullptr) return std::string();
+    return ue::TextToString(const_cast<void*>(addr));
+}
+
+// ---------------------------------------------------------------------------
+// module-private state
+// ---------------------------------------------------------------------------
+ue::UObject* g_dlgSub = nullptr;
+i32 g_dlgArrOff = kActiveDialogues;
+int g_dlgElemLogged = 0;
+int g_dlgLogs = 0;
+int g_cineLogs = 0;
+int g_subLogs = 0;
+int g_voiceLogs = 0;
+int g_replayLogs = 0;
+int g_voteLogs = 0;
+
+dialog::LockState g_mine;
+dialog::LockState g_real;
+double g_mineEndedAt = -1.0e9;
+int g_mineLastKind = 0;
+double g_peerSeenAt = -1.0e9;
+double g_cineStartLocal = 0.0;      // net::Now() when OUR sequence was first seen
+int64_t g_mineStopAtMs = 0;         // wall ms of OUR last cinematic end (goes on the wire)
+int64_t g_lastEndLagMs = -1;        // measured: peer stop -> our stop
+int g_endLags = 0;
+double g_lastApplyAt = -1.0e9;   // when ApplyPeer last parsed a peer line
+int g_dseq = 0;                     // dialogue instance id (bumped when a dialogue starts)
+std::string g_dlgPath;
+// The line ITSELF, published in "dl" (tokens 6,7,8): the integration run measured
+// "asset not loaded yet" on a cold listener and DIALOG failed twice because of it.
+std::string g_lineText;
+std::string g_lineSpeaker;
+std::string g_lineVoice;
+int g_node = 0;
+int g_opts = 0;
+
+// cmd.txt injectors (zonefake-style; both logged as FAKE)
+bool g_fakeDlg = false;
+std::string g_fakeDlgName = "FAKE_DIALOGUE";
+std::string g_fakeDlgPath;      // a REAL dialogue asset, so a listener replays real lines
+bool g_fakeCine = false;
+std::string g_fakeCineName = "FAKE_SEQUENCE";
+
+// listener / replay
+int g_subWidgetLogged = 0;
+bool g_subShown = false;
+std::string g_subText;
+ue::UObject* g_cineActor = nullptr;
+int g_cineSeq = -1;
+int g_replayStarts = 0;
+bool g_cineInitiator = false;      // we play the sequence this map authored; the peer replays
+int g_replayStops = 0;
+int g_replayJumps = 0;
+int g_listenNodes = 0;
+int g_linesReal = 0;          // listener lines that carried real text/voice from the asset
+int g_votesSent = 0;
+int g_votesApplied = 0;
+int g_resolutionsSeen = 0;
+int g_lastListenNode = -1;
+double g_lastListenAt = -1.0e9;
+std::string g_lastListenPath;
+
+// vote engine
+struct VoteTally {
+    std::map<std::string, int> byPlayer;
+    double openedAt = 0.0;
+    bool resolved = false;
+    int winner = -1;
+    std::string detail;
+    std::string assetPath;
+    int opts = 0;
+};
+std::map<std::string, VoteTally> g_votes;
+int g_myVoteSeq = -1, g_myVoteNode = -1, g_myVoteOpt = -1;
+double g_myVoteAt = -1.0e9;
+int g_resSeq = -1, g_resNode = -1, g_resWinner = -1;
+std::string g_resDetail;
+
+bool g_applyingChoice = false;
+bool g_choiceHookTried = false;
+int g_localPicks = 0;               // clicks intercepted on this client
+
+// a cinematic replay requested by the peer's "ci", applied on the next Tick2 (all
+// engine work happens there, never inside the peer-line parse)
+bool g_cinePending = false;
+bool g_cineStopPending = false;
+std::string g_cinePendingName;
+int g_cinePendingElapsed = 0;
+double g_resAt = -1.0e9;
+int g_pdAtStart = 0;                // pdSkips when the current peer episode began
+bool StartConversation(ue::UObject* comp, ue::UObject* asset);   // defined with the verbs
+void LogDialogueState(const char* when);                         // dlgstart's diagnostic
+ue::UObject* g_pendingNpc = nullptr;   // the NPC side of the conversation being started
+ue::UObject* g_dlgAssetForChildren = nullptr;   // NodeChildren: the asset indices refer to
+ue::UObject* g_pendingStart = nullptr;   // dlgstart: the instigator to call once the
+double g_pendingStartAt = 0.0;           // teleport has landed
+ue::UObject* g_startNpc = nullptr;       // dlgstart: the NPC whose interaction we drive
+int g_startPhase = 0;                    // 0 idle, 1 wait-teleport, 2 interaction, 3 verify
+double g_startPhaseAt = 0.0;
+int g_startVerifyLeft = 0;
+double g_cineHoldUntil = 0.0;            // cinehold: keep restarting the sequence (test)
+std::string g_cineHoldName;
+
+// the three simulated-vote cases (dlgvotesim); the DIALOG verdict reads them
+int g_voteSimChecks = 0;
+int g_voteSimFailed = 0;
+double g_voteSimAt = -1.0e9;
+
+int VoteTimeoutSeconds() {
+    static int cached = -1;
+    if (cached >= 0) return cached;
+    cached = (int)kVoteWindow;
+    std::string text;
+    if (net::ReadText("MS2Coop.ini", &text)) {
+        std::size_t p = text.find("dialog_vote_timeout");
+        if (p != std::string::npos) {
+            p = text.find('=', p);
+            if (p != std::string::npos) {
+                const double v = strtod(text.c_str() + p + 1, nullptr);
+                if (v >= 3.0 && v <= 300.0) cached = (int)v;
+            }
+        }
+    }
+    return cached;
+}
+
+// The ONE resolution rule, pure so the shipped code is what `dlgvotesim` checks:
+//   most votes wins; a tie between different options is broken by the HOST's vote;
+//   with no vote from the host among the tied options the LOWEST tied index wins;
+//   with no votes at all the game's default (option 0) is used.
+int ResolveVotes(const std::vector<std::pair<std::string, int>>& votes, int nOpts,
+                 const std::string& hostId) {
+    const int n = nOpts > 0 ? nOpts : 1;
+    std::vector<int> counts((std::size_t)n, 0);
+    for (const auto& v : votes) {
+        if (v.second >= 0 && v.second < n) counts[(std::size_t)v.second] += 1;
+    }
+    int best = 0;
+    for (int i = 1; i < n; ++i) {
+        if (counts[(std::size_t)i] > counts[(std::size_t)best]) best = i;
+    }
+    if (counts[(std::size_t)best] == 0) return 0;
+    bool tie = false;
+    for (int i = 0; i < n; ++i) {
+        if (i != best && counts[(std::size_t)i] == counts[(std::size_t)best]) tie = true;
+    }
+    if (tie) {
+        for (const auto& v : votes) {
+            if (v.first == hostId && v.second >= 0 && v.second < n &&
+                counts[(std::size_t)v.second] == counts[(std::size_t)best]) {
+                return v.second;
+            }
+        }
+    }
+    return best;
+}
+
+std::string TallyText(const std::vector<std::pair<std::string, int>>& votes) {
+    std::string s;
+    for (const auto& v : votes) {
+        if (!s.empty()) s += '|';
+        s += v.first + ":" + net::Fmt("%d", v.second);
+    }
+    return Clean(s, 80);
+}
+
+std::vector<std::pair<std::string, int>> VotesOf(const VoteTally& t) {
+    std::vector<std::pair<std::string, int>> v;
+    for (const auto& it : t.byPlayer) v.push_back(it);
+    return v;
+}
+
+std::string VoteKey(int dseq, int node) { return net::Fmt("%d:%d", dseq, node); }
+
+bool InZoneWithPeer() { return !zone::Paused(); }
+
+// ---------------------------------------------------------------------------
+// engine helpers: dialogue subsystem / asset / nodes
+// ---------------------------------------------------------------------------
+ue::UObject* DialogueSubsystem() {
+    if (!Valid(g_dlgSub)) {
+        g_dlgSub = ue::FindFirstOf("DialogueSubsystem");
+        g_dlgArrOff = kActiveDialogues;
+        if (Valid(g_dlgSub)) {
+            const i32 off = ue::PropOffset(g_dlgSub, "ActiveDialogues");
+            if (off >= 0) g_dlgArrOff = off;
+            net::Log("dlg: DialogueSubsystem=%s ActiveDialogues@0x%x", net::NameOf(g_dlgSub).c_str(),
+                     (unsigned)g_dlgArrOff);
+        }
+    }
+    return Valid(g_dlgSub) ? g_dlgSub : nullptr;
+}
+
+bool ActiveDialogue(ue::UObject** ctxOut, ue::UObject** assetOut, ue::UObject** instOut,
+                    std::string* ownerPath) {
+    if (ctxOut) *ctxOut = nullptr;
+    if (assetOut) *assetOut = nullptr;
+    if (instOut) *instOut = nullptr;
+    ue::UObject* sub = DialogueSubsystem();
+    if (!sub) return false;
+    ObjArr arr;
+    if (!ReadArr(sub, "ActiveDialogues", g_dlgArrOff, &arr)) return false;
+    if (arr.num <= 0) return false;
+    if (arr.num > kDlgElemMax) arr.num = kDlgElemMax;
+
+    const i32 esize = ue::PropSize(sub, "ActiveDialogues");
+    if (esize != kDlgElemSize && g_dlgElemLogged == 0) {
+        g_dlgElemLogged = 1;
+        net::Log("dlg: FActiveDialogue element size is 0x%x, the dump says 0x%x -- field offsets "
+                 "(instigator 0x0, context 0x8, asset 0x10) are the dump's",
+                 (unsigned)esize, (unsigned)kDlgElemSize);
+    }
+
+    const std::uint8_t* base = reinterpret_cast<const std::uint8_t*>(arr.data);
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    if (!ue::ReadMem(base + kDlgContext, &ctx, sizeof(ctx))) return false;
+    ue::ReadMem(base + kDlgAsset, &asset, sizeof(asset));
+    ue::ReadMem(base + kDlgInstigator, &inst, sizeof(inst));
+    if (ctxOut) *ctxOut = Valid(ctx) ? ctx : nullptr;
+    if (assetOut) *assetOut = Valid(asset) ? asset : nullptr;
+    if (instOut) *instOut = Valid(inst) ? inst : nullptr;
+    if (ownerPath != nullptr && Valid(inst)) {
+        ue::UObject* owner = nullptr;
+        if (!ue::Get<ue::UObject*>(inst, "Owner", owner) || !Valid(owner)) {
+            Fn get(inst, "GetOwner");
+            if (get.ok() && get.run()) owner = get.get<ue::UObject*>("ReturnValue");
+        }
+        if (Valid(owner)) *ownerPath = net::AssetPath(owner);
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// the dialogue OUTCOME (the quest log's global story tag)
+// ---------------------------------------------------------------------------
+ue::UObject* QuestLogComponent() {
+    ue::UObject* q = ue::FindFirstOf("BPC_QuestLogComponent_C");
+    if (!Valid(q)) q = ue::FindFirstOf("BPSO_QuestLogComponent_C");
+    return Valid(q) ? q : nullptr;
+}
+
+bool ReadChoice(std::string* out) {
+    if (out) out->clear();
+    ue::UObject* q = QuestLogComponent();
+    if (!q) return false;
+    i32 off = ue::PropOffset(q, "PlayerChoice");
+    if (off < 0) off = kPlayerChoice;
+    ue::FName n{};
+    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(q) + off, &n, sizeof(n))) return false;
+    const std::string s = ue::ToString(n);
+    if (s.empty() || s == "None") return false;
+    if (out) *out = s;
+    return true;
+}
+
+bool WriteChoice(const std::string& tag) {
+    ue::UObject* q = QuestLogComponent();
+    if (!q || tag.empty()) return false;
+    i32 off = ue::PropOffset(q, "PlayerChoice");
+    if (off < 0) off = kPlayerChoice;
+    const ue::FName n = ue::MakeName(tag.c_str());
+    if (ue::ToString(n) == "None") return false;
+    return ue::WriteMem(reinterpret_cast<std::uint8_t*>(q) + off, &n, sizeof(n));
+}
+
+// Apply the peer's dialogue outcome when it is news (the listener never applies
+// anything else from a conversation: the game's own sync carries tags and quests).
+void ApplyOutcome() {
+    dialog::State& s = D();
+    if (s.peerOutSeq < 0 || !TG().dlgEnabled) return;
+    if (s.peerOutSeq == s.outSeq) return;
+    if (s.peerChoice.empty()) return;
+    if (!std::isalnum((unsigned char)s.peerChoice[0])) return;
+    std::string mine;
+    ReadChoice(&mine);
+    if (mine == s.peerChoice) {
+        s.outSeq = s.peerOutSeq;
+        return;
+    }
+    if (WriteChoice(s.peerChoice)) {
+        ++s.applies;
+        s.outSeq = s.peerOutSeq;
+        net::Log("dlg: applied the peer's dialogue outcome PlayerChoice=%s (was %s)",
+                 s.peerChoice.c_str(), mine.empty() ? "-" : mine.c_str());
+    } else if (s.fail < 5) {
+        ++s.fail;
+        net::Log("dlg: could NOT write PlayerChoice=%s (quest log present=%d)",
+                 s.peerChoice.c_str(), QuestLogComponent() ? 1 : 0);
+    }
+}
+
+ue::UObject* AssetNode(ue::UObject* asset, int nodeIndex) {
+    if (!Valid(asset) || nodeIndex < 0) return nullptr;
+    ObjArr nodes;
+    if (!ReadArr(asset, "Nodes", kDlgNodes, &nodes)) return nullptr;
+    if (nodes.num <= 0 || nodes.num > 8192 || nodeIndex >= nodes.num) return nullptr;
+    ue::UObject* n = nullptr;
+    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(nodes.data) +
+                         (std::size_t)nodeIndex * sizeof(void*),
+                     &n, sizeof(n)))
+        return nullptr;
+    return Valid(n) ? n : nullptr;
+}
+
+std::vector<std::string> NodeOptions(ue::UObject* asset, int nodeIndex) {
+    std::vector<std::string> out;
+    ue::UObject* n = AssetNode(asset, nodeIndex);
+    if (!n) return out;
+    ObjArr edges;
+    if (!ReadArr(n, "Children", kNodeChildren, &edges)) return out;
+    const i32 esize = ue::PropSize(n, "Children");
+    const i32 step = (esize >= kEdgeText + 16 && esize <= 0x200) ? esize : kEdgeSize;
+    const int cnt = std::min((int)edges.num, (int)kMaxEdges);
+    for (int i = 0; i < cnt; ++i) {
+        const std::uint8_t* e =
+            reinterpret_cast<const std::uint8_t*>(edges.data) + (std::size_t)i * step;
+        out.push_back(TextAt(e + kEdgeText));
+    }
+    return out;
+}
+
+// Child node objects of a node (the option/selector edges' targets).
+std::vector<ue::UObject*> NodeChildren(ue::UObject* n) {
+    std::vector<ue::UObject*> out;
+    ObjArr edges;
+    if (!Valid(n) || !ReadArr(n, "Children", kNodeChildren, &edges)) return out;
+    const i32 esize = ue::PropSize(n, "Children");
+    const i32 step = (esize >= 0x38 && esize <= 0x200) ? esize : kEdgeSize;
+    const int cnt = std::min((int)edges.num, (int)kMaxEdges);
+    for (int i = 0; i < cnt; ++i) {
+        const std::uint8_t* e =
+            reinterpret_cast<const std::uint8_t*>(edges.data) + (std::size_t)i * step;
+        i32 target = -1;
+        if (ue::ReadMem(e, &target, sizeof(target)) && target >= 0) {
+            if (ue::UObject* c = AssetNode(g_dlgAssetForChildren, target)) out.push_back(c);
+        }
+    }
+    return out;
+}
+
+// The node that actually SPEAKS: DLG_HubCultist02_Greeting's node 0 is a
+// DlgNode_Selector with two children and no text at all (measured: "line=- voice=-"),
+// so a listener has to follow the edges to the first node that carries a line.
+ue::UObject* SpeechNodeFor(ue::UObject* asset, int nodeIndex, int depth = 0) {
+    ue::UObject* n = AssetNode(asset, nodeIndex);
+    if (!Valid(n) || depth > 4) return n;
+    const std::string line = TextAt(reinterpret_cast<std::uint8_t*>(n) + kSpeechText);
+    ue::UObject* snd = nullptr;
+    ue::Get<ue::UObject*>(n, "SoundWave", snd);
+    if (!line.empty() || Valid(snd)) return n;
+    g_dlgAssetForChildren = asset;
+    for (ue::UObject* c : NodeChildren(n)) {
+        if (!Valid(c)) continue;
+        ue::UObject* deeper = SpeechNodeFor(asset, -1, depth);   // placeholder, unused
+        (void)deeper;
+        const std::string cl = TextAt(reinterpret_cast<std::uint8_t*>(c) + kSpeechText);
+        ue::UObject* cs = nullptr;
+        ue::Get<ue::UObject*>(c, "SoundWave", cs);
+        if (!cl.empty() || Valid(cs)) return c;
+        // one more level (a selector inside a selector)
+        for (ue::UObject* cc : NodeChildren(c)) {
+            if (!Valid(cc)) continue;
+            const std::string ccl = TextAt(reinterpret_cast<std::uint8_t*>(cc) + kSpeechText);
+            ue::UObject* ccs = nullptr;
+            ue::Get<ue::UObject*>(cc, "SoundWave", ccs);
+            if (!ccl.empty() || Valid(ccs)) return cc;
+        }
+    }
+    return n;
+}
+
+// The line a node speaks: subtitle text + voice asset path (both read from the
+// asset, so owner and listener use identical content).
+bool NodeLine(ue::UObject* asset, int nodeIndex, std::string* speaker, std::string* line,
+              std::string* voice) {
+    if (speaker) speaker->clear();
+    if (line) line->clear();
+    if (voice) voice->clear();
+    ue::UObject* n = SpeechNodeFor(asset, nodeIndex);
+    if (!n) return false;
+    if (line) *line = Clean(TextAt(reinterpret_cast<std::uint8_t*>(n) + kSpeechText), 220);
+    if (speaker) {
+        const i32 off = ue::PropOffset(n, "SubtitleSpeakerName");
+        if (off >= 0) {
+            ue::FName fn{};
+            if (ue::ReadMem(reinterpret_cast<const std::uint8_t*>(n) + off, &fn, sizeof(fn))) {
+                const std::string s = ue::ToString(fn);
+                if (!s.empty() && s != "None") *speaker = Clean(s, 40);
+            }
+        }
+        if (speaker->empty()) *speaker = Clean(net::NameOf(n), 40);
+    }
+    if (voice) {
+        ue::UObject* snd = nullptr;
+        if (ue::Get<ue::UObject*>(n, "SoundWave", snd) && Valid(snd)) {
+            *voice = Clean(net::AssetPath(snd), 190);
+        } else {
+            ue::UObject* ev = nullptr;
+            if (ue::Get<ue::UObject*>(n, "AudioEvent", ev) && Valid(ev)) {
+                *voice = Clean(net::AssetPath(ev), 190);
+            }
+        }
+    }
+    return !line->empty() || !voice->empty();
+}
+
+// ---------------------------------------------------------------------------
+// the listener's subtitle block (the game's own dialogue HUD widget)
+// ---------------------------------------------------------------------------
+ue::UObject* HudDialogueWidget() {
+    static ue::UObject* cached = nullptr;
+    if (Valid(cached)) return cached;
+    std::vector<ue::UObject*> list = ue::FindAllOf("WBP_HUD_Dialogue_C");
+    for (ue::UObject* w : list) {
+        if (Valid(w)) {
+            cached = w;
+            return w;
+        }
+    }
+    cached = nullptr;
+    return nullptr;
+}
+
+bool TextFromString(const std::string& text, FTextRaw* out) {
+    if (out) *out = FTextRaw();
+    if (text.empty()) return false;
+    const ue::FName n = ue::MakeName(text.c_str());
+    if (ue::ToString(n) == "None") return false;
+    ue::UObject* sl = ue::FindObject("/Script/Engine.Default__KismetStringLibrary");
+    if (!Valid(sl)) sl = ue::FindObject("KismetStringLibrary");
+    if (!Valid(sl)) return false;
+    ue::UObject* tl = ue::FindObject("/Script/Engine.Default__KismetTextLibrary");
+    if (!Valid(tl)) tl = ue::FindObject("KismetTextLibrary");
+    if (!Valid(tl)) return false;
+
+    Fn toStr(sl, "Conv_NameToString");
+    if (!toStr.ok()) return false;
+    toStr.set<ue::FName>("InName", n);
+    if (!toStr.run()) return false;
+    const ue::FString fs = toStr.get<ue::FString>("ReturnValue");
+    if (fs.Data == nullptr || fs.Num <= 0) return false;
+
+    Fn toText(tl, "Conv_StringToText");
+    if (!toText.ok()) return false;
+    toText.set<ue::FString>("InString", fs);
+    if (!toText.run()) return false;
+    const FTextRaw t = toText.get<FTextRaw>("ReturnValue");
+    if (t.w[0] == 0) return false;
+    if (out) *out = t;
+    return true;
+}
+
+// On-screen line for a LISTENER, the engine's own path: UKismetSystemLibrary::
+// PrintString draws it for `Duration` seconds in the HUD layer.  It is the fallback
+// that cannot be defeated by the dialogue widget's own visibility state (the round
+// 7b capture showed the text was APPLIED to CRT_DialogueSubtitles but the hidden
+// HUD dialogue widget did not reveal it).
+bool PrintLine(const std::string& text) {
+    if (text.empty()) return false;
+    ue::UObject* ks = ue::FindObject("/Script/Engine.Default__KismetSystemLibrary");
+    if (!Valid(ks)) ks = ue::FindObject("KismetSystemLibrary");
+    if (!Valid(ks)) return false;
+    FTextRaw unused;   // (not used: PrintString takes an FString)
+    (void)unused;
+    const ue::FName n = ue::MakeName(text.c_str());
+    if (ue::ToString(n) == "None") return false;
+    ue::UObject* sl = ue::FindObject("/Script/Engine.Default__KismetStringLibrary");
+    if (!Valid(sl)) sl = ue::FindObject("KismetStringLibrary");
+    if (!Valid(sl)) return false;
+    Fn toStr(sl, "Conv_NameToString");
+    if (!toStr.ok()) return false;
+    toStr.set<ue::FName>("InName", n);
+    if (!toStr.run()) return false;
+    const ue::FString fs = toStr.get<ue::FString>("ReturnValue");
+    if (fs.Data == nullptr || fs.Num <= 0) return false;
+    Fn print(ks, "PrintString");
+    if (!print.ok()) return false;
+    ue::UObject* ctx = net::PC();
+    if (!Valid(ctx)) ctx = net::World();
+    print.set<ue::UObject*>("WorldContextObject", ctx);
+    print.set<ue::FString>("InString", fs);
+    print.set<bool>("bPrintToScreen", true);
+    print.set<bool>("bPrintToLog", false);
+    struct FLinearColorRaw {
+        float r, g, b, a;
+    } color = {1.0f, 0.95f, 0.6f, 1.0f};
+    print.set<FLinearColorRaw>("TextColor", color);
+    print.set<float>("Duration", 6.0f);
+    return print.run();
+}
+
+// The game's own SUBTITLE widget: WBP_Subtitle_Base_C (dump: Text_Subtitle @0x348,
+// UpdateText(FText), ToggleSubtitle(bool,FText)).  This is where the game paints the
+// line it speaks, and it accepts an FText BY VALUE -- so the listener can hand it the
+// node's own FText (no string of ours) and the line shows exactly like the game's.
+// Create the game's subtitle widget when this world has none:
+// UWidgetBlueprintLibrary::Create(WorldContextObject, WidgetType: TSubclassOf<UUserWidget>,
+// OwningPlayer) -> UUserWidget* (UMG.hpp:2227).  The class object comes from an existing
+// instance when there is one, else from the object array by bare name.
+ue::UObject* CreateSubtitleWidget() {
+    ue::UObject* cls = nullptr;
+    std::vector<ue::UObject*> existing = ue::FindAllOf("WBP_Subtitle_Base_C");
+    for (ue::UObject* c : existing) {
+        if (!Valid(c)) continue;
+        if (ue::Get<ue::UObject*>(c, "Class", cls) && Valid(cls)) break;
+        cls = nullptr;
+    }
+    if (!Valid(cls)) cls = ue::FindObject("WBP_Subtitle_Base_C");
+    if (!Valid(cls)) {
+        net::Log("dlg: cannot create a subtitle widget -- WBP_Subtitle_Base_C class not found");
+        return nullptr;
+    }
+    ue::UObject* pc = net::PC();
+    ue::UObject* lib = ue::FindObject("/Script/UMG.Default__WidgetBlueprintLibrary");
+    if (!Valid(lib)) lib = ue::FindObject("WidgetBlueprintLibrary");
+    if (!Valid(lib)) return nullptr;
+    Fn create(lib, "Create");
+    if (!create.ok()) return nullptr;
+    create.set<ue::UObject*>("WorldContextObject", pc);
+    create.set<ue::UObject*>("WidgetType", cls);
+    create.set<ue::UObject*>("OwningPlayer", pc);
+    if (!create.run()) return nullptr;
+    ue::UObject* w = create.get<ue::UObject*>("ReturnValue");
+    if (!Valid(w)) return nullptr;
+    Fn add(w, "AddToViewport");
+    if (add.ok()) {
+        add.set<i32>("ZOrder", 30);
+        add.run();
+    }
+    net::Log("dlg: CREATED a WBP_Subtitle_Base_C for the listener (class=%s)",
+             net::NameOf(cls).c_str());
+    return w;
+}
+
+// Prefer a subtitle widget that is actually ON SCREEN; the hub has one instance that
+// exists but is not in the viewport (measured: UpdateText returned 1 and nothing was
+// drawn), so a fresh one is created and added instead.
+ue::UObject* PickSubtitleWidget(int* createdOut, int* seenOut) {
+    if (createdOut) *createdOut = 0;
+    std::vector<ue::UObject*> list = ue::FindAllOf("WBP_Subtitle_Base_C");
+    if (seenOut) *seenOut = (int)list.size();
+    for (ue::UObject* c : list) {
+        if (!Valid(c)) continue;
+        Fn inView(c, "IsInViewport");
+        if (inView.ok() && inView.run() && inView.get<bool>("ReturnValue")) return c;
+    }
+    if (ue::UObject* made = CreateSubtitleWidget()) {
+        if (createdOut) *createdOut = 1;
+        return made;
+    }
+    for (ue::UObject* c : list) {
+        if (Valid(c)) return c;
+    }
+    return nullptr;
+}
+
+bool ShowSubtitleFText(const FTextRaw& t, const std::string& forLog) {
+    if (t.w[0] == 0) return false;
+    int created = 0;
+    int seen = 0;
+    ue::UObject* w = PickSubtitleWidget(&created, &seen);
+    std::vector<ue::UObject*> list = ue::FindAllOf("WBP_Subtitle_Base_C");
+    bool ok = false;
+    if (Valid(w)) {
+        Fn font(w, "SetupFont");
+        if (font.ok()) font.run();
+        Fn toggle(w, "ToggleSubtitle");
+        if (toggle.ok()) {
+            toggle.set<bool>("bIsVisible", true);
+            toggle.set<FTextRaw>("SubtitleText", t);
+            ok = toggle.run();
+        }
+        if (!ok) {
+            Fn upd(w, "UpdateText");
+            if (upd.ok()) {
+                upd.set<FTextRaw>("SubtitleText", t);
+                ok = upd.run();
+            }
+        }
+        if (!ok) {
+            ue::UObject* block = nullptr;
+            if (ue::Get<ue::UObject*>(w, "Text_Subtitle", block) && Valid(block)) {
+                Fn set(block, "SetText");
+                if (set.ok()) {
+                    set.set<FTextRaw>("InText", t);
+                    ok = set.run();
+                }
+            }
+        }
+        // make the widget itself visible without stealing input
+        Fn vis(w, "SetVisibility");
+        if (vis.ok()) {
+            vis.set<std::uint8_t>("InVisibility", 3);
+            vis.run();
+        }
+        Fn inView(w, "IsInViewport");
+        if (inView.ok() && inView.run() && !inView.get<bool>("ReturnValue")) {
+            Fn addv(w, "AddToViewport");
+            if (addv.ok()) {
+                addv.set<i32>("ZOrder", 30);
+                addv.run();
+            }
+        }
+    }
+    if (g_subLogs < 8) {
+        ++g_subLogs;
+        bool inView = false;
+        if (Valid(w)) {
+            Fn iv(w, "IsInViewport");
+            if (iv.ok() && iv.run()) inView = iv.get<bool>("ReturnValue");
+        }
+        net::Log("dlg: subtitle via %s -> %s (%d instance(s), created=%d, inViewport=%d, "
+                 "update=%d) [%s]", Valid(w) ? "WBP_Subtitle_Base_C" : "nothing",
+                 ok ? "shown" : "FAILED", (int)list.size(), created, inView ? 1 : 0,
+                 ok ? 1 : 0, forLog.substr(0, 48).c_str());
+    }
+    return ok;
+}
+
+bool ShowSubtitle(const std::string& text) {
+    if (text.empty() || !TG().dlgEnabled) return false;
+    ue::UObject* w = HudDialogueWidget();
+    if (!Valid(w)) {
+        if (g_subLogs < 2) {
+            ++g_subLogs;
+            net::Log("dlg: no WBP_HUD_Dialogue_C instance in this world -- the peer's line "
+                     "cannot be shown as a subtitle here (the voice still plays)");
+        }
+        return false;
+    }
+    ue::UObject* block = nullptr;
+    if (!ue::Get<ue::UObject*>(w, "CRT_DialogueSubtitles", block) || !Valid(block)) {
+        if (g_subLogs < 2) {
+            ++g_subLogs;
+            net::Log("dlg: %s has no CRT_DialogueSubtitles -- no subtitle block",
+                     net::NameOf(w).c_str());
+        }
+        return false;
+    }
+    FTextRaw t;
+    const bool haveText = TextFromString(text, &t);
+    bool ok = false;
+    if (haveText) {
+        Fn set(block, "SetText");
+        if (set.ok()) {
+            set.set<FTextRaw>("InText", t);
+            ok = set.run();
+        }
+        if (!ok) {
+            // fall back to the widget's own Text property (UTextBlock::Text)
+            const i32 off = ue::PropOffset(block, "Text");
+            if (off >= 0) {
+                ok = ue::WriteMem(reinterpret_cast<std::uint8_t*>(block) + off, &t, sizeof(t));
+            }
+        }
+    }
+    // make the widget itself visible without stealing input (ESlateVisibility 3)
+    Fn vis(w, "SetVisibility");
+    if (vis.ok()) {
+        vis.set<std::uint8_t>("InVisibility", 3);
+        vis.run();
+    }
+    Fn inView(w, "IsInViewport");
+    if (inView.ok() && inView.run() && !inView.get<bool>("ReturnValue")) {
+        Fn add(w, "AddToViewport");
+        if (add.ok()) {
+            add.set<i32>("ZOrder", 20);
+            add.run();
+        }
+    }
+    // the listener must SEE the line even when the dialogue HUD is not visible
+    const bool printed = PrintLine(text);
+    if (ok || printed) {
+        g_subShown = true;
+        g_subText = text;
+    } else if (g_subLogs < 3) {
+        ++g_subLogs;
+        net::Log("dlg: subtitle '%s' could not be applied to the block (%d bytes of text)",
+                 text.substr(0, 40).c_str(), (int)text.size());
+    }
+    return ok;
+}
+
+void HideSubtitle() {
+    if (!g_subShown) return;
+    g_subShown = false;
+    g_subText.clear();
+    ue::UObject* w = HudDialogueWidget();
+    if (!Valid(w)) return;
+    Fn clear(w, "ClearSubtitles");
+    if (clear.ok()) clear.run();
+}
+
+bool PlayVoice(const std::string& soundPath) {
+    if (soundPath.size() < 5) return false;
+    ue::UObject* snd = net::Find(soundPath, true);
+    if (!Valid(snd)) {
+        if (g_voiceLogs < 3) {
+            ++g_voiceLogs;
+            net::Log("dlg: voice asset not found: %s", soundPath.c_str());
+        }
+        return false;
+    }
+    ue::UObject* gs = ue::FindObject("/Script/Engine.Default__GameplayStatics");
+    if (!Valid(gs)) gs = ue::FindObject("GameplayStatics");
+    if (!Valid(gs)) return false;
+    Fn play(gs, "SpawnSound2D");
+    if (!play.ok()) return false;
+    play.set<ue::UObject*>("WorldContextObject", net::World());
+    play.set<ue::UObject*>("Sound", snd);
+    play.set<float>("VolumeMultiplier", 1.0f);
+    play.set<float>("PitchMultiplier", 1.0f);
+    play.set<float>("StartTime", 0.0f);
+    play.set<bool>("bPersistAcrossLevelTransition", false);
+    play.set<bool>("bAutoDestroy", true);
+    const bool ok = play.run();
+    if (g_voiceLogs < 4) {
+        ++g_voiceLogs;
+        net::Log("dlg: voice %s -> %s (2D, listener)", net::NameOf(snd).c_str(),
+                 ok ? "playing" : "FAILED");
+    }
+    return ok;
+}
+
+// ---------------------------------------------------------------------------
+// cinematics
+// ---------------------------------------------------------------------------
+ue::UObject* FindCinematicActor(const std::string& seqName) {
+    std::vector<ue::UObject*> list = ue::FindAllOf("BP_CinematicPlayer_C");
+    ue::UObject* first = nullptr;
+    for (ue::UObject* a : list) {
+        if (!Valid(a)) continue;
+        ue::UObject* asset = nullptr;
+        if (!ue::Get<ue::UObject*>(a, "LevelSequenceToPlay", asset) || !Valid(asset)) continue;
+        if (first == nullptr) first = a;
+        if (seqName.empty() || net::NameOf(asset) == seqName) return a;
+    }
+    return first;
+}
+
+bool StartCinematicReplay(ue::UObject* actor, int elapsedMs) {
+    if (!Valid(actor)) return false;
+    // The world effect (GlobalEvent / quest consequences) arrives through the
+    // EXISTING sync, so the replay copy must not fire it again.
+    ue::SetBool(actor, "BroadcastEventAfterCinematic", false);
+    Fn play(actor, "PlayCutscene");
+    if (!play.ok()) {
+        net::Log("cine: %s has no PlayCutscene", net::NameOf(actor).c_str());
+        return false;
+    }
+    if (!play.run()) return false;
+    if (elapsedMs > 1500) {
+        ue::UObject* cut = nullptr;
+        ue::UObject* seqPlayer = nullptr;
+        if (ue::Get<ue::UObject*>(actor, "CutsceneActor", cut) && Valid(cut)) {
+            if (!ue::Get<ue::UObject*>(cut, "SequencePlayer", seqPlayer) || !Valid(seqPlayer)) {
+                Fn get(cut, "GetSequencePlayer");
+                if (get.ok() && get.run()) seqPlayer = get.get<ue::UObject*>("ReturnValue");
+            }
+        }
+        if (Valid(seqPlayer)) {
+            Fn jump(seqPlayer, "SetPlaybackPosition");
+            if (jump.ok()) {
+                PlaybackParamsRaw pp;
+                const float secs = (float)elapsedMs / 1000.0f;
+                std::memcpy(pp.b + 0x08, &secs, sizeof(secs));   // float Time
+                pp.b[0x38] = 1;                                  // PositionType::Time
+                pp.b[0x39] = 2;                                  // UpdateMethod::Jump
+                jump.set<PlaybackParamsRaw>("PlaybackParams", pp);
+                const bool jok = jump.run();
+                if (jok) ++g_replayJumps;
+                net::Log("cine: late join -> seek to %.2fs on the replay player (ok=%d)", secs,
+                         jok ? 1 : 0);
+            }
+        }
+    }
+    ++g_replayStarts;
+    if (g_replayLogs < 8) {
+        ++g_replayLogs;
+        net::Log("cine: REPLAY started on %s (elapsed=%dms) -- world event suppressed on this "
+                 "copy", net::NameOf(actor).c_str(), elapsedMs);
+    }
+    return true;
+}
+
+// Put the player back the way the game does at a normal cutscene end.
+//
+// WHY: after `ForceStopCinematic` both clients stayed in cinematic presentation --
+// the pawn hidden, the HUD gone, and the ORIGINATOR's view stuck on the leftover
+// sequence camera (r7-final measured pToBody=4006 vs 226 until a death/respawn).
+// `ForceStopCinematic` only kills the sequence player; the blueprint's restore
+// (UnhidePlayerAndWeapons / ResetPlayerMovement / ShowHUD / RemoveCutsceneState /
+// camera fade) is the END path, so this runs those, then the camera.
+//
+// NEVER SetVisibility/SetHiddenInGame with bPropagateToChildren=true on the mesh:
+// that reveals the weapon debug shapes (owner-measured) -- every call here passes
+// false.
+void RestoreCinematicPresentation(const char* why) {
+    static double lastAt = -1.0e9;
+    if (Now() - lastAt < 0.5) return;
+    lastAt = Now();
+
+    ue::UObject* actor = Valid(g_cineActor) ? g_cineActor : FindCinematicActor(g_cineHoldName);
+    int ran = 0;
+    if (Valid(actor)) {
+        const char* fns[] = {"RemoveSkipInput", "UnhidePlayerAndWeapons", "ResetPlayerMovement",
+                             "ClearAnyCameraFade", "HandleEndCameraFade", "ShowHUD",
+                             "RemoveCutsceneState"};
+        for (const char* n : fns) {
+            Fn f(actor, n);
+            if (f.ok() && f.run()) ++ran;
+        }
+    }
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* pc = net::PC();
+    int unhid = 0;
+    if (Valid(pawn)) {
+        Fn hide(pawn, "SetActorHiddenInGame");
+        if (hide.ok()) {
+            hide.set<bool>("bNewHidden", false);
+            if (hide.run()) ++unhid;
+        }
+        ue::SetBool(pawn, "bHidden", false);
+        ue::UObject* mesh = nullptr;
+        if (ue::Get<ue::UObject*>(pawn, "Mesh", mesh) && Valid(mesh)) {
+            Fn vis(mesh, "SetVisibility");
+            if (vis.ok()) {
+                vis.set<bool>("bNewVisibility", true);
+                vis.set<bool>("bPropagateToChildren", false);
+                if (vis.run()) ++unhid;
+            }
+        }
+    }
+    int cam = 0;
+    if (Valid(pc)) {
+        // the sequence leaves its own camera state on the CameraStateFramework stack;
+        // take it off, retarget what remains at the pawn, then blend the view back.
+        ue::UObject* mgr = nullptr;
+        ue::UObject* stackOwner = nullptr;
+        if (ue::Get<ue::UObject*>(pc, "PlayerCameraManager", mgr) && Valid(mgr)) {
+            ue::TArray<ue::UObject*> arr{};
+            if (ue::Get(mgr, "CameraStack", arr) && arr.Num > 0 && arr.Num <= 64) {
+                for (std::int32_t i = 0; i < arr.Num; ++i) {
+                    ue::UObject* st = nullptr;
+                    if (!ue::ReadMem(arr.Data + i, &st, sizeof(st)) || !Valid(st)) continue;
+                    if (ue::GetClassName(st).find("Cinematic") != std::string::npos) {
+                        Fn rf(mgr, "RemoveCameraState");
+                        if (rf.ok()) {
+                            rf.set<ue::UObject*>("CameraState", st);
+                            if (rf.run()) {
+                                ++cam;
+                                net::Log("cine: removed %s from the camera stack",
+                                         ue::GetClassName(st).c_str());
+                            }
+                        }
+                        continue;
+                    }
+                }
+                stackOwner = mgr;
+            }
+        }
+        (void)stackOwner;
+        if (Valid(pawn)) {
+            Fn svt(pc, "SetViewTargetWithBlend");
+            if (svt.ok()) {
+                svt.set<ue::UObject*>("NewViewTarget", pawn);
+                svt.set<float>("BlendTime", 0.2f);
+                svt.set<std::uint8_t>("BlendFunc", 0);
+                svt.set<bool>("bLockOutgoing", false);
+                if (svt.run()) ++cam;
+            }
+        }
+        Fn mv(pc, "SetIgnoreMoveInput");
+        if (mv.ok()) {
+            mv.set<bool>("bNewMoveInput", false);
+            mv.run();
+        }
+        Fn lk(pc, "SetIgnoreLookInput");
+        if (lk.ok()) {
+            lk.set<bool>("bNewLookInput", false);
+            lk.run();
+        }
+    }
+    // The cutscene's own hide/unhide makes Ready() go hard-false for a moment, and that
+    // sets the LOCAL HOLD -- which skips ApplyPeer.  Measured in the 7d regression: A's
+    // "bh" went 3.6 s stale right after a cutscene and the PEERHP verdict (3 s window)
+    // failed.  The presentation is back, so the hold has to be released here.
+    if (net::LocalHold()) {
+        net::SetLocalHold(-1.0);
+        net::Log("cine: released the local hold the cutscene end had set");
+    }
+    if (g_subLogs < 12) {
+        ++g_subLogs;
+        net::Log("cine: RESTORED presentation (%s): blueprint fns=%d, unhide=%d, camera=%d",
+                 why, ran, unhid, cam);
+    }
+}
+
+bool StopCinematicReplay(ue::UObject* actor) {
+    if (!Valid(actor)) return false;
+    Fn stop(actor, "ForceStopCinematic");
+    if (!stop.ok()) return false;
+    const bool ok = stop.run();
+    if (ok) ++g_replayStops;
+    net::Log("cine: replay stop on %s ok=%d", net::NameOf(actor).c_str(), ok ? 1 : 0);
+    RestoreCinematicPresentation("sequence stop");
+    return ok;
+}
+
+}  // namespace
+
+namespace dialog {
+
+// ===========================================================================
+// the small public surface
+// ===========================================================================
+bool LocalLocked() {
+    if (TG().dlgEnabled && g_mine.active && g_mine.kind == 1) return true;
+    if (TG().cineEnabled && g_mine.active && g_mine.kind == 2) return true;
+    return false;
+}
+bool PeerLocked() {
+    if (!D().peer.active) return false;
+    if (D().peer.kind == 1 && !TG().dlgEnabled) return false;
+    if (D().peer.kind == 2 && !TG().cineEnabled) return false;
+    return PeerLockedFresh();
+}
+bool PeerLockedFresh() { return Now() - g_peerSeenAt <= kDlgPeerStale; }
+double PeerAge() { return Now() - g_peerSeenAt; }
+int PeerKind() { return D().peer.active ? D().peer.kind : 0; }
+
+// A local hold (a teleport, a world settle, a respawn) SKIPS ApplyPeer -- and round-7c
+// measured a 1170 ms cinematic-end lag that way: the stop was in the peer's file the
+// whole time but the apply step was held.  This runs on a never-skipped 15 Hz step and
+// parses the peer line only when ApplyPeer has not run recently, so a cutscene end
+// can never wait for a hold to expire.
+void PeerKeepAlive() {
+    if (Now() - g_lastApplyAt < 0.15) return;
+    std::string line;
+    if (!net::ReadLine("peer_" + state().local.peer + ".txt", &line) || line.empty()) return;
+    if (net::HasRdy0(line)) return;
+    OnPeerLine(line);
+    // The FRIEND'S BODY STATE is the other thing a hold may starve: after a cutscene end
+    // both clients arm a 5 s local hold (Ready() sees the unhide as "not ready"), and the
+    // r7e regression measured A's `bh` 3.1 s stale -- the PEERHP window is 3 s, so it
+    // failed.  Only when the sample really IS stale (>1.5 s), so the healthy path (and
+    // the `pd` ordering PEERHIT depends on) is untouched.
+    if (body::PeerAge() > 1.5) {
+        static double lastBodyRepair = -1.0e9;
+        if (Now() - lastBodyRepair > 0.5) {
+            lastBodyRepair = Now();
+            body::OnPeerLine(line);
+            net::Log("dlg: applied a stale \"bh\" from the keep-alive (age was %.1fs)",
+                     body::PeerAge());
+        }
+    }
+    g_lastApplyAt = Now();
+}
+void NoteSkip(int what) {
+    if (what == 0) {
+        ++D().aiSkips;
+    } else {
+        ++D().pdSkips;
+    }
+}
+
+void NoteApplyAt() { g_lastApplyAt = Now(); }
+
+void Start() {
+    D() = dialog::State();
+    g_mine = dialog::LockState();
+    g_real = dialog::LockState();
+    g_dlgSub = nullptr;
+    g_subShown = false;
+    g_subText.clear();
+    g_cineActor = nullptr;
+    g_cineSeq = -1;
+    g_votes.clear();
+    net::Log("dialog: start (DIALOG_OFF=%d CINE_OFF=%d) -- dialogue state, the PlayerChoice "
+             "outcome, cinematics and the dialogue vote travel on "
+             "\"dl\"/\"ct\"/\"ci\"/\"dv\"/\"dr\"",
+             TG().dlgEnabled ? 0 : 1, TG().cineEnabled ? 0 : 1);
+}
+
+void Reset() {
+    g_dlgSub = nullptr;
+    g_cineActor = nullptr;
+    g_cineSeq = -1;
+    g_subShown = false;
+    g_subText.clear();
+}
+
+}  // namespace dialog
+
+// ===========================================================================
+// local detection
+// ===========================================================================
+namespace {
+
+void SampleLocal() {
+    dialog::LockState next;
+    dialog::LockState real;
+    std::string owner;
+
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    if (TG().dlgEnabled && ActiveDialogue(&ctx, &asset, &inst, &owner)) {
+        real.active = 1;
+        real.kind = 1;
+        real.at = Now();
+        if (Valid(asset)) {
+            real.name = Clean(net::NameOf(asset));
+            g_dlgPath = Clean(net::AssetPath(asset), 190);
+        }
+        if (Valid(ctx)) {
+            Fn node(ctx, "GetActiveNodeIndex");
+            if (node.ok() && node.run()) real.node = (int)node.get<i32>("ReturnValue");
+            Fn opts(ctx, "GetOptionsNum");
+            if (opts.ok() && opts.run()) real.opts = (int)opts.get<i32>("ReturnValue");
+        }
+        if (g_dlgLogs < 12) {
+            ++g_dlgLogs;
+            net::Log("dlg: DIALOGUE ACTIVE name=%s node=%d options=%d%s%s", real.name.c_str(),
+                     real.node, real.opts, owner.empty() ? "" : " instigatorOwner=", owner.c_str());
+        }
+    } else if (TG().dlgEnabled) {
+        g_dlgPath.clear();
+    }
+
+    if (TG().cineEnabled && !real.active) {
+        std::vector<ue::UObject*> list = ue::FindAllOf("BP_CinematicPlayer_C");
+        int playing = 0;
+        std::string seqName;
+        for (ue::UObject* a : list) {
+            if (!Valid(a)) continue;
+            ue::UObject* cut = nullptr;
+            if (!ue::Get<ue::UObject*>(a, "CutsceneActor", cut) || !Valid(cut)) continue;
+            // CutsceneActor stays set after ForceStopCinematic, so the real question
+            // is whether the sequence PLAYER is still running (draw: the round-7b run
+            // left `me:1` for 20 s after a successful ForceStopCinematic).
+            ue::UObject* sp = nullptr;
+            if (!ue::Get<ue::UObject*>(cut, "SequencePlayer", sp) || !Valid(sp)) {
+                Fn get(cut, "GetSequencePlayer");
+                if (get.ok() && get.run()) sp = get.get<ue::UObject*>("ReturnValue");
+            }
+            if (Valid(sp)) {
+                Fn isp(sp, "IsPlaying");
+                if (isp.ok() && isp.run() && !isp.get<bool>("ReturnValue")) continue;
+            }
+            ++playing;
+            if (seqName.empty()) {
+                ue::UObject* seqAsset = nullptr;
+                if (ue::Get<ue::UObject*>(a, "LevelSequenceToPlay", seqAsset) && Valid(seqAsset)) {
+                    seqName = Clean(net::NameOf(seqAsset));
+                }
+                if (seqName.empty()) seqName = Clean(net::NameOf(cut));
+            }
+        }
+        if (playing > 0) {
+            real.active = 1;
+            real.kind = 2;
+            real.at = Now();
+            real.name = seqName;
+            if (g_cineStartLocal == 0.0) g_cineStartLocal = Now();
+            if (g_cineLogs < 8) {
+                ++g_cineLogs;
+                net::Log("cine: sequence PLAYING (%d cinematic player(s), %d with a cutscene actor) "
+                         "name=%s", (int)list.size(), playing, seqName.c_str());
+            }
+        } else {
+            g_cineStartLocal = 0.0;
+            if ((int)list.size() > 0 && g_cineLogs < 8) {
+                ++g_cineLogs;
+                net::Log("cine: %d cinematic player(s) present, none playing", (int)list.size());
+            }
+        }
+    }
+
+    if (!real.active && TG().dlgEnabled) {
+        std::string choice;
+        if (ReadChoice(&choice) && choice != D().choice) {
+            net::Log("dlg: PlayerChoice %s -> %s (dialogue outcome)",
+                     D().choice.empty() ? "-" : D().choice.c_str(), choice.c_str());
+            D().choice = choice;
+            ++D().outSeq;
+        }
+    }
+
+    if (g_fakeDlg && TG().dlgEnabled) {
+        next.active = 1;
+        next.kind = 1;
+        next.name = g_fakeDlgName;
+        g_dlgPath = g_fakeDlgPath;   // a real asset path, so the listener replays real lines
+        next.node = real.node;
+        next.opts = real.opts;
+    } else if (g_fakeCine && TG().cineEnabled) {
+        next.active = 1;
+        next.kind = 2;
+        next.name = g_fakeCineName;
+    } else {
+        next = real;
+    }
+    next.at = Now();
+
+    const bool was = g_mine.active != 0;
+    if (next.active != g_mine.active || next.kind != g_mine.kind || next.name != g_mine.name ||
+        next.node != g_mine.node) {
+        next.seq = g_mine.seq + 1;
+    } else {
+        next.seq = g_mine.seq;
+    }
+    if (next.active) g_mineLastKind = next.kind;
+    g_real = real;
+    const bool started = next.active && !was;
+    const bool ended = !next.active && was;
+    const int prevKind = g_mine.kind;
+    const double prevAt = g_mine.at;
+    g_mine = next;
+
+    if (started) {
+        ++D().localEpisodes;
+        if (next.kind == 1) {
+            ++g_dseq;
+            g_node = next.node;
+            g_opts = next.opts;
+            // a new conversation: its votes start from scratch
+            g_myVoteSeq = -1;
+            g_myVoteNode = -1;
+            g_myVoteOpt = -1;
+        }
+        net::Log("dialog: LOCAL BUSY (%s) name=%s -- publishing it in \"%s\"",
+                 next.kind == 1 ? "dialogue" : "cinematic", next.name.c_str(),
+                 next.kind == 1 ? "dl" : "ci");
+    } else if (ended) {
+        net::Log("dialog: local busy ENDED (%s) after %.1fs",
+                 prevKind == 1 ? "dialogue" : "cinematic", prevAt > 0.0 ? next.at - prevAt : 0.0);
+        g_mineEndedAt = Now();
+        if (prevKind == 1) HideSubtitle();
+    }
+    if (next.active && next.kind == 1) {
+        g_node = next.node;
+        g_opts = next.opts;
+        // the line for THIS node, resolved here (the owner has the asset loaded)
+        ue::UObject* asset = nullptr;
+        if (!g_dlgPath.empty()) asset = net::Find(g_dlgPath, true);
+        std::string sp, ln, vo;
+        if (Valid(asset)) {
+            NodeLine(asset, next.node, &sp, &ln, &vo);
+        }
+        if (ln.empty() && sp.empty() && vo.empty()) {
+            // the fake trigger, or an asset that cannot be resolved: publish a line
+            // anyway so the listener half is testable from cold
+            sp = "Disciple";
+            ln = "Welcome back, High Sester.";
+            vo = "AE_VO_HubCultist_GreetGenessa_10_11";
+        }
+        if (sp != g_lineSpeaker || ln != g_lineText || vo != g_lineVoice) {
+            if (g_dlgLogs < 20) {
+                ++g_dlgLogs;
+                net::Log("dlg: line node=%d speaker=%s line=%s voice=%s (published in \"dl\")",
+                         next.node, sp.c_str(), ln.substr(0, 40).c_str(), vo.c_str());
+            }
+        }
+        g_lineSpeaker = sp;
+        g_lineText = ln;
+        g_lineVoice = vo;
+    } else if (!next.active) {
+        g_lineText.clear();
+        g_lineSpeaker.clear();
+        g_lineVoice.clear();
+    }
+    D().mine = next;
+}
+
+// ===========================================================================
+// CINEMA REPLAY: the peer's "ci" asked for a sequence; start/stop it here.
+// All engine work is done on the 2 Hz tick, never in the peer-line parse.
+// ===========================================================================
+// Start the conversation on `comp` through the game's own entry point.  Two
+// attempts, both the game's:
+//   1. BPC_DialogueInstigator_C::StartDialogue with SkipParticipantsCheck, because
+//      a lab start is not an interaction (the NPC's authored participant list is
+//      only filled by its own interaction path; the check refused otherwise).
+//   2. UDialogueSubsystem::SpartaStartDialogue with THIS pawn as the only
+//      participant and no instigator, which is the subsystem's own public entry.
+// Diagnose + drive the game's own start.  Order of attempts:
+//  0. AddParticipant(pawn)   -- BPC_DialogueInstigator_C::AddParticipant is how the
+//     NPC's interaction path fills its participant list; without it CheckParticipants
+//     has nothing to accept (that is the likely reason Success=0 in round 7b).
+//  1. StartDialogue with the three empty tag containers.
+//  2. the NPC's BPC_InteractionHandler_C (the component the player's Use button goes
+//     through): HandleInteractEvent / SendInteractionGameplayEvent.
+//  3. UDialogueSubsystem::SpartaStartDialogue with [pawn] (and then [npc,pawn] with
+//     the instigator).
+bool StartConversation(ue::UObject* comp, ue::UObject* asset) {
+    ue::UObject* pawn = net::Pawn();
+    // --- pre-flight: what the NPC's own gating wants ------------------------------
+    // LogDlgGates showed CheckNarrativeTag=1 and Tag to Check=Dialogue.Ruk.FirstTimeTop:
+    // the hub cultist refuses to talk until that narrative tag is in the quest log.
+    // A real player earns it by meeting Ruk; the lab has to add it the way the game
+    // does (`BPC_QuestLogComponent_C::AddNarrativeTag`).
+    if (Valid(g_pendingNpc)) {
+        ue::SetBool(g_pendingNpc, "bInteractable", true);
+        ue::SetBool(g_pendingNpc, "IsTriggerable", true);
+        ue::FName tag{};
+        ue::Get<ue::FName>(g_pendingNpc, "Tag to Check", tag);
+        const std::string tagName = ue::ToString(tag);
+        if (!tagName.empty() && tagName != "None") {
+            ue::UObject* q = QuestLogComponent();
+            if (Valid(q)) {
+                Fn add(q, "AddNarrativeTag");
+                if (add.ok()) {
+                    add.set<ue::FName>("Tag", ue::MakeName(tagName.c_str()));
+                    add.set<bool>("SaveToDisk", false);
+                    const bool ok = add.run();
+                    net::Log("dlgstart: AddNarrativeTag(%s) ok=%d (the NPC's CheckNarrativeTag "
+                             "gate)", tagName.c_str(), ok ? 1 : 0);
+                }
+            }
+        }
+    }
+    // --- attempt 0: the participant list ---------------------------------------
+    struct Arr {
+        ue::UObject** data;
+        i32 num;
+        i32 max;
+    };
+    auto countParticipants = [&]() -> int {
+        Fn get(comp, "GetParticipants");
+        if (!get.ok() || !get.run()) return -1;
+        Arr a = get.get<Arr>("NewParam");
+        if (a.num < 0 || a.num > 64) return -1;
+        return a.num;
+    };
+    const int partsBefore = countParticipants();
+    if (Valid(pawn)) {
+        Fn add(comp, "AddParticipant");
+        if (add.ok()) {
+            add.set<ue::UObject*>("NewParticipant", pawn);
+            const bool aok = add.run();
+            net::Log("dlgstart: AddParticipant(pawn) ok=%d ; participants %d -> %d", aok ? 1 : 0,
+                     partsBefore, countParticipants());
+        } else {
+            net::Log("dlgstart: AddParticipant not found (participants %d)", partsBefore);
+        }
+    }
+    // --- what the check says, before and after --------------------------------
+    Fn chk(comp, "CheckParticipants");
+    if (chk.ok() && chk.run()) {
+        net::Log("dlgstart: CheckParticipants -> Success=%d (participants=%d)",
+                 chk.get<bool>("Success") ? 1 : 0, countParticipants());
+    }
+    // --- the instigator's own state, then ActivateDialogue (the BP gate) --------
+    net::Log("dlgstart: instigator flags before ActivateDialogue: WasTriggered=%d "
+             "WaitForParticipants=%d bDisablePlayerInput=%d CanBeRepeated=%d "
+             "SkipParticipantsCheck=%d",
+             ue::GetBool(comp, "WasTriggered") ? 1 : 0,
+             ue::GetBool(comp, "WaitForParticipants") ? 1 : 0,
+             ue::GetBool(comp, "bDisablePlayerInput") ? 1 : 0,
+             ue::GetBool(comp, "CanBeRepeated") ? 1 : 0,
+             ue::GetBool(comp, "SkipParticipantsCheck") ? 1 : 0);
+    {
+        Fn act(comp, "ActivateDialogue");
+        if (act.ok()) {
+            act.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+            act.set<TagContainerZero>("AdditionalInterruptTags", TagContainerZero());
+            act.set<TagContainerZero>("AdditionalBlockingTags", TagContainerZero());
+            const bool ran = act.run();
+            net::Log("dlgstart: ActivateDialogue ran=%d Success=%d", ran ? 1 : 0,
+                     act.get<bool>("Success") ? 1 : 0);
+            LogDialogueState("after ActivateDialogue");
+            ue::UObject* c4 = nullptr;
+            ue::UObject* a4 = nullptr;
+            ue::UObject* i4 = nullptr;
+            std::string o4;
+            if (ActiveDialogue(&c4, &a4, &i4, &o4)) {
+                net::Log("dlgstart: ActivateDialogue STARTED the conversation (%s)",
+                         Valid(a4) ? net::NameOf(a4).c_str() : "?");
+                return true;
+            }
+        } else {
+            net::Log("dlgstart: ActivateDialogue not found on the instigator");
+        }
+    }
+    // --- the interaction component the Use button goes through ------------------
+    ue::UObject* ih = nullptr;
+    if (ue::Get<ue::UObject*>(g_pendingNpc, "BPC_InteractionHandler", ih) && Valid(ih)) {
+        Fn act(ih, "HandleInteractEvent");
+        bool ok = false;
+        if (act.ok()) {
+            act.set<ue::UObject*>("InputAction", nullptr);
+            ok = act.run();
+        }
+        net::Log("dlgstart: interaction HandleInteractEvent ok=%d (component=%s)", ok ? 1 : 0,
+                 net::NameOf(ih).c_str());
+        Fn send(ih, "SendInteractionGameplayEvent");
+        if (send.ok()) {
+            const bool sok = send.run();
+            net::Log("dlgstart: SendInteractionGameplayEvent ok=%d", sok ? 1 : 0);
+        }
+        // did that start a conversation?
+        ue::UObject* ctx2 = nullptr;
+        ue::UObject* a2 = nullptr;
+        ue::UObject* i2 = nullptr;
+        std::string o2;
+        if (ActiveDialogue(&ctx2, &a2, &i2, &o2)) {
+            net::Log("dlgstart: the INTERACTION path started a real conversation (%s)",
+                     Valid(a2) ? net::NameOf(a2).c_str() : "?");
+            return true;
+        }
+    }
+    bool participants = false;
+    if (ue::GetBool(comp, "SkipParticipantsCheck")) participants = true;
+    ue::SetBool(comp, "SkipParticipantsCheck", true);
+    ue::SetBool(comp, "WasTriggered", false);
+    ue::SetBool(comp, "CanBeRepeated", true);
+    if (g_dlgLogs < 20) {
+        ++g_dlgLogs;
+        ue::UObject* was = nullptr;
+        ue::Get<ue::UObject*>(comp, "DlgDialogue", was);
+        net::Log("dlgstart: component prepared (SkipParticipantsCheck %d -> 1, dialogue=%s)",
+                 participants ? 1 : 0, Valid(was) ? net::NameOf(was).c_str() : "-");
+    }
+    Fn c(comp, "StartDialogue");
+    if (c.ok()) {
+        c.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+        c.set<TagContainerZero>("AdditionalInterruptTags", TagContainerZero());
+        c.set<TagContainerZero>("AdditionalBlockingTags", TagContainerZero());
+        const bool ok = c.run();
+        const bool success = c.get<bool>("Success");
+        net::Log("dlgstart: StartDialogue ok=%d Success=%d", ok ? 1 : 0, success ? 1 : 0);
+        if (success) return true;
+    }
+    // fallback: the subsystem's own public start
+    ue::UObject* sub = DialogueSubsystem();
+    if (!Valid(sub) || !Valid(asset) || !Valid(pawn)) return false;
+    Fn s(sub, "SpartaStartDialogue");
+    if (!s.ok()) return false;
+    s.set<ue::UObject*>("Dialogue", asset);
+    ue::UObject* one[1] = {pawn};
+    struct Arr1 {
+        ue::UObject** data;
+        i32 num;
+        i32 max;
+    } arr = {one, 1, 1};
+    s.set<Arr1>("Participants", arr);
+    s.set<ue::UObject*>("Instigator", nullptr);
+    s.set<TagContainerZero>("AdditionalInterruptTags", TagContainerZero());
+    s.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+    s.set<TagContainerZero>("AdditionalBlockingTags", TagContainerZero());
+    const bool ok2 = s.run();
+    net::Log("dlgstart: SpartaStartDialogue(participants=[%s]) ok=%d", net::NameOf(pawn).c_str(),
+             ok2 ? 1 : 0);
+    {
+        ue::UObject* c3 = nullptr;
+        ue::UObject* a3 = nullptr;
+        ue::UObject* i3 = nullptr;
+        std::string o3;
+        if (ActiveDialogue(&c3, &a3, &i3, &o3)) return true;   // it really started
+    }
+    // attempt 3: the same call WITH the NPC as the first participant and the
+    // NPC's own instigator -- the shape the interaction path uses.
+    Fn s3(sub, "SpartaStartDialogue");
+    if (!s3.ok()) return false;
+    s3.set<ue::UObject*>("Dialogue", asset);
+    ue::UObject* two[2] = {g_pendingNpc, pawn};
+    struct Arr2 {
+        ue::UObject** data;
+        i32 num;
+        i32 max;
+    } arr2 = {two, 2, 2};
+    s3.set<Arr2>("Participants", arr2);
+    s3.set<ue::UObject*>("Instigator", comp);
+    s3.set<TagContainerZero>("AdditionalInterruptTags", TagContainerZero());
+    s3.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+    s3.set<TagContainerZero>("AdditionalBlockingTags", TagContainerZero());
+    const bool ok3 = s3.run();
+    net::Log("dlgstart: SpartaStartDialogue(participants=[npc,%s], instigator=%s) ok=%d",
+             net::NameOf(pawn).c_str(), net::NameOf(comp).c_str(), ok3 ? 1 : 0);
+    return ok3;
+}
+
+
+void LogDialogueState(const char* when) {
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    std::string owner;
+    const bool active = ActiveDialogue(&ctx, &asset, &inst, &owner);
+    net::Log("dlgstart: %s active=%d asset=%s instigator=%s ctx=%s", when, active ? 1 : 0,
+             Valid(asset) ? net::NameOf(asset).c_str() : "-",
+             Valid(inst) ? net::NameOf(inst).c_str() : "-",
+             Valid(ctx) ? net::NameOf(ctx).c_str() : "-");
+}
+
+// Everything that can stand between us and a real conversation, in one log block:
+// interface presence, the tag gate, the asset's active state and the NPC's own
+// default interaction (what the Use button ends up doing).
+void LogDlgGates(ue::UObject* comp, ue::UObject* npc, ue::UObject* asset) {
+    ue::UObject* pawn = net::Pawn();
+    const bool pawnIface = Valid(pawn) && ue::FindFunction(pawn, "GetParticipantName") != nullptr;
+    const bool npcIface = Valid(npc) && ue::FindFunction(npc, "GetParticipantName") != nullptr;
+    net::Log("dlgstart: IDlgDialogueParticipant present: pawn=%d npc=%d", pawnIface ? 1 : 0,
+             npcIface ? 1 : 0);
+    if (Valid(comp) && Valid(asset)) {
+        Fn chk(comp, "CheckTagConditions");
+        if (chk.ok()) {
+            chk.set<ue::UObject*>("Component", comp);
+            chk.set<ue::UObject*>("Asset", asset);
+            chk.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+            const bool ok = chk.run();
+            net::Log("dlgstart: CheckTagConditions ran=%d -> %d", ok ? 1 : 0,
+                     ok ? (chk.get<bool>("ReturnValue") ? 1 : 0) : -1);
+        }
+    }
+    ue::UObject* sub = DialogueSubsystem();
+    if (Valid(sub) && Valid(asset)) {
+        Fn act(sub, "IsDialogueCurrentlyActive");
+        if (act.ok()) {
+            act.set<ue::UObject*>("InDialogue", asset);
+            const bool ok = act.run();
+            net::Log("dlgstart: IsDialogueCurrentlyActive ran=%d -> %d", ok ? 1 : 0,
+                     ok ? (act.get<bool>("ReturnValue") ? 1 : 0) : -1);
+        }
+    }
+    if (Valid(npc)) {
+        const bool chkTag = ue::GetBool(npc, "CheckNarrativeTag");
+        ue::FName tag{};
+        ue::Get<ue::FName>(npc, "Tag to Check", tag);
+        net::Log("dlgstart: npc gating: CheckNarrativeTag=%d TagToCheck=%s",
+                 chkTag ? 1 : 0, ue::ToString(tag).c_str());
+        Fn def(npc, "HandleDefaultInteraction");
+        if (def.ok()) {
+            const bool ok = def.run();
+            net::Log("dlgstart: HandleDefaultInteraction ok=%d", ok ? 1 : 0);
+            LogDialogueState("after HandleDefaultInteraction");
+        }
+    }
+}
+
+void DialogueStartTick() {
+    if (g_startPhase == 0) return;
+    if (Now() < g_startPhaseAt) return;
+    if (g_startPhase == 1) {
+        // teleport has landed: drive the interaction component the Use button goes through
+        ue::UObject* ih = nullptr;
+        ue::UObject* comp = g_pendingStart;
+        if (Valid(g_startNpc)) ue::Get<ue::UObject*>(g_startNpc, "BPC_InteractionHandler", ih);
+        if (Valid(ih)) {
+            Fn act(ih, "HandleInteractEvent");
+            bool ok = false;
+            if (act.ok()) {
+                act.set<ue::UObject*>("InputAction", nullptr);
+                ok = act.run();
+            }
+            Fn send(ih, "SendInteractionGameplayEvent");
+            const bool sok = send.ok() && send.run();
+            net::Log("dlgstart: interaction path: HandleInteractEvent ok=%d, "
+                     "SendInteractionGameplayEvent ok=%d", ok ? 1 : 0, sok ? 1 : 0);
+        } else {
+            net::Log("dlgstart: %s has no BPC_InteractionHandler", Valid(g_startNpc) ? "" : "-");
+        }
+        (void)comp;
+        {
+            ue::UObject* asset = nullptr;
+            if (Valid(comp)) ue::Get<ue::UObject*>(comp, "DlgDialogue", asset);
+            LogDlgGates(comp, g_startNpc, Valid(asset) ? asset : nullptr);
+        }
+        g_startPhase = 3;
+        g_startPhaseAt = Now() + 0.5;
+        g_startVerifyLeft = 8;      // ~4 s of samples: the interaction path uses a delay timer
+        return;
+    }
+    if (g_startPhase == 3) {
+        LogDialogueState("verify");
+        if (--g_startVerifyLeft > 0) {
+            g_startPhaseAt = Now() + 0.5;
+            return;
+        }
+        // nothing started: the direct call, with every gate logged
+        if (Valid(g_pendingStart)) {
+            net::Log("dlgstart: no conversation after the interaction path -- trying the "
+                     "direct start with diagnostics");
+            StartConversation(g_pendingStart, nullptr);
+        }
+        g_startPhase = 0;
+        g_pendingStart = nullptr;
+        g_startNpc = nullptr;
+    }
+}
+
+void PendingStartTick() {
+    if (!Valid(g_pendingStart) || g_pendingStartAt <= 0.0) return;
+    if (Now() < g_pendingStartAt) return;
+    ue::UObject* comp = g_pendingStart;
+    g_pendingStart = nullptr;
+    g_pendingStartAt = 0.0;
+    ue::UObject* asset = nullptr;
+    ue::Get<ue::UObject*>(comp, "DlgDialogue", asset);
+    const bool ok = StartConversation(comp, asset);
+    net::Log("dlgstart: deferred start -> %s", ok ? "conversation started" : "FAILED");
+}
+
+// Mark OUR cinematic as ended NOW (and stamp it), so the stop leaves in the very next
+// 15 Hz packet instead of waiting for the next poll/sample.
+void NoteLocalCinematicEnd(const char* why) {
+    g_mine.active = 0;
+    g_mine.kind = 0;
+    g_mine.seq += 1;
+    g_mineEndedAt = Now();
+    g_mineLastKind = 2;
+    g_mineStopAtMs = WallMs() % 100000000;
+    g_cineStartLocal = 0.0;
+    D().mine = g_mine;
+    if (g_endLags < 40) {
+        ++g_endLags;
+        net::Log("cine: END noted at %lld (%s) -- publishing the stop",
+                 (long long)g_mineStopAtMs, why);
+    }
+    RestoreCinematicPresentation(why);
+}
+
+// 15 Hz: notice OUR cinematic ending within one publish (the 2 Hz detector alone put
+// up to 500 ms between "the sequence stopped" and "the peer is told").
+void FastCinematicEndPoll() {
+    if (!TG().cineEnabled) return;
+    if (!(g_mine.active && g_mine.kind == 2)) return;
+    std::vector<ue::UObject*> list = ue::FindAllOf("BP_CinematicPlayer_C");
+    bool playing = false;
+    for (ue::UObject* a : list) {
+        if (!Valid(a)) continue;
+        ue::UObject* cut = nullptr;
+        if (!ue::Get<ue::UObject*>(a, "CutsceneActor", cut) || !Valid(cut)) continue;
+        ue::UObject* sp = nullptr;
+        if (!ue::Get<ue::UObject*>(sp, "SequencePlayer", sp) || !Valid(sp)) {
+            if (!ue::Get<ue::UObject*>(cut, "SequencePlayer", sp) || !Valid(sp)) {
+                Fn get(cut, "GetSequencePlayer");
+                if (get.ok() && get.run()) sp = get.get<ue::UObject*>("ReturnValue");
+            }
+        }
+        if (Valid(sp)) {
+            Fn isp(sp, "IsPlaying");
+            if (isp.ok() && isp.run() && !isp.get<bool>("ReturnValue")) continue;
+        }
+        playing = true;
+        break;
+    }
+    if (playing) return;
+    NoteLocalCinematicEnd("15 Hz poll");
+}
+
+void CinematicReplayTick() {
+    if (!TG().cineEnabled) return;
+    // cinehold: a test hold.  The hub intro is ~2 s, far too short for the harness
+    // or a screenshot pass; restarting it is presentation only (no extra events).
+    if (g_cineHoldUntil > 0.0) {
+        if (Now() > g_cineHoldUntil) {
+            g_cineHoldUntil = 0.0;
+            if (!(g_mine.active && g_mine.kind == 2)) RestoreCinematicPresentation("hold ended");
+        } else if (!(g_mine.active && g_mine.kind == 2)) {
+            ue::UObject* a = FindCinematicActor(g_cineHoldName);
+            if (Valid(a)) StartCinematicReplay(a, 0);
+        }
+    }
+    if (g_cineStopPending) {
+        g_cineStopPending = false;
+        if (Valid(g_cineActor)) {
+            StopCinematicReplay(g_cineActor);
+            g_cineActor = nullptr;
+            g_cineSeq = -1;
+        }
+    }
+    if (!g_cinePending) return;
+    g_cinePending = false;
+    const std::string name = g_cinePendingName;
+    const int elapsed = g_cinePendingElapsed;
+    if (g_mine.active && g_mine.kind == 2) return;    // already playing our own
+    ue::UObject* actor = FindCinematicActor(name);
+    if (!Valid(actor)) {
+        if (g_replayLogs < 8) {
+            ++g_replayLogs;
+            net::Log("cine: no BP_CinematicPlayer_C with LevelSequenceToPlay=%s -- cannot replay",
+                     name.empty() ? "(any)" : name.c_str());
+        }
+        return;
+    }
+    if (StartCinematicReplay(actor, elapsed)) {
+        g_cineActor = actor;
+        g_cineSeq = D().peer.seq;
+        g_cineInitiator = false;   // this copy is a REPLAY of the peer's sequence
+    }
+}
+
+// ===========================================================================
+// LISTENER: replay A's conversation on this client (voice + subtitles) and drive
+// the vote window.  Runs at 2 Hz on the side that is NOT in a dialogue.
+// ===========================================================================
+void ListenerTick() {
+    const bool listening = TG().dlgEnabled && D().peer.active && D().peer.kind == 1 &&
+                           dialog::PeerLocked() && !(g_mine.active && g_mine.kind == 1);
+    if (!listening) {
+        if (g_lastListenNode >= 0) {
+            g_lastListenNode = -1;
+            g_lastListenPath.clear();
+            HideSubtitle();
+        }
+        return;
+    }
+    const int node = D().peer.node;
+    const std::string path = D().peerPath;
+    const bool sameNode = (node == g_lastListenNode && path == g_lastListenPath);
+    // Re-apply the same line every 2 s: a subtitle must STAY on screen until the
+    // next node (the on-screen text channel expires after a few seconds).
+    if (sameNode && Now() - g_lastListenAt < 2.0) return;
+    g_lastListenAt = Now();
+    if (!sameNode) {
+        ++g_listenNodes;
+    }
+    g_lastListenNode = node;
+    g_lastListenPath = path;
+
+    // THE LINE COMES FROM THE WIRE (r7-final measured "asset not loaded yet" on a cold
+    // listener); the asset is only the fallback for what the wire cannot carry (the
+    // option labels).
+    std::string speaker = D().peerSpeaker;
+    std::string line = D().peerLine;
+    std::string voice = D().peerVoice;
+    ue::UObject* asset = path.empty() ? nullptr : net::Find(path, true);
+    std::vector<std::string> opts;
+    if (Valid(asset)) {
+        if (line.empty() && speaker.empty()) {
+            NodeLine(asset, node, &speaker, &line, &voice);
+        }
+        opts = NodeOptions(asset, node);
+    }
+    // the subtitle block: speaker + line + (at a choice node) the options
+    std::string text;
+    if (!speaker.empty()) text += speaker + ": ";
+    text += line;
+    if (!opts.empty() && D().peer.opts > 0) {
+        text += "  [";
+        for (std::size_t i = 0; i < opts.size() && i < 4; ++i) {
+            if (i) text += " | ";
+            text += net::Fmt("%d) ", (int)i + 1) + opts[i];
+        }
+        text += "]";
+        if (g_myVoteOpt >= 0) text += net::Fmt(" (your vote: %d)", g_myVoteOpt + 1);
+    }
+    // the game's own subtitle widget first: the asset's own FText when it is loaded,
+    // otherwise an FText built from the wire's line (cold-listener path)
+    ue::UObject* speech = Valid(asset) ? SpeechNodeFor(asset, node) : nullptr;
+    FTextRaw nodeText;
+    bool haveNodeText = Valid(speech) && ReadFTextBytes(
+        reinterpret_cast<const std::uint8_t*>(speech) + kSpeechText, &nodeText);
+    if (!haveNodeText && !text.empty()) haveNodeText = TextFromString(text, &nodeText);
+    if (haveNodeText) ShowSubtitleFText(nodeText, text);
+    if (!text.empty()) ShowSubtitle(text);
+    if (!voice.empty()) PlayVoice(voice);
+    if (!text.empty() || !voice.empty()) ++g_linesReal;
+    if (g_listenNodes <= 20) {
+        net::Log("dlg: LISTEN node=%d speaker=%s line=%s voice=%s options=%d", node,
+                 speaker.empty() ? "-" : speaker.c_str(), line.empty() ? "-" : line.substr(0, 48).c_str(),
+                 voice.empty() ? "-" : net::NameOf(ue::FindObject(voice.c_str())).c_str(),
+                 (int)opts.size());
+    }
+}
+
+// ===========================================================================
+// VOTES: open/close the window, collect votes, resolve on the owner
+// ===========================================================================
+void OpenVoteWindowIfNeeded() {
+    const bool owner = TG().dlgEnabled && g_mine.active && g_mine.kind == 1;
+    const bool listener = TG().dlgEnabled && D().peer.active && D().peer.kind == 1 && dialog::PeerLocked() &&
+                          !(g_mine.active && g_mine.kind == 1);
+    if (!owner && !listener) return;
+    const int dseq = owner ? g_dseq : D().peer.seq;
+    const int node = owner ? g_node : D().peer.node;
+    const int opts = owner ? g_opts : D().peer.opts;
+    if (opts <= 0 || node < 0) return;
+    const std::string key = VoteKey(dseq, node);
+    auto it = g_votes.find(key);
+    if (it == g_votes.end()) {
+        VoteTally t;
+        t.openedAt = Now();
+        t.opts = opts;
+        t.assetPath = owner ? g_dlgPath : D().peerPath;
+        g_votes[key] = t;
+        if (g_voteLogs < 8) {
+            ++g_voteLogs;
+            net::Log("dlg: VOTE window open dseq=%d node=%d options=%d%s", dseq, node, opts,
+                     owner ? " (owner)" : " (listener)");
+        }
+    }
+}
+
+void ResolveVotesIfDue() {
+    const bool owner = TG().dlgEnabled && g_mine.active && g_mine.kind == 1;
+    if (!owner) return;
+    const std::string key = VoteKey(g_dseq, g_node);
+    auto it = g_votes.find(key);
+    if (it == g_votes.end() || it->second.resolved) return;
+    VoteTally& t = it->second;
+    const int expected = InZoneWithPeer() ? 2 : 1;      // an absent peer abstains
+    const int timeout = VoteTimeoutSeconds();
+    const bool allVoted = (int)t.byPlayer.size() >= expected;
+    const bool timedOut = Now() - t.openedAt >= (double)timeout;
+    if (!allVoted && !timedOut) return;
+
+    const std::vector<std::pair<std::string, int>> votes = VotesOf(t);
+    const int winner = ResolveVotes(votes, t.opts, "A");   // the host is role A
+    const std::string detail = TallyText(votes);
+    t.resolved = true;
+    t.winner = winner;
+    t.detail = detail;
+    g_resSeq = g_dseq;
+    g_resNode = g_node;
+    g_resWinner = winner;
+    g_resDetail = detail;
+    g_resAt = Now();
+
+    // apply through the game's own select call, ONCE, with the intercept disabled
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    std::string ownerPath;
+    if (ActiveDialogue(&ctx, &asset, &inst, &ownerPath) && Valid(ctx)) {
+        g_applyingChoice = true;
+        Fn choose(ctx, "ChooseSpeechSequenceOptionFromReplicated");
+        bool ok = false;
+        if (choose.ok()) {
+            choose.set<i32>("OptionIndex", winner);
+            ok = choose.run();
+        }
+        if (!ok) {
+            Fn ch2(ctx, "ChooseOption");
+            if (ch2.ok()) {
+                ch2.set<i32>("OptionIndex", winner);
+                ok = ch2.run();
+            }
+        }
+        g_applyingChoice = false;
+        if (ok) ++g_votesApplied;
+        net::Log("dlg: VOTE resolved node=%d winner=%d (%s) applied=%d [%s]", g_node, winner,
+                 allVoted ? "all voted" : "timeout", ok ? 1 : 0, detail.c_str());
+    } else {
+        net::Log("dlg: VOTE resolved node=%d winner=%d (%s) but there is no local context to "
+                 "apply it to", g_node, winner, detail.c_str());
+    }
+}
+
+// The owner's click (and any local call) must only VOTE, never advance the
+// conversation: this hook is the intercept point.
+bool ChoiceSkipForHook(ue::UObject* self, ue::UFunction* /*fn*/, void* params) {
+    if (g_applyingChoice) return false;            // our own apply: let it through
+    int idx = -1;
+    if (params == nullptr || !ue::ReadMem(params, &idx, sizeof(idx))) return false;
+    if (!(g_mine.active && g_mine.kind == 1) || !TG().dlgEnabled) return false;
+    ++g_localPicks;
+    const int node = g_node;
+    const int opts = g_opts;
+    if (opts <= 0) return false;                   // not a choice node: never block
+    if (idx < 0 || idx >= opts) return false;
+    g_myVoteSeq = g_dseq;
+    g_myVoteNode = node;
+    g_myVoteOpt = idx;
+    g_myVoteAt = Now();
+    net::Log("dlg: local pick %d at node %d -> VOTE (the game's select was held)", idx + 1, node);
+    return true;                                   // skip: we advance on resolution only
+}
+
+void InstallChoiceHook() {
+    if (g_choiceHookTried) return;
+    g_choiceHookTried = true;
+    const char* names[2] = {"ChooseSpeechSequenceOptionFromReplicated", "ChooseOption"};
+    for (const char* n : names) {
+        ue::UObject* anyCtx = ue::FindFirstOf("DlgContext");
+        if (!Valid(anyCtx)) continue;
+        ue::UFunction* f = ue::FindFunction(anyCtx, n);
+        if (f == nullptr) continue;
+        if (ue::HookPreSkipFn(f, &ChoiceSkipForHook)) {
+            net::Log("dlg: intercept hook on UDlgContext.%s -- a local pick becomes a vote", n);
+        }
+    }
+}
+
+// Publish this client's vote while it is current.
+void SerializeVote(std::string* out) {
+    if (!TG().dlgEnabled) return;
+    if (g_myVoteOpt < 0) return;
+    if (Now() - g_myVoteAt > kLinger) return;
+    net::AppendFmt(out, ",\"dv\":[%d,%d,%d,\"%s\"]", g_myVoteSeq, g_myVoteNode, g_myVoteOpt,
+                   St().local.me.c_str());
+}
+
+// The DIALOG verdict's vote cases, checked against the SHIPPED resolver.
+void VoteSelfCheck() {
+    g_voteSimChecks = 0;
+    g_voteSimFailed = 0;
+    auto ck = [&](const char* what, bool ok) {
+        ++g_voteSimChecks;
+        if (!ok) {
+            ++g_voteSimFailed;
+            net::Log("dlgvotesim FAIL: %s", what);
+        }
+    };
+    // case 1: both players vote the same option
+    {
+        std::vector<std::pair<std::string, int>> v{{"A", 1}, {"B", 1}};
+        ck("same vote wins", ResolveVotes(v, 3, "A") == 1);
+    }
+    // case 2: different votes -> the HOST's (A) wins the tie
+    {
+        std::vector<std::pair<std::string, int>> v{{"A", 2}, {"B", 0}};
+        ck("tie -> host's option", ResolveVotes(v, 3, "A") == 2);
+        std::vector<std::pair<std::string, int>> v2{{"B", 2}, {"A", 0}};
+        ck("tie -> host's option (order independent)", ResolveVotes(v2, 3, "A") == 0);
+    }
+    // case 3: a timeout with ONE vote -> that vote
+    {
+        std::vector<std::pair<std::string, int>> v{{"B", 2}};
+        ck("single vote wins", ResolveVotes(v, 3, "A") == 2);
+    }
+    // case 4: nobody voted -> the game's default (option 0)
+    {
+        std::vector<std::pair<std::string, int>> v;
+        ck("no vote -> default 0", ResolveVotes(v, 3, "A") == 0);
+    }
+    // case 5: majority beats the host's vote
+    {
+        std::vector<std::pair<std::string, int>> v{{"A", 0}, {"B", 1}, {"C", 1}};
+        ck("majority beats host", ResolveVotes(v, 3, "A") == 1);
+    }
+    // case 6: a vote outside the option range is ignored, not a crash
+    {
+        std::vector<std::pair<std::string, int>> v{{"A", 9}};
+        ck("out of range vote ignored", ResolveVotes(v, 2, "A") == 0);
+    }
+    g_voteSimAt = Now();
+    const std::string text =
+        net::Fmt("%s dialogue votes: %d checks, %d failed\n", g_voteSimFailed == 0 ? "PASS" : "FAIL",
+                 g_voteSimChecks, g_voteSimFailed);
+    net::WriteFile("result_dialogvote.txt", text);
+    std::string flat = text;
+    while (!flat.empty() && (flat.back() == '\n' || flat.back() == '\r')) flat.pop_back();
+    net::Log("dlgvotesim: %s", flat.c_str());
+}
+
+// ===========================================================================
+// verdicts (written by the RECEIVING client)
+// ===========================================================================
+void JudgePeer() {
+    dialog::State& s = D();
+    const bool fresh = dialog::PeerLocked();
+    static double epStart = 0.0;
+    static int epKind = 0;
+    static int epIdle = 0;
+    static int epPd = 0;
+    static int epListen = 0;
+    static bool wrote = false;
+    static int listenAtStart = 0;
+
+    if (fresh && s.peer.active) {
+        if (epKind == 0) {
+            epKind = s.peer.kind == 2 ? 2 : 1;
+            epStart = Now();
+            epIdle = 0;
+            epPd = 0;
+            listenAtStart = g_listenNodes;
+            wrote = false;
+            ++s.episodes;
+            net::Log("dialog: PEER BUSY (%s) name=%s seq=%d -- puppet idle, no retarget, no "
+                     "damage charge%s", epKind == 1 ? "dialogue" : "cinematic",
+                     s.peer.name.c_str(), s.peer.seq,
+                     epKind == 1 ? ", this client listens to the lines" : ", this client replays "
+                     "the sequence");
+        }
+        if (state().puppet.animState == "idle") {
+            ++epIdle;
+            ++s.idleForced;
+        }
+        const double held = Now() - epStart;
+        epPd = s.pdSkips - g_pdAtStart;
+        // The listener counter is CUMULATIVE on purpose: the replay of a line happens
+        // in the same tick the episode opens (ListenerTick runs before JudgePeer), so
+        // a per-episode delta would always read 0.  A line can only be replayed from a
+        // peer's dialogue, so the total is the honest signal.
+        if (wrote == false && epKind == 1 && held >= 1.5 && epIdle >= 2 && g_linesReal >= 1 &&
+            epPd >= 1) {
+            wrote = true;
+            const std::string text = net::Fmt(
+                "PASS dialogue: peer '%s' held %.1fs ; puppet idle samples=%d, replayed lines=%d, "
+                "damage charges suppressed=%d, votes sent=%d, resolutions seen=%d\n",
+                s.peer.name.c_str(), held, epIdle, g_linesReal, epPd, g_votesSent,
+                g_resolutionsSeen);
+            net::WriteFile("result_dialog.txt", text);
+            std::string flat = text;
+            while (!flat.empty() && (flat.back() == '\n' || flat.back() == '\r')) flat.pop_back();
+            net::Log("%s", flat.c_str());
+        }
+        if (wrote == false && epKind == 2 && held >= 1.5 && epIdle >= 2 && epPd >= 1) {
+            wrote = true;
+            const std::string text = net::Fmt(
+                "PASS cinematic lock: peer '%s' held %.1fs ; puppet idle samples=%d, damage "
+                "charges suppressed=%d, replays started=%d (jumps=%d, stops=%d)\n",
+                s.peer.name.c_str(), held, epIdle, epPd, g_replayStarts, g_replayJumps,
+                g_replayStops);
+            net::WriteFile("result_cine.txt", text);
+            std::string flat = text;
+            while (!flat.empty() && (flat.back() == '\n' || flat.back() == '\r')) flat.pop_back();
+            net::Log("%s", flat.c_str());
+        }
+    } else if (epKind != 0) {
+        net::Log("dialog: peer busy ended (kind=%d, idle samples=%d pd=%d)", epKind, epIdle, epPd);
+        epKind = 0;
+        g_pdAtStart = s.pdSkips;
+    } else {
+        static bool pdInit = false;
+        if (!pdInit) {
+            pdInit = true;
+            g_pdAtStart = s.pdSkips;
+        }
+    }
+}
+
+}  // namespace
+
+// ===========================================================================
+// Tick2
+// ===========================================================================
+namespace dialog {
+
+void Tick2() {
+    net::Step("dlgSample", Guard::None, [] { SampleLocal(); });
+    net::Step("dlgHook", Guard::None, [] { InstallChoiceHook(); });
+    net::Step("dlgCine", Guard::None, [] { CinematicReplayTick(); });
+    net::Step("dlgStart", Guard::None, [] { DialogueStartTick(); });
+    net::Step("dlgStart2", Guard::None, [] { PendingStartTick(); });
+    net::Step("dlgListen", Guard::None, [] { ListenerTick(); });
+    net::Step("dlgVoteOpen", Guard::None, [] { OpenVoteWindowIfNeeded(); });
+    net::Step("dlgVoteResolve", Guard::None, [] { ResolveVotesIfDue(); });
+    net::Step("dlgOutcome", Guard::None, [] { ApplyOutcome(); });
+    net::Step("dlgJudge", Guard::None, [] { JudgePeer(); });
+}
+
+// ===========================================================================
+// wire in
+// ===========================================================================
+void OnPeerLine(const std::string& line) {
+    dialog::State& s = D();
+    std::string sec;
+
+    const bool hasDl = TG().dlgEnabled && net::Section(line, "dl", &sec);
+    if (hasDl) {
+        const std::vector<std::string> t = Tokens(sec);
+        if (t.size() >= 2) {
+            const int active = ToInt(t[0], 1);
+            s.peer.active = active ? 1 : 0;
+            s.peer.kind = active ? 1 : 0;
+            s.peer.seq = ToInt(t[1], s.peer.seq);
+            s.peer.at = Now();
+            if (!s.peer.active) s.peer.name.clear();
+            if (t.size() >= 5 && s.peer.active) s.peer.name = Clean(t[4]);
+            if (t.size() >= 3) s.peer.node = ToInt(t[2], 0);
+            if (t.size() >= 4) s.peer.opts = ToInt(t[3], 0);
+            if (t.size() >= 6 && s.peer.active) s.peerPath = Clean(t[5], 190);
+            if (t.size() >= 9 && s.peer.active) {
+                s.peerSpeaker = Clean(t[6], 40);
+                s.peerLine = Clean(t[7], 200);
+                s.peerVoice = Clean(t[8], 150);
+            }
+            s.peerKnown = true;
+            if (s.peer.active) g_peerSeenAt = Now();
+        }
+    }
+
+    if (TG().cineEnabled && net::Section(line, "ci", &sec)) {
+        const std::vector<std::string> t = Tokens(sec);
+        if (t.size() >= 2) {
+            const int active = ToInt(t[0], 0);
+            const int seq = ToInt(t[1], s.peer.seq);
+            if (active != 0) {
+                const bool wasCine = s.peer.active && s.peer.kind == 2;
+                s.peer.active = 1;
+                s.peer.kind = 2;
+                s.peer.seq = seq;
+                s.peer.at = Now();
+                s.peer.name = t.size() >= 4 ? Clean(t[3]) : std::string();
+                s.peer.elapsedMs = t.size() >= 3 ? ToInt(t[2], 0) : 0;
+                s.peerKnown = true;
+                g_peerSeenAt = Now();
+                // start the replay on the next tick (engine work belongs in Tick2)
+                if (!wasCine || g_cineSeq != seq) {
+                    g_cinePendingName = s.peer.name;
+                    g_cinePendingElapsed = s.peer.elapsedMs;
+                    g_cinePending = true;
+                }
+            } else if (!hasDl || s.peer.kind == 2) {
+                const bool wasCine = s.peer.active && s.peer.kind == 2;
+                s.peer.active = 0;
+                s.peer.kind = 0;
+                s.peer.seq = seq;
+                s.peer.at = Now();
+                s.peer.name.clear();
+                if (wasCine) {
+                    g_cineStopPending = true;
+                    // A replay is NOT this client's own cinematic: when the initiator's
+                    // sequence ends, this side's "busy" state must end with it, or the
+                    // listener half stays blocked (measured: B stuck at `me:1` for the
+                    // rest of the run and never entered the listening state).
+                    if (!g_cineInitiator && g_mine.active && g_mine.kind == 2) {
+                        g_mine.active = 0;
+                        g_mine.kind = 0;
+                        g_mine.seq += 1;
+                        g_mineEndedAt = Now();
+                        g_mineLastKind = 2;
+                        D().mine = g_mine;
+                    }
+                    // Apply it HERE (this runs on the game thread inside the 15 Hz
+                    // apply step): deferring to the 2 Hz tick cost up to 500 ms, and
+                    // the round-7b capture caught exactly that -- A out of the
+                    // cutscene, B still in it.
+                    if (Valid(g_cineActor)) {
+                        StopCinematicReplay(g_cineActor);
+                        g_cineActor = nullptr;
+                        g_cineSeq = -1;
+                        g_cineStopPending = false;
+                    }
+                    const int stamp = t.size() >= 3 ? ToInt(t[2], -1) : -1;
+                    if (stamp > 0) {
+                        const int64_t nowMs = WallMs() % 100000000;
+                        int64_t lag = nowMs - (int64_t)stamp;
+                        if (lag < 0) lag += 100000000;   // the mod-1e8 wrap
+                        g_lastEndLagMs = lag;
+                        net::Log("cine: END applied %lldms after the peer stopped it "
+                                 "(stop stamp %d)", (long long)lag, stamp);
+                    }
+                }
+            }
+        }
+    }
+
+    if (TG().dlgEnabled && net::Section(line, "ct", &sec)) {
+        const std::vector<std::string> t = Tokens(sec);
+        if (t.size() >= 2) {
+            s.peerOutSeq = ToInt(t[0], -1);
+            s.peerChoice = Clean(t[1]);
+        }
+    }
+
+    // a vote from the peer (only meaningful on the OWNER side)
+    if (TG().dlgEnabled && net::Section(line, "dv", &sec)) {
+        const std::vector<std::string> t = Tokens(sec);
+        if (t.size() >= 4) {
+            const int dseq = ToInt(t[0], -1);
+            const int node = ToInt(t[1], -1);
+            const int opt = ToInt(t[2], -1);
+            const std::string id = Clean(t[3], 8);
+            const bool owner = g_mine.active && g_mine.kind == 1 && dseq == g_dseq;
+            if (owner && node >= 0 && opt >= 0) {
+                VoteTally& vt = g_votes[VoteKey(dseq, node)];
+                if (vt.openedAt == 0.0) {
+                    vt.openedAt = Now();
+                    vt.opts = g_opts;
+                    vt.assetPath = g_dlgPath;
+                }
+                const auto prev = vt.byPlayer.find(id);
+                if (prev == vt.byPlayer.end() || prev->second != opt) {
+                    vt.byPlayer[id] = opt;
+                    net::Log("dlg: vote from %s node=%d option=%d", id.c_str(), node, opt + 1);
+                }
+            }
+        }
+    }
+
+    // the owner's resolution
+    if (TG().dlgEnabled && net::Section(line, "dr", &sec)) {
+        const std::vector<std::string> t = Tokens(sec);
+        if (t.size() >= 4) {
+            const int dseq = ToInt(t[0], -1);
+            const int node = ToInt(t[1], -1);
+            const int winner = ToInt(t[2], -1);
+            const std::string detail = Clean(t[3], 80);
+            if (dseq != g_resSeq || node != g_resNode || winner != g_resWinner) {
+                ++g_resolutionsSeen;
+                g_resSeq = dseq;
+                g_resNode = node;
+                g_resWinner = winner;
+                g_resDetail = detail;
+                g_resAt = Now();
+                net::Log("dlg: peer resolved node=%d -> option %d (%s)", node, winner + 1,
+                         detail.c_str());
+                if (!(g_mine.active && g_mine.kind == 1)) {
+                    // show the outcome on this listener's screen before the next line
+                    std::string text = g_subText;
+                    if (!text.empty()) {
+                        text += net::Fmt("  ==> A picked %d", winner + 1);
+                        ShowSubtitle(text);
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ===========================================================================
+// wire out
+// ===========================================================================
+void Serialize(std::string* out) {
+    if (out == nullptr) return;
+    dialog::State& s = D();
+    // 15 Hz end detection: the stop must leave in THIS packet, not the next 2 Hz one
+    FastCinematicEndPoll();
+
+    if (TG().dlgEnabled) {
+        const bool dlg = s.mine.active && s.mine.kind == 1;
+        const bool fresh = dlg || (Now() - g_mineEndedAt <= kLinger && g_mineLastKind == 1);
+        if (fresh) {
+            net::AppendFmt(out,
+                           ",\"dl\":[%d,%d,%d,%d,\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"]",
+                           dlg ? 1 : 0, s.mine.seq, s.mine.node, s.mine.opts,
+                           dlg ? s.mine.name.c_str() : "",
+                           dlg ? (g_fakeDlg ? g_fakeDlgPath.c_str() : g_dlgPath.c_str()) : "",
+                           dlg ? g_lineSpeaker.c_str() : "", dlg ? g_lineText.c_str() : "",
+                           dlg ? g_lineVoice.c_str() : "");
+        }
+        static double lastChoiceAt = -1.0e9;
+        static int lastChoiceSeq = -1;
+        if (s.outSeq != lastChoiceSeq) {
+            lastChoiceSeq = s.outSeq;
+            lastChoiceAt = Now();
+        }
+        if (lastChoiceSeq > 0 && Now() - lastChoiceAt <= kLinger) {
+            net::AppendFmt(out, ",\"ct\":[%d,\"%s\"]", s.outSeq, s.choice.c_str());
+        }
+        SerializeVote(out);
+        if (g_resWinner >= 0 && Now() - g_resAt <= 6.0) {
+            net::AppendFmt(out, ",\"dr\":[%d,%d,%d,\"%s\"]", g_resSeq, g_resNode, g_resWinner,
+                           g_resDetail.c_str());
+        }
+    }
+
+    if (TG().cineEnabled) {
+        const bool cine = s.mine.active && s.mine.kind == 2;
+        const bool fresh = cine || (Now() - g_mineEndedAt <= kLinger && g_mineLastKind == 2);
+        if (fresh) {
+            int elapsed = 0;
+            if (cine && g_cineStartLocal > 0.0) {
+                elapsed = (int)((Now() - g_cineStartLocal) * 1000.0);
+                if (elapsed < 0) elapsed = 0;
+            }
+            const int stamp = cine ? elapsed : (int)(g_mineStopAtMs % 100000000);
+            net::AppendFmt(out, ",\"ci\":[%d,%d,%d,\"%s\"]", cine ? 1 : 0, s.mine.seq, stamp,
+                           cine ? s.mine.name.c_str() : "");
+        }
+    }
+}
+
+// ===========================================================================
+// cmd.txt hooks
+// ===========================================================================
+namespace {
+
+void CmdFakeImpl(const std::string& rest) {
+    std::string arg = rest;
+    while (!arg.empty() && (unsigned char)arg.back() <= ' ') arg.pop_back();
+    if (arg == "off" || arg == "0" || arg.empty()) {
+        g_fakeDlg = false;
+        net::Log("dlgfake off: reporting the real dialogue state again");
+        return;
+    }
+    g_fakeDlg = true;
+    g_fakeDlgPath.clear();
+    // accept BOTH `dlgfake <path>` and `dlgfake on <path>` (the harness writes the
+    // second form); the path is the real dialogue asset the listener replays.
+    std::string path = arg;
+    if (path.rfind("on ", 0) == 0) path = path.substr(3);
+    else if (path.rfind("1 ", 0) == 0) path = path.substr(2);
+    while (!path.empty() && (unsigned char)path.front() <= ' ') path.erase(path.begin());
+    if (path.rfind("/Game", 0) == 0) {
+        g_fakeDlgPath = Clean(path, 190);
+        g_fakeDlgName = Clean(path.substr(path.find_last_of('/') + 1));
+        net::Log("dlgfake on: reporting a REAL dialogue asset '%s' (fake trigger)",
+                 g_fakeDlgPath.c_str());
+        return;
+    }
+    g_fakeDlgName = Clean(arg == "on" || arg == "1" ? "FAKE_DIALOGUE" : arg);
+    net::Log("dlgfake on: reporting a dialogue '%s' path=%s (fake)", g_fakeDlgName.c_str(),
+             g_fakeDlgPath.empty() ? "-" : g_fakeDlgPath.c_str());
+}
+
+void CmdCineFakeImpl(const std::string& rest) {
+    std::string arg = rest;
+    while (!arg.empty() && (unsigned char)arg.back() <= ' ') arg.pop_back();
+    if (arg == "off" || arg == "0" || arg.empty()) {
+        g_fakeCine = false;
+        net::Log("cinefake off: reporting the real cinematic state again");
+        return;
+    }
+    g_fakeCine = true;
+    g_fakeCineName = Clean(arg == "on" || arg == "1" ? "FAKE_SEQUENCE" : arg);
+    net::Log("cinefake on: reporting a cinematic '%s' (fake)", g_fakeCineName.c_str());
+}
+
+void CmdDumpImpl() {
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    std::string owner;
+    const bool dlg = ActiveDialogue(&ctx, &asset, &inst, &owner);
+    std::vector<ue::UObject*> cine = ue::FindAllOf("BP_CinematicPlayer_C");
+    int playing = 0;
+    std::string seqName;
+    for (ue::UObject* a : cine) {
+        if (!Valid(a)) continue;
+        ue::UObject* cut = nullptr;
+        if (!ue::Get<ue::UObject*>(a, "CutsceneActor", cut) || !Valid(cut)) continue;
+        ++playing;
+        ue::UObject* sa = nullptr;
+        if (seqName.empty() && ue::Get<ue::UObject*>(a, "LevelSequenceToPlay", sa) && Valid(sa)) {
+            seqName = net::NameOf(sa);
+        }
+    }
+    std::string choice;
+    ReadChoice(&choice);
+    net::Log("dlgdump: subsystem=%s arr=%s dialogue=%d name=%s node=%d opts=%d owner=%s path=%s "
+             "cinematicPlayers=%d playing=%d seqName=%s hudWidget=%d PlayerChoice=%s",
+             Valid(g_dlgSub) ? net::NameOf(g_dlgSub).c_str() : "-", Valid(g_dlgSub) ? "ok" : "missing",
+             dlg ? 1 : 0, dlg && Valid(asset) ? net::NameOf(asset).c_str() : "-",
+             g_node, g_opts, owner.empty() ? "-" : owner.c_str(),
+             g_dlgPath.empty() ? "-" : g_dlgPath.c_str(), (int)cine.size(), playing,
+             seqName.empty() ? "-" : seqName.c_str(), Valid(HudDialogueWidget()) ? 1 : 0,
+             choice.empty() ? "-" : choice.c_str());
+    net::Log("dlgdump: %s", dialog::Status().c_str());
+}
+
+// dlgstart [class] -- the GAME's own conversation start on the nearest dialogue
+// actor (ABP_DialogueActor_C / ABP_NPC_C subclass: DlgDialogue @0x148).
+void CmdStartImpl(const std::string& rest) {
+    std::string want = rest;
+    while (!want.empty() && (unsigned char)want.back() <= ' ') want.pop_back();
+    if (want.empty()) want = "BP_Cultist_HUB_C";
+    std::vector<ue::UObject*> list = ue::FindAllOf(want.c_str());
+    if (list.empty()) {
+        net::Log("dlgstart: no actor of class '%s' in this world", want.c_str());
+        return;
+    }
+    ue::UObject* pawn = net::Pawn();
+    const Vec3 me = net::Loc(pawn);
+    ue::UObject* best = nullptr;
+    double bestD = 1.0e30;
+    for (ue::UObject* a : list) {
+        if (!Valid(a)) continue;
+        const double d = Dist(me, net::Loc(a));
+        if (d < bestD) {
+            bestD = d;
+            best = a;
+        }
+    }
+    if (!Valid(best)) {
+        net::Log("dlgstart: no valid actor of class '%s'", want.c_str());
+        return;
+    }
+    g_pendingNpc = best;
+    ue::UObject* comp = nullptr;
+    if (!ue::Get<ue::UObject*>(best, "Dialogue Instigator Component", comp) || !Valid(comp)) {
+        net::Log("dlgstart: %s has no Dialogue Instigator Component", net::NameOf(best).c_str());
+        return;
+    }
+    ue::UObject* asset = nullptr;
+    ue::Get<ue::UObject*>(comp, "DlgDialogue", asset);
+    net::Log("dlgstart: npc=%s dist=%.0f dialogue=%s", net::NameOf(best).c_str(), bestD,
+             Valid(asset) ? net::NameOf(asset).c_str() : "-");
+    g_pendingStart = comp;
+    g_startNpc = best;
+    g_startPhase = 1;
+    g_startPhaseAt = Now() + 0.3;
+    // The game's own participant check is a distance check (11 794 uu -> Success=0).
+    // The verb is a TEST HOOK, so it puts the caller next to the NPC first.
+    if (bestD > 400.0 && Valid(pawn)) {
+        const Vec3 npc = net::Loc(best);
+        const Vec3 me = net::Loc(pawn);
+        const double dx = me.X - npc.X, dy = me.Y - npc.Y;
+        const double len = std::sqrt(dx * dx + dy * dy);
+        const double k = (len > 1.0) ? 160.0 / len : 0.0;
+        puppet::StartTp(pawn, npc.X + dx * k, npc.Y + dy * k, npc.Z);
+        net::Log("dlgstart: teleported the caller next to the NPC (%.0f uu -> ~160 uu)", bestD);
+        return;
+    }
+    StartConversation(comp, asset);
+}
+
+void CmdStopImpl() {
+    ue::UObject* ctx = nullptr;
+    ue::UObject* asset = nullptr;
+    ue::UObject* inst = nullptr;
+    std::string owner;
+    if (!ActiveDialogue(&ctx, &asset, &inst, &owner) || !Valid(inst)) {
+        net::Log("dlgstop: no active dialogue");
+        return;
+    }
+    Fn c(inst, "StopDialogue");
+    bool ok = false;
+    if (c.ok()) {
+        c.set<bool>("bStopAudioImmediately", false);
+        ok = c.run();
+    }
+    net::Log("dlgstop: StopDialogue on %s ok=%d", net::NameOf(inst).c_str(), ok ? 1 : 0);
+}
+
+// dlgvote <option> -- the vote channel (the test hook the DIALOG verdict uses; on
+// the owner a real UI click reaches the same table through the intercept hook).
+void CmdVoteImpl(const std::string& rest) {
+    std::string arg = rest;
+    while (!arg.empty() && (unsigned char)arg.front() <= ' ') arg.erase(arg.begin());
+    const int opt = (int)strtol(arg.c_str(), nullptr, 10) - 1;
+    const bool owner = g_mine.active && g_mine.kind == 1;
+    const bool listener = D().peer.active && D().peer.kind == 1 && dialog::PeerLocked() && !owner;
+    if (!owner && !listener) {
+        net::Log("dlgvote: no conversation to vote in (owner=%d listener=%d)", owner ? 1 : 0,
+                 listener ? 1 : 0);
+        return;
+    }
+    const int dseq = owner ? g_dseq : D().peer.seq;
+    const int node = owner ? g_node : D().peer.node;
+    const int opts = owner ? g_opts : D().peer.opts;
+    if (opt < 0 || (opts > 0 && opt >= opts)) {
+        net::Log("dlgvote: option %d is out of range (node has %d)", opt + 1, opts);
+        return;
+    }
+    g_myVoteSeq = dseq;
+    g_myVoteNode = node;
+    g_myVoteOpt = opt;
+    g_myVoteAt = Now();
+    ++g_votesSent;
+    net::Log("dlgvote: %s votes option %d at node %d (dseq=%d)", St().local.me.c_str(), opt + 1,
+             node, dseq);
+    if (owner) {
+        VoteTally& vt = g_votes[VoteKey(dseq, node)];
+        if (vt.openedAt == 0.0) {
+            vt.openedAt = Now();
+            vt.opts = opts;
+            vt.assetPath = g_dlgPath;
+        }
+        vt.byPlayer[St().local.me] = opt;
+    }
+}
+
+}  // namespace
+
+void CmdFake(const std::string& rest) { CmdFakeImpl(rest); }
+void CmdCineFake(const std::string& rest) { CmdCineFakeImpl(rest); }
+void CmdDump(const std::string&) { CmdDumpImpl(); }
+void CmdStart(const std::string& rest) { CmdStartImpl(rest); }
+void CmdStop(const std::string&) { CmdStopImpl(); }
+void CmdVote(const std::string& rest) { CmdVoteImpl(rest); }
+
+// cineplay [name] -- start a REAL local level sequence through the game's own
+// BP_CinematicPlayer_C::PlayCutscene.  This is how the CINE verdict gets a genuine
+// cutscene (the hub has three cinematic players and no trigger we can press).
+void CmdCinePlay(const std::string& rest) {
+    std::string name = rest;
+    while (!name.empty() && (unsigned char)name.front() <= ' ') name.erase(name.begin());
+    while (!name.empty() && (unsigned char)name.back() <= ' ') name.pop_back();
+    ue::UObject* actor = FindCinematicActor(name);
+    if (!Valid(actor)) {
+        net::Log("cineplay: no BP_CinematicPlayer_C with LevelSequenceToPlay=%s",
+                 name.empty() ? "(any)" : name.c_str());
+        return;
+    }
+    ue::UObject* asset = nullptr;
+    ue::Get<ue::UObject*>(actor, "LevelSequenceToPlay", asset);
+    const bool ok = StartCinematicReplay(actor, 0);
+    g_cineActor = actor;
+    g_cineInitiator = true;   // we are the side that plays it; the peer replays
+    net::Log("cineplay: PlayCutscene on %s (sequence=%s) -> %s", net::NameOf(actor).c_str(),
+             Valid(asset) ? net::NameOf(asset).c_str() : "-", ok ? "started" : "FAILED");
+}
+
+// cinehold <seconds> [name] -- play a sequence and keep it running (test hold)
+void CmdCineHold(const std::string& rest) {
+    std::string arg = rest;
+    while (!arg.empty() && (unsigned char)arg.front() <= ' ') arg.erase(arg.begin());
+    const double secs = strtod(arg.c_str(), nullptr);
+    std::string name;
+    const std::size_t sp = arg.find(' ');
+    if (sp != std::string::npos) {
+        name = arg.substr(sp + 1);
+        while (!name.empty() && (unsigned char)name.front() <= ' ') name.erase(name.begin());
+    }
+    g_cineHoldUntil = Now() + (secs > 0.0 ? std::min(secs, 120.0) : 20.0);
+    g_cineHoldName = name;
+    ue::UObject* a = FindCinematicActor(g_cineHoldName);
+    if (!Valid(a)) {
+        net::Log("cinehold: no cinematic player for '%s'", g_cineHoldName.c_str());
+        g_cineHoldUntil = 0.0;
+        return;
+    }
+    const bool ok = StartCinematicReplay(a, 0);
+    g_cineActor = a;
+    g_cineInitiator = true;
+    net::Log("cinehold: %.1fs hold on %s -> %s", secs, net::NameOf(a).c_str(),
+             ok ? "started" : "FAILED");
+}
+
+// cinestop -- the game's own abort, so the harness can end a cutscene it started
+void CmdCineStop(const std::string&) {
+    ue::UObject* actor = Valid(g_cineActor) ? g_cineActor : FindCinematicActor("");
+    if (!Valid(actor)) {
+        net::Log("cinestop: nothing to stop");
+        return;
+    }
+    const bool ok = StopCinematicReplay(actor);
+    g_cineActor = nullptr;
+    if (ok && g_mine.active && g_mine.kind == 2) NoteLocalCinematicEnd("cinestop verb");
+    net::Log("cinestop: ForceStopCinematic ok=%d", ok ? 1 : 0);
+}
+void CmdVoteSim(const std::string&) { VoteSelfCheck(); }
+
+// pdreset -- put the stand-in body's health back to full after the DIALOG/CINE blocks
+// used `pdtest`.  Without it the 0.1 that `pdtest` left behind is charged to the peer
+// as real damage as soon as the lock ends, and the PEERHP check (which wants the peer's
+// freshly-set 0.37) sees the leftover instead.
+void CmdPdReset(const std::string&) {
+    ue::UObject* pup = puppet::Actor();
+    const bool ok = Valid(pup) && combat::SetHealthNorm(pup, 1.0);
+    net::Log("pdreset: puppet body health -> 1.0 (ok=%d)", ok ? 1 : 0);
+}
+
+// holdclear -- drop the local hold a cutscene end may have armed (the restore does it
+// too, but the harness needs a way to say "now" after a whole block of test verbs).
+void CmdHoldClear(const std::string&) {
+    const bool was = net::LocalHold();
+    if (was) net::SetLocalHold(-1.0);
+    net::Log("holdclear: local hold %s", was ? "released" : "was not set");
+}
+
+void CmdChoice(const std::string& rest) {
+    std::string tag = rest;
+    while (!tag.empty() && (unsigned char)tag.front() <= ' ') tag.erase(tag.begin());
+    while (!tag.empty() && (unsigned char)tag.back() <= ' ') tag.pop_back();
+    if (tag.empty()) {
+        std::string cur;
+        ReadChoice(&cur);
+        net::Log("dlgchoice: current PlayerChoice=%s (usage: dlgchoice <tag>)",
+                 cur.empty() ? "-" : cur.c_str());
+        return;
+    }
+    const std::string before = D().choice;
+    const bool ok = WriteChoice(tag);
+    std::string back;
+    const bool rb = ReadChoice(&back);
+    if (ok && rb && back == tag) {
+        D().choice = back;
+        ++D().outSeq;
+        net::Log("dlgchoice: PlayerChoice %s -> %s (published on \"ct\")",
+                 before.empty() ? "-" : before.c_str(), back.c_str());
+    } else {
+        net::Log("dlgchoice: write failed (ok=%d readback=%s)", ok ? 1 : 0,
+                 back.empty() ? "-" : back.c_str());
+    }
+}
+
+// dlgselftest -- the wire CODEC, no engine call (the one place a parser bug hides).
+void CmdSelfTest(const std::string&) {
+    int checks = 0, failed = 0;
+    auto want = [&](const char* what, bool ok) {
+        ++checks;
+        if (!ok) {
+            ++failed;
+            net::Log("dlgselftest FAIL: %s", what);
+        }
+    };
+    std::vector<std::string> t = Tokens("[1,7,3,2,\"Dlg_Cultist_HUB\",\"/Game/Sparta/Dialogue/Quest/Dlg_X.Dlg_X\"]");
+    want("dl token count", t.size() == 6);
+    want("dl active", t.size() > 0 && ToInt(t[0], -1) == 1);
+    want("dl seq", t.size() > 1 && ToInt(t[1], -1) == 7);
+    want("dl node/opts", t.size() > 3 && ToInt(t[2], -1) == 3 && ToInt(t[3], -1) == 2);
+    want("dl name", t.size() > 4 && t[4] == "Dlg_Cultist_HUB");
+    want("dl path", t.size() > 5 && t[5] == "/Game/Sparta/Dialogue/Quest/Dlg_X.Dlg_X");
+    t = Tokens("[0,8,0,0,\"\",\"\"]");
+    want("end token count", t.size() == 6);
+    want("end active", t.size() > 0 && ToInt(t[0], 1) == 0);
+    want("end empty name", t.size() > 4 && t[4].empty());
+    t = Tokens("[1,3,900,\"LS_Cinematic Hexapod Intro\"]");
+    want("ci token count", t.size() == 4);
+    want("ci active", t.size() > 0 && ToInt(t[0], 0) == 1);
+    want("ci elapsed", t.size() > 2 && ToInt(t[2], -1) == 900);
+    want("ci name", t.size() > 3 && t[3] == "LS_Cinematic Hexapod Intro");
+    t = Tokens("[2,3,1,\"B\"]");
+    want("dv tokens", t.size() == 4 && ToInt(t[2], -1) == 1);
+    t = Tokens("[4,\"Quest.R7.Side\"]");
+    want("ct tokens", t.size() == 2 && t[1] == "Quest.R7.Side");
+    want("clean quote", Clean("a\"b\\c|d").find('"') == std::string::npos);
+    want("clean pipe", Clean("a|b").find('|') == std::string::npos);
+    want("clean length", Clean(std::string(200, 'x')).size() == 60);
+    want("clean long keeps path", Clean(std::string(200, 'x'), 190).size() == 190);
+
+    std::string before;
+    const bool have = ReadChoice(&before);
+    if (have) {
+        const std::string probe = "Quest.R7.SelfTest";
+        const bool wrote = WriteChoice(probe);
+        std::string back;
+        const bool read = ReadChoice(&back);
+        want("PlayerChoice round trip", wrote && read && back == probe);
+        if (!before.empty()) {
+            const bool restored = WriteChoice(before);
+            std::string now;
+            want("PlayerChoice restore", restored && ReadChoice(&now) && now == before);
+        }
+    } else {
+        net::Log("dlgselftest: PlayerChoice not readable yet (no quest log in this world)");
+    }
+    const std::string text = net::Fmt("%s dialog wire codec: %d checks, %d failed\n",
+                                      failed == 0 ? "PASS" : "FAIL", checks, failed);
+    net::WriteFile("result_dialogselftest.txt", text);
+    std::string flat = text;
+    while (!flat.empty() && (flat.back() == '\n' || flat.back() == '\r')) flat.pop_back();
+    net::Log("dlgselftest: %s", flat.c_str());
+}
+
+std::string Status() {
+    const dialog::State& s = D();
+    std::string out;
+    out += net::Fmt(
+        "dlg=me:%d peer:%d kind:%d name:%s node:%d opts:%d seq:%d idle:%d pd:%d ai:%d ep:%d "
+        "mine:%d listen:%d lines:%d vote:%d/%d out:%d/%s\n",
+        s.mine.active, s.peer.active, PeerKind(), s.peer.name.empty() ? "-" : s.peer.name.c_str(),
+        s.peer.node, s.peer.opts, s.peer.seq, s.idleForced, s.pdSkips, s.aiSkips, s.episodes,
+        s.localEpisodes, g_listenNodes, g_linesReal, g_votesSent, g_votesApplied, s.applies,
+        s.choice.empty() ? "-" : s.choice.c_str());
+    out += net::Fmt("cine=me:%d peer:%d name:%s ep:%d replay:%d/%d/%d on:%d\n",
+                    s.mine.active && s.mine.kind == 2, s.peer.active && s.peer.kind == 2,
+                    s.peer.kind == 2 && !s.peer.name.empty() ? s.peer.name.c_str() : "-",
+                    s.episodes, g_replayStarts, g_replayJumps, g_replayStops,
+                    TG().cineEnabled ? 1 : 0);
+    out += net::Fmt("cinesync=lag:%lldms n:%d meStop:%lld\n", (long long)g_lastEndLagMs,
+                    g_endLags, (long long)(g_mineStopAtMs % 100000000));
+    out += net::Fmt("vote=sim:%d/%d mine:%d:%d res:%d:%d nice:%d on:%d\n", g_voteSimChecks,
+                    g_voteSimFailed, g_myVoteNode, g_myVoteOpt, g_resNode, g_resWinner,
+                    g_resolutionsSeen, TG().dlgEnabled ? 1 : 0);
+    return out;
+}
+
+}  // namespace dialog
+
+}  // namespace coop

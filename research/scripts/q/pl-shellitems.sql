@@ -1,0 +1,1 @@
+SELECT type, path FROM obj WHERE path LIKE '/Game/Sparta/Items/Shells/%' AND type IN ('BlueprintGeneratedClass','DataAsset','PrimaryDataAsset','SpartaItemDefinition','WidgetBlueprintGeneratedClass') ORDER BY path

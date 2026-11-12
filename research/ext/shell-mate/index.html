@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#181b1b">
+  <link rel="icon" href="./favicon.ico" sizes="any">
+  <title>Shell Mate | Mortal Shell 2 Guide</title>
+  <script src="./theme.js"></script><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip" href="#catalog">Skip to guide</a>
+  <header class="site-header">
+    <div class="shell">
+      <div class="site-brand">
+        <p class="eyebrow">Mortal Shell 2 companion</p>
+        <h1>Shell Mate <span aria-hidden="true">◆</span></h1>
+      </div>
+      <div class="header-actions"><label class="theme-picker"><select id="theme-select" aria-label="Theme"><option value="default">Shell Mate</option><option value="obsidian">Obsidian</option><option value="porcelain-prime">Porcelain Prime</option><option value="second-son">Second Son</option><option value="sanguine-prophet">Sanguine Prophet</option><option value="king-in-yellow">King in Yellow</option><option value="warden">Warden</option><option value="ophidian">Ophidian</option><option value="bonegrafted">Bonegrafted</option><option value="apocryphal">Apocryphal</option><option value="anointed-butcher">Anointed Butcher</option><option value="white-knight">White Knight</option><option value="red-kingsnake">Red Kingsnake</option><option value="lunar-emissary">Lunar Emissary</option><option value="gilded-scarab">Gilded Scarab</option><option value="sapphire-herald">Sapphire Herald</option><option value="regal-druzhina">Regal Druzhina</option><option value="queen-of-hearts">Queen of Hearts</option></select></label><a class="loadout-button" href="./loadout.html" aria-label="Open loadout" title="Loadout"><img src="./assets/icons/loadout.svg" alt=""></a><a class="glossary-button" href="./glossary.html" aria-label="Open glossary" title="Glossary"><img src="./assets/icons/glossary.svg" alt=""></a>
+      <a class="kofi-button" href="https://ko-fi.com/bashotomo" target="_blank" rel="noopener noreferrer" aria-label="Support Shell Mate on Ko-fi" title="Shell Mate has no ads and is free 💪&#10;Coffee is what built it!"><span aria-hidden="true">☕</span></a></div>
+    </div>
+  </header>
+  <main class="shell" id="catalog">
+    <details class="overview" aria-labelledby="progress-title">
+      <summary class="overview-top"><span id="progress-title">Your guide progress</span><strong id="overall-count"></strong></summary>
+        <div class="completion-banner" id="completion-banner" role="status" aria-live="polite" tabindex="0" title="Forsaken Vow and October30 Stone are excluded from progress totals until they are officially found." hidden>
+          <span class="completion-spark" aria-hidden="true">✦</span>
+          <div><strong id="completion-title"></strong></div>
+          <span class="completion-spark completion-spark-end" aria-hidden="true">✦</span>
+        </div>
+      <p id="progress-scope" class="progress-note"></p>
+      <progress id="overall-progress" value="0" max="1" aria-label="Overall completion"></progress>
+      <div id="category-progress" class="progress-grid"></div>
+    </details>
+    <p class="storage-warning" id="storage-warning" role="status" hidden></p>
+    <nav class="tabs" aria-label="Guide categories" id="tabs"></nav>
+    <section class="guide" aria-labelledby="category-title">
+      <div class="guide-head"><div><h2 id="category-title"></h2></div><div class="file-actions"><button id="select-all" type="button">Select all</button><button id="export" type="button">Export</button><button id="import" type="button">Import</button><input id="import-file" type="file" accept=".json,application/json" hidden></div></div>
+      <div class="filters" role="search">
+        <label class="search-field"><span>Search guide</span><input id="search" type="search" placeholder="Name, region, or landmark" autocomplete="off"></label>
+        <label><span>Region</span><select id="region"></select></label>
+        <label class="content-field"><span>Content</span><select id="scope"><option value="all">All</option><option value="base">Base game</option><option value="rotten-autumn">Rotten Autumn DLC</option></select></label>
+        <label><span>Progress</span><select id="status"><option value="all">All</option><option value="open">To do</option><option value="done">Done</option></select></label>
+        <label><span id="kind-label">Type</span><select id="kind-filter"></select></label>
+        <label><span>Order</span><select id="sort"><option value="catalog">Catalog order</option><option value="name">Name</option></select></label>
+      </div>
+      <p class="results" id="results" aria-live="polite" tabindex="-1"></p>
+      <div id="entries" class="entries"></div>
+    </section>
+  </main>
+  <footer class="site-footer shell"><p>Unofficial fan guide; not affiliated with Cold Symmetry. Progress is saved in this browser for this site address. Clearing browser data removes it. Use Export to keep a backup or move to another browser.</p></footer>
+  <div class="toast" id="notice" role="status" aria-live="polite"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

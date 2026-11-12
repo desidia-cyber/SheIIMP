@@ -1,0 +1,146 @@
+# Drive a scripted probe session without a human at the keyboard.
+# The game runs windowed, off-screen and minimized, so the machine stays usable.
+# Usage: .\drive.ps1 -GameDir "E:\Games\_MS2-coop-test" -Commands "auto" [-BootWait 75]
+
+param(
+    [Parameter(Mandatory = $true)][string]$GameDir,
+    [string]$Commands = "",
+    [int]$BootWait = 75,
+    [int]$StepWait = 8,
+    [int]$KeepOpen = 0,
+    [string]$ExtraArgs = "-windowed -ResX=1024 -ResY=576 -nosound -nosplash -nocrashreport",
+    [string]$LocalAppData = ""
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Start-ReporterKiller {
+    # Crash dialogs must never reach the owner's screen. Kill them on sight.
+    $script:killerFlag = Join-Path $env:TEMP ("ms2killer_" + (Get-Date -Format 'HHmmss') + ".flag")
+    New-Item -ItemType File -Force -Path $script:killerFlag | Out-Null
+    $script:killerJob = Start-Job -ArgumentList $script:killerFlag -ScriptBlock {
+        param($flag)
+        while (Test-Path $flag) {
+            Get-Process CrashReportClient -ErrorAction SilentlyContinue | ForEach-Object {
+                try { Stop-Process -Id $_.Id -Force } catch {}
+            }
+            Start-Sleep -Milliseconds 150
+        }
+    }
+}
+
+function Stop-ReporterKiller {
+    try { Remove-Item $script:killerFlag -Force -ErrorAction SilentlyContinue } catch {}
+    try { Stop-Job $script:killerJob -ErrorAction SilentlyContinue; Remove-Job $script:killerJob -Force -ErrorAction SilentlyContinue } catch {}
+}
+$w64 = Join-Path $GameDir 'MortalShell2\Binaries\Win64'
+$coop = Join-Path $w64 'coop'
+$exe = Join-Path $w64 'MortalShell2-Win64-Shipping.exe'
+if (-not (Test-Path $exe)) { throw "no shipping exe in $w64" }
+New-Item -ItemType Directory -Force -Path $coop | Out-Null
+
+Add-Type -Namespace Win32 -Name W -MemberDefinition @'
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern bool ShowWindow(System.IntPtr hWnd, int nCmdShow);
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+public static extern bool SetWindowPos(System.IntPtr hWnd, System.IntPtr after, int x, int y, int cx, int cy, uint flags);
+'@
+
+function Hide-GameWindow {
+    # park the window off-screen but keep it "normal": minimizing stalls the
+    # menu widget creation in this game, so never SW_MINIMIZE during a run
+    Get-Process | Where-Object ProcessName -match 'MortalShell2-Win64' | ForEach-Object {
+        if ($_.MainWindowHandle -ne 0) {
+            [Win32.W]::SetWindowPos($_.MainWindowHandle, [IntPtr]::Zero, -30000, -30000, 0, 0, 0x0001 -bor 0x0010 -bor 0x0004) | Out-Null
+        }
+    }
+}
+
+function Stop-Game {
+    Get-Process | Where-Object ProcessName -match 'MortalShell2' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+    Get-Process | Where-Object ProcessName -match 'CrashReportClient' | ForEach-Object { try { Stop-Process -Id $_.Id -Force } catch {} }
+}
+
+# snapshot saves so a test cannot damage the owner's progress
+$sg = "$env:LOCALAPPDATA\MortalShell2\Saved\SaveGames"
+$snap = Join-Path $env:TEMP ("ms2saves_" + (Get-Date -Format 'HHmmss'))
+if (Test-Path $sg) { New-Item -ItemType Directory -Force -Path $snap | Out-Null; Copy-Item "$sg\*.sav" $snap -Force }
+function Restore-Saves {
+    if (Test-Path $snap) {
+        Get-ChildItem $snap -Filter *.sav | ForEach-Object { Copy-Item $_.FullName $sg -Force }
+        Write-Host "saves restored"
+    }
+}
+
+$realLocal = $env:LOCALAPPDATA
+if ($LocalAppData) {
+    $mine = Join-Path $LocalAppData "MortalShell2\Saved"
+    if (-not (Test-Path $mine)) {
+        New-Item -ItemType Directory -Force -Path (Join-Path $mine "SaveGames") | Out-Null
+        $srcSaves = Join-Path $realLocal "MortalShell2\Saved\SaveGames"
+        if (Test-Path $srcSaves) { Copy-Item "$srcSaves\*.sav" (Join-Path $mine "SaveGames") -Force }
+        $srcCfg = Join-Path $realLocal "MortalShell2\Saved\Config"
+        if (Test-Path $srcCfg) { Copy-Item $srcCfg (Join-Path $mine "Config") -Recurse -Force }
+        Write-Host "seeded isolated LOCALAPPDATA: $LocalAppData"
+    }
+}
+
+Stop-Game
+Start-Sleep -Seconds 2
+Remove-Item (Join-Path $coop 'cmd.txt') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $coop 'result.txt') -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path $coop 'probe.log') -Force -ErrorAction SilentlyContinue
+
+# launch minimized, keep it off-screen
+$argList = @('MortalShell2') + ($ExtraArgs -split '\s+' | Where-Object { $_ })
+$psi = New-Object System.Diagnostics.ProcessStartInfo
+$psi.FileName = $exe
+$psi.Arguments = ($argList | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '
+$psi.WorkingDirectory = $GameDir
+$psi.UseShellExecute = $true
+$psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Normal
+if ($LocalAppData) { $env:LOCALAPPDATA = $LocalAppData }
+$p = [System.Diagnostics.Process]::Start($psi)
+if ($LocalAppData) { $env:LOCALAPPDATA = $realLocal }
+Write-Host "launched pid $($p.Id) off-screen, isolated=$LocalAppData; boot wait ${BootWait}s"
+
+$deadline = (Get-Date).AddSeconds($BootWait)
+while ((Get-Date) -lt $deadline) { Hide-GameWindow; Start-Sleep -Milliseconds 700 }
+
+# send commands; the mod waits for milestones itself, so short fixed waits are enough
+if ($Commands) {
+    foreach ($cmd in ($Commands -split ',')) {
+        $cmd = $cmd.Trim()
+        if (-not $cmd) { continue }
+        $wait = $StepWait
+        if ($cmd -match '^(.*)@(\d+)$') { $cmd = $matches[1].Trim(); $wait = [int]$matches[2] }
+        Write-Host "-> $cmd (wait ${wait}s)"
+        [System.IO.File]::WriteAllText((Join-Path $coop 'cmd.txt'), $cmd + "`n")
+        Start-Sleep -Seconds $wait
+        Hide-GameWindow
+    }
+}
+
+# wait for the mod's own verdict if it writes one
+$resultPath = Join-Path $coop 'result.txt'
+$waitUntil = (Get-Date).AddSeconds([math]::Max($KeepOpen, 90))
+while ((Get-Date) -lt $waitUntil) {
+    Hide-GameWindow
+    if (Test-Path $resultPath) {
+        $r = Get-Content $resultPath -Raw
+        if ($r -match '^(PASS|FAIL)') { break }
+    }
+    Start-Sleep -Milliseconds 700
+}
+
+Write-Host "=== result.txt ==="
+if (Test-Path $resultPath) { Get-Content $resultPath } else { Write-Host "(none)" }
+Write-Host "=== probe.log (tail) ==="
+if (Test-Path (Join-Path $coop 'probe.log')) { Get-Content (Join-Path $coop 'probe.log') | Select-Object -Last 40 } else { Write-Host "(no probe.log)" }
+Write-Host "=== state.txt ==="
+if (Test-Path (Join-Path $coop 'state.txt')) { Get-Content (Join-Path $coop 'state.txt') }
+
+Stop-Game
+Stop-ReporterKiller
+Restore-Saves
+Write-Host "DONE"

@@ -1,0 +1,17 @@
+﻿### ArrayProperty /Script/Sparta.SpartaMapTileSet:Levels  [000001F4ACDB7000]
+    1 members:
+      PRP Levels : StructProperty of /Script/Sparta.SpartaMapTileLevel [o:0x0]
+
+### Class /Script/Sparta.SpartaMapTileSet  [00007FF46F04F538]
+    super: /Script/Engine.DataAsset
+    3 members:
+      PRP TileSize : IntProperty [o:0x30]
+      PRP NumLevels : IntProperty [o:0x34]
+      PRP Levels : ArrayProperty of Levels./Script/Sparta.SpartaMapTileSet:Levels [o:0x38]
+
+### IntProperty /Script/Sparta.SpartaMapTileSet:NumLevels  [000001F4ACD6DE50]
+
+### IntProperty /Script/Sparta.SpartaMapTileSet:TileSize  [000001F4ACD6DDE0]
+
+### StructProperty Levels./Script/Sparta.SpartaMapTileSet:Levels  [000001F4ACDB6F80]
+

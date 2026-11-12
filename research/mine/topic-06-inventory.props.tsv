@@ -1,0 +1,84 @@
+declared_in	class	member	type	offset	dump_line
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.PlayerInventoryComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	OnLootPickedUp	MulticastInlineDelegateProperty	0xB8	60813
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	OnItemStacksUpdated	MulticastInlineDelegateProperty	0xC8	60814
+/Script/Sparta.SpartaItemManagerComponent	/Script/Sparta.SpartaItemManagerComponent	ItemList	StructProperty of /Script/Sparta.SpartaItemList	0xD8	60815
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	PrimaryComponentTick	StructProperty of /Script/Engine.ActorComponentTickFunction	0x38	2317
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	ComponentTags	ArrayProperty of ComponentTags./Script/Engine.ActorComponent:ComponentTags	0x68	2318
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	AssetUserData	ArrayProperty of AssetUserData./Script/Engine.ActorComponent:AssetUserData	0x78	2320
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	UCSSerializationIndex	IntProperty	0x8C	2322
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bNetAddressable	BoolProperty	0x94	2323
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bReplicateUsingRegisteredSubObjectList	BoolProperty	0x94	2324
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bReplicates	BoolProperty	0x94	2325
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bAutoActivate	BoolProperty	0x96	2326
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bIsActive	BoolProperty	0x96	2327
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bEditableWhenInherited	BoolProperty	0x96	2328
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bCanEverAffectNavigation	BoolProperty	0x96	2329
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	bIsEditorOnly	BoolProperty	0x97	2330
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	CreationMethod	EnumProperty of /Script/Engine.EComponentCreationMethod	0xB1	2331
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	OnComponentActivated	MulticastSparseDelegateProperty	0xB2	2332
+/Script/Engine.ActorComponent	/Script/Sparta.SpartaItemManagerComponent	OnComponentDeactivated	MulticastSparseDelegateProperty	0xB3	2333
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	FragmentData	MapProperty	0x28	60785
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	StatTags	StructProperty of /Script/Sparta.GameplayTagStackContainer	0x78	60788
+/Script/Sparta.SpartaItemInstance	/Script/Sparta.SpartaItemInstance	ItemDef	ClassProperty	0x1E0	60789
+/Script/Sparta.SpartaItemDefinition	/Script/Sparta.SpartaItemDefinition	DisplayName	TextProperty	0x28	60767
+/Script/Sparta.SpartaItemDefinition	/Script/Sparta.SpartaItemDefinition	Fragments	ArrayProperty of Fragments./Script/Sparta.SpartaItemDefinition:Fragments	0x38	60768
+/Script/Sparta.SpartaItemChangeEvent	/Script/Sparta.SpartaItemChangeEvent	ItemOwner	ObjectProperty of /Script/Engine.ActorComponent	0x28	60808
+/Script/Sparta.SpartaItemChangeEvent	/Script/Sparta.SpartaItemChangeEvent	Instance	ObjectProperty of /Script/Sparta.SpartaItemInstance	0x30	60809
+/Script/Sparta.SpartaItemChangeEvent	/Script/Sparta.SpartaItemChangeEvent	NewCount	IntProperty	0x38	60810
+/Script/Sparta.SpartaItemChangeEvent	/Script/Sparta.SpartaItemChangeEvent	Delta	IntProperty	0x3C	60811
+/Script/Sparta.SpartaItemFragment_StatLevels	/Script/Sparta.SpartaItemFragment_StatLevels	RequirementTag	StructProperty of /Script/GameplayTags.GameplayTag	0x28	56803
+/Script/Sparta.SpartaItemFragment_StatLevels	/Script/Sparta.SpartaItemFragment_StatLevels	UpgradeLevelsMap	MapProperty	0x30	56804
+/Script/Sparta.AdditionalContainerComponent	/Script/Sparta.AdditionalContainerComponent	TagsToAdd	MapProperty	0x28	53189
+/Script/Sparta.AdditionalContainerComponent	/Script/Sparta.AdditionalContainerComponent	TagsToRemove	MapProperty	0x78	53192
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	Icon	SoftObjectProperty of /Script/Engine.Texture2D	0x28	53660
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	DefaultVideo	SoftObjectProperty of /Script/MediaAssets.MediaSource	0x50	53661
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	DisplayName	TextProperty	0x78	53662
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	DisplayNameSuffix	TextProperty	0x88	53663
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	PrefixName	TextProperty	0x98	53664
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	SubNameInfix	TextProperty	0xA8	53665
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	SubName	TextProperty	0xB8	53666
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	Description	TextProperty	0xC8	53667
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	Effect	TextProperty	0xD8	53668
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	HeaderOnAcquired	TextProperty	0xE8	53669
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	HeaderOnEquipped	TextProperty	0xF8	53670
+/Script/Sparta.ItemFragment_Display	/Script/Sparta.ItemFragment_Display	GlowColor	StructProperty of /Script/CoreUObject.LinearColor	0x108	53671
+/Script/Sparta.ItemFragment_StackabilityRules	/Script/Sparta.ItemFragment_StackabilityRules	bGrantDuplicateAbilitySets	BoolProperty	0x28	53701
+/Script/Sparta.ItemFragment_StackabilityRules	/Script/Sparta.ItemFragment_StackableDivideSumByCountSquared	bGrantDuplicateAbilitySets	BoolProperty	0x28	53701
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	TarstoneExpClass	ClassProperty	0x28	53718
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	TarstoneSlot	ByteProperty	0x30	53719
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	TarstoneColor	EnumProperty of /Script/Sparta.ETarstoneColor	0x31	53720
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	CompatibilityTags	StructProperty of /Script/GameplayTags.GameplayTagContainer	0x38	53721
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	ExpNeededPerLevel	ArrayProperty of ExpNeededPerLevel./Script/Sparta.ItemFragment_Tarstone:ExpNeededPerLevel	0x58	53722
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	GoldNeededPerLevel	ArrayProperty of GoldNeededPerLevel./Script/Sparta.ItemFragment_Tarstone:GoldNeededPerLevel	0x68	53724
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	TarcoresNeededPerLevel	ArrayProperty of TarcoresNeededPerLevel./Script/Sparta.ItemFragment_Tarstone:TarcoresNeededPerLevel	0x78	53726
+/Script/Sparta.ItemFragment_Tarstone	/Script/Sparta.ItemFragment_Tarstone	TarcoresGrantedPerLevel	ArrayProperty of TarcoresGrantedPerLevel./Script/Sparta.ItemFragment_Tarstone:TarcoresGrantedPerLevel	0x88	53728
+/Script/Sparta.ItemFragment_SetStats	/Script/Sparta.ItemFragment_SetStats	InitialItemStats	MapProperty	0x28	60763
+/Script/Sparta.ItemFragment_GiveItemToPlayer	/Script/Sparta.ItemFragment_GiveItemToPlayer	ItemToGive	SoftClassProperty	0x28	53673
+/Script/Sparta.ItemFragment_GiveItemToShell	/Script/Sparta.ItemFragment_GiveItemToShell	ItemToGive	SoftClassProperty	0x28	53675
+/Script/Sparta.ItemFragment_WorldStateModifier	/Script/Sparta.ItemFragment_WorldStateModifier	OnSpawnEffectsToAdd	ArrayProperty of OnSpawnEffectsToAdd./Script/Sparta.ItemFragment_WorldStateModifier:OnSpawnEffectsToAdd	0x28	53731
+/Script/Sparta.ItemFragment_WorldStateModifier	/Script/Sparta.ItemFragment_WorldStateModifier	OnSpawnAbilitiesToAdd	ArrayProperty of OnSpawnAbilitiesToAdd./Script/Sparta.ItemFragment_WorldStateModifier:OnSpawnAbilitiesToAdd	0x38	53733
+/Script/Sparta.ItemFragment_Executable	/Script/Sparta.ItemFragment_Executable	ExecutableBehaviors	ArrayProperty of ExecutableBehaviors./Script/Sparta.ItemFragment_Executable:ExecutableBehaviors	0x28	60751
+/Script/Sparta.ItemFragment_SetShellClass	/Script/Sparta.ItemFragment_SetShellClass	ShellClass	SoftClassProperty	0x28	53689
+/Script/Sparta.ItemFragment_SetDarkformClass	/Script/Sparta.ItemFragment_SetDarkformClass	DarkformClass	SoftClassProperty	0x28	53687
+/Script/Sparta.ItemFragment_AbilitySets	/Script/Sparta.ItemFragment_AbilitySets	AbilitySetToGrant	StructProperty of /Script/Sparta.SpartaAbilitySet	0x28	53653
+/Script/Sparta.ItemFragment_PickupIcon	/Script/Sparta.ItemFragment_PickupIcon	ItemRarity	EnumProperty of /Script/Sparta.EItemRarity	0x28	60756
+/Script/Sparta.ItemFragment_PickupIcon	/Script/Sparta.ItemFragment_PickupIcon	AudioSwitchGroup	ObjectProperty of /Script/WaveWeaver.AudioSwitchGroup	0x30	60757
+/Script/Sparta.ItemFragment_PickupIcon	/Script/Sparta.ItemFragment_PickupIcon	AudioSwitchValue	StructProperty of /Script/WaveWeaver.AudioSwitchState	0x38	60758
+/Script/Sparta.ItemFragment_PickupIcon	/Script/Sparta.ItemFragment_PickupIcon	bInstancesRespawnAfterPickup	BoolProperty	0x60	60759
+/Script/Sparta.ItemFragment_PickupIcon	/Script/Sparta.ItemFragment_PickupIcon	OnPickupBehaviors	ArrayProperty of OnPickupBehaviors./Script/Sparta.ItemFragment_PickupIcon:OnPickupBehaviors	0x68	60760
+/Script/Sparta.ItemFragment_Spawnable	/Script/Sparta.ItemFragment_Spawnable	ActorToSpawn	SoftClassProperty	0x28	53691

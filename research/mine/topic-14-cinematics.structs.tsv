@@ -1,0 +1,6 @@
+module	struct	field_offset	field_size	field_type	field	flags
+GameplayAbilities	FActiveGameplayEffectHandle	0x0000	0x0004	int32	Handle	(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+GameplayAbilities	FActiveGameplayEffectHandle	0x0004	0x0001	bool	bPassedFiltersAndWasExecuted	(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+GameplayTags	FGameplayTag	0x0000	0x0008	class FName	TagName	(Edit, ZeroConstructor, EditConst, SaveGame, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0000	0x0010	TArray<struct FGameplayTag>	GameplayTags	(Edit, BlueprintVisible, ZeroConstructor, EditConst, SaveGame, Protected, NativeAccessSpecifierProtected)
+GameplayTags	FGameplayTagContainer	0x0010	0x0010	TArray<struct FGameplayTag>	ParentTags	(ZeroConstructor, Transient, Protected, NativeAccessSpecifierProtected)

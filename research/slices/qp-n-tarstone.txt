@@ -1,0 +1,276 @@
+﻿### ArrayProperty /Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:ReturnValue  [000001F4ACE19980]
+    1 members:
+      PRP ReturnValue : ClassProperty [o:0x0]
+
+### ArrayProperty /Script/Sparta.TarstoneComponent:TarstoneSupportBuild  [000001F4ACE1AD80]
+    1 members:
+      PRP TarstoneSupportBuild : ClassProperty [o:0x0]
+
+### BoolProperty /Script/Sparta.TarstoneComponent:CanLevelUpTarstone:ReturnValue  [000001F4ACE19E00]
+
+### Class /Script/Sparta.TarstoneComponent  [00007FF46F062B38]
+    super: /Script/Sparta.SpartaSaveComponent
+    31 members:
+      PRP TarcoreItemDefinition : ClassProperty [o:0x120]
+      PRP TarstoneBuilds : MapProperty [o:0x128]
+      PRP TarstoneLevels : MapProperty [o:0x178]
+      PRP TarstoneSupportBuild : ArrayProperty of TarstoneSupportBuild./Script/Sparta.TarstoneComponent:TarstoneSupportBuild [o:0x1c8]
+      PRP EquippedTarstoneItemInstances : MapProperty [o:0x1d8]
+      PRP EquippedSupportTarstoneItemInstances : MapProperty [o:0x228]
+      PRP OnTarstoneLevelUp : MulticastInlineDelegateProperty [o:0x278]
+      PRP OnTarstoneExpUp : MulticastInlineDelegateProperty [o:0x288]
+      PRP OnTarstoneEquip : MulticastInlineDelegateProperty [o:0x298]
+      PRP OnTarstoneUnequip : MulticastInlineDelegateProperty [o:0x2a8]
+      PRP OnSupportTarstoneEquip : MulticastInlineDelegateProperty [o:0x2b8]
+      PRP OnSupportTarstoneUnequip : MulticastInlineDelegateProperty [o:0x2c8]
+      PRP OnTarstoneReady : MulticastInlineDelegateProperty [o:0x2d8]
+      PRP OnWeaponTarstonesEquipped : MulticastInlineDelegateProperty [o:0x2e8]
+      PRP OnWeaponTarstonesUnequipped : MulticastInlineDelegateProperty [o:0x2f8]
+      PRP OnWeaponTarstoneHandlingComplete : MulticastInlineDelegateProperty [o:0x308]
+      FUN UnequipTarstone 
+          param EquipmentSlot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SlotIndex : IntProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x10]
+      FUN UnequipSupportTarstone 
+          param SlotIndex : IntProperty [o:0x0]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x8]
+      FUN SetTarstoneLevel 
+          param Tarstone : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x0]
+          param LevelData : StructProperty of /Script/Sparta.TarstoneLevelData [o:0x8]
+      FUN OnWeaponUnequipped 
+          param Weapon : ObjectProperty of /Script/Sparta.SpartaWeapon [o:0x0]
+      FUN OnWeaponEquipped 
+          param Weapon : ObjectProperty of /Script/Sparta.SpartaWeapon [o:0x0]
+      FUN OnChangeShellItem 
+          param OldShell : ClassProperty [o:0x0]
+          param NewShell : ClassProperty [o:0x8]
+      FUN GetCurrentTarstoneBuildForSlot 
+          param Slot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:ReturnValue [o:0x8]
+      FUN ForceAddTarstoneLevel 
+          param Tarstone : ClassProperty [o:0x0]
+      FUN EquipTarstone 
+          param EquipmentSlot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+          param SlotIndex : IntProperty [o:0x8]
+          param TarstoneID : ClassProperty [o:0x10]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x18]
+      FUN EquipSupportTarstone 
+          param SlotIndex : IntProperty [o:0x0]
+          param TarstoneID : ClassProperty [o:0x8]
+          param ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x10]
+      FUN DetermineExpRequirement 
+          param Level : IntProperty [o:0x0]
+          param TarstoneExperience : ObjectProperty of /Script/Sparta.ItemFragment_Tarstone [o:0x8]
+          param ReturnValue : IntProperty [o:0x10]
+      FUN CanLevelUpTarstone 
+          param Tarstone : ClassProperty [o:0x0]
+          param ReturnValue : BoolProperty [o:0x8]
+      FUN AddTarstoneToInventory 
+          param Tarstone : ClassProperty [o:0x0]
+          param Level : IntProperty [o:0x8]
+          param exp : IntProperty [o:0xc]
+      FUN AddTarstoneLevel 
+          param Tarstone : ClassProperty [o:0x0]
+      FUN AddTarstoneExp 
+          param Tarstone : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x0]
+          param exp : IntProperty [o:0x8]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:AddTarstoneLevel:Tarstone  [000001F4ACE19F00]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:AddTarstoneToInventory:Tarstone  [000001F4ACE19E80]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:CanLevelUpTarstone:Tarstone  [000001F4ACE19D80]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:EquipSupportTarstone:TarstoneID  [000001F4ACE19C00]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:EquipTarstone:TarstoneID  [000001F4ACE19B00]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:ForceAddTarstoneLevel:Tarstone  [000001F4ACE19A00]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:OnChangeShellItem:NewShell  [000001F4ACE19800]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:OnChangeShellItem:OldShell  [000001F4ACE19780]
+
+### ClassProperty /Script/Sparta.TarstoneComponent:TarcoreItemDefinition  [000001F4ACE1AA80]
+
+### ClassProperty EquippedSupportTarstoneItemInstances./Script/Sparta.TarstoneComponent:EquippedSupportTarstoneItemInstances_Key  [000001F4ACE1AF80]
+
+### ClassProperty EquippedTarstoneItemInstances./Script/Sparta.TarstoneComponent:EquippedTarstoneItemInstances_Key  [000001F4ACE1AE80]
+
+### ClassProperty ReturnValue./Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:ReturnValue  [000001F4ACE19900]
+
+### ClassProperty TarstoneLevels./Script/Sparta.TarstoneComponent:TarstoneLevels_Key  [000001F4ACE1AC80]
+
+### ClassProperty TarstoneSupportBuild./Script/Sparta.TarstoneComponent:TarstoneSupportBuild  [000001F4ACE1AD00]
+
+### Function /Script/Sparta.TarstoneComponent:AddTarstoneExp  [00007FF46F721CB8]
+    2 members:
+      PRP Tarstone : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x0]
+      PRP exp : IntProperty [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:AddTarstoneLevel  [00007FF46F721D98]
+    1 members:
+      PRP Tarstone : ClassProperty [o:0x0]
+
+### Function /Script/Sparta.TarstoneComponent:AddTarstoneToInventory  [00007FF46F721E78]
+    3 members:
+      PRP Tarstone : ClassProperty [o:0x0]
+      PRP Level : IntProperty [o:0x8]
+      PRP exp : IntProperty [o:0xc]
+
+### Function /Script/Sparta.TarstoneComponent:CanLevelUpTarstone  [00007FF46F721F58]
+    2 members:
+      PRP Tarstone : ClassProperty [o:0x0]
+      PRP ReturnValue : BoolProperty [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:DetermineExpRequirement  [00007FF46F722038]
+    3 members:
+      PRP Level : IntProperty [o:0x0]
+      PRP TarstoneExperience : ObjectProperty of /Script/Sparta.ItemFragment_Tarstone [o:0x8]
+      PRP ReturnValue : IntProperty [o:0x10]
+
+### Function /Script/Sparta.TarstoneComponent:EquipSupportTarstone  [00007FF46F722118]
+    3 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+      PRP TarstoneID : ClassProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x10]
+
+### Function /Script/Sparta.TarstoneComponent:EquipTarstone  [00007FF46F7221F8]
+    4 members:
+      PRP EquipmentSlot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SlotIndex : IntProperty [o:0x8]
+      PRP TarstoneID : ClassProperty [o:0x10]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x18]
+
+### Function /Script/Sparta.TarstoneComponent:ForceAddTarstoneLevel  [00007FF46F7222D8]
+    1 members:
+      PRP Tarstone : ClassProperty [o:0x0]
+
+### Function /Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot  [00007FF46F7223B8]
+    2 members:
+      PRP Slot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP ReturnValue : ArrayProperty of ReturnValue./Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:ReturnValue [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:OnChangeShellItem  [00007FF46F722498]
+    2 members:
+      PRP OldShell : ClassProperty [o:0x0]
+      PRP NewShell : ClassProperty [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:OnWeaponEquipped  [00007FF46F722578]
+    1 members:
+      PRP Weapon : ObjectProperty of /Script/Sparta.SpartaWeapon [o:0x0]
+
+### Function /Script/Sparta.TarstoneComponent:OnWeaponUnequipped  [00007FF46F722658]
+    1 members:
+      PRP Weapon : ObjectProperty of /Script/Sparta.SpartaWeapon [o:0x0]
+
+### Function /Script/Sparta.TarstoneComponent:SetTarstoneLevel  [00007FF46F722738]
+    2 members:
+      PRP Tarstone : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x0]
+      PRP LevelData : StructProperty of /Script/Sparta.TarstoneLevelData [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:UnequipSupportTarstone  [00007FF46F722818]
+    2 members:
+      PRP SlotIndex : IntProperty [o:0x0]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x8]
+
+### Function /Script/Sparta.TarstoneComponent:UnequipTarstone  [00007FF46F7228F8]
+    3 members:
+      PRP EquipmentSlot : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP SlotIndex : IntProperty [o:0x8]
+      PRP ReturnValue : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x10]
+
+### IntProperty /Script/Sparta.TarstoneComponent:AddTarstoneExp:exp  [000001F4ACDE9000]
+
+### IntProperty /Script/Sparta.TarstoneComponent:AddTarstoneToInventory:Level  [000001F4ACDE8F20]
+
+### IntProperty /Script/Sparta.TarstoneComponent:AddTarstoneToInventory:exp  [000001F4ACDE8F90]
+
+### IntProperty /Script/Sparta.TarstoneComponent:DetermineExpRequirement:Level  [000001F4ACDE8E40]
+
+### IntProperty /Script/Sparta.TarstoneComponent:DetermineExpRequirement:ReturnValue  [000001F4ACDE8EB0]
+
+### IntProperty /Script/Sparta.TarstoneComponent:EquipSupportTarstone:SlotIndex  [000001F4ACDE8DD0]
+
+### IntProperty /Script/Sparta.TarstoneComponent:EquipTarstone:SlotIndex  [000001F4ACDE8D60]
+
+### IntProperty /Script/Sparta.TarstoneComponent:UnequipSupportTarstone:SlotIndex  [000001F4ACDE8CF0]
+
+### IntProperty /Script/Sparta.TarstoneComponent:UnequipTarstone:SlotIndex  [000001F4ACDE8C80]
+
+### MapProperty /Script/Sparta.TarstoneComponent:EquippedSupportTarstoneItemInstances  [000001F4ACE21140]
+    2 members:
+      PRP EquippedSupportTarstoneItemInstances_Key : ClassProperty [o:0x0]
+      PRP EquippedSupportTarstoneItemInstances : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x8]
+
+### MapProperty /Script/Sparta.TarstoneComponent:EquippedTarstoneItemInstances  [000001F4ACE210A0]
+    2 members:
+      PRP EquippedTarstoneItemInstances_Key : ClassProperty [o:0x0]
+      PRP EquippedTarstoneItemInstances : ObjectProperty of /Script/Sparta.SpartaItemInstance [o:0x8]
+
+### MapProperty /Script/Sparta.TarstoneComponent:TarstoneBuilds  [000001F4ACE20F60]
+    2 members:
+      PRP TarstoneBuilds_Key : StructProperty of /Script/GameplayTags.GameplayTag [o:0x0]
+      PRP TarstoneBuilds : StructProperty of /Script/Sparta.TarstoneArray [o:0x8]
+
+### MapProperty /Script/Sparta.TarstoneComponent:TarstoneLevels  [000001F4ACE21000]
+    2 members:
+      PRP TarstoneLevels_Key : ClassProperty [o:0x0]
+      PRP TarstoneLevels : StructProperty of /Script/Sparta.TarstoneLevelData [o:0x8]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnSupportTarstoneEquip  [000001F4ACE1B200]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnSupportTarstoneUnequip  [000001F4ACE1B280]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnTarstoneEquip  [000001F4ACE1B100]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnTarstoneExpUp  [000001F4ACE1B080]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnTarstoneLevelUp  [000001F4ACE1B000]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnTarstoneReady  [000001F4ACE1B300]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnTarstoneUnequip  [000001F4ACE1B180]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnWeaponTarstoneHandlingComplete  [000001F4ACE1B480]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnWeaponTarstonesEquipped  [000001F4ACE1B380]
+
+### MulticastInlineDelegateProperty /Script/Sparta.TarstoneComponent:OnWeaponTarstonesUnequipped  [000001F4ACE1B400]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:AddTarstoneExp:Tarstone  [000001F4ACE19F80]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:DetermineExpRequirement:TarstoneExperience  [000001F4ACE19D00]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:EquipSupportTarstone:ReturnValue  [000001F4ACE19C80]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:EquipTarstone:ReturnValue  [000001F4ACE19B80]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:OnWeaponEquipped:Weapon  [000001F4ACE19700]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:OnWeaponUnequipped:Weapon  [000001F4ACE19680]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:SetTarstoneLevel:Tarstone  [000001F4ACE19580]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:UnequipSupportTarstone:ReturnValue  [000001F4ACE19500]
+
+### ObjectProperty /Script/Sparta.TarstoneComponent:UnequipTarstone:ReturnValue  [000001F4ACE1B580]
+
+### ObjectProperty EquippedSupportTarstoneItemInstances./Script/Sparta.TarstoneComponent:EquippedSupportTarstoneItemInstances  [000001F4ACE1AF00]
+
+### ObjectProperty EquippedTarstoneItemInstances./Script/Sparta.TarstoneComponent:EquippedTarstoneItemInstances  [000001F4ACE1AE00]
+
+### StructProperty /Script/Sparta.TarstoneComponent:EquipTarstone:EquipmentSlot  [000001F4ACE19A80]
+
+### StructProperty /Script/Sparta.TarstoneComponent:GetCurrentTarstoneBuildForSlot:Slot  [000001F4ACE19880]
+
+### StructProperty /Script/Sparta.TarstoneComponent:SetTarstoneLevel:LevelData  [000001F4ACE19600]
+
+### StructProperty /Script/Sparta.TarstoneComponent:UnequipTarstone:EquipmentSlot  [000001F4ACE1B500]
+
+### StructProperty TarstoneBuilds./Script/Sparta.TarstoneComponent:TarstoneBuilds  [000001F4ACE1AB00]
+
+### StructProperty TarstoneBuilds./Script/Sparta.TarstoneComponent:TarstoneBuilds_Key  [000001F4ACE1AB80]
+
+### StructProperty TarstoneLevels./Script/Sparta.TarstoneComponent:TarstoneLevels  [000001F4ACE1AC00]
+
