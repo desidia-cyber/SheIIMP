@@ -18,6 +18,9 @@
 #endif
 #include <windows.h>
 
+#include "MinHook.h"
+
+#include <atomic>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -37,6 +40,7 @@ bool g_coopBtnShown = false;
 int  g_sel = 0;        // 0=Network, 1=Identity, 2=Password, 3=Server(LAN), 4=Port(LAN), 5=Host, 6=Join, 7=Disconnect, 8=RestartApp
 bool g_editing = false;
 bool g_prevKeys[256] = {};
+unsigned g_drawCount = 0;   // ReceiveDrawHUD calls seen (diagnostic)
 std::string g_feedback;
 DWORD g_feedbackUntil = 0;
 
@@ -129,6 +133,7 @@ void HandleInput() {
     if (KeyJustPressed(VK_F9)) {
         g_open = !g_open;
         g_editing = false;
+        net::Log("menu: F9 -> %s (HUD draws seen so far: %u)", g_open ? "open" : "closed", g_drawCount);
         return;
     }
     if (!g_open) return;
@@ -223,6 +228,8 @@ void HandleInput() {
 
 void OnDrawHUD(UObject* hud, UFunction*, void*) {
     if (!state().toggles.menuEnabled || !hud) return;
+    if (g_drawCount++ == 0)
+        net::Log("menu: first HUD draw on %s", ue::GetFullName(hud).c_str());
 
     // Small always-visible status badge in top-left when connected or waiting
     const int st = steam::State();
@@ -294,6 +301,106 @@ void UnhideTitleCoopButton() {
     }
 }
 
+
+// ---------------------------------------------------------------------------
+// Drawing hook: AHUD::PostRender (native vtable slot), not ReceiveDrawHUD.
+//
+// Measured 2026-11-27 on this build: AHUD::PostRender runs every frame, but
+// HUD.ReceiveDrawHUD never reaches ProcessEvent (0 calls with bShowHUD=1).  So
+// the menu is drawn from a MinHook detour on PostRender itself, right after the
+// original, while the HUD's Canvas is still set.
+//
+// PostRender's slot is found without symbols: ADebugCameraHUD overrides only the
+// destructor (slot 0) and PostRender, so the one other slot where the AHUD and
+// ADebugCameraHUD vtables differ is PostRender.  If that is not exactly one
+// slot, the ReceiveDrawHUD hook is the fallback.
+// ---------------------------------------------------------------------------
+using PostRenderFn = void (*)(UObject*);
+PostRenderFn g_origPostRender = nullptr;
+bool g_postRenderTried = false;
+bool g_postRenderHooked = false;
+
+bool IsExec(const void* p) {
+    MEMORY_BASIC_INFORMATION mbi{};
+    if (!p || !VirtualQuery(p, &mbi, sizeof(mbi))) return false;
+    return (mbi.Protect & (PAGE_EXECUTE_READ | PAGE_EXECUTE | PAGE_EXECUTE_READWRITE)) != 0;
+}
+
+void DrawFromPostRender(UObject* hud) {
+    if (g_open) {
+        static int s_n = 0;
+        if (s_n++ < 3) {
+            UObject* canvas = nullptr; UObject* dbg = nullptr;
+            ue::Get<UObject*>(hud, "Canvas", canvas);
+            ue::Get<UObject*>(hud, "DebugCanvas", dbg);
+            net::Log("menu: draw diag Canvas=%p DebugCanvas=%p DrawRect=%p DrawText=%p",
+                     (void*)canvas, (void*)dbg, (void*)ue::FindFunction(hud, "DrawRect"),
+                     (void*)ue::FindFunction(hud, "DrawText"));
+        }
+    }
+    OnDrawHUD(hud, nullptr, nullptr);
+}
+
+int SehDraw(UObject* hud) {
+    __try {
+        DrawFromPostRender(hud);
+        return 1;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        return 0;
+    }
+}
+
+void DetourPostRender(UObject* hud) {
+    g_origPostRender(hud);
+    static bool s_dead = false;
+    if (s_dead) return;
+    if (!SehDraw(hud)) {
+        s_dead = true;
+        net::Log("menu: drawing from PostRender faulted -- menu drawing disabled");
+    }
+}
+
+void InstallPostRenderHook() {
+    if (g_postRenderTried) return;
+    UObject* hudCdo = ue::FindObject("/Script/Engine.Default__HUD");
+    UObject* dbgCdo = ue::FindObject("/Script/Engine.Default__DebugCameraHUD");
+    if (!hudCdo || !dbgCdo) return;   // try again next tick
+    g_postRenderTried = true;
+
+    void** vh = nullptr; void** vd = nullptr;
+    ue::ReadMem(hudCdo, &vh, sizeof(vh));
+    ue::ReadMem(dbgCdo, &vd, sizeof(vd));
+    int slot = -1, diffs = 0;
+    void* target = nullptr;
+    for (int i = 1; i < 600; ++i) {
+        void* a = nullptr; void* b = nullptr;
+        if (!ue::ReadMem(vh + i, &a, sizeof(a)) || !ue::ReadMem(vd + i, &b, sizeof(b))) break;
+        if (!IsExec(a) || !IsExec(b)) break;
+        if (a == b) continue;
+        ++diffs;
+        slot = i;
+        target = a;
+    }
+    if (diffs != 1 || !target) {
+        net::Log("menu: PostRender slot not identified (%d differing slots) -- using ReceiveDrawHUD", diffs);
+        return;
+    }
+    if (MH_CreateHook(target, reinterpret_cast<LPVOID>(&DetourPostRender),
+                      reinterpret_cast<LPVOID*>(&g_origPostRender)) != MH_OK ||
+        MH_EnableHook(target) != MH_OK) {
+        net::Log("menu: PostRender hook FAILED at slot %d -- using ReceiveDrawHUD", slot);
+        return;
+    }
+    g_postRenderHooked = true;
+    net::Log("menu: drawing from AHUD::PostRender (vtable slot %d, rva 0x%llx) -- press F9 for CO-OP menu",
+             slot, (unsigned long long)((uintptr_t)target - (uintptr_t)GetModuleHandleW(nullptr)));
+}
+
+void OnReceiveDrawHUD(UObject* hud, UFunction* fn, void* parms) {
+    if (g_postRenderHooked) return;   // PostRender draws; never draw twice
+    OnDrawHUD(hud, fn, parms);
+}
+
 }  // namespace
 
 void Tick30() {
@@ -303,16 +410,17 @@ void Tick30() {
 
 void Tick2() {
     if (!state().toggles.menuEnabled) return;
+    InstallPostRenderHook();
     if (!g_hudHooked) {
-        if (ue::HookPost("HUD.ReceiveDrawHUD", &OnDrawHUD)) {
+        if (ue::HookPost("HUD.ReceiveDrawHUD", &OnReceiveDrawHUD)) {
             g_hudHooked = true;
-            net::Log("menu: hooked HUD.ReceiveDrawHUD (press F9 for CO-OP menu)");
         }
     }
     if (state().puppet.phase == Phase::Menu) {
         UnhideTitleCoopButton();
     }
 }
+
 
 void Reset() {
     g_coopBtnShown = false;

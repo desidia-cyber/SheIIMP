@@ -438,6 +438,7 @@ struct Toggles {
     bool hitHook        = true;  // !HITHOOK_OFF.txt
     bool puppetPlus     = true;  // !PUPPET_PLUS_OFF.txt
     bool menuEnabled    = true;  // !MENU_OFF.txt
+    bool autoContinue   = false; // AUTO_CONTINUE.txt -- test rig: press Continue on the title screen
     bool beaconScale    = true;  // !BEACON_SCALE_OFF.txt
     bool fxGrabs        = true;  // !FX_GRABS_OFF.txt
     bool partB          = true;  // !PARTB_OFF.txt
