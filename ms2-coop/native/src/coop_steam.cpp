@@ -4,9 +4,11 @@
 //   1. Never calls SteamAPI_ManualDispatch_Init() (coexists with UE5 OnlineSubsystemSteam).
 //      Uses flat-C ISteamUtils::IsAPICallCompleted / GetAPICallResult for lobbies and
 //      SteamAPI_RegisterCallback (CCallbackBase) for ISteamNetworkingMessages requests/failures.
-//   2. Reuses the game's already-loaded steam_api64.dll (GetModuleHandleW), or loads
-//      <dllDir>\MS2Coop\steam_api64.dll / Steamv165\Win64\steam_api64.dll for Spacewar (480),
-//      rejecting emulator DLLs (tenoke/goldberg/codex/steam_emu/smartsteamemu).
+//   2. Resolves Steamworks in Sparta\Engine\Binaries\ThirdParty\Steamworks\Steamv165\Win64
+//      (and Steamv157 / Steamv151): if steam_api64.rne is present in that folder, loads and
+//      uses steam_api64.rne for Steam P2P; if only steam_api64.dll is present (no .rne),
+//      reuses the game's already-loaded steam_api64.dll or loads it from that folder.
+//      Falls back to MS2Coop\steam_api64.dll, rejecting emulator DLLs.
 //   3. Supports Steam Identity selection: Game AppID (Mortal Shell II) vs Spacewar (480),
 //      with active_steam_app_id() mismatch guard and RestartWithAppId() relaunch.
 //   4. Password-keyed public lobbies: 20,000-round SHA-256 of "ms2coop-v1|<password>" (32 hex)
@@ -321,6 +323,8 @@ std::string     g_peerName;
 std::string     g_statusMsg = "OFFLINE (SOLO)";
 std::atomic<bool> g_stop{false};
 std::thread     g_worker;
+std::atomic<HMODULE> g_steamMod{nullptr};
+std::atomic<bool>    g_steamWeStarted{false};
 
 // Lock-guarded packet queues exchanged with coop_net.cpp
 std::mutex              g_ioMu;
@@ -328,17 +332,31 @@ std::deque<std::string> g_txQueue;
 std::string             g_rxLatest;
 bool                    g_rxHasNew = false;
 
-std::string ExeDirNarrow() {
-    wchar_t w[MAX_PATH * 2] = L"";
-    DWORD n = GetModuleFileNameW(nullptr, w, MAX_PATH * 2);
-    if (!n) return "";
-    std::wstring ws(w, n);
-    size_t sl = ws.find_last_of(L"\\/");
-    if (sl != std::wstring::npos) ws.resize(sl);
+std::string WideToUtf8(const std::wstring& ws) {
+    if (ws.empty()) return "";
     int cb = WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), (int)ws.size(), nullptr, 0, nullptr, nullptr);
     std::string s(cb > 0 ? cb : 0, '\0');
     if (cb > 0) WideCharToMultiByte(CP_UTF8, 0, ws.c_str(), (int)ws.size(), &s[0], cb, nullptr, nullptr);
     return s;
+}
+
+std::wstring ExeDirWide() {
+    wchar_t w[MAX_PATH * 2] = L"";
+    DWORD n = GetModuleFileNameW(nullptr, w, MAX_PATH * 2);
+    if (!n) return L"";
+    std::wstring ws(w, n);
+    size_t sl = ws.find_last_of(L"\\/");
+    if (sl != std::wstring::npos) ws.resize(sl);
+    return ws;
+}
+
+std::string ExeDirNarrow() {
+    return WideToUtf8(ExeDirWide());
+}
+
+bool FileExistsW(const std::wstring& path) {
+    DWORD attrs = GetFileAttributesW(path.c_str());
+    return attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY) == 0;
 }
 
 void SetStatus(int st, const std::string& msg, const std::string& peer = "") {
@@ -366,29 +384,93 @@ bool IsEmulatorDll(const std::wstring& path) {
     return false;
 }
 
-bool LoadSteamApi(int steamIdentity, SteamApi* out, std::string* err) {
-    HMODULE m = GetModuleHandleW(L"steam_api64.dll");
-    if (!m) {
-        std::string dir = g_dllDir.empty() ? ExeDirNarrow() : g_dllDir;
-        std::wstring wd(dir.begin(), dir.end());
-        const std::wstring cands[] = {
-            wd + L"\\MS2Coop\\steam_api64.dll",
-            wd + L"\\steam_api64.dll",
-            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv165\\Win64\\steam_api64.dll",
-            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv157\\Win64\\steam_api64.dll",
-            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv151\\Win64\\steam_api64.dll",
+HMODULE ResolveSteamModule(bool* usedRne, std::string* err) {
+    if (usedRne) *usedRne = false;
+
+    std::wstring wd = ExeDirWide();
+    if (wd.empty() && !g_dllDir.empty()) {
+        int n = MultiByteToWideChar(CP_UTF8, 0, g_dllDir.c_str(), (int)g_dllDir.size(), nullptr, 0);
+        if (n > 0) {
+            wd.resize((size_t)n);
+            MultiByteToWideChar(CP_UTF8, 0, g_dllDir.c_str(), (int)g_dllDir.size(), &wd[0], n);
+        }
+    }
+
+    if (!wd.empty()) {
+        const std::wstring steamDirs[] = {
+            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv165\\Win64",
+            wd + L"\\..\\..\\..\\Sparta\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv165\\Win64",
+            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv157\\Win64",
+            wd + L"\\..\\..\\..\\Sparta\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv157\\Win64",
+            wd + L"\\..\\..\\..\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv151\\Win64",
+            wd + L"\\..\\..\\..\\Sparta\\Engine\\Binaries\\ThirdParty\\Steamworks\\Steamv151\\Win64",
         };
-        for (const std::wstring& c : cands) {
-            if (GetFileAttributesW(c.c_str()) != INVALID_FILE_ATTRIBUTES && !IsEmulatorDll(c)) {
-                m = LoadLibraryW(c.c_str());
-                if (m) break;
+        for (const std::wstring& dir : steamDirs) {
+            const std::wstring rnePath = dir + L"\\steam_api64.rne";
+            const std::wstring dllPath = dir + L"\\steam_api64.dll";
+            const bool hasRne = FileExistsW(rnePath);
+            const bool hasDll = FileExistsW(dllPath);
+            if (!hasRne && !hasDll) continue;
+
+            if (hasRne) {
+                // steam_api64.rne is present in this Steamworks folder: always use it
+                // instead of steam_api64.dll.
+                HMODULE m = GetModuleHandleW(L"steam_api64.rne");
+                if (!m) m = LoadLibraryW(rnePath.c_str());
+                if (!m) {
+                    if (err) *err = "Failed to load steam_api64.rne (error " + std::to_string(GetLastError()) + ")";
+                    ms2::Logf("steam: failed to load %s (err=%lu)", WideToUtf8(rnePath).c_str(), (unsigned long)GetLastError());
+                    return nullptr;
+                }
+                if (usedRne) *usedRne = true;
+                ms2::Logf("steam: using steam_api64.rne (%s)", WideToUtf8(rnePath).c_str());
+                return m;
+            }
+
+            // Only steam_api64.dll is present (no steam_api64.rne in the same folder).
+            // Reuse the game's already-loaded steam_api64.dll if present, otherwise load it.
+            HMODULE m = GetModuleHandleW(L"steam_api64.dll");
+            if (!m && !IsEmulatorDll(dllPath)) {
+                m = LoadLibraryW(dllPath.c_str());
+            }
+            if (m) {
+                ms2::Logf("steam: using steam_api64.dll (%s)", WideToUtf8(dllPath).c_str());
+                return m;
             }
         }
     }
+
+    // Fallback: already-loaded steam_api64.dll or local MS2Coop override
+    HMODULE m = GetModuleHandleW(L"steam_api64.dll");
+    if (!m && !wd.empty()) {
+        const std::wstring cands[] = {
+            wd + L"\\MS2Coop\\steam_api64.dll",
+            wd + L"\\steam_api64.dll",
+        };
+        for (const std::wstring& c : cands) {
+            if (FileExistsW(c) && !IsEmulatorDll(c)) {
+                m = LoadLibraryW(c.c_str());
+                if (m) {
+                    ms2::Logf("steam: using fallback %s", WideToUtf8(c).c_str());
+                    break;
+                }
+            }
+        }
+    }
+    if (!m && err) {
+        *err = "steam_api64.dll / steam_api64.rne not found (launch via Steam or check Steamworks Win64 folder)";
+    }
+    return m;
+}
+
+bool LoadSteamApi(int steamIdentity, SteamApi* out, std::string* err) {
+    bool usedRne = false;
+    HMODULE m = ResolveSteamModule(&usedRne, err);
     if (!m) {
-        if (err) *err = "steam_api64.dll not found (launch via Steam or place steam_api64.dll in MS2Coop\\)";
         return false;
     }
+    const char* modLabel = usedRne ? "steam_api64.rne" : "steam_api64.dll";
+    g_steamMod.store(m, std::memory_order_release);
 
     auto findIface = [&](const char* const* names, int n) -> void* (__cdecl *)() {
         for (int i = 0; i < n; ++i) {
@@ -411,13 +493,13 @@ bool LoadSteamApi(int steamIdentity, SteamApi* out, std::string* err) {
     auto utG   = findIface(kUtNames, 3);
     auto nuG   = findIface(kNuNames, 2);
     if (!userG || !frG || !msgG || !mmG || !utG) {
-        if (err) *err = "steam_api64.dll missing required flat-C interface exports";
+        if (err) *err = std::string(modLabel) + " missing required flat-C interface exports";
         return false;
     }
 
     const uint32_t wantApp = (steamIdentity == 1) ? kSpacewarAppId : kDefaultGameAppId;
     void* user = userG();
-    bool weStarted = false;
+    bool weStarted = g_steamWeStarted.load(std::memory_order_acquire);
     if (!user) {
         char appBuf[32];
         std::snprintf(appBuf, sizeof(appBuf), "%u", wantApp);
@@ -437,10 +519,11 @@ bool LoadSteamApi(int steamIdentity, SteamApi* out, std::string* err) {
                 return false;
             }
         } else {
-            if (err) *err = "steam_api64.dll missing SteamAPI_Init";
+            if (err) *err = std::string(modLabel) + " missing SteamAPI_Init";
             return false;
         }
         weStarted = true;
+        g_steamWeStarted.store(true, std::memory_order_release);
         user = userG();
     }
 
@@ -883,7 +966,9 @@ Config GetConfig() {
 }
 
 uint32_t ActiveSteamAppId() {
-    HMODULE m = GetModuleHandleW(L"steam_api64.dll");
+    HMODULE m = g_steamMod.load(std::memory_order_acquire);
+    if (!m) m = GetModuleHandleW(L"steam_api64.rne");
+    if (!m) m = GetModuleHandleW(L"steam_api64.dll");
     if (!m) return 0;
     auto getApp = (uint32_t (__cdecl *)(void*))GetProcAddress(m, "SteamAPI_ISteamUtils_GetAppID");
     static const char* kUt[] = {"SteamAPI_SteamUtils_v011", "SteamAPI_SteamUtils_v010", "SteamAPI_SteamUtils_v009"};
