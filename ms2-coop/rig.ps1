@@ -1,4 +1,4 @@
-# rig.ps1 -- Fast, persistent hot-session two-client co-op test rig for Mortal Shell II.
+﻿# rig.ps1 -- Fast, persistent hot-session two-client co-op test rig for Mortal Shell II.
 # Boots Host A and Guest B ONCE, keeps them LAN-linked, and runs real-gameplay test
 # suites back-to-back without rebooting. Owner saves are always snapshotted on `start`
 # and restored on `stop` (or on fatal boot failure).
@@ -678,6 +678,90 @@ function Run-Suite-BossGauntlet($sess) {
     Write-Host ("  BOSS GAUNTLET SUMMARY: {0}/{1} PASS, {2} FAIL" -f $passed, $bossPaths.Count, $failed)
 }
 
+function Run-Suite-GapsClose($sess) {
+    Write-Host "`n================ SUITE: REMAINING GAPS CLOSE (NM / MULTI-OPT DLG / SET-PIECES / OVA / 13 QUESTS) ================"
+
+    # 0. Baseline dump
+    $oA0 = LogLen $GameA; $oB0 = LogLen $GameB
+    Send-Both "partbtest dump" 2
+    Write-Host "  Baseline A: $((GrabSince $GameA $oA0 'partbtest dump:') -join ' | ')"
+    Write-Host "  Baseline B: $((GrabSince $GameB $oB0 'partbtest dump:') -join ' | ')"
+
+    # 1. All 12-13 NPC Questlines extra counters (Egon BlisterBoiDonations, Gorf/Vlas/Thestus/Genessa rel, ImmortalBrigSpoils, WormfishGold)
+    Write-Host "`n  --- 1. 12-13 NPC Questlines Progression Counters ---"
+    $oQ13A = LogLen $GameA; $oQ13B = LogLen $GameB
+    Send-Cmd $CoopA "partbtest quest13" 5
+    $oDA = LogLen $GameA; $oDB = LogLen $GameB
+    Send-Both "partbtest dump" 2
+    Write-Host "  Quest13 A: $((GrabSince $GameA $oDA 'partbtest dump:') -join ' | ')"
+    Write-Host "  Quest13 B: $((GrabSince $GameB $oDB 'partbtest dump:') -join ' | ')"
+    GrabSince $GameB $oQ13B 'wq apply.*(BlisterBoi|Gorf|Vlas|Thestus|Genessa|RIG_BRIG|RIG_WORM)' | ForEach-Object { Write-Host "    B(wq): $_" }
+
+    # 2. Live Multi-Option (>=2 choices) NPC Dialogue Voting + Vote Engine Self-Check
+    Write-Host "`n  --- 2. Multi-Option (>=2) NPC Dialogue Voting + Vote Engine ---"
+    $oDlgA = LogLen $GameA; $oDlgB = LogLen $GameB
+    Send-Cmd $CoopA "dlgvotesim" 2
+    GrabSince $GameA $oDlgA 'dlgvotesim|vote self-check|PASS|FAIL' | ForEach-Object { Write-Host "    A(sim): $_" }
+    Send-Cmd $CoopA "dlgstart BP_Cultist_HUB_C /Game/Sparta/Dialogue/Dialogues/Shellkeeper/Dlg_Shellkeeper_ChooseShell_Playtest.Dlg_Shellkeeper_ChooseShell_Playtest" 1
+    Send-Both "dlgdump" 1
+    Write-Host "    A(dlg): $((GrabSince $GameA $oDlgA 'dlgdump: subsystem=') -join ' | ')"
+    Write-Host "    B(dlg): $((GrabSince $GameB $oDlgB 'dlg: LISTEN') | Select-Object -Last 2 | ForEach-Object { $_ })"
+    Send-Cmd $CoopA "dlgstop" 2
+
+    # 3. Live Night Mode Toggle (BP_DayNight_Interaction_Thestus_C) in open courtyard
+    Write-Host "`n  --- 3. Live Night Mode Toggle (Thestus) ---"
+    $oNmA = LogLen $GameA; $oNmB = LogLen $GameB
+    Send-Cmd $CoopA "tp 49164 -134413 -42379" 0
+    Send-Cmd $CoopB "tp 49664 -134413 -42379" 3
+    Send-Both "partbtest thestus_load" 2
+    Send-Both "partbtest thestus_spawn" 3
+    Send-Cmd $CoopA "partbtest thestus" 5
+    Write-Host "  Host A: $((GrabSince $GameA $oNmA 'partbtest thestus|partb: host NightMode') -join ' | ')"
+    Write-Host "  Guest B: $((GrabSince $GameB $oNmB 'partbtest thestus|partb: synced NightMode') -join ' | ')"
+    Write-Host "  partb A=$(SyncVal $CoopA 'partb') | B=$(SyncVal $CoopB 'partb')"
+
+    # 4. Live TombZone Dungeon Variant Sync (dng)
+    Write-Host "`n  --- 4. Live TombZone Dungeon Variant Sync (dng) ---"
+    $oTmA = LogLen $GameA; $oTmB = LogLen $GameB
+    Send-Cmd $CoopA "partbtest tomb" 6
+    Write-Host "  Host A: $((GrabSince $GameA $oTmA 'partbtest tomb:') -join ' | ')"
+    Write-Host "  Guest B: $((GrabSince $GameB $oTmB 'partb: synced dungeon variant') -join ' | ')"
+    Write-Host "  partb A=$(SyncVal $CoopA 'partb') | B=$(SyncVal $CoopB 'partb')"
+
+    # 5. Live Ovum Main Story Progression Sync (BPSO_Ovum_C + ID_Ovum_C grant)
+    Write-Host "`n  --- 5. Live Ovum Collection + ID_Ovum_C Grant Sync ---"
+    $oOvA = LogLen $GameA; $oOvB = LogLen $GameB
+    Send-Both "partbtest ovum_reset" 12
+    Send-Cmd $CoopA "partbtest ovum" 12
+    $oOD = LogLen $GameB
+    Send-Cmd $CoopB "partbtest dump" 2
+    Write-Host "  Host A: $((GrabSince $GameA $oOvA 'partbtest ovum') -join ' | ')"
+    Write-Host "  Guest B(ovum): $((GrabSince $GameB $oOvB 'ws ovum live sync|Ovum:|ID_Ovum') -join ' | ')"
+    Write-Host "  Guest B(dump): $((GrabSince $GameB $oOD 'partbtest dump:') -join ' | ')"
+
+    # 6. Live HeadTree Underground Visibility Quirk (bsa quirk bit0) in open courtyard
+    Write-Host "`n  --- 6. Live HeadTree Underground Visibility Quirk (bsa bit0) ---"
+    $oHtB = LogLen $GameB
+    Send-Cmd $CoopA "tp 49164 -134413 -42379" 0
+    Send-Cmd $CoopB "tp 49764 -134413 -42379" 3
+    Send-Both "bossspawn /Game/Sparta/Characters/Bosses/Dwarf/BP_DwarfBoss.BP_DwarfBoss_C" 3
+    Send-Cmd $CoopA "partbtest headtree_hide" 4
+    Send-Cmd $CoopA "partbtest headtree_show" 4
+    Write-Host "  partb B=$(SyncVal $CoopB 'partb')"
+    GrabSince $GameB $oHtB 'partb:' | Select-Object -Last 6 | ForEach-Object { Write-Host "    B(partb): $_" }
+    Send-Both "bossdespawn" 2
+
+    # 7. Live FinalBossManager (Zmey BPSO_FC_FinalBossManager_C.ClensedCores — already live in L_Core_World_01!)
+    Write-Host "`n  --- 7. Live FinalBossManager (Zmey ClensedCores) ---"
+    $oFbA = LogLen $GameA; $oFbB = LogLen $GameB
+    Send-Cmd $CoopA "partbtest finalboss" 12
+    $oFbD = LogLen $GameB
+    Send-Cmd $CoopB "partbtest dump" 2
+    Write-Host "  Host A: $((GrabSince $GameA $oFbA 'partbtest finalboss:') -join ' | ')"
+    Write-Host "  Guest B(wt): $((GrabSince $GameB $oFbB 'ClensedCores|FinalBossManager') -join ' | ')"
+    Write-Host "  Guest B(dump): $((GrabSince $GameB $oFbD 'partbtest dump:') -join ' | ')"
+}
+
 # ============================================================================
 # DISPATCH
 # ============================================================================
@@ -711,6 +795,7 @@ switch ($Action) {
                     'boss_tour'      { Run-Suite-BossTour $sess }
                     'boss_gauntlet'  { Run-Suite-BossGauntlet $sess }
                     'quests'         { Run-Suite-Quests $sess }
+                    'gaps_close'     { Run-Suite-GapsClose $sess }
                     default          { Write-Host "Unknown suite: $s" }
                 }
             }

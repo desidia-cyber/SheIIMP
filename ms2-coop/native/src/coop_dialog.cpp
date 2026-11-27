@@ -2752,11 +2752,20 @@ void CmdDumpImpl() {
     }
 }
 
-// dlgstart [class] -- the GAME's own conversation start on the nearest dialogue
-// actor (ABP_DialogueActor_C / ABP_NPC_C subclass: DlgDialogue @0x148).
+// dlgstart [class] [/Game/...DlgAsset] -- the GAME's own conversation start on the nearest
+// dialogue actor (ABP_DialogueActor_C / ABP_NPC_C subclass: DlgDialogue @0x148).
 void CmdStartImpl(const std::string& rest) {
     std::string want = rest;
+    while (!want.empty() && (unsigned char)want.front() <= ' ') want.erase(want.begin());
     while (!want.empty() && (unsigned char)want.back() <= ' ') want.pop_back();
+    std::string dlgOverride;
+    const std::size_t sp = want.find(' ');
+    if (sp != std::string::npos) {
+        dlgOverride = want.substr(sp + 1);
+        want = want.substr(0, sp);
+        while (!dlgOverride.empty() && (unsigned char)dlgOverride.front() <= ' ')
+            dlgOverride.erase(dlgOverride.begin());
+    }
     if (want.empty()) want = "BP_Cultist_HUB_C";
     std::vector<ue::UObject*> list = ue::FindAllOf(want.c_str());
     if (list.empty()) {
@@ -2786,7 +2795,47 @@ void CmdStartImpl(const std::string& rest) {
         return;
     }
     ue::UObject* asset = nullptr;
-    ue::Get<ue::UObject*>(comp, "DlgDialogue", asset);
+    if (!dlgOverride.empty()) {
+        asset = net::Find(dlgOverride, true);
+        if (Valid(asset)) {
+            ue::Set<ue::UObject*>(comp, "DlgDialogue", asset);
+            ue::SetBool(comp, "SkipParticipantsCheck", true);
+            ue::SetBool(comp, "WasTriggered", false);
+            ue::SetBool(comp, "CanBeRepeated", true);
+            net::Log("dlgstart: override DlgDialogue -> %s (starting directly)", dlgOverride.c_str());
+            Fn c(comp, "StartDialogue");
+            bool started = false;
+            if (c.ok()) {
+                c.set<TagContainerZero>("AdditionalTags", TagContainerZero());
+                c.set<TagContainerZero>("AdditionalInterruptTags", TagContainerZero());
+                c.set<TagContainerZero>("AdditionalBlockingTags", TagContainerZero());
+                const bool ok = c.run();
+                const bool succ = c.get<bool>("Success");
+                net::Log("dlgstart: override StartDialogue ok=%d Success=%d", ok ? 1 : 0, succ ? 1 : 0);
+                started = ok && succ;
+            }
+            if (!started) {
+                ue::UObject* sub = DialogueSubsystem();
+                if (Valid(sub) && Valid(pawn)) {
+                    Fn sp(sub, "SpartaStartDialogue");
+                    if (sp.ok()) {
+                        ue::TArray<ue::UObject*> arr;
+                        ue::UObject* two[2] = {best, pawn};
+                        arr.Data = two; arr.Num = 2; arr.Max = 2;
+                        sp.set<ue::UObject*>("Dialogue", asset);
+                        sp.set<ue::TArray<ue::UObject*>>("Participants", arr);
+                        sp.set<ue::UObject*>("Instigator", comp);
+                        const bool ok = sp.run();
+                        net::Log("dlgstart: override SpartaStartDialogue ok=%d", ok ? 1 : 0);
+                    }
+                }
+            }
+            return;
+        } else {
+            net::Log("dlgstart: override asset '%s' failed to load", dlgOverride.c_str());
+        }
+    }
+    if (!Valid(asset)) ue::Get<ue::UObject*>(comp, "DlgDialogue", asset);
     net::Log("dlgstart: npc=%s dist=%.0f dialogue=%s", net::NameOf(best).c_str(), bestD,
              Valid(asset) ? net::NameOf(asset).c_str() : "-");
     g_pendingStart = comp;

@@ -3336,6 +3336,9 @@ void RunCommands() {
         else if (hithook::OnCommand(cmd, rest)) {
             // handled by hithook
         }
+        else if (partb::OnCommand(cmd, rest)) {
+            // handled by partb
+        }
         else if (cmd == "lanhost" || cmd == "lanjoin" || cmd == "lanstop" ||
                  cmd == "steamhost" || cmd == "steamjoin" || cmd == "steamstop") {
             if (cmd == "lanstop" || cmd == "steamstop") {

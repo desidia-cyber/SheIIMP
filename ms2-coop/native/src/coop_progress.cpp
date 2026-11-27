@@ -1406,18 +1406,13 @@ void WqScan() {
     }
 
     // main.lua:2863 NPCRelationships -> "r|", NarrativeEvents -> "e|"  (TMap<FString,int32>)
-    //
-    // ue::MapWalkStrInt, not WalkMapProp: the MAP_PROBE run showed that
-    // NPCRelationships is NOT empty (`num=7`, keys Sester Genessa / Gorf / Vlas /
-    // Collector / Thestus / Blacksmith / Tavern NPC) and that this build stores the
-    // allocation bits INLINE (NumBits map+0x28, MaxBits 0x80 map+0x2C).  The old
-    // walker saw no flags and then decoded each slot's key as an FName, i.e. as the
-    // wrong type for these FString-keyed maps, so it published `r|e| = 0` for the
-    // whole session.  That was the QUEST2 `rel` failure, not a missing insert.
+    // [R10-PROGRESSION] Also sync ImmortalBrigSpoils ("i|"), WormfishGold ("w|"), and
+    // BlisterBoiDonations ("b|BlisterBoiDonations", Egon's Gloom tribute counter).
     {
-        static const char* kNames[2] = {"NPCRelationships", "NarrativeEvents"};
-        static const char* kPrefix[2] = {"r|", "e|"};
-        for (int k = 0; k < 2; ++k) {
+        static const char* kNames[4] = {"NPCRelationships", "NarrativeEvents",
+                                        "ImmortalBrigSpoils", "WormfishGold"};
+        static const char* kPrefix[4] = {"r|", "e|", "i|", "w|"};
+        for (int k = 0; k < 4; ++k) {
             int32_t rows = 0;
             ue::MapWalkStrInt(q, kNames[k], [&](const char* name, int32_t v) -> bool {
                 if (!MatchNameDotSpace(name)) return true;
@@ -1425,10 +1420,14 @@ void WqScan() {
                 ++rows;
                 return true;
             });
-            if (rows == 0 && g_gateWqMap.Due(Mono(), 5.0, 24)) {
+            if (k < 2 && rows == 0 && g_gateWqMap.Due(Mono(), 5.0, 24)) {
                 net::Log("wq: %s rows=%d class=%s -- relationships/events empty (or unreadable)",
                          kNames[k], (int)rows, ue::GetClassName(q).c_str());
             }
+        }
+        int32_t egonDon = 0;
+        if (ue::Get<int32_t>(q, "BlisterBoiDonations", egonDon) && egonDon > 0) {
+            now.Set("b|BlisterBoiDonations", (int)egonDon);
         }
     }
 
@@ -1819,11 +1818,28 @@ void WqApply() {
             } else {
                 ++nNoWant;
             }
-        } else if (kind == 'r' || kind == 'e') {
+        } else if (kind == 'b') {
+            // [R10-PROGRESSION] BlisterBoiDonations (Egon's Gloom tribute counter, max-wins)
+            if (e.v > (hasMine ? mine : 0) && qset.tried.Get(e.name, 0) != e.v) {
+                --budget;
+                qset.tried.Set(e.name, e.v);
+                if (ue::Set<int32_t>(q, id.c_str(), (int32_t)e.v)) {
+                    WqAdopt(e.name, e.v, "set", e.live);
+                } else {
+                    ++qset.fail;
+                    net::Log("wq apply %s FAILED: int write failed", e.name.c_str());
+                }
+            } else {
+                ++nNoWant;
+            }
+        } else if (kind == 'r' || kind == 'e' || kind == 'i' || kind == 'w') {
             const bool want = (e.live && e.v != (hasMine ? mine : 0)) ||
                               (!e.live && e.v > (hasMine ? mine : 0));
             if (want && qset.tried.Get(e.name, 0) != e.v) {
-                const char* map = (kind == 'r') ? "NPCRelationships" : "NarrativeEvents";
+                const char* map = (kind == 'r') ? "NPCRelationships"
+                                : (kind == 'e') ? "NarrativeEvents"
+                                : (kind == 'i') ? "ImmortalBrigSpoils"
+                                                : "WormfishGold";
                 // main.lua:3011 `q[map]:Add(id, p.v)`.  For NPCRelationships this is an
                 // OVERWRITE: the blueprint defaults seed the map with every hub NPC
                 // (MAP_PROBE: `num=7 ... key='Gorf'`), which is exactly what made the

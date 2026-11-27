@@ -1013,6 +1013,39 @@ void WsApplyOne(const std::string& key, const WsRow& e, int how) {
         } else {
             ok = WriteBoolField(o, field);
             if (!ok) err = "property write failed";
+            // [R10-PROGRESSION] Live Ovum collection sync: when partner collects an Ovum,
+            // grant ID_Ovum_C locally (so Guest never falls behind on the 168-Ova Unfound Path
+            // / 5-Ova Mether's Breath gate) and play the visual collection cleanup.
+            if (ok && how == 0 && std::strcmp(kKinds[kind].cls, "BPSO_Ovum_C") == 0) {
+                if (std::strcmp(field, "OvumCollected") == 0) {
+                    int32_t ovumAdd = 1;
+                    if (owner) {
+                        int32_t v = 0;
+                        if (ue::Get<int32_t>(owner, "Ovums to Add", v) && v >= 1 && v <= 10) ovumAdd = v;
+                        std::string vErr;
+                        CallNoArg(owner, "CollectOvaVisual", &vErr);
+                    }
+                    LootQueueItem qi;
+                    qi.path = "/Game/Sparta/Items/Pickups/Core/ID_Ovum.ID_Ovum_C";
+                    qi.n = ovumAdd;
+                    qi.tries = 0;
+                    qi.chest = "Ovum:" + e.owner;
+                    W().chestQueue.push_back(qi);
+                    net::Log("ws ovum live sync: queued +%d ID_Ovum_C for %s", (int)ovumAdd, e.owner.c_str());
+                } else if (std::strcmp(field, "Cleansed") == 0 && owner) {
+                    CallBoolArg(owner, "ClenseOva", "IsBeginPlayLogic", true);
+                }
+            }
+            // [R10-PROGRESSION] Live FinalBossManager / CorruptionCore refresh
+            if (ok && how == 0 &&
+                (std::strcmp(kKinds[kind].cls, "BPSO_FC_FinalBossManager_C") == 0 ||
+                 std::strcmp(kKinds[kind].cls, "BPSO_FC_CorruptionCore_C") == 0)) {
+                for (ue::UObject* fbm : ue::FindAllOf("BP_LevelScript_FinalBossManager_C")) {
+                    if (!net::Valid(fbm)) continue;
+                    std::string fErr;
+                    CallNoArg(fbm, "SaveStateHandler", &fErr);
+                }
+            }
         }
     }
 
@@ -1896,7 +1929,7 @@ void ChestGrant() {
     std::vector<LootQueueItem> keep;
     for (std::size_t i = 0; i < W().chestQueue.size(); ++i) {
         LootQueueItem q = W().chestQueue[i];
-        ue::UObject* def = net::Find(q.path, false);
+        ue::UObject* def = net::Find(q.path, q.tries >= 1);
         if (def && net::Valid(def)) {
             const int before = static_cast<int>(ItemCount(im, def));
             std::string err;

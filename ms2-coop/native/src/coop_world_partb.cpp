@@ -155,8 +155,15 @@ void SampleBossArena() {
 
         activeBoss = net::Tail(owner);
         bossPos = net::Loc(owner);
-        // Check HeadTree underground state (hidden / collision disabled while alive)
-        if (ue::GetBool(owner, "bHidden")) quirk |= 1;
+        // Check HeadTree underground state via AActor::IsHidden() (immune to bitfield masks)
+        bool hidden = false;
+        if (UFunction* fnHid = ue::FindFunction(owner, "IsHidden")) {
+            ue::Params p(fnHid);
+            if (ue::Call(owner, fnHid, p.data())) hidden = p.Get<bool>("ReturnValue");
+        } else {
+            hidden = ue::GetBool(owner, "bHidden");
+        }
+        if (hidden) quirk |= 1;
         break;
     }
 
@@ -199,18 +206,30 @@ void ApplyPeerBossArena(int seq, const std::string& bossTail, double bx, double 
     // Sync HeadTree underground visibility quirk (hide when underground, unhide when surfacing)
     static int g_lastAppliedQuirk = 0;
     if ((quirk & 1) != (g_lastAppliedQuirk & 1)) {
+        UObject* matchOwner = nullptr;
+        UObject* clsFallback = nullptr;
+        // Extract class prefix from bossTail (e.g. "BP_DwarfBoss_C" from "BP_DwarfBoss_C_2147...")
+        std::string clsPrefix = bossTail;
+        size_t cPos = clsPrefix.find("_C_");
+        if (cPos != std::string::npos) clsPrefix.resize(cPos + 2);
         for (UObject* ai : ue::FindAllOf("BPC_BossAI_C")) {
             if (!Live(ai)) continue;
             UObject* owner = ue::GetOuter(ai);
-            if (Live(owner) && net::Tail(owner) == bossTail) {
-                if (UFunction* fn = ue::FindFunction(owner, "SetActorHiddenInGame")) {
-                    ue::Params p(fn);
-                    p.Set<bool>("bNewHidden", (quirk & 1) != 0);
-                    ue::Call(owner, fn, p.data());
-                    g_lastAppliedQuirk = quirk;
-                    ++g_bossQuirksSynced;
-                }
-                break;
+            if (!Live(owner)) continue;
+            if (net::Tail(owner) == bossTail) { matchOwner = owner; break; }
+            if (!clsFallback && !clsPrefix.empty() && ue::GetClassName(owner) == clsPrefix) {
+                clsFallback = owner;
+            }
+        }
+        UObject* target = matchOwner ? matchOwner : clsFallback;
+        if (Live(target)) {
+            if (UFunction* fn = ue::FindFunction(target, "SetActorHiddenInGame")) {
+                ue::Params p(fn);
+                p.Set<bool>("bNewHidden", (quirk & 1) != 0);
+                ue::Call(target, fn, p.data());
+                g_lastAppliedQuirk = quirk;
+                ++g_bossQuirksSynced;
+                net::Log("partb: synced boss underground quirk=%d on %s", quirk & 1, net::Tail(target).c_str());
             }
         }
     }
@@ -346,6 +365,22 @@ void SamplePuzzlesAndSpawners() {
         }
     }
 
+    // Vlas's cage at Lone Spire (BP_Vlas_Cage_01_C.IsOpen)
+    for (UObject* vc : ue::FindAllOf("BP_Vlas_Cage_01_C")) {
+        if (!Live(vc) || Dist(myLoc, net::Loc(vc)) > 4500.0) continue;
+        const std::string tail = net::Tail(vc);
+        if (tail.empty()) continue;
+        int val = ue::GetBool(vc, "IsOpen") ? 1 : 0;
+        auto it = g_pzlSeen.find(tail);
+        if (it == g_pzlSeen.end()) {
+            g_pzlSeen[tail] = val;
+        } else if (val == 1 && it->second == 0) {
+            it->second = 1;
+            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 5, 1, now});
+            ++g_pzlTx;
+        }
+    }
+
     // S74: Night Mode (Host authoritative via BP_DayNight_Interaction_Thestus_C.bInNightMode)
     if (state().local.role == "host") {
         for (UObject* th : ue::FindAllOf("BP_DayNight_Interaction_Thestus_C")) {
@@ -418,6 +453,20 @@ void ApplyPeerPuzzle(int seq, const std::string& tail, int kind, int val) {
                 }
                 return;
             }
+        }
+    } else if (kind == 5 && val == 1) {
+        // Vlas's cage at Lone Spire (BP_Vlas_Cage_01_C.IsOpen)
+        for (UObject* vc : ue::FindAllOf("BP_Vlas_Cage_01_C")) {
+            if (!Live(vc) || net::Tail(vc) != tail) continue;
+            if (ue::GetBool(vc, "IsOpen")) return;
+            ue::SetBool(vc, "IsOpen", true);
+            if (UFunction* fn = ue::FindFunction(vc, "GrishaCageDoorUnlocked__DelegateSignature")) {
+                ue::Params p(fn);
+                ue::Call(vc, fn, p.data());
+            }
+            ++g_pzlRx;
+            net::Log("partb: synced BP_Vlas_Cage_01_C.IsOpen=true on %s", tail.c_str());
+            return;
         }
     } else if (kind == 3 && val == 1) {
         for (UObject* sp : ue::FindAllOf("BP_Spawner_C")) {
@@ -649,6 +698,253 @@ std::string Status() {
                     g_sealName.empty() ? "-" : g_sealName.c_str(),
                     g_ngpSeq, g_lastPeerNgpSeq, g_ngpVetoed,
                     g_nmState, g_nmSynced);
+}
+
+bool OnCommand(const std::string& cmd, const std::string& rest) {
+    if (cmd != "partbtest") return false;
+    std::string sub = rest;
+    while (!sub.empty() && (unsigned char)sub.front() <= ' ') sub.erase(sub.begin());
+    while (!sub.empty() && (unsigned char)sub.back() <= ' ') sub.pop_back();
+
+    auto ovumInvCount = []() -> int {
+        UObject* pc = net::PC();
+        if (!Live(pc)) return -1;
+        UObject* im = nullptr;
+        for (UObject* c : ue::FindAllOf("SpartaItemManagerComponent")) {
+            if (Live(c) && ue::GetOuter(c) == pc) { im = c; break; }
+        }
+        if (!Live(im)) {
+            auto all = ue::FindAllOf("SpartaItemManagerComponent");
+            for (UObject* c : all) { if (Live(c)) { im = c; break; } }
+        }
+        if (!Live(im)) return -1;
+        UObject* def = net::Find("/Game/Sparta/Items/Pickups/Core/ID_Ovum.ID_Ovum_C", true);
+        if (!Live(def)) return -2;
+        if (UFunction* fn = ue::FindFunction(im, "GetTotalItemCountByDefinition")) {
+            ue::Params p(fn);
+            p.Set<UObject*>("ItemDef", def);
+            if (ue::Call(im, fn, p.data())) return (int)p.Get<int32_t>("ReturnValue");
+        }
+        return -3;
+    };
+
+    if (sub == "dump" || sub.empty()) {
+        auto ths = ue::FindAllOf("BP_DayNight_Interaction_Thestus_C");
+        auto ovs = ue::FindAllOf("BPSO_Ovum_C");
+        auto fbms = ue::FindAllOf("BPSO_FC_FinalBossManager_C");
+        auto vcs = ue::FindAllOf("BP_Vlas_Cage_01_C");
+        auto sels = ue::FindAllOf("BP_LevelInstanceSelector_C");
+        int loadedSels = 0;
+        for (UObject* s : sels) if (Live(s) && ue::GetBool(s, "bIsLevelLoaded")) ++loadedSels;
+        int nmVal = -1;
+        for (UObject* t : ths) if (Live(t)) { nmVal = ue::GetBool(t, "bInNightMode") ? 1 : 0; break; }
+        int32_t fbmCores = -1;
+        for (UObject* f : fbms) {
+            if (Live(f) && net::FullName(f).find("PersistentLevel.") != std::string::npos) {
+                ue::Get<int32_t>(f, "ClensedCores", fbmCores);
+                break;
+            }
+        }
+        int32_t egonDon = -1;
+        int32_t gorfRel = -1, vlasRel = -1, thestusRel = -1, genessaRel = -1;
+        int32_t brigVal = -1, wormVal = -1;
+        UObject* ql = ue::FindFirstOf("BPC_QuestLogComponent_C");
+        if (Live(ql)) {
+            ue::Get<int32_t>(ql, "BlisterBoiDonations", egonDon);
+            ue::MapWalkStrInt(ql, "NPCRelationships", [&](const char* k, int32_t v) {
+                if (std::strcmp(k, "Gorf") == 0) gorfRel = v;
+                else if (std::strcmp(k, "Vlas") == 0) vlasRel = v;
+                else if (std::strcmp(k, "Thestus") == 0) thestusRel = v;
+                else if (std::strcmp(k, "Sester Genessa") == 0) genessaRel = v;
+                return true;
+            });
+            ue::MapWalkStrInt(ql, "ImmortalBrigSpoils", [&](const char* k, int32_t v) {
+                if (std::strcmp(k, "RIG_BRIG") == 0) brigVal = v;
+                return true;
+            });
+            ue::MapWalkStrInt(ql, "WormfishGold", [&](const char* k, int32_t v) {
+                if (std::strcmp(k, "RIG_WORM") == 0) wormVal = v;
+                return true;
+            });
+        }
+        net::Log("partbtest dump: thestus=%d(nm=%d) ovumSO=%d ovumInv=%d fbm=%d(cores=%d) vlasCage=%d sels=%d(loaded=%d) egonDon=%d rel(gorf=%d,vlas=%d,thestus=%d,gen=%d) brig=%d worm=%d",
+                 (int)ths.size(), nmVal, (int)ovs.size(), ovumInvCount(), (int)fbms.size(), (int)fbmCores,
+                 (int)vcs.size(), (int)sels.size(), loadedSels, (int)egonDon,
+                 (int)gorfRel, (int)vlasRel, (int)thestusRel, (int)genessaRel, (int)brigVal, (int)wormVal);
+        return true;
+    }
+
+    if (sub == "thestus_load") {
+        const char* thPath = "/Game/Sparta/Core/Interaction/BP_DayNight_Interaction_Thestus.BP_DayNight_Interaction_Thestus_C";
+        UObject* cls = net::Find(thPath, true);
+        net::Log("partbtest thestus_load: loaded=%d", Live(cls) ? 1 : 0);
+        return true;
+    }
+
+    if (sub == "thestus_spawn") {
+        const char* thPath = "/Game/Sparta/Core/Interaction/BP_DayNight_Interaction_Thestus.BP_DayNight_Interaction_Thestus_C";
+        net::Find(thPath, true);
+        UObject* pc = net::PC();
+        if (Live(pc)) {
+            if (UFunction* fn = ue::FindFunction(pc, "ConsoleCommand")) {
+                static wchar_t wcmd[] = L"summon BP_DayNight_Interaction_Thestus_C";
+                ue::FString fs;
+                fs.Data = wcmd;
+                fs.Num = (int32_t)(sizeof(wcmd) / sizeof(wchar_t));
+                fs.Max = fs.Num;
+                ue::Params p(fn);
+                p.Set<ue::FString>("Command", fs);
+                p.Set<bool>("bWriteToLog", false);
+                ue::Call(pc, fn, p.data());
+            }
+        }
+        auto ths = ue::FindAllOf("BP_DayNight_Interaction_Thestus_C");
+        net::Log("partbtest thestus_spawn: count=%d", (int)ths.size());
+        return true;
+    }
+
+    if (sub == "thestus") {
+        auto ths = ue::FindAllOf("BP_DayNight_Interaction_Thestus_C");
+        if (ths.empty()) {
+            net::Log("partbtest thestus: 0 BP_DayNight_Interaction_Thestus_C live");
+            return true;
+        }
+        UObject* th = ths[0];
+        if (!Live(th)) { net::Log("partbtest thestus: invalid"); return true; }
+        int before = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+        if (UFunction* fnEn = ue::FindFunction(th, "EnableThestus")) {
+            ue::Params p(fnEn);
+            ue::Call(th, fnEn, p.data());
+        }
+        bool ok = false;
+        if (UFunction* fn = ue::FindFunction(th, "togglenightmode")) {
+            ue::Params p(fn);
+            ok = ue::Call(th, fn, p.data());
+        }
+        int after = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+        net::Log("partbtest thestus: togglenightmode ok=%d bInNightMode %d->%d", ok ? 1 : 0, before, after);
+        return true;
+    }
+
+    if (sub == "headtree_hide" || sub == "headtree_show") {
+        const bool hide = (sub == "headtree_hide");
+        for (UObject* ai : ue::FindAllOf("BPC_BossAI_C")) {
+            if (!Live(ai)) continue;
+            UObject* owner = ue::GetOuter(ai);
+            if (!Live(owner)) continue;
+            ue::SetBool(ai, "bIsAggroed", true);
+            if (UFunction* fn = ue::FindFunction(owner, "SetActorHiddenInGame")) {
+                ue::Params p(fn);
+                p.Set<bool>("bNewHidden", hide);
+                ue::Call(owner, fn, p.data());
+            }
+            net::Log("partbtest %s: boss=%s bHidden=%d", sub.c_str(), net::Tail(owner).c_str(),
+                     ue::GetBool(owner, "bHidden") ? 1 : 0);
+            return true;
+        }
+        net::Log("partbtest %s: no live BPC_BossAI_C", sub.c_str());
+        return true;
+    }
+
+    if (sub == "tomb") {
+        UObject* pawn = net::Pawn();
+        const Vec3 me = Live(pawn) ? net::Loc(pawn) : Vec3{};
+        UObject* best = nullptr;
+        double bestD = 1e30;
+        for (UObject* s : ue::FindAllOf("BP_LevelInstanceSelector_C")) {
+            if (!Live(s)) continue;
+            double d = Dist(me, net::Loc(s));
+            if (d < bestD) { bestD = d; best = s; }
+        }
+        if (!Live(best)) { net::Log("partbtest tomb: no BP_LevelInstanceSelector_C"); return true; }
+        const char* evPath = "/Game/Sparta/Core/World/Levels/Events/Event_TombLayout_01_Event_01_VampireCrypt.Event_TombLayout_01_Event_01_VampireCrypt";
+        UObject* ev = net::Find(evPath, true);
+        if (!Live(ev)) { net::Log("partbtest tomb: failed to load %s", evPath); return true; }
+        bool ok = false;
+        if (UFunction* fn = ue::FindFunction(best, "LoadLevel")) {
+            ue::Params p(fn);
+            p.Set<UObject*>("SelectedEvent", ev);
+            ok = ue::Call(best, fn, p.data());
+        }
+        UObject* lastEv = nullptr;
+        ue::Get<UObject*>(best, "LastEventLoaded", lastEv);
+        if (!Live(lastEv)) ue::Set<UObject*>(best, "LastEventLoaded", ev);
+        if (!ue::GetBool(best, "bIsLevelLoaded")) ue::SetBool(best, "bIsLevelLoaded", true);
+        net::Log("partbtest tomb: LoadLevel(%s) on %s (d=%.0f) ok=%d loaded=%d lastEv=%d",
+                 evPath, net::Tail(best).c_str(), bestD, ok ? 1 : 0,
+                 ue::GetBool(best, "bIsLevelLoaded") ? 1 : 0, Live(lastEv) ? 1 : 0);
+        return true;
+    }
+
+    if (sub == "ovum_reset") {
+        int n = 0;
+        for (UObject* o : ue::FindAllOf("BPSO_Ovum_C")) {
+            if (!Live(o)) continue;
+            std::string fn = net::FullName(o);
+            if (fn.find("PersistentLevel.") == std::string::npos) continue;
+            ue::SetBool(o, "OvumCollected", false);
+            net::Log("partbtest ovum_reset: set OvumCollected=false on %s", fn.c_str());
+            ++n;
+            break;
+        }
+        if (n == 0) net::Log("partbtest ovum_reset: 0 PersistentLevel BPSO_Ovum_C");
+        return true;
+    }
+
+    if (sub == "ovum") {
+        int inv = ovumInvCount();
+        for (UObject* o : ue::FindAllOf("BPSO_Ovum_C")) {
+            if (!Live(o)) continue;
+            std::string fn = net::FullName(o);
+            if (fn.find("PersistentLevel.") == std::string::npos) continue;
+            bool col = ue::GetBool(o, "OvumCollected");
+            if (col) continue;
+            ue::SetBool(o, "OvumCollected", true);
+            net::Log("partbtest ovum: flipped OvumCollected=true on %s (localInv=%d)", fn.c_str(), inv);
+            return true;
+        }
+        net::Log("partbtest ovum: no uncollected PersistentLevel BPSO_Ovum_C found (localInv=%d)", inv);
+        return true;
+    }
+
+    if (sub == "finalboss") {
+        for (UObject* f : ue::FindAllOf("BPSO_FC_FinalBossManager_C")) {
+            if (!Live(f)) continue;
+            std::string fn = net::FullName(f);
+            if (fn.find("PersistentLevel.") == std::string::npos) continue;
+            int32_t cur = 0;
+            ue::Get<int32_t>(f, "ClensedCores", cur);
+            ue::Set<int32_t>(f, "ClensedCores", cur + 1);
+            net::Log("partbtest finalboss: ClensedCores %d->%d on %s", (int)cur, (int)(cur + 1),
+                     fn.c_str());
+            return true;
+        }
+        net::Log("partbtest finalboss: 0 PersistentLevel BPSO_FC_FinalBossManager_C live");
+        return true;
+    }
+
+    if (sub == "quest13") {
+        UObject* ql = ue::FindFirstOf("BPC_QuestLogComponent_C");
+        if (!Live(ql)) { net::Log("partbtest quest13: no BPC_QuestLogComponent_C"); return true; }
+        // 1. Egon BlisterBoiDonations
+        int32_t curDon = 0;
+        ue::Get<int32_t>(ql, "BlisterBoiDonations", curDon);
+        ue::Set<int32_t>(ql, "BlisterBoiDonations", curDon + 250);
+        // 2. NPC Relationships across core quest NPCs
+        ue::MapInsertStrInt(ql, "NPCRelationships", "Gorf", 3);
+        ue::MapInsertStrInt(ql, "NPCRelationships", "Vlas", 2);
+        ue::MapInsertStrInt(ql, "NPCRelationships", "Thestus", 2);
+        ue::MapInsertStrInt(ql, "NPCRelationships", "Sester Genessa", 4);
+        // 3. Extra quest maps (ImmortalBrigSpoils & WormfishGold)
+        ue::MapInsertStrInt(ql, "ImmortalBrigSpoils", "RIG_BRIG", 7);
+        ue::MapInsertStrInt(ql, "WormfishGold", "RIG_WORM", 42);
+        net::Log("partbtest quest13: set BlisterBoiDonations=%d, rel(Gorf=3,Vlas=2,Thestus=2,Genessa=4), brig=7, worm=42",
+                 (int)(curDon + 250));
+        return true;
+    }
+
+    net::Log("partbtest: unknown subcmd '%s'", sub.c_str());
+    return true;
 }
 
 }  // namespace partb
