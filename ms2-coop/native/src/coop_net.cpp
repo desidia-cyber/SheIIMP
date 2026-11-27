@@ -853,6 +853,7 @@ void Toggles::Load() {
         {&hitHook,       "HITHOOK_OFF.txt",    false},
         {&puppetPlus,    "PUPPET_PLUS_OFF.txt",false},
         {&menuEnabled,   "MENU_OFF.txt",       false},
+        {&autoContinue,  "AUTO_CONTINUE.txt",  true},
         {&beaconScale,   "BEACON_SCALE_OFF.txt",false},
         {&fxGrabs,       "FX_GRABS_OFF.txt",   false},
         {&partB,         "PARTB_OFF.txt",      false},

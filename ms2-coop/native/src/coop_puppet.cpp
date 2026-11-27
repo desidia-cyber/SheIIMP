@@ -789,7 +789,20 @@ void Boot() {
                 break;
             }
         }
-        if (Valid(w)) {
+        if (Valid(w) && !state().toggles.autoContinue) {
+            // Normal play: the player picks Continue / Load themselves.  Stay in
+            // Phase::Menu (the title CO-OP button needs it) until their character
+            // is the pawn, then hand over to the World wait.
+            static bool s_noted = false;
+            if (!s_noted) {
+                s_noted = true;
+                net::Log("menu ready after %ds -- waiting for the player to start the game "
+                         "(AUTO_CONTINUE.txt in the coop dir makes the mod press Continue)", pts);
+            }
+            ue::UObject* pawn = net::Pawn();
+            if (Valid(pawn) && net::FullName(pawn).find(kPlayerCharClass) != std::string::npos)
+                net::EnterPhase(Phase::World);
+        } else if (Valid(w)) {
             net::Log("menu ready after %ds", pts);
             const bool ok = CallNoArg(w, "ContinueGame");
             net::Log("ContinueGame ok=%s", ok ? "true" : "false");
