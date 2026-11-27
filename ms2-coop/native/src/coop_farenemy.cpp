@@ -1059,7 +1059,11 @@ std::uintptr_t UFunctionEntry(UObject* fnObject) {
 // untouched: RouteEndPlay is already too late (the actor has been flagged and the caller
 // finishes the removal either way -- measured: with RouteEndPlay skipped the actor's
 // EndPlay never ran, and the spawner's SpawnedEnemy still read back dead within 0.6 s).
-constexpr std::uint64_t kActorDestroyRva = 0x394cbf0;
+// Nov 2026: 0x3992B00 (Day1: 0x394CBF0).  Resolved via AOB scan first (matches
+// uniquely on both builds), falling back to kActorDestroyRva, still prologue-guarded.
+constexpr std::uint64_t kActorDestroyRva = 0x3992B00;
+constexpr const char* kSigActorDestroy =
+    "48 89 5C 24 08 48 89 6C 24 10 48 89 74 24 18 57 48 83 EC 20 F6 41 5D 02";
 
 void InstallVeto(std::uint64_t explicitRva, bool reportOnly) {
     const std::uintptr_t base = ue::GetResolved().imageBase;
@@ -1075,9 +1079,15 @@ void InstallVeto(std::uint64_t explicitRva, bool reportOnly) {
                 reinterpret_cast<UObject*>(ue::FindFunction(cdo, "K2_DestroyActor")));
         }
     }
-    // 2. the target
-    const std::uint64_t rva = explicitRva ? explicitRva : kActorDestroyRva;
-    const std::uintptr_t target = base + static_cast<std::uintptr_t>(rva);
+    // 2. the target (AOB-first when no explicit override was passed)
+    std::uintptr_t target = 0;
+    if (explicitRva) {
+        target = base + static_cast<std::uintptr_t>(explicitRva);
+    } else {
+        const std::uintptr_t hit = ue::ScanTextAob(kSigActorDestroy);
+        target = hit ? hit : (base + static_cast<std::uintptr_t>(kActorDestroyRva));
+    }
+    const std::uint64_t rva = (target >= base) ? static_cast<std::uint64_t>(target - base) : 0ull;
 
     // 3. the guard: the EXACT first 24 bytes of AActor::Destroy on this build, read back
     // from the image before anything is hooked.  A different game build (or a wrong RVA)

@@ -270,6 +270,10 @@ bool MapAddStrInt(UObject* o, const char* prop, const char* key, int32 value);
 // structures need it as much as this header does.
 // NOTE: declared near the top of this header (above ue::Get/ue::Set); see there.
 
+// AOB scan over the game exe's .text section (e.g. "48 89 5C ?? ??").
+// Returns the absolute address of the first match, or 0 if not found.
+uintptr_t ScanTextAob(const char* aob);
+
 // ---------------------------------------------------------------------------
 // Functions and ProcessEvent
 // ---------------------------------------------------------------------------

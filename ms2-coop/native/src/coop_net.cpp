@@ -850,6 +850,12 @@ void Toggles::Load() {
         // [R8-MONEY] the death-drop lane: no sampling, no scan, no stale-drop sweep.
         {&moneyEnabled,  "MONEY_OFF.txt",      false},
         {&farEnemy,      "FARENEMY_OFF.txt",   false},
+        {&hitHook,       "HITHOOK_OFF.txt",    false},
+        {&puppetPlus,    "PUPPET_PLUS_OFF.txt",false},
+        {&menuEnabled,   "MENU_OFF.txt",       false},
+        {&beaconScale,   "BEACON_SCALE_OFF.txt",false},
+        {&fxGrabs,       "FX_GRABS_OFF.txt",   false},
+        {&partB,         "PARTB_OFF.txt",      false},
     };
     for (const Row& r : rows) {
         const std::wstring w = Widen(dir + r.file);
@@ -991,6 +997,12 @@ void ResetAll() {
     // and the verdict latch survive on purpose (the verdict is about the session).
     net::Step("reset far", Guard::None, []() { farenemy::Reset(); });
     // [R8-FARENEMY] end
+    net::Step("reset hithook", Guard::None, []() { hithook::Reset(); });
+    net::Step("reset pplus", Guard::None, []() { puppet_plus::Reset(); });
+    net::Step("reset menu", Guard::None, []() { menu::Reset(); });
+    net::Step("reset bscale", Guard::None, []() { beacon_scale::Reset(); });
+    net::Step("reset fx", Guard::None, []() { fx_grabs::Reset(); });
+    net::Step("reset partb", Guard::None, []() { partb::Reset(); });
 }
 
 // ===========================================================================
@@ -1135,8 +1147,25 @@ void IoWorker() {
                 if (g_ioStop) return;
                 continue;
             }
-            job = std::move(g_ioQueue.front());
-            g_ioQueue.pop_front();
+            // Prioritize whole-file writes (out_*.txt, sync.txt) ahead of log appends so
+            // bursts of probe.log lines (with FlushFileBuffers) can never stall 15 Hz sync.
+            auto chosen = g_ioQueue.begin();
+            for (auto it = g_ioQueue.begin(); it != g_ioQueue.end(); ++it) {
+                if (!it->append) { chosen = it; break; }
+            }
+            job = std::move(*chosen);
+            g_ioQueue.erase(chosen);
+            // Coalesce any additional queued appends for the same path into one flush.
+            if (job.append) {
+                for (auto it = g_ioQueue.begin(); it != g_ioQueue.end(); ) {
+                    if (it->append && it->path == job.path) {
+                        job.text += it->text;
+                        it = g_ioQueue.erase(it);
+                    } else {
+                        ++it;
+                    }
+                }
+            }
         }
         if (job.append) {
             AppendToFile(job.path, job.text);
@@ -1175,6 +1204,15 @@ void IoQueue(std::wstring path, std::string text, bool append, bool sync = false
             return;
         }
         if (append) {
+            // Coalesce with an existing pending append to the same file (e.g. probe.log)
+            // so bursts of hundreds of log lines produce one batched disk flush.
+            for (auto it = g_ioQueue.rbegin(); it != g_ioQueue.rend(); ++it) {
+                if (it->append && it->path == path) {
+                    if (it->text.size() < (1u << 20)) it->text += text;
+                    g_ioCv.notify_one();
+                    return;
+                }
+            }
             if (g_ioQueue.size() >= kIOMaxQueuedAppends) return;   // drop, never grow
         } else {
             for (auto it = g_ioQueue.rbegin(); it != g_ioQueue.rend(); ++it) {
@@ -1837,7 +1875,8 @@ void Publish() {
         const std::string text =
             Fmt("{\"t\":\"p\",\"id\":\"%s\",\"sq\":%lld,\"rdy\":0}\n", L.me.c_str(),
                 (long long)L.seq);
-        WriteFile("out_" + L.me + ".txt", text);
+        if (steam::IsActive()) steam::SendPacket(text);
+    WriteFile("out_" + L.me + ".txt", text);
         return;
     }
 
@@ -1941,6 +1980,10 @@ void Publish() {
     // peer is squeezing through a gap.
     wall::Serialize(&line);
     // [R8-WALL] end
+    hithook::Serialize(&line);
+    beacon_scale::Serialize(&line);
+    fx_grabs::Serialize(&line);
+    partb::Serialize(&line);
 
     line += "}";
     line += "\n";
@@ -1949,6 +1992,9 @@ void Publish() {
     // [R7-WIRE] one publish -> one or more datagrams.  "hot" is the base block
     // (members only, no braces), "rest" is every member after it.  WIRE_SPLIT_OFF
     // keeps the pre-round-7 single line, which the relay sends as it always did.
+    if (steam::IsActive()) {
+        steam::SendPacket(line);
+    }
     const long long seq = (long long)L.seq;
     if (!toggles().wireSplit) {
         WriteFile("out_" + L.me + ".txt", line);
@@ -2156,7 +2202,11 @@ bool ReadPeerPacket(const std::string& name, std::string* out, int* parts,
     if (maxBytes) *maxBytes = 0;
     if (expected) *expected = 0;
     std::string text;
-    if (!ReadText(name, &text)) return false;
+    if (steam::IsActive()) {
+        if (!steam::PopPeerPacket(&text)) return false;
+    } else {
+        if (!ReadText(name, &text)) return false;
+    }
 
     std::vector<std::string> lines;
     std::size_t start = 0;
@@ -2436,6 +2486,10 @@ void ApplyPeer() {
         // other world key; the hold it arms is dropped by the guard itself.
         Step("wallReadPeer", Guard::None, [&line]() { wall::OnPeerLine(line); });
         // [R8-WALL] end
+        Step("hitReadPeer", Guard::None, [&line]() { hithook::OnPeerLine(line); });
+        Step("bscaleReadPeer", Guard::None, [&line]() { beacon_scale::OnPeerLine(line); });
+        Step("fxReadPeer", Guard::None, [&line]() { fx_grabs::OnPeerLine(line); });
+        Step("partbReadPeer", Guard::None, [&line]() { partb::OnPeerLine(line); });
     }
     // [R5-BODY] end
 }
@@ -2569,6 +2623,12 @@ void WriteSyncStatus() {
     // [R8-MONEY] begin -- "money=" (the death drop this world holds, and the wallet)
     out += money::Status();
     // [R8-MONEY] end
+    out += hithook::Status();
+    out += puppet_plus::Status();
+    out += steam::Status();
+    out += beacon_scale::Status();
+    out += fx_grabs::Status();
+    out += partb::Status();
 
     WriteFile("sync.txt", out);
 }
@@ -3262,6 +3322,45 @@ void RunCommands() {
         else if (money::OnCommand(cmd, rest)) {
             // handled by the money module (it logged what it did)
         }
+        else if (hithook::OnCommand(cmd, rest)) {
+            // handled by hithook
+        }
+        else if (cmd == "lanhost" || cmd == "lanjoin" || cmd == "lanstop" ||
+                 cmd == "steamhost" || cmd == "steamjoin" || cmd == "steamstop") {
+            if (cmd == "lanstop" || cmd == "steamstop") {
+                steam::StopSession();
+                state().peer.present = false;
+                state().peer.live = false;
+                Log("steam: stopped via lab cmd");
+            } else {
+                steam::Config cfg = steam::GetConfig();
+                if (cmd == "lanhost" || cmd == "lanjoin") {
+                    cfg.network = 1; // LAN UDP
+                    if (!rest.empty()) {
+                        char hostBuf[128] = "";
+                        unsigned portVal = 0;
+                        if (cmd == "lanhost") {
+                            portVal = (unsigned)std::atoi(rest.c_str());
+                            if (portVal >= 1024 && portVal <= 65535) cfg.port = (uint16_t)portVal;
+                        } else if (std::sscanf(rest.c_str(), "%127s %u", hostBuf, &portVal) >= 1) {
+                            cfg.server = hostBuf;
+                            if (portVal >= 1024 && portVal <= 65535) cfg.port = (uint16_t)portVal;
+                        }
+                    }
+                    steam::SaveConfig(cfg);
+                    std::string err;
+                    bool ok = steam::StartSession(cmd == "lanhost", &err);
+                    Log("steam: %s ok=%d err=%s", cmd.c_str(), ok ? 1 : 0, err.c_str());
+                } else {
+                    cfg.network = 0; // Steam P2P
+                    if (!rest.empty()) cfg.password = rest;
+                    steam::SaveConfig(cfg);
+                    std::string err;
+                    bool ok = steam::StartSession(cmd == "steamhost", &err);
+                    Log("steam: %s ok=%d err=%s", cmd.c_str(), ok ? 1 : 0, err.c_str());
+                }
+            }
+        }
         // [R8-MONEY] end
 
         Log("cmd handled: %s", line.c_str());
@@ -3292,6 +3391,7 @@ void Loop30(double dt) {
     // [R8-WALL] after the puppet on purpose: it reads what the drive just played
     // (the traversal pose hold) for the WALLANIM verdict.
     RunGuardStep("wall30", true, true, []() { wall::Tick30(0.0); });
+    RunGuardStep("menu30", false, false, []() { menu::Tick30(); });
     // [R8-WALL] end
 }
 
@@ -3325,6 +3425,7 @@ void Loop15(double /*dt*/) {
     // (a death, a teleport) must not stop the fix, or the copy dies while our own
     // player is busy -- which is exactly when the game's own timer would expire.
     RunGuardStep("farEnemy", true, false, []() { farenemy::Tick15(); });
+    RunGuardStep("fx15", true, true, []() { fx_grabs::Tick15(); });
     if (!InSync()) return;
 
     // refreshChars + capture transform/montage + judge + peerWatchdog + anim.
@@ -3398,6 +3499,12 @@ void Loop2(double /*dt*/) {
     // [R8-WALL] begin -- the traversal detector: is OUR pawn inside the game's
     // squeeze montage right now, and does the peer have to hold that pose?
     RunGuardStep("wall", true, true, []() { wall::Tick2(); });
+    RunGuardStep("hithook", false, false, []() { hithook::Tick2(); });
+    RunGuardStep("pplus", true, true, []() { puppet_plus::Tick2(); });
+    RunGuardStep("menu2", false, false, []() { menu::Tick2(); });
+    RunGuardStep("bscale", true, true, []() { beacon_scale::Tick2(); });
+    RunGuardStep("fx2", false, false, []() { fx_grabs::Tick2(); });
+    RunGuardStep("partb", true, true, []() { partb::Tick2(); });
     // [R8-WALL] end
 
     // writeSyncStatus: not in either skip table (main.lua:4125).

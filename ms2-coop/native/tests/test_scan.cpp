@@ -121,24 +121,26 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    struct Expect { const char* name; uintptr_t rva; };
+    struct Expect { const char* name; uintptr_t rvaOld; uintptr_t rvaNew; };
     const Expect expect[] = {
-        {"ProcessEvent", 0x01619320},
-        {"AppendString", 0x013F8FA0},
-        {"EngineTick",   0x03DA7B30},
-        {"GObjects",     0x0B03AEF0},
+        {"ProcessEvent", 0x01619320, 0x0161C420},
+        {"AppendString", 0x013F8FA0, 0x013FC030},
+        {"EngineTick",   0x03DA7B30, 0x03DEDE40},
+        {"GObjects",     0x0B03AEF0, 0x0B25A5E0},
     };
 
     int bad = 0;
     for (int i = 0; i < 4; ++i) {
         const ue::detail::ScanCheck& c = checks[i];
-        uintptr_t want = 0;
-        for (const Expect& e : expect) if (!strcmp(e.name, c.name)) want = e.rva;
+        uintptr_t wantOld = 0, wantNew = 0;
+        for (const Expect& e : expect) {
+            if (!strcmp(e.name, c.name)) { wantOld = e.rvaOld; wantNew = e.rvaNew; }
+        }
 
-        const bool ok = (c.matches == 1 && c.rva == want);
-        printf("  %-13s matches=%d  resolved=0x%08llX  expected=0x%08llX  %s\n",
+        const bool ok = (c.matches == 1 && (c.rva == wantOld || c.rva == wantNew));
+        printf("  %-13s matches=%d  resolved=0x%08llX  expected=0x%08llX|0x%08llX  %s\n",
                c.name, c.matches,
-               (unsigned long long)c.rva, (unsigned long long)want,
+               (unsigned long long)c.rva, (unsigned long long)wantOld, (unsigned long long)wantNew,
                ok ? "PASS" : (c.matches > 1 ? "FAIL (ambiguous)" : "FAIL"));
         if (!ok) ++bad;
     }

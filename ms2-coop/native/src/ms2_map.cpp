@@ -91,19 +91,15 @@ constexpr uint32 kOffMapFreeNum   = 0x34;   // int32 NumFreeIndices
 constexpr int32  kInlineBitWords  = 4;      // MaxBits 0x80 == 4 words held inline
 
 // The engine's "add a pair to a map property" routine, from
-// UBlueprintMapLibrary::execMap_Add:
-//   execMap_Add steps the map/key/value parameters off the bytecode and then
-//     mov rcx, [map address]      mov rdx, [FMapProperty*]
-//     mov r8,  [key temp]         mov r9,  [value temp]
-//     call 0x3AEEAD0              (0x3B0491E in the Map_Add thunk, rva 0x3B04700)
-// so the contract is (TMap*, FMapProperty*, const Key*, const Value*) -- the same
-// four registers.  0x3AEEE30 is the matching "find" routine, called the same way by
-// Map_Find and Map_Contains, which is what identifies this pair of helpers.
-constexpr uintptr_t kRvaMapAddHelper = 0x3AEEAD0;
+// UBlueprintMapLibrary::execMap_Add.  Resolved by AOB first (matches uniquely on
+// both Day1 0x3AEEAD0 and Nov 2026 0x3B34BA0), falling back to kRvaMapAddHelper.
+constexpr uintptr_t kRvaMapAddHelper = 0x3B34BA0;
+constexpr const char* kSigMapAddHelper =
+    "48 85 C9 0F 84 4A 03 00 00 48 89 7C 24 20 55 48 8D 6C 24 80 48 81 EC 80";
 constexpr uint8_t   kMapAddPrologue[5] = {0x48, 0x85, 0xC9, 0x0F, 0x84};   // test rcx,rcx; je
 
-// GMalloc, from README.md ("Globals").  Only used by the probe.
-constexpr uintptr_t kRvaGMalloc = 0x0AF4B3C0;
+// GMalloc (Nov 2026: 0x0B16AAC0; Day1: 0x0AF4B3C0).  Only used by the probe.
+constexpr uintptr_t kRvaGMalloc = 0x0B16AAC0;
 
 int32 AlignUp(int32 v, int32 a) {
     if (a <= 1) return v;
@@ -405,11 +401,16 @@ namespace {
 bool EngineInsert(int kindStrKey, void* mapAddr, void* prop, const char* key, int32 value) {
     const uintptr_t base = GetResolved().imageBase;
     if (!base) return false;
-    const uint8_t* fn = reinterpret_cast<const uint8_t*>(base + kRvaMapAddHelper);
+    static uintptr_t s_mapAddAddr = 0;
+    if (!s_mapAddAddr) {
+        const uintptr_t hit = ScanTextAob(kSigMapAddHelper);
+        s_mapAddAddr = hit ? hit : (base + kRvaMapAddHelper);
+    }
+    const uint8_t* fn = reinterpret_cast<const uint8_t*>(s_mapAddAddr);
     uint8_t pro[sizeof(kMapAddPrologue)] = {0};
     if (!ReadMem(fn, pro, sizeof(pro)) || memcmp(pro, kMapAddPrologue, sizeof(pro)) != 0) {
         ms2::Logf("map insert: the helper at rva 0x%llX does not start with the expected "
-                  "bytes -- refusing to call it", (unsigned long long)kRvaMapAddHelper);
+                  "bytes -- refusing to call it", (unsigned long long)(s_mapAddAddr - base));
         return false;
     }
     int32 v = value;
