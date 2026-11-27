@@ -2298,6 +2298,9 @@ void Reset();
 void Serialize(std::string* out);
 void OnPeerLine(const std::string& line);
 std::string Status();
+bool OnCommand(const std::string& cmd, const std::string& rest);
+bool PeerTransformNonHumanoid();
+bool PeerTransformHideBody();
 } // namespace fx_grabs
 
 namespace partb {

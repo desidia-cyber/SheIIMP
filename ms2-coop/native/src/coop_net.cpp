@@ -3339,6 +3339,9 @@ void RunCommands() {
         else if (partb::OnCommand(cmd, rest)) {
             // handled by partb
         }
+        else if (fx_grabs::OnCommand(cmd, rest)) {
+            // handled by fx_grabs
+        }
         else if (cmd == "lanhost" || cmd == "lanjoin" || cmd == "lanstop" ||
                  cmd == "steamhost" || cmd == "steamjoin" || cmd == "steamstop") {
             if (cmd == "lanstop" || cmd == "steamstop") {

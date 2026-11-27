@@ -32,7 +32,7 @@ $RepoRoot    = "G:\Freespace\shell_coop"
 $SessionFile = Join-Path $RepoRoot "local\rig-session.json"
 $AtlasFile   = Join-Path $RepoRoot "local\rig-atlas.json"
 $SaveDir     = Join-Path $env:LOCALAPPDATA "MortalShell2\Saved\SaveGames"
-$SavesSource = "C:\Users\ALVIBO\.t3\userdata\providers\antigravity\ac0a3dfd6dddb20962cecff6ee5fe65e19d3923be20e52c5ab52ff877f7e4c32\antigravity-acp\brain\8a67115d-3544-4299-8254-a5b1d045d5bd\scratch\saves"
+$SavesSource = Join-Path $RepoRoot "local\save-archive"
 $CoopA       = Join-Path $GameA "MortalShell2\Binaries\Win64\coop"
 $CoopB       = Join-Path $GameB "MortalShell2\Binaries\Win64\coop"
 
@@ -762,6 +762,57 @@ function Run-Suite-GapsClose($sess) {
     Write-Host "  Guest B(dump): $((GrabSince $GameB $oFbD 'partbtest dump:') -join ' | ')"
 }
 
+function Run-Suite-RangedXformClone($sess) {
+    Write-Host "`n================ SUITE: RANGED PROJECTILES + ANIMAL/OBJECT XFORM + CLONES ================"
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+
+    # 1. Ranged projectile sync (fresh + repeat shot with rotation & velocity)
+    Write-Host "  [1/4] Ranged projectiles (Crossbow + repeat shot)..."
+    Send-Cmd $CoopA "fxtest proj" 2
+    Send-Cmd $CoopA "fxtest proj" 2
+    Send-Cmd $CoopA "fxtest status" 1
+    Send-Cmd $CoopB "fxtest status" 1
+    (GrabSince $GameA $offA 'fxtest:|fx_grabs:.*proj') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'fxtest:|fx_grabs:.*replayed proj') | ForEach-Object { Write-Host "    B: $_" }
+
+    # 2. Animal & Object Transformations (Sheep non-humanoid + Bush body-hide/StaticMesh + off)
+    Write-Host "  [2/4] Animal/Object transformations (Sheep -> Bush -> Off)..."
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+    Send-Cmd $CoopA "fxtest xform_sheep" 2
+    Send-Cmd $CoopB "fxtest status" 1
+    Send-Cmd $CoopA "fxtest xform_bush" 2
+    Send-Cmd $CoopB "fxtest status" 1
+    Send-Cmd $CoopA "fxtest xform_off" 2
+    Send-Cmd $CoopB "fxtest status" 1
+    (GrabSince $GameA $offA 'fxtest:|fx_grabs:.*xform') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'fxtest:|fx_grabs:.*xform') | ForEach-Object { Write-Host "    B: $_" }
+
+    # 3. Player Clones (Tiel ShadowClone + Genessa AstralClone + despawn)
+    Write-Host "  [3/4] Player clones (Tiel ShadowClone + Genessa AstralClone + clear)..."
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+    Send-Cmd $CoopA "fxtest clone_tiel" 2
+    Send-Cmd $CoopA "fxtest clone_astral" 2
+    Send-Cmd $CoopA "fxtest status" 1
+    Send-Cmd $CoopB "fxtest status" 1
+    Send-Cmd $CoopA "fxtest clone_clear" 2
+    Send-Cmd $CoopB "fxtest status" 1
+    (GrabSince $GameA $offA 'fxtest:|fx_grabs:.*clone') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'fxtest:|fx_grabs:.*clone') | ForEach-Object { Write-Host "    B: $_" }
+
+    # 4. Streamed FinalBoss cavern cell check (Zmey FinalBossManager + Ovum)
+    Write-Host "  [4/4] FinalBoss cavern stream-in check (Zmey FinalBossManager + Ovum)..."
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+    Send-Cmd $CoopA "tp -845308 -100377 -26035" 0
+    Send-Cmd $CoopB "tp -845108 -100377 -26035" 25
+    Send-Cmd $CoopA "partbtest dump" 1
+    Send-Cmd $CoopA "partbtest finalboss" 3
+    Send-Cmd $CoopA "partbtest ovum" 3
+    Send-Cmd $CoopB "partbtest dump" 1
+    (GrabSince $GameA $offA 'partbtest:|world:.*FinalBoss|world:.*Ovum|chestGrant') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'partbtest:|world:.*FinalBoss|world:.*Ovum|chestGrant') | ForEach-Object { Write-Host "    B: $_" }
+    Write-Host "  Ranged/Xform/Clone suite complete."
+}
+
 # ============================================================================
 # DISPATCH
 # ============================================================================
@@ -795,7 +846,8 @@ switch ($Action) {
                     'boss_tour'      { Run-Suite-BossTour $sess }
                     'boss_gauntlet'  { Run-Suite-BossGauntlet $sess }
                     'quests'         { Run-Suite-Quests $sess }
-                    'gaps_close'     { Run-Suite-GapsClose $sess }
+                    'gaps_close'         { Run-Suite-GapsClose $sess }
+                'ranged_xform_clone' { Run-Suite-RangedXformClone $sess }
                     default          { Write-Host "Unknown suite: $s" }
                 }
             }

@@ -1021,6 +1021,9 @@ std::vector<NpcRow> CollectNpcs() {
 
         const std::string cfn = ClassFullName(a);
         if (Contains(cfn, "BP_PlayerCharacter") || Contains(cfn, "BP_MainMenuCharacter")) continue;
+        // [R10-CLONE] Player-owned clones & decoys are synced by coop_fx_grabs ("cln"), never as enemies
+        if (Contains(cfn, "BP_Shell_Tiel_ShadowClone") || Contains(cfn, "BP_Shell_Genessa_Astral") ||
+            Contains(cfn, "BP_Shell_Decoy") || Contains(cfn, "BP_Decoy_Bait")) continue;
 
         Vec3 loc;
         if (!LocOf(a, &loc)) continue;
