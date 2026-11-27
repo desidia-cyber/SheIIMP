@@ -813,6 +813,43 @@ function Run-Suite-RangedXformClone($sess) {
     Write-Host "  Ranged/Xform/Clone suite complete."
 }
 
+function Run-Suite-FinalGaps($sess) {
+    Write-Host "`n================ SUITE: FINAL GAPS (THESTUS + SHELL/ALLY SUMMONS + LIVE OVUM) ================"
+
+    # 1. Live Thestus Day/Night Toggle (GameplayStatics spawn + togglenightmode -> "nm" sync)
+    Write-Host "  [1/3] Live Thestus Day/Night Toggle (BP_DayNight_Interaction_Thestus_C -> nm)..."
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+    Send-Both "partbtest thestus_load" 2
+    Send-Both "partbtest thestus_spawn" 5
+    Send-Cmd $CoopA "partbtest thestus" 5
+    Send-Both "partbtest dump" 1
+    (GrabSince $GameA $offA 'partbtest thestus|partb: host NightMode|partbtest dump:') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'partbtest thestus|partb: synced NightMode|partbtest dump:') | ForEach-Object { Write-Host "    B: $_" }
+
+    # 2. Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Despawn
+    Write-Host "  [2/3] Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Clear..."
+    $offA = LogLen $GameA; $offB = LogLen $GameB
+    Send-Cmd $CoopA "fxtest clone_shell" 2
+    Send-Cmd $CoopA "fxtest clone_tiel" 2
+    Send-Cmd $CoopA "fxtest status" 1
+    Send-Cmd $CoopB "fxtest status" 1
+    Send-Cmd $CoopA "fxtest clone_clear" 2
+    Send-Cmd $CoopB "fxtest status" 1
+    (GrabSince $GameA $offA 'fxtest:|fx_grabs:.*clone') | ForEach-Object { Write-Host "    A: $_" }
+    (GrabSince $GameB $offB 'fxtest:|fx_grabs:.*clone') | ForEach-Object { Write-Host "    B: $_" }
+
+    # 3. Live Uncollected PersistentLevel.BPSO_Ovum_C -> +1 ID_Ovum_C Grant
+    Write-Host "  [3/3] Live Uncollected PersistentLevel.BPSO_Ovum_C -> +1 ID_Ovum_C Grant..."
+    $oOvA = LogLen $GameA; $oOvB = LogLen $GameB
+    Send-Both "partbtest ovum_reset" 12
+    Send-Both "partbtest dump" 1
+    Send-Cmd $CoopA "partbtest ovum" 12
+    Send-Both "partbtest dump" 1
+    (GrabSince $GameA $oOvA 'partbtest ovum|partbtest dump:|ws local flip') | ForEach-Object { Write-Host "    A(ovum): $_" }
+    (GrabSince $GameB $oOvB 'partbtest ovum|ws ovum live sync|Ovum:|chestGrant|partbtest dump:') | ForEach-Object { Write-Host "    B(ovum): $_" }
+    Write-Host "  FinalGaps suite complete."
+}
+
 # ============================================================================
 # DISPATCH
 # ============================================================================
@@ -848,6 +885,7 @@ switch ($Action) {
                     'quests'         { Run-Suite-Quests $sess }
                     'gaps_close'         { Run-Suite-GapsClose $sess }
                 'ranged_xform_clone' { Run-Suite-RangedXformClone $sess }
+                'final_gaps'         { Run-Suite-FinalGaps $sess }
                     default          { Write-Host "Unknown suite: $s" }
                 }
             }

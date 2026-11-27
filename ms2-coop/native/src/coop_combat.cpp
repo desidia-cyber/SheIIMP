@@ -1021,9 +1021,24 @@ std::vector<NpcRow> CollectNpcs() {
 
         const std::string cfn = ClassFullName(a);
         if (Contains(cfn, "BP_PlayerCharacter") || Contains(cfn, "BP_MainMenuCharacter")) continue;
-        // [R10-CLONE] Player-owned clones & decoys are synced by coop_fx_grabs ("cln"), never as enemies
+        // [R10-CLONE] Player-owned clones, decoys, Shell Summons, and Ally Summons are synced by coop_fx_grabs ("cln"), never as enemies
         if (Contains(cfn, "BP_Shell_Tiel_ShadowClone") || Contains(cfn, "BP_Shell_Genessa_Astral") ||
-            Contains(cfn, "BP_Shell_Decoy") || Contains(cfn, "BP_Decoy_Bait")) continue;
+            Contains(cfn, "BP_Shell_Decoy") || Contains(cfn, "BP_Decoy_Bait") ||
+            Contains(cfn, "BP_Shell_Summon") || fx_grabs::IsPeerCloneMirror(a)) continue;
+        {
+            static ue::UClass* s_astralCls = nullptr;
+            if (!s_astralCls) s_astralCls = ue::FindClass("BPC_AstralAI_C");
+            if (s_astralCls) {
+                if (UFunction* fnComp = ue::FindFunction(a, "GetComponentByClass")) {
+                    ue::Params p(fnComp);
+                    p.Set<ue::UObject*>("ComponentClass", reinterpret_cast<ue::UObject*>(s_astralCls));
+                    if (ue::Call(a, fnComp, p.data())) {
+                        ue::UObject* comp = p.Get<ue::UObject*>("ReturnValue");
+                        if (Live(comp) && !ue::GetBool(comp, "bIsCached") && ue::GetBool(comp, "bCharacterEnabled")) continue;
+                    }
+                }
+            }
+        }
 
         Vec3 loc;
         if (!LocOf(a, &loc)) continue;

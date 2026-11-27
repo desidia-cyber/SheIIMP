@@ -247,13 +247,28 @@ bool IsLocalPlayerInstigator(UObject* damageCauser, UObject* instigatingASC) {
         if (ue::Get<UObject*>(damageCauser, "Owner", owner) && owner == pawn) return true;
         UObject* inst = nullptr;
         if (ue::Get<UObject*>(damageCauser, "Instigator", inst) && inst == pawn) return true;
-        // [R10-CLONE] Tiel ShadowClone & Genessa AstralClones damage forwarding
+        // [R10-CLONE] Tiel ShadowClone, Genessa AstralClones, Shell Summons & Sidearm/Grisha Ally Summons damage forwarding
         UObject* ownChar = nullptr;
         if (ue::Get<UObject*>(damageCauser, "OwnerCharacter", ownChar) && ownChar == pawn) return true;
         UObject* astralComp = nullptr;
         if (ue::Get<UObject*>(damageCauser, "Astral_AI_Component", astralComp) && Live(astralComp)) {
             UObject* aOwn = nullptr;
             if (ue::Get<UObject*>(astralComp, "OwnerSpartaCharacter", aOwn) && aOwn == pawn) return true;
+        }
+        static ue::UClass* s_astralCls = nullptr;
+        if (!s_astralCls) s_astralCls = ue::FindClass("BPC_AstralAI_C");
+        if (s_astralCls) {
+            if (UFunction* fnComp = ue::FindFunction(damageCauser, "GetComponentByClass")) {
+                ue::Params p(fnComp);
+                p.Set<UObject*>("ComponentClass", reinterpret_cast<UObject*>(s_astralCls));
+                if (ue::Call(damageCauser, fnComp, p.data())) {
+                    UObject* comp = p.Get<UObject*>("ReturnValue");
+                    if (Live(comp)) {
+                        UObject* aOwn = nullptr;
+                        if (ue::Get<UObject*>(comp, "OwnerSpartaCharacter", aOwn) && aOwn == pawn) return true;
+                    }
+                }
+            }
         }
     }
     if (Live(instigatingASC)) {

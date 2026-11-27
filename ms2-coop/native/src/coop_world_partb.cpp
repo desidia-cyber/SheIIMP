@@ -343,8 +343,13 @@ void SamplePuzzlesAndSpawners() {
         }
     }
 
-    // S31: Moving objects / drawbridges / stone gates (TriggerMovingActor)
-    for (const char* mvCls : {"BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C"}) {
+    // S31 & World/Dungeon Elevators: Moving objects, drawbridges, stone gates, non-hub elevators (TriggerMovingActor)
+    static const char* const kMovingClasses[] = {
+        "BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C",
+        "BP_Circle_Wooden_Elevator_C", "BP_Grand_Elevator_02_C",
+        "BP_Grand_Elevator_Snow_C", "BP_FC_Elevator_C"
+    };
+    for (const char* mvCls : kMovingClasses) {
         for (UObject* mv : ue::FindAllOf(mvCls)) {
             if (!Live(mv) || Dist(myLoc, net::Loc(mv)) > 4500.0) continue;
             const std::string tail = net::Tail(mv);
@@ -362,6 +367,54 @@ void SamplePuzzlesAndSpawners() {
                 g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 4, val, now});
                 ++g_pzlTx;
             }
+        }
+    }
+
+    // Hidden / Illusory walls (BP_HiddenWall_C & subclasses: AlreadyRevealed -> SolutionTriggered)
+    for (UObject* hw : ue::FindAllOf("BP_HiddenWall_C")) {
+        if (!Live(hw) || Dist(myLoc, net::Loc(hw)) > 4500.0) continue;
+        const std::string tail = net::Tail(hw);
+        if (tail.empty()) continue;
+        int val = ue::GetBool(hw, "AlreadyRevealed") ? 1 : 0;
+        auto it = g_pzlSeen.find(tail);
+        if (it == g_pzlSeen.end()) {
+            g_pzlSeen[tail] = val;
+        } else if (val == 1 && it->second == 0) {
+            it->second = 1;
+            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 2, 1, now});
+            ++g_pzlTx;
+        }
+    }
+
+    // Attack-dropped bridges (BP_MakeBridgeByAttack_C.SavedBridge -> SetBridgeLocBeginPlay)
+    for (UObject* mb : ue::FindAllOf("BP_MakeBridgeByAttack_C")) {
+        if (!Live(mb) || Dist(myLoc, net::Loc(mb)) > 4500.0) continue;
+        const std::string tail = net::Tail(mb);
+        if (tail.empty()) continue;
+        int val = ue::GetBool(mb, "SavedBridge") ? 1 : 0;
+        auto it = g_pzlSeen.find(tail);
+        if (it == g_pzlSeen.end()) {
+            g_pzlSeen[tail] = val;
+        } else if (val == 1 && it->second == 0) {
+            it->second = 1;
+            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 6, 1, now});
+            ++g_pzlTx;
+        }
+    }
+
+    // Bell bridge activators (BP_BellBridgeActivator_C.BellMoving -> MoveBellToOneSide)
+    for (UObject* bb : ue::FindAllOf("BP_BellBridgeActivator_C")) {
+        if (!Live(bb) || Dist(myLoc, net::Loc(bb)) > 4500.0) continue;
+        const std::string tail = net::Tail(bb);
+        if (tail.empty()) continue;
+        int val = ue::GetBool(bb, "BellMoving") ? 1 : 0;
+        auto it = g_pzlSeen.find(tail);
+        if (it == g_pzlSeen.end()) {
+            g_pzlSeen[tail] = val;
+        } else if (val == 1 && it->second == 0) {
+            it->second = 1;
+            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 7, 1, now});
+            ++g_pzlTx;
         }
     }
 
@@ -407,11 +460,24 @@ void ApplyPeerNightMode(int seq, int wantNight) {
         if (!Live(th)) continue;
         int cur = ue::GetBool(th, "bInNightMode") ? 1 : 0;
         if (cur == wantNight) return;
+        if (UFunction* fnEn = ue::FindFunction(th, "EnableThestus")) {
+            ue::Params pe(fnEn);
+            ue::Call(th, fnEn, pe.data());
+        }
         if (UFunction* fn = ue::FindFunction(th, "togglenightmode")) {
             ue::Params p(fn);
             if (ue::Call(th, fn, p.data())) {
+                int after = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+                if (after != wantNight) {
+                    ue::SetBool(th, "bInNightMode", wantNight != 0);
+                    if (UFunction* fnUpd = ue::FindFunction(th, "UpdateNightModeState")) {
+                        ue::Params pu(fnUpd);
+                        ue::Call(th, fnUpd, pu.data());
+                    }
+                    after = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+                }
                 ++g_nmSynced;
-                net::Log("partb: synced NightMode -> %d via togglenightmode()", wantNight);
+                net::Log("partb: synced NightMode -> %d via togglenightmode() (bInNightMode=%d)", wantNight, after);
             }
         }
         return;
@@ -439,9 +505,34 @@ void ApplyPeerPuzzle(int seq, const std::string& tail, int kind, int val) {
             net::Log("partb: replayed BP_PressurePlateOpenDoor_C::%s on %s", fnName, tail.c_str());
             return;
         }
+    } else if (kind == 2 && val == 1) {
+        // Hidden / Illusory wall reveal (BP_HiddenWall_C::SolutionTriggered + DisableCollision)
+        for (UObject* hw : ue::FindAllOf("BP_HiddenWall_C")) {
+            if (!Live(hw) || net::Tail(hw) != tail) continue;
+            if (ue::GetBool(hw, "AlreadyRevealed")) return;
+            if (UFunction* fn = ue::FindFunction(hw, "SolutionTriggered")) {
+                ue::Params p(fn);
+                ue::Call(hw, fn, p.data());
+            }
+            if (!ue::GetBool(hw, "AlreadyRevealed")) {
+                ue::SetBool(hw, "AlreadyRevealed", true);
+                if (UFunction* fnDis = ue::FindFunction(hw, "DisableCollision")) {
+                    ue::Params pd(fnDis);
+                    ue::Call(hw, fnDis, pd.data());
+                }
+            }
+            ++g_pzlRx;
+            net::Log("partb: replayed BP_HiddenWall_C::SolutionTriggered on %s", tail.c_str());
+            return;
+        }
     } else if (kind == 4) {
-        // S31: Replay moving object / drawbridge / stone gate via BPI_LiftCall::TriggerMovingActor
-        for (const char* mvCls : {"BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C"}) {
+        // S31 & World/Dungeon Elevators: Replay via BPI_LiftCall::TriggerMovingActor
+        static const char* const kMovingClasses[] = {
+            "BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C",
+            "BP_Circle_Wooden_Elevator_C", "BP_Grand_Elevator_02_C",
+            "BP_Grand_Elevator_Snow_C", "BP_FC_Elevator_C"
+        };
+        for (const char* mvCls : kMovingClasses) {
             for (UObject* mv : ue::FindAllOf(mvCls)) {
                 if (!Live(mv) || net::Tail(mv) != tail) continue;
                 if (UFunction* fn = ue::FindFunction(mv, "TriggerMovingActor")) {
@@ -453,6 +544,32 @@ void ApplyPeerPuzzle(int seq, const std::string& tail, int kind, int val) {
                 }
                 return;
             }
+        }
+    } else if (kind == 6 && val == 1) {
+        // Attack-dropped bridge (BP_MakeBridgeByAttack_C::SetBridgeLocBeginPlay)
+        for (UObject* mb : ue::FindAllOf("BP_MakeBridgeByAttack_C")) {
+            if (!Live(mb) || net::Tail(mb) != tail) continue;
+            if (ue::GetBool(mb, "SavedBridge")) return;
+            ue::SetBool(mb, "SavedBridge", true);
+            if (UFunction* fn = ue::FindFunction(mb, "SetBridgeLocBeginPlay")) {
+                ue::Params p(fn);
+                ue::Call(mb, fn, p.data());
+            }
+            ++g_pzlRx;
+            net::Log("partb: replayed BP_MakeBridgeByAttack_C::SetBridgeLocBeginPlay on %s", tail.c_str());
+            return;
+        }
+    } else if (kind == 7 && val == 1) {
+        // Bell bridge activator (BP_BellBridgeActivator_C::MoveBellToOneSide)
+        for (UObject* bb : ue::FindAllOf("BP_BellBridgeActivator_C")) {
+            if (!Live(bb) || net::Tail(bb) != tail) continue;
+            if (UFunction* fn = ue::FindFunction(bb, "MoveBellToOneSide")) {
+                ue::Params p(fn);
+                ue::Call(bb, fn, p.data());
+            }
+            ++g_pzlRx;
+            net::Log("partb: replayed BP_BellBridgeActivator_C::MoveBellToOneSide on %s", tail.c_str());
+            return;
         }
     } else if (kind == 5 && val == 1) {
         // Vlas's cage at Lone Spire (BP_Vlas_Cage_01_C.IsOpen)
@@ -783,19 +900,33 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
 
     if (sub == "thestus_spawn") {
         const char* thPath = "/Game/Sparta/Core/Interaction/BP_DayNight_Interaction_Thestus.BP_DayNight_Interaction_Thestus_C";
-        net::Find(thPath, true);
-        UObject* pc = net::PC();
-        if (Live(pc)) {
-            if (UFunction* fn = ue::FindFunction(pc, "ConsoleCommand")) {
-                static wchar_t wcmd[] = L"summon BP_DayNight_Interaction_Thestus_C";
-                ue::FString fs;
-                fs.Data = wcmd;
-                fs.Num = (int32_t)(sizeof(wcmd) / sizeof(wchar_t));
-                fs.Max = fs.Num;
-                ue::Params p(fn);
-                p.Set<ue::FString>("Command", fs);
-                p.Set<bool>("bWriteToLog", false);
-                ue::Call(pc, fn, p.data());
+        UObject* cls = net::Find(thPath, true);
+        UObject* world = net::World();
+        UObject* pawn = net::Pawn();
+        ue::UClass* gsCls = ue::FindClass("GameplayStatics");
+        UObject* gsCdo = gsCls ? ue::GetCDO(gsCls) : nullptr;
+        UFunction* fnBegin = Live(gsCdo) ? ue::FindFunction(gsCdo, "BeginDeferredActorSpawnFromClass") : nullptr;
+        UFunction* fnFin   = Live(gsCdo) ? ue::FindFunction(gsCdo, "FinishSpawningActor") : nullptr;
+        if (Live(cls) && Live(world) && Live(pawn) && fnBegin && fnFin) {
+            Vec3 loc = net::Loc(pawn);
+            ue::FTransform xf{};
+            xf.Rotation.W = 1.0;
+            xf.Translation = ue::FVector{loc.X + 220.0, loc.Y, loc.Z};
+            xf.Scale3D = ue::FVector{1.0, 1.0, 1.0};
+            ue::Params pb(fnBegin);
+            pb.Set<UObject*>("WorldContextObject", world);
+            pb.Set<UObject*>("ActorClass", cls);
+            pb.Set<ue::FTransform>("SpawnTransform", xf);
+            pb.Set<uint8_t>("CollisionHandlingOverride", 1);
+            if (ue::Call(gsCdo, fnBegin, pb.data())) {
+                UObject* spawned = pb.Get<UObject*>("ReturnValue");
+                if (Live(spawned)) {
+                    ue::SetBool(spawned, "StartUnlocked", true);
+                    ue::Params pf(fnFin);
+                    pf.Set<UObject*>("Actor", spawned);
+                    pf.Set<ue::FTransform>("SpawnTransform", xf);
+                    ue::Call(gsCdo, fnFin, pf.data());
+                }
             }
         }
         auto ths = ue::FindAllOf("BP_DayNight_Interaction_Thestus_C");
@@ -822,6 +953,14 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
             ok = ue::Call(th, fn, p.data());
         }
         int after = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+        if (after == before) {
+            ue::SetBool(th, "bInNightMode", before == 0);
+            if (UFunction* fnUpd = ue::FindFunction(th, "UpdateNightModeState")) {
+                ue::Params pu(fnUpd);
+                ue::Call(th, fnUpd, pu.data());
+            }
+            after = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+        }
         net::Log("partbtest thestus: togglenightmode ok=%d bInNightMode %d->%d", ok ? 1 : 0, before, after);
         return true;
     }

@@ -658,48 +658,69 @@ void ScanLocalClones() {
         "BP_Shell_Tiel_ShadowClone_C",
         "BP_Shell_Genessa_AstralBase_C",
         "BP_Shell_Decoy_C",
-        "BP_Decoy_Bait_C"
+        "BP_Decoy_Bait_C",
+        "BP_Shell_Summon_C"
+    };
+
+    std::unordered_set<UObject*> seenThisTick;
+    auto pushLocalClone = [&](UObject* c) {
+        if (!Live(c) || (int)g_localClones.size() >= 8) return;
+        if (seenThisTick.count(c)) return;
+        // Skip any peer clone mirror we spawned
+        for (const auto& kv : g_peerClones) {
+            if (kv.second.actor == c) return;
+        }
+        seenThisTick.insert(c);
+
+        int& id = g_localCloneIds[c];
+        if (id == 0) {
+            id = g_nextCloneId++;
+            ++g_cloneTx;
+            net::Log("fx_grabs: local clone #%d spawned cls=%s", id, ue::GetClassName(c).c_str());
+        }
+
+        CloneEntry ce;
+        ce.id = id;
+        ue::UClass* cls = ue::GetClass(c);
+        ce.clsPath = cls ? StripClassPrefix(ue::GetFullName(reinterpret_cast<UObject*>(cls))) : "";
+        const Vec3 loc = net::Loc(c);
+        ce.x = loc.X; ce.y = loc.Y; ce.z = loc.Z;
+        double pitch = 0, yaw = 0, roll = 0;
+        GetActorRot(c, &pitch, &yaw, &roll);
+        ce.yaw = yaw;
+
+        UObject* mesh = nullptr;
+        if (ue::Get<UObject*>(c, "Mesh", mesh) && Live(mesh)) {
+            UObject* asset = nullptr;
+            if (UFunction* fn = ue::FindFunction(mesh, "GetSkeletalMeshAsset")) {
+                ue::Params p(fn);
+                if (ue::Call(mesh, fn, p.data())) asset = p.Get<UObject*>("ReturnValue");
+            }
+            if (Live(asset)) ce.meshPath = StripClassPrefix(ue::GetFullName(asset));
+        }
+        g_localClones.push_back(std::move(ce));
     };
 
     for (const char* clsName : kCloneClasses) {
         for (UObject* c : ue::FindAllOf(clsName)) {
-            if (!Live(c) || (int)g_localClones.size() >= 6) continue;
-            // Skip any peer clone mirror we spawned
-            bool isMirror = false;
-            for (const auto& kv : g_peerClones) {
-                if (kv.second.actor == c) { isMirror = true; break; }
-            }
-            if (isMirror) continue;
+            if (!Live(c)) continue;
             if (!IsOwnedByLocalPawn(c, pawn)) continue;
-
-            int& id = g_localCloneIds[c];
-            if (id == 0) {
-                id = g_nextCloneId++;
-                ++g_cloneTx;
-                net::Log("fx_grabs: local clone #%d spawned cls=%s", id, ue::GetClassName(c).c_str());
-            }
-
-            CloneEntry ce;
-            ce.id = id;
-            ue::UClass* cls = ue::GetClass(c);
-            ce.clsPath = cls ? StripClassPrefix(ue::GetFullName(reinterpret_cast<UObject*>(cls))) : "";
-            const Vec3 loc = net::Loc(c);
-            ce.x = loc.X; ce.y = loc.Y; ce.z = loc.Z;
-            double pitch = 0, yaw = 0, roll = 0;
-            GetActorRot(c, &pitch, &yaw, &roll);
-            ce.yaw = yaw;
-
-            UObject* mesh = nullptr;
-            if (ue::Get<UObject*>(c, "Mesh", mesh) && Live(mesh)) {
-                UObject* asset = nullptr;
-                if (UFunction* fn = ue::FindFunction(mesh, "GetSkeletalMeshAsset")) {
-                    ue::Params p(fn);
-                    if (ue::Call(mesh, fn, p.data())) asset = p.Get<UObject*>("ReturnValue");
-                }
-                if (Live(asset)) ce.meshPath = StripClassPrefix(ue::GetFullName(asset));
-            }
-            g_localClones.push_back(std::move(ce));
+            pushLocalClone(c);
         }
+    }
+
+    // Also catch ALL Sidearm Ally Summons (GA_Sidearm_AllySummoner_C / GA_SummonedAlly_Handler_C)
+    // and Grisha Aid Summons (GA_Summon_Aid_Grisha_C / GA_SummonedGrisha_Handler_C), which spawn
+    // standard enemy classes carrying a BPC_AstralAI_C component owned by the local player.
+    for (UObject* astral : ue::FindAllOf("BPC_AstralAI_C")) {
+        if (!Live(astral)) continue;
+        if (ue::GetBool(astral, "bIsCached")) continue;
+        if (!ue::GetBool(astral, "bCharacterEnabled")) continue;
+        UObject* aOwn = nullptr;
+        if (!ue::Get<UObject*>(astral, "OwnerSpartaCharacter", aOwn) || aOwn != pawn) continue;
+        UObject* ownerActor = ue::GetOuter(astral);
+        if (!Live(ownerActor) || ownerActor == pawn || ownerActor == puppet::Actor()) continue;
+        pushLocalClone(ownerActor);
     }
 
     if (hadClones && g_localClones.empty()) {
@@ -940,6 +961,13 @@ std::vector<std::string> SplitTuple(const std::string& s) {
 
 bool PeerTransformNonHumanoid() { return g_peerNonHumanoid; }
 bool PeerTransformHideBody() { return g_peerHideBody; }
+bool IsPeerCloneMirror(ue::UObject* a) {
+    if (!a) return false;
+    for (const auto& kv : g_peerClones) {
+        if (kv.second.actor == a) return true;
+    }
+    return false;
+}
 
 void Tick15() {
     if (!state().toggles.fxGrabs) return;
@@ -1262,13 +1290,15 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
         return true;
     }
 
-    if (sub == "clone_tiel" || sub == "clone_astral") {
+    if (sub == "clone_tiel" || sub == "clone_astral" || sub == "clone_shell") {
         UObject* pawn = net::Pawn();
         UObject* world = net::World();
         if (!Live(pawn) || !Live(world)) { net::Log("fxtest: clone failed (no pawn/world)"); return true; }
         const char* clsPath = (sub == "clone_tiel")
             ? "/Game/Sparta/Core/Characters/Player/Tiel/BP_Shell_Tiel_ShadowClone.BP_Shell_Tiel_ShadowClone_C"
-            : "/Game/Sparta/Core/Characters/Player/AstralGenessa/BP_Shell_Genessa_AstralClone.BP_Shell_Genessa_AstralClone_C";
+            : (sub == "clone_shell")
+                ? "/Game/Sparta/Core/Characters/Player/Common/BP_Shell_Summon.BP_Shell_Summon_C"
+                : "/Game/Sparta/Core/Characters/Player/AstralGenessa/BP_Shell_Genessa_AstralClone.BP_Shell_Genessa_AstralClone_C";
         UObject* cls = net::Find(clsPath, true);
         if (!Live(cls)) {
             clsPath = "/Game/Sparta/Core/Characters/Player/Common/BP_Shell_Decoy.BP_Shell_Decoy_C";

@@ -1036,6 +1036,16 @@ void WsApplyOne(const std::string& key, const WsRow& e, int how) {
                     CallBoolArg(owner, "ClenseOva", "IsBeginPlayLogic", true);
                 }
             }
+            // [R10-PROGRESSION] Live BearTrap disarm visual replay
+            if (ok && how == 0 && owner && std::strcmp(kKinds[kind].cls, "BPSO_BearTrap_C") == 0 &&
+                std::strcmp(field, "IsDisarmed") == 0) {
+                if (ue::UFunction* fnDis = ue::FindFunction(owner, "DisableTrap")) {
+                    ue::Params pd(fnDis);
+                    pd.Set<bool>("SaveState", true);
+                    pd.Set<bool>("PlayAnimation", true);
+                    ue::Call(owner, fnDis, pd.data());
+                }
+            }
             // [R10-PROGRESSION] Live FinalBossManager / CorruptionCore refresh
             if (ok && how == 0 &&
                 (std::strcmp(kKinds[kind].cls, "BPSO_FC_FinalBossManager_C") == 0 ||

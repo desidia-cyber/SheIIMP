@@ -2301,6 +2301,7 @@ std::string Status();
 bool OnCommand(const std::string& cmd, const std::string& rest);
 bool PeerTransformNonHumanoid();
 bool PeerTransformHideBody();
+bool IsPeerCloneMirror(ue::UObject* a);
 } // namespace fx_grabs
 
 namespace partb {
