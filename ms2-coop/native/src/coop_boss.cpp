@@ -570,8 +570,14 @@ void CmdDump(const std::string& arg) {
     }
     for (const BossEntry& e : B.bosses) {
         if (!a.empty() && a != "all" && e.key.find(a) == std::string::npos) continue;
-        net::Log("bossdump: %s cls=%s phase=%d hp=%.3f t2=%.3f t3=%.3f aggro=%d comp=%s",
+        // [R10-BOSSLOC] where the boss stands and how far from us (lab diagnostics)
+        ue::UObject* actor = OwnerOf(e.comp);
+        const auto bl = net::Loc(actor);
+        const auto ml = net::Loc(net::Pawn());
+        const double dx = bl.X - ml.X, dy = bl.Y - ml.Y, dz = bl.Z - ml.Z;
+        net::Log("bossdump: %s cls=%s phase=%d hp=%.3f t2=%.3f t3=%.3f aggro=%d at (%.0f %.0f %.0f) d=%.0f comp=%s",
                  e.key.c_str(), e.cls.c_str(), e.phase, e.hp, e.t2, e.t3, e.aggro ? 1 : 0,
+                 bl.X, bl.Y, bl.Z, std::sqrt(dx * dx + dy * dy + dz * dz),
                  net::FullName(e.comp).c_str());
     }
     net::Log("bossdump: n=%d scans=%d hook=%d pub=%d applied=%d fail=%d missed=%d echoes=%d "
@@ -993,7 +999,56 @@ std::string Status() {
                     TG().bossSync ? 0 : 1);
 }
 
+// [R10-BOSSFIGHT]
+static bool BossFightOff() {
+    static int v = -1;
+    if (v < 0) {
+        v = net::FileExists("BOSSFIGHT_OFF.txt") ? 1 : 0;
+        if (v) net::Log("BOSSFIGHT_OFF.txt present -- the R10 boss-fight fixes are off");
+    }
+    return v != 0;
+}
+void CheckPhaseAfterDamage(ue::UObject* actor) {
+    if (!Valid(actor) || BossFightOff()) return;
+    BossState& B = BS();
+    BossEntry* e = nullptr;
+    for (int pass = 0; pass < 2 && !e; ++pass) {
+        if (pass == 1) Scan();
+        for (BossEntry& x : B.bosses)
+            if (x.actor == actor) { e = &x; break; }
+    }
+    if (!e || !Valid(e->comp)) return;
+    const double hp = combat::HealthNorm(actor, nullptr);
+    if (hp < 0.0) return;
+    e->hp = hp;
+    int phase = PhaseOf(e->comp);
+    for (int want = 2; want <= kPhaseMax; ++want) {
+        const double thr = (want >= 3) ? e->t3 : e->t2;
+        if (!(thr > 0.0) || hp > thr || phase >= want) continue;
+        const bool called = CallPhase(e, want);
+        phase = PhaseOf(e->comp);
+        net::Log("bossphase: [R10-BOSSFIGHT] %s hp %.4f <= %.3f after a peer hit -> %s called=%d phase now %d",
+                 e->key.c_str(), hp, thr, PhaseFunction(want), called ? 1 : 0, phase);
+    }
+}
+
+// [R10-BOSSFIGHT] "bosshp <norm> [tail]" -- LAB ONLY: put the local boss at a health so a
+// test can reach the phase gate / the kill with a few real hits.
+void CmdHp(const std::string& arg) {
+    const double v = std::atof(TrimArg(arg).c_str());
+    Scan();
+    BossState& B = BS();
+    for (BossEntry& e : B.bosses) {
+        if (!Valid(e.actor)) continue;
+        const bool ok = combat::SetHealthNorm(e.actor, v);
+        net::Log("bosshp: %s hp %.4f -> %.4f ok=%d", e.key.c_str(), combat::HealthNorm(e.actor, nullptr) , v, ok ? 1 : 0);
+        return;
+    }
+    net::Log("bosshp: no local boss");
+}
+
 bool OnCommand(const std::string& cmd, const std::string& rest) {
+    if (cmd == "bosshp") { CmdHp(rest); return true; }
     if (cmd != "bossphase" && cmd != "bossdump" && cmd != "bossspawn") return false;
 
     if (cmd == "bossdump") {

@@ -355,6 +355,11 @@ bool HookPreSkip(const char* functionFullName, HookSkipFn);
 // ask it for the function, register that.  Returns false for a null function.
 bool HookPreSkipFn(UFunction* fn, HookSkipFn f);
 
+// [R10-VETONAME] The same veto keyed by the bare FUNCTION NAME (the detour matches on
+// the UFunction's FName, so no live object or loaded class is needed).  The hook fires
+// for every function of that name: the callback must check the receiver's class.
+bool HookPreSkipName(const char* functionName, HookSkipFn f);
+
 // THE EVENT PROBE -- a research instrument, not a feature.  Logs every
 // ProcessEvent whose function name contains one of the `|`- or `,`-separated
 // substrings (case-insensitive), for `seconds`, into the native log.  It is a

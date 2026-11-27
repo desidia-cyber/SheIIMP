@@ -1,4 +1,4 @@
-// coop_realarea.cpp -- round 9 lab probe: find a REAL area (a boss arena) and get
+﻿// coop_realarea.cpp -- round 9 lab probe: find a REAL area (a boss arena) and get
 // the local player into it.  Not part of the sync; only runs when a `cmd` verb asks.
 //
 //   areasweep [substring ...]   every live Actor whose CLASS NAME contains one of
@@ -390,7 +390,51 @@ void Call(const std::string& arg) {
              exists ? 1 : 0, ok ? 1 : 0);
 }
 
-void Reset() { g_hits.clear(); }
+// [R10-INTERDUMP] areacomp <n|nearest|substring> <ComponentProp> [go] -- world location of a
+// component property on a cached hit (e.g. BP_CinematicPlayer_C TriggerArea), optionally tp
+// our pawn into it.  Lab verb.
+void Comp(const std::string& arg) {
+    std::vector<std::string> f = Split(arg);
+    if (f.size() < 2) {
+        net::Log("areacomp: usage areacomp <n|nearest|substring> <ComponentProp> [go]");
+        return;
+    }
+    Hit* h = Pick(f[0]);
+    if (!h || !net::Valid(h->obj)) {
+        net::Log("areacomp: no cached hit for '%s'", f[0].c_str());
+        return;
+    }
+    ue::UObject* comp = nullptr;
+    ue::Get<ue::UObject*>(h->obj, f[1].c_str(), comp);
+    if (!net::Valid(comp)) {
+        net::Log("areacomp: %s has no live component '%s'", h->name.c_str(), f[1].c_str());
+        return;
+    }
+    Vec3 tl;
+    if (ue::UFunction* gl = ue::FindFunction(comp, "K2_GetComponentLocation")) {
+        ue::Params gp(gl);
+        if (ue::Call(comp, gl, gp.data())) {
+            const ue::FVector v = gp.Get<ue::FVector>("ReturnValue");
+            tl.X = v.X; tl.Y = v.Y; tl.Z = v.Z;
+        }
+    }
+    ue::FVector ext{};
+    const bool hasExt = ue::Get<ue::FVector>(comp, "BoxExtent", ext);
+    ue::UObject* pawn = net::Pawn();
+    net::Log("areacomp: %s.%s (%s) at (%s) d=%.0f extent=%s UseTriggerToPlay=%d TriggerActivated=%d "
+             "PlayCinematicOnSpawn=%d OnlyPlayOnce=%d",
+             h->name.c_str(), f[1].c_str(), ue::GetClassName(comp).c_str(), Where(tl).c_str(),
+             Dist(net::Loc(pawn), tl),
+             hasExt ? net::Fmt("%.0f,%.0f,%.0f", ext.X, ext.Y, ext.Z).c_str() : "-",
+             ue::GetBool(h->obj, "UseTriggerToPlay") ? 1 : 0, ue::GetBool(h->obj, "TriggerActivated") ? 1 : 0,
+             ue::GetBool(h->obj, "PlayCinematicOnSpawn") ? 1 : 0, ue::GetBool(h->obj, "OnlyPlayOnce") ? 1 : 0);
+    if (f.size() > 2 && f[2] == "go" && net::Valid(pawn)) {
+        puppet::StartTp(pawn, tl.X, tl.Y, tl.Z + 50.0);
+        net::Log("areacomp: go -> (%s)", Where(tl).c_str());
+    }
+}
+
+void Reset() { g_hits.clear(); InjectReset(); }
 
 // ===========================================================================
 // attack -- the game's OWN melee swing, and the watch that proves it ran
@@ -517,12 +561,16 @@ void EnemyTp(const std::string& arg) {
     } else {
         ue::UObject* pawn = net::Pawn();
         const Vec3 me = net::Loc(pawn);
+        // [R10-AIM] nearest LIVE match, so `enemytp Brigand` on both clients lands on
+        // the same brigand (the guest's mirror of the host's), not the first in the list
         for (ue::UObject* e : ue::FindAllOf("BP_AICharacter_C")) {
             if (!net::Valid(e)) continue;
             if (ue::GetName(e).find(want) == std::string::npos) continue;
-            a = e;
-            dd = Dist(me, net::Loc(e));
-            break;
+            bool dead = false;
+            combat::HealthNorm(e, &dead);
+            if (dead) continue;
+            const double d = Dist(me, net::Loc(e));   // [R10-BOSSLOC] a named pick has no range cap
+            if (!a || d < dd) { a = e; dd = d; }
         }
     }
     if (!a) {
@@ -568,7 +616,19 @@ void EnemyTp(const std::string& arg) {
         pr.Set<ue::FRotator>("NewRotation", r);
         pr.Set<bool>("bTeleportPhysics", true);
         const bool ok = ue::Call(pawn, fr, pr.data());
-        net::Log("enemytp: facing yaw %.0f (set=%d)", yaw, ok ? 1 : 0);
+        // [R10-AIM] The player pawn turns to the CONTROL rotation (camera), so a pawn-only
+        // rotation snaps back and the swing whiffs (round 10 run 8: host baseline target
+        // stayed hp=1.000 after 3 swings).  Turn the controller too.
+        bool okc = false;
+        ue::UObject* pc = net::PC();
+        if (pc) {
+            if (ue::UFunction* fc = ue::FindFunction(pc, "SetControlRotation")) {
+                ue::Params pp(fc);
+                pp.Set<ue::FRotator>("NewRotation", r);
+                okc = ue::Call(pc, fc, pp.data());
+            }
+        }
+        net::Log("enemytp: facing yaw %.0f (set=%d ctrl=%d)", yaw, ok ? 1 : 0, okc ? 1 : 0);
     }
 }
 
@@ -716,6 +776,7 @@ void Attack(const std::string& arg) {
 
 // 15 Hz, always-run (a local hold must not hide a swing): 4 samples/s for 4 s.
 void AttackTick() {
+    InjectTick();
     if (!g_atk.on) return;
     const double now = net::Now();
     if (now < g_atk.nextSample) return;
@@ -787,6 +848,315 @@ void WeaponState(const std::string& arg) {
         }
     }
     net::Log("weaponstate: %d weapon actor(s) attached", n);
+}
+
+
+// ===========================================================================
+// [R10-INJECT] ialist / inject -- the game's OWN input, without the desktop.
+//
+// Real OS input (real-input.ps1) needs the game window in the foreground, and
+// Windows refuses SetForegroundWindow to a background script while someone is
+// using the PC: the R10 rig clicks went to the owner's window, not the game.
+// Enhanced Input's StartContinuousInputInjectionForAction feeds an InputAction
+// through the same mapping/trigger pipeline a key press uses, every frame until
+// StopContinuousInputInjectionForAction -- so a tap and a hold both work.
+//   ialist [substr]            list live UInputAction assets (name, value type)
+//   inject <substr> [seconds]  hold that action for `seconds` (default 0.12)
+// ===========================================================================
+namespace {
+
+struct InjectJob {
+    ue::UObject* sub = nullptr;
+    ue::UObject* action = nullptr;
+    std::string  name;
+    double       until = 0.0;
+};
+std::vector<InjectJob> g_inject;
+
+ue::UObject* InputSubsystem() {
+    for (ue::UObject* s : ue::FindAllOf("EnhancedInputLocalPlayerSubsystem")) {
+        if (net::Valid(s)) return s;
+    }
+    return nullptr;
+}
+
+ue::UObject* FindInputAction(const std::string& want, std::string* exact) {
+    ue::UObject* best = nullptr;
+    for (ue::UObject* a : ue::FindAllOf("InputAction")) {
+        if (!net::Valid(a)) continue;
+        const std::string n = ue::GetName(a);
+        if (n.find("Default__") == 0) continue;
+        if (n == want) { if (exact) *exact = n; return a; }
+        if (!best && n.find(want) != std::string::npos) { best = a; if (exact) *exact = n; }
+    }
+    return best;
+}
+
+ue::UFunction* InjectFn(ue::UObject* sub, const char* name) {
+    if (ue::UFunction* f = ue::FindFunction(sub, name)) return f;
+    const std::string path = std::string("/Script/EnhancedInput.EnhancedInputSubsystemInterface:") + name;
+    if (ue::UObject* o = ue::FindObject(path.c_str())) return reinterpret_cast<ue::UFunction*>(o);
+    const std::string path2 = std::string("/Script/EnhancedInput.EnhancedInputSubsystemInterface.") + name;
+    if (ue::UObject* o = ue::FindObject(path2.c_str())) return reinterpret_cast<ue::UFunction*>(o);
+    return nullptr;
+}
+
+struct ActionValue {   // FInputActionValue, 0x20
+    double  x, y, z;
+    uint8_t type;
+    uint8_t pad[7];
+};
+static_assert(sizeof(ActionValue) == 0x20, "FInputActionValue size");
+
+bool StartInject(ue::UObject* sub, ue::UObject* action) {
+    ue::UFunction* fn = InjectFn(sub, "StartContinuousInputInjectionForAction");
+    if (!fn) return false;
+    uint8_t vt = 0;
+    ue::Get<uint8_t>(action, "ValueType", vt);
+    ActionValue v{};
+    v.x = 1.0;
+    v.type = vt;
+    ue::Params p(fn);
+    p.Set<ue::UObject*>("Action", action);
+    p.Set<ActionValue>("RawValue", v);
+    return ue::Call(sub, fn, p.data());
+}
+
+bool StopInject(ue::UObject* sub, ue::UObject* action) {
+    ue::UFunction* fn = InjectFn(sub, "StopContinuousInputInjectionForAction");
+    if (!fn || !net::Valid(sub)) return false;
+    ue::Params p(fn);
+    p.Set<ue::UObject*>("Action", action);
+    return ue::Call(sub, fn, p.data());
+}
+
+}  // namespace
+
+void InputList(const std::string& arg) {
+    std::string want = arg;
+    while (!want.empty() && (unsigned char)want.back() <= ' ') want.pop_back();
+    int n = 0;
+    std::string line;
+    for (ue::UObject* a : ue::FindAllOf("InputAction")) {
+        if (!net::Valid(a)) continue;
+        const std::string nm = ue::GetName(a);
+        if (nm.find("Default__") == 0) continue;
+        if (!want.empty() && nm.find(want) == std::string::npos) continue;
+        uint8_t vt = 0;
+        ue::Get<uint8_t>(a, "ValueType", vt);
+        line += net::Fmt("%s(%d) ", nm.c_str(), (int)vt);
+        if (++n % 12 == 0) {
+            net::Log("ialist: %s", line.c_str());
+            line.clear();
+        }
+    }
+    if (!line.empty()) net::Log("ialist: %s", line.c_str());
+    net::Log("ialist: %d input action(s) match '%s' ; subsystem=%s", n, want.c_str(),
+             net::Valid(InputSubsystem()) ? "yes" : "NO");
+}
+
+void Inject(const std::string& arg) {
+    std::vector<std::string> f = Split(arg);
+    if (f.empty()) {
+        net::Log("inject: usage inject <InputAction substring> [seconds]");
+        return;
+    }
+    double secs = 0.12;
+    if (f.size() >= 2) secs = std::max(0.05, std::atof(f[1].c_str()));
+    std::string exact;
+    ue::UObject* action = FindInputAction(f[0], &exact);
+    ue::UObject* sub = InputSubsystem();
+    if (!action || !sub) {
+        net::Log("inject: action '%s' %s, subsystem %s", f[0].c_str(), action ? "found" : "NOT FOUND",
+                 sub ? "found" : "NOT FOUND");
+        return;
+    }
+    const bool ok = StartInject(sub, action);
+    net::Log("inject: %s for %.2fs start=%d montage=%s", exact.c_str(), secs, ok ? 1 : 0,
+             MontageNow(nullptr).c_str());
+    if (!ok) return;
+    InjectJob j;
+    j.sub = sub;
+    j.action = action;
+    j.name = exact;
+    j.until = net::Now() + secs;
+    g_inject.push_back(j);
+}
+
+bool g_labGod = false;
+
+// labgod 0|1 -- LAB ONLY: keep our own health topped up at 15 Hz so a combat test
+// is not ended by a wipe (the 150% co-op scaling kills a test pawn in seconds)
+void LabGod(const std::string& arg) {
+    g_labGod = std::atoi(arg.c_str()) != 0;
+    net::Log("labgod: %d", g_labGod ? 1 : 0);
+}
+
+// [R10-LABGOD] coop_hithook drops every hit payload aimed at our own pawn while this is
+// on: the 15 Hz top-up alone lost to a brigand burst (run 11: guest died, party wipe).
+bool LabGodOn() { return g_labGod; }
+
+void InjectTick() {
+    if (g_labGod) {
+        ue::UObject* pawn = net::Pawn();
+        bool dead = false;
+        const double hp = net::Valid(pawn) ? combat::HealthNorm(pawn, &dead) : -1.0;
+        if (!dead && hp >= 0.0 && hp < 0.9) combat::SetHealthNorm(pawn, 1.0);
+    }
+    if (g_inject.empty()) return;
+    const double now = net::Now();
+    for (size_t i = 0; i < g_inject.size();) {
+        if (now < g_inject[i].until) { ++i; continue; }
+        const bool ok = StopInject(g_inject[i].sub, g_inject[i].action);
+        net::Log("inject: %s released stop=%d montage=%s", g_inject[i].name.c_str(), ok ? 1 : 0,
+                 MontageNow(nullptr).c_str());
+        g_inject.erase(g_inject.begin() + (std::ptrdiff_t)i);
+    }
+}
+
+void InjectReset() { g_inject.clear(); }
+
+// ===========================================================================
+// [R10-INTERDUMP] interdump [owner-substr] [call <IA-substr>]
+//   The NPC interaction handlers near us: which InputAction each one expects, whether it
+//   is locked / has input bound, and the game's OWN CanFocus / IsRelevant verdict with its
+//   failure text.  `call` hands that InputAction to HandleInteractEvent on the nearest one
+//   (the path the bound input takes).  Read-only otherwise.  Lab verb.
+// ===========================================================================
+void InterDump(const std::string& arg) {
+    std::vector<std::string> f = Split(arg);
+    std::string want, callIA;
+    bool goTrigger = false;
+    bool haveTrig = false;
+    Vec3 trigLoc;
+    for (size_t i = 0; i < f.size(); ++i) {
+        if (f[i] == "call" && i + 1 < f.size()) { callIA = f[i + 1]; ++i; }
+        else if (f[i] == "go") goTrigger = true;
+        else want = f[i];
+    }
+    ue::UObject* pawn = net::Pawn();
+    const Vec3 me = net::Loc(pawn);
+    struct Cand { ue::UObject* c; ue::UObject* owner; double d; };
+    std::vector<Cand> cs;
+    for (ue::UObject* c : ue::FindAllOf("BPC_InteractionHandler_C")) {
+        if (!net::Valid(c)) continue;
+        ue::UObject* owner = ue::GetOuter(c);
+        if (!net::Valid(owner)) continue;
+        if (!want.empty() && ue::GetName(owner).find(want) == std::string::npos) continue;
+        cs.push_back({c, owner, Dist(me, net::Loc(owner))});
+    }
+    std::sort(cs.begin(), cs.end(), [](const Cand& a, const Cand& b) { return a.d < b.d; });
+    net::Log("interdump: %d handler(s) match '%s'", (int)cs.size(), want.c_str());
+
+    auto verdict = [](ue::UObject* c, const char* fn, std::string* why) -> int {
+        ue::UFunction* f = ue::FindFunction(c, fn);
+        if (!f) return -1;
+        ue::Params p(f);
+        if (!ue::Call(c, f, p.data())) return -2;
+        *why = ue::ToUtf8(p.Get<ue::FString>("FailureReasons"));
+        return p.Get<bool>("ReturnValue") ? 1 : 0;
+    };
+
+    const size_t shown = std::min<size_t>(cs.size(), 4);
+    for (size_t i = 0; i < shown; ++i) {
+        ue::UObject* c = cs[i].c;
+        std::string acts;
+        const int32_t offA = ue::PropOffset(c, "Actions");
+        if (offA >= 0) {
+            ue::TArray<uint8_t> arr{};
+            ue::ReadMem(reinterpret_cast<uint8_t*>(c) + offA, &arr, sizeof(arr));
+            for (int32_t k = 0; k < arr.Num && k < 8 && arr.Data; ++k) {
+                ue::FName id{};
+                ue::UObject* ia = nullptr;
+                ue::ReadMem(arr.Data + k * 0x40, &id, sizeof(id));
+                ue::ReadMem(arr.Data + k * 0x40 + 0x38, &ia, sizeof(ia));
+                acts += net::Fmt("%s->%s ", ue::ToString(id).c_str(),
+                                 net::Valid(ia) ? ue::GetName(ia).c_str() : "-");
+            }
+        }
+        int32_t handles = -1;
+        const int32_t offH = ue::PropOffset(c, "InputHandles");
+        if (offH >= 0) {
+            ue::TArray<uint8_t> h{};
+            ue::ReadMem(reinterpret_cast<uint8_t*>(c) + offH, &h, sizeof(h));
+            handles = h.Num;
+        }
+        std::string whyF, whyR;
+        const int canF = verdict(c, "CanFocus", &whyF);
+        const int rel = verdict(c, "IsRelevant", &whyR);
+        net::Log("interdump: [%d] %s d=%.0f locked=%d handles=%d relevant=%d(%s) focus=%d(%s) actions: %s",
+                 (int)i, ue::GetName(cs[i].owner).c_str(), cs[i].d,
+                 ue::GetBool(c, "InteractionLocked") ? 1 : 0, handles, rel, whyR.c_str(), canF,
+                 whyF.c_str(), acts.c_str());
+
+        // the focus conditions: a TriggerOverlap one names the box the player must stand in
+        const int32_t offC = ue::PropOffset(c, "FocusConditions");
+        if (offC >= 0) {
+            ue::TArray<ue::UObject*> conds{};
+            ue::ReadMem(reinterpret_cast<uint8_t*>(c) + offC, &conds, sizeof(conds));
+            for (int32_t k = 0; k < conds.Num && k < 6 && conds.Data; ++k) {
+                ue::UObject* cond = nullptr;
+                ue::ReadMem(conds.Data + k, &cond, sizeof(cond));
+                if (!net::Valid(cond)) continue;
+                ue::UObject* trig = nullptr;
+                ue::Get<ue::UObject*>(cond, "Trigger", trig);
+                Vec3 tl;
+                bool got = false;
+                if (net::Valid(trig)) {
+                    if (ue::UFunction* gl = ue::FindFunction(trig, "K2_GetComponentLocation")) {
+                        ue::Params gp(gl);
+                        if (ue::Call(trig, gl, gp.data())) {
+                            const ue::FVector v = gp.Get<ue::FVector>("ReturnValue");
+                            tl.X = v.X; tl.Y = v.Y; tl.Z = v.Z;
+                            got = true;
+                        }
+                    }
+                }
+                net::Log("interdump:     cond %s trigger=%s at (%s) d=%.0f", ue::GetClassName(cond).c_str(),
+                         net::Valid(trig) ? ue::GetName(trig).c_str() : "-",
+                         got ? Where(tl).c_str() : "-", got ? Dist(me, tl) : -1.0);
+                if (i == 0 && got && !haveTrig) { trigLoc = tl; haveTrig = true; }
+            }
+        }
+    }
+
+    if (goTrigger && haveTrig && net::Valid(pawn)) {
+        net::Log("interdump: go -> trigger (%s)", Where(trigLoc).c_str());
+        puppet::StartTp(pawn, trigLoc.X, trigLoc.Y, trigLoc.Z + 50.0);
+        if (!cs.empty()) {
+            const Vec3 o = net::Loc(cs[0].owner);
+            const double yaw = std::atan2(o.Y - trigLoc.Y, o.X - trigLoc.X) * 180.0 / 3.14159265358979323846;
+            ue::FRotator r{};
+            r.Yaw = yaw;
+            if (ue::UFunction* fr = ue::FindFunction(pawn, "K2_SetActorRotation")) {
+                ue::Params pr(fr);
+                pr.Set<ue::FRotator>("NewRotation", r);
+                pr.Set<bool>("bTeleportPhysics", true);
+                ue::Call(pawn, fr, pr.data());
+            }
+            if (ue::UObject* pc = net::PC()) {
+                if (ue::UFunction* fc = ue::FindFunction(pc, "SetControlRotation")) {
+                    ue::Params pc2(fc);
+                    pc2.Set<ue::FRotator>("NewRotation", r);
+                    ue::Call(pc, fc, pc2.data());
+                }
+            }
+        }
+    }
+
+    if (!callIA.empty() && !cs.empty()) {
+        std::string exact;
+        ue::UObject* ia = FindInputAction(callIA, &exact);
+        ue::UFunction* fn = ue::FindFunction(cs[0].c, "HandleInteractEvent");
+        bool ok = false;
+        if (ia && fn) {
+            ue::Params p(fn);
+            p.Set<ue::UObject*>("InputAction", ia);
+            ok = ue::Call(cs[0].c, fn, p.data());
+        }
+        net::Log("interdump: HandleInteractEvent(%s) on %s fn=%d ia=%d call=%d", exact.c_str(),
+                 ue::GetName(cs[0].owner).c_str(), fn ? 1 : 0, ia ? 1 : 0, ok ? 1 : 0);
+    }
 }
 
 }  // namespace area

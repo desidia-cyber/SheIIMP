@@ -3229,6 +3229,16 @@ void RunCommands() {
             area::EnemyDump(rest);
         } else if (cmd == "weaponstate") {
             area::WeaponState(rest);
+        } else if (cmd == "ialist") {
+            area::InputList(rest);
+        } else if (cmd == "inject") {
+            area::Inject(rest);
+        } else if (cmd == "labgod") {
+            area::LabGod(rest);
+        } else if (cmd == "interdump") {      // [R10-INTERDUMP]
+            area::InterDump(rest);
+        } else if (cmd == "areacomp") {       // [R10-INTERDUMP]
+            area::Comp(rest);
         // [R9-AREA] end
         // [R8-APPEAR] begin -- the game's own equipment writers (coop_equip.cpp):
         // shell / skin / mask / clothing / dark form on the LOCAL player, so the
@@ -3514,6 +3524,7 @@ void Loop2(double /*dt*/) {
 
 // 1 Hz -- main.lua:4023-4028.
 void Loop1(double /*dt*/) {
+    steam::GuardTick();   // [R10-STEAMGUARD]
     ++g_hb;
     Heartbeat();
 }

@@ -67,6 +67,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <utility>
 #include <vector>
@@ -83,6 +84,10 @@ inline dialog::State& D() { return state().dialog; }
 
 bool Valid(ue::UObject* o) { return o != nullptr && ue::IsValid(o); }
 double Now() { return net::Now(); }
+
+// [R10-CINEDEATH] last time a cinematic was seen running here: our own sample, a replay
+// of the peer's, or the peer being busy in one.  coop_death asks it (CinematicRecent).
+double g_cineSeenAt = -1.0e9;
 
 // Wall-clock milliseconds (system clock).  BOTH clients run on this one PC, so a
 // timestamp one side puts on the wire is directly comparable on the other -- that is
@@ -436,18 +441,149 @@ bool InZoneWithPeer() { return !zone::Paused(); }
 // ---------------------------------------------------------------------------
 // engine helpers: dialogue subsystem / asset / nodes
 // ---------------------------------------------------------------------------
+// [R10-DLGSUB] The first DialogueSubsystem seen at boot is the FRONT-END world's (it
+// stays Valid -- not GC'd soon enough), so real NPC talks in the game world never
+// showed up in ActiveDialogues.  The cache now must belong to the CURRENT world
+// (UWorldSubsystem's outer is its UWorld); else it is rescanned (throttled 1 s).
+// Kill switch DLGSUB_OFF.txt restores the old first-found behaviour.
+static int g_dlgSubOff = -1;
+static double g_dlgSubScanAt = -100.0;
+static void AdoptDlgSub(ue::UObject* sub) {
+    g_dlgSub = sub;
+    g_dlgArrOff = kActiveDialogues;
+    if (Valid(g_dlgSub)) {
+        const i32 off = ue::PropOffset(g_dlgSub, "ActiveDialogues");
+        if (off >= 0) g_dlgArrOff = off;
+        net::Log("dlg: DialogueSubsystem=%s ActiveDialogues@0x%x", net::NameOf(g_dlgSub).c_str(),
+                 (unsigned)g_dlgArrOff);
+    }
+}
 ue::UObject* DialogueSubsystem() {
-    if (!Valid(g_dlgSub)) {
-        g_dlgSub = ue::FindFirstOf("DialogueSubsystem");
-        g_dlgArrOff = kActiveDialogues;
-        if (Valid(g_dlgSub)) {
-            const i32 off = ue::PropOffset(g_dlgSub, "ActiveDialogues");
-            if (off >= 0) g_dlgArrOff = off;
-            net::Log("dlg: DialogueSubsystem=%s ActiveDialogues@0x%x", net::NameOf(g_dlgSub).c_str(),
-                     (unsigned)g_dlgArrOff);
+    if (g_dlgSubOff < 0) g_dlgSubOff = net::FileExists("DLGSUB_OFF.txt") ? 1 : 0;
+    if (g_dlgSubOff == 1) {
+        if (!Valid(g_dlgSub)) AdoptDlgSub(ue::FindFirstOf("DialogueSubsystem"));
+        return Valid(g_dlgSub) ? g_dlgSub : nullptr;
+    }
+    ue::UObject* world = net::World();
+    const bool cur = Valid(g_dlgSub) && world != nullptr && ue::GetOuter(g_dlgSub) == world;
+    if (!cur && Now() - g_dlgSubScanAt >= 1.0) {
+        g_dlgSubScanAt = Now();
+        ue::UObject* pick = nullptr;
+        for (ue::UObject* o : ue::FindAllOf("DialogueSubsystem")) {
+            if (!Valid(o)) continue;
+            if (net::NameOf(o).rfind("Default__", 0) == 0) continue;
+            if (world != nullptr && ue::GetOuter(o) == world) { pick = o; break; }
+        }
+        if (pick != nullptr && pick != g_dlgSub) {
+            net::Log("dlg: [R10-DLGSUB] the cached subsystem is not the current world's -- switching");
+            AdoptDlgSub(pick);
         }
     }
     return Valid(g_dlgSub) ? g_dlgSub : nullptr;
+}
+
+// [R10-DLGCTX] Rig test 2026-11-27, Savegame #1: Zhirelle / Genessa / Louis talk on screen,
+// but DialogueSubsystem.ActiveDialogues stays EMPTY -- those talks run as a bare Dlg-plugin
+// UDlgContext (outer = the player character).  So when the subsystem has nothing, a live
+// context (HasDialogueEnded()==false) is the conversation; the NPC is its non-pawn
+// participant, and its "Dialogue Instigator Component" stands in for the instigator.
+// Kill switch DLGCTX_OFF.txt (read at dialog::Start).
+static int g_dlgCtxOff = -1;
+static int g_dlgCtxLogs = 0;
+// [R10-DLGCTX] A context only counts when it appeared within kEngageWindow s of a LOCAL
+// interaction (rig 2026-11-27: Dlg_Shellkeeper_ShellReaction_Greeting and
+// Dlg_Genessa_Training_Intro start by walking into the NPC's trigger, never end on
+// their own, and would hold the partner "busy" for as long as you stand there).
+// The interaction is seen through two name-keyed ProcessEvent hooks: the handler's
+// HandleInteractEvent and BP_NPC's bound OnInteraction event (a delegate broadcast,
+// so it always goes through ProcessEvent).  They never skip anything.
+constexpr double kEngageWindow = 5.0;
+static double g_interactAt = -100.0;
+static bool g_interactHooked = false;
+struct CtxSeen { double first = 0.0; double last = 0.0; bool engaged = false; };
+static std::unordered_map<ue::UObject*, CtxSeen> g_ctxSeen;
+static bool InteractSeen(ue::UObject* self, ue::UFunction*, void*) {
+    const std::string cls = net::NameOf(reinterpret_cast<ue::UObject*>(ue::GetClass(self)));
+    if (cls.find("InteractionHandler") != std::string::npos || cls.find("NPC") != std::string::npos) {
+        g_interactAt = Now();
+    }
+    return false;   // observe only
+}
+static void HookInteract() {
+    if (g_interactHooked) return;
+    g_interactHooked = true;
+    ue::HookPreSkipName("HandleInteractEvent", &InteractSeen);
+    ue::HookPreSkipName("BndEvt__BP_NPC_BPC_InteractionHandler_K2Node_ComponentBoundEvent_0_OnInteraction__DelegateSignature",
+                        &InteractSeen);
+    net::Log("dlg: [R10-DLGCTX] interaction hooks on (HandleInteractEvent, BP_NPC OnInteraction)");
+}
+constexpr i32 kCtxDialogue = 0x38;       // UDlgContext::Dialogue
+constexpr i32 kCtxSerialParts = 0x40;    // UDlgContext::SerializedParticipants
+bool ContextDialogue(ue::UObject** ctxOut, ue::UObject** assetOut, ue::UObject** instOut,
+                     std::string* ownerPath) {
+    if (g_dlgCtxOff < 0) g_dlgCtxOff = net::FileExists("DLGCTX_OFF.txt") ? 1 : 0;
+    if (g_dlgCtxOff == 1) return false;
+    HookInteract();
+    ue::UObject* pawn = net::Pawn();
+    ue::UObject* best = nullptr;
+    double bestFirst = -1.0;
+    const double now = Now();
+    for (ue::UObject* c : ue::FindAllOf("DlgContext")) {
+        if (!Valid(c)) continue;
+        if (net::NameOf(c).rfind("Default__", 0) == 0) continue;
+        // only OUR player's talks (the context's outer is the player it was started for)
+        if (pawn != nullptr && ue::GetOuter(c) != pawn) continue;
+        CtxSeen& seen = g_ctxSeen[c];
+        if (seen.first == 0.0) {
+            seen.first = now;
+            seen.engaged = now - g_interactAt <= kEngageWindow;
+        }
+        seen.last = now;
+        if (!seen.engaged) continue;
+        Fn ended(c, "HasDialogueEnded");
+        if (!ended.ok() || !ended.run() || ended.get<bool>("ReturnValue")) continue;
+        Fn node(c, "GetActiveNodeIndex");
+        if (node.ok() && node.run() && node.get<i32>("ReturnValue") < 0) continue;
+        if (seen.first > bestFirst) { best = c; bestFirst = seen.first; }   // the newest talk
+    }
+    for (auto it = g_ctxSeen.begin(); it != g_ctxSeen.end();) {
+        if (now - it->second.last > 30.0) it = g_ctxSeen.erase(it); else ++it;
+    }
+    if (!best) return false;
+    ue::UObject* asset = nullptr;
+    if (!ue::Get<ue::UObject*>(best, "Dialogue", asset) || !Valid(asset)) {
+        asset = nullptr;
+        ue::ReadMem(reinterpret_cast<const std::uint8_t*>(best) + kCtxDialogue, &asset, sizeof(asset));
+    }
+    ue::UObject* npc = nullptr;
+    ObjArr parts;
+    if (ReadArr(best, "SerializedParticipants", kCtxSerialParts, &parts)) {
+        const int n = std::min((int)parts.num, 8);
+        for (int k = 0; k < n; ++k) {
+            ue::UObject* o = nullptr;
+            ue::ReadMem(reinterpret_cast<const std::uint8_t*>(parts.data) + k * 8, &o, sizeof(o));
+            if (!Valid(o) || o == pawn) continue;
+            npc = o;
+            break;
+        }
+    }
+    ue::UObject* inst = nullptr;
+    if (Valid(npc)) {
+        ue::Get<ue::UObject*>(npc, "Dialogue Instigator Component", inst);
+        if (!Valid(inst)) inst = nullptr;
+    }
+    if (ctxOut) *ctxOut = best;
+    if (assetOut) *assetOut = Valid(asset) ? asset : nullptr;
+    if (instOut) *instOut = inst;
+    if (ownerPath != nullptr && Valid(npc)) *ownerPath = net::AssetPath(npc);
+    if (g_dlgCtxLogs < 6) {
+        ++g_dlgCtxLogs;
+        net::Log("dlg: [R10-DLGCTX] live context %s asset=%s npc=%s inst=%s parts=%d (subsystem list empty)",
+                 net::NameOf(best).c_str(), Valid(asset) ? net::NameOf(asset).c_str() : "-",
+                 Valid(npc) ? net::NameOf(npc).c_str() : "-", inst ? net::NameOf(inst).c_str() : "-",
+                 (int)parts.num);
+    }
+    return true;
 }
 
 bool ActiveDialogue(ue::UObject** ctxOut, ue::UObject** assetOut, ue::UObject** instOut,
@@ -456,10 +592,11 @@ bool ActiveDialogue(ue::UObject** ctxOut, ue::UObject** assetOut, ue::UObject** 
     if (assetOut) *assetOut = nullptr;
     if (instOut) *instOut = nullptr;
     ue::UObject* sub = DialogueSubsystem();
-    if (!sub) return false;
     ObjArr arr;
-    if (!ReadArr(sub, "ActiveDialogues", g_dlgArrOff, &arr)) return false;
-    if (arr.num <= 0) return false;
+    if (!sub || !ReadArr(sub, "ActiveDialogues", g_dlgArrOff, &arr) || arr.num <= 0) {
+        // [R10-DLGCTX] NPC talks (BP_NPC_C -> TryStartDlg) never enter ActiveDialogues
+        return ContextDialogue(ctxOut, assetOut, instOut, ownerPath);
+    }
     if (arr.num > kDlgElemMax) arr.num = kDlgElemMax;
 
     const i32 esize = ue::PropSize(sub, "ActiveDialogues");
@@ -1036,6 +1173,7 @@ bool StartCinematicReplay(ue::UObject* actor, int elapsedMs) {
         }
     }
     ++g_replayStarts;
+    g_cineSeenAt = Now();   // [R10-CINEDEATH]
     if (g_replayLogs < 8) {
         ++g_replayLogs;
         net::Log("cine: REPLAY started on %s (elapsed=%dms) -- world event suppressed on this "
@@ -1245,7 +1383,12 @@ void NoteSkip(int what) {
 
 void NoteApplyAt() { g_lastApplyAt = Now(); }
 
+// [R10-CINEDEATH] a cinematic ran here (ours, a replay, or the peer's) within `window` s
+bool CinematicRecent(double window) { return Now() - g_cineSeenAt <= window; }
+
 void Start() {
+    g_dlgSubOff = -1;
+    g_dlgCtxOff = -1;
     D() = dialog::State();
     g_mine = dialog::LockState();
     g_real = dialog::LockState();
@@ -1337,6 +1480,7 @@ void SampleLocal() {
             }
         }
         if (playing > 0) {
+            g_cineSeenAt = Now();   // [R10-CINEDEATH]
             real.active = 1;
             real.kind = 2;
             real.at = Now();
@@ -1855,6 +1999,13 @@ void CinematicReplayTick() {
     const std::string name = g_cinePendingName;
     const int elapsed = g_cinePendingElapsed;
     if (g_mine.active && g_mine.kind == 2) return;    // already playing our own
+    // [R10-CINEECHO] a request queued while OUR cinematic was still running (run
+    // r10_boss5: elapsed 20.4 s, consumed 0.1 s after ours ended) is the same echo
+    if (!net::FileExists("CINEECHO_OFF.txt") && g_mineLastKind == 2 &&
+        Now() - g_mineEndedAt < 3.0 && elapsed > 3000) {
+        net::Log("cine: [R10-CINEECHO] queued peer cinematic at %dms dropped -- ours just ended", elapsed);
+        return;
+    }
     ue::UObject* actor = FindCinematicActor(name);
     if (!Valid(actor)) {
         if (g_replayLogs < 8) {
@@ -2140,6 +2291,7 @@ void JudgePeer() {
     static int listenAtStart = 0;
 
     if (fresh && s.peer.active) {
+        if (s.peer.kind == 2) g_cineSeenAt = Now();   // [R10-CINEDEATH]
         if (epKind == 0) {
             epKind = s.peer.kind == 2 ? 2 : 1;
             epStart = Now();
@@ -2269,13 +2421,26 @@ void OnPeerLine(const std::string& line) {
                 s.peerKnown = true;
                 g_peerSeenAt = Now();
                 // start the replay on the next tick (engine work belongs in Tick2)
-                if (!wasCine || g_cineSeq != seq) {
+                // [R10-CINEECHO] measured (r10_npcboss 4): the host's own boss intro
+                // ended, then the guest's replay -- still flagged active by its 15 Hz
+                // poll for one more line -- made the host "late join" its own cinematic
+                // at 20.2 s.  A peer cinematic far into its run, right after OUR own
+                // cinematic ended, is that echo.  coop\CINEECHO_OFF.txt disables.
+                static int echoOff = -1;
+                if (echoOff < 0) echoOff = net::FileExists("CINEECHO_OFF.txt") ? 1 : 0;
+                const bool echo = !echoOff && !g_mine.active && g_mineLastKind == 2 &&
+                                  Now() - g_mineEndedAt < 3.0 && s.peer.elapsedMs > 3000;
+                if (echo) {
+                    net::Log("cine: [R10-CINEECHO] peer cinematic at %dms right after ours ended -- echo, not replayed",
+                             s.peer.elapsedMs);
+                } else if (!wasCine || g_cineSeq != seq) {
                     g_cinePendingName = s.peer.name;
                     g_cinePendingElapsed = s.peer.elapsedMs;
                     g_cinePending = true;
                 }
             } else if (!hasDl || s.peer.kind == 2) {
                 const bool wasCine = s.peer.active && s.peer.kind == 2;
+                g_cinePending = false;   // [R10-CINEECHO] a queued replay of a stopped sequence must not start
                 s.peer.active = 0;
                 s.peer.kind = 0;
                 s.peer.seq = seq;
@@ -2511,6 +2676,80 @@ void CmdDumpImpl() {
              seqName.empty() ? "-" : seqName.c_str(), Valid(HudDialogueWidget()) ? 1 : 0,
              choice.empty() ? "-" : choice.c_str());
     net::Log("dlgdump: %s", dialog::Status().c_str());
+    // [R10-DLGSUB] every subsystem, which world it belongs to, and how many talks it holds
+    {
+        ue::UObject* world = net::World();
+        for (ue::UObject* o : ue::FindAllOf("DialogueSubsystem")) {
+            if (!Valid(o)) continue;
+            ObjArr a;
+            const bool ok = ReadArr(o, "ActiveDialogues", g_dlgArrOff, &a);
+            net::Log("dlgdump: sub %s outer=%s curWorld=%d cached=%d active=%d", net::NameOf(o).c_str(),
+                     net::NameOf(ue::GetOuter(o)).c_str(), ue::GetOuter(o) == world ? 1 : 0,
+                     o == g_dlgSub ? 1 : 0, ok ? (int)a.num : -1);
+        }
+        {
+            ue::UObject* o = g_dlgSub;
+            if (Valid(o)) {
+                i32 off = ue::PropOffset(o, "ActiveDialogues");
+                ObjArr raw;
+                ue::ReadMem(reinterpret_cast<const std::uint8_t*>(o) + (off >= 0 ? off : g_dlgArrOff), &raw, sizeof(raw));
+                net::Log("dlgdump: raw ActiveDialogues propOff=%d data=%p num=%d max=%d plausible=%d esize=0x%x",
+                         (int)off, raw.data, (int)raw.num, (int)raw.max, raw.data ? (ue::PlausiblePtr(raw.data) ? 1 : 0) : -1,
+                         (unsigned)ue::PropSize(o, "ActiveDialogues"));
+            }
+        }
+        int nctx = 0;
+        for (ue::UObject* c : ue::FindAllOf("DlgContext")) {
+            if (!Valid(c) || ++nctx > 6) continue;
+            int ended = -1, node = -99, opts = -1;
+            { Fn f(c, "HasDialogueEnded"); if (f.ok() && f.run()) ended = f.get<bool>("ReturnValue") ? 1 : 0; }
+            { Fn f(c, "GetActiveNodeIndex"); if (f.ok() && f.run()) node = (int)f.get<i32>("ReturnValue"); }
+            { Fn f(c, "GetOptionsNum"); if (f.ok() && f.run()) opts = (int)f.get<i32>("ReturnValue"); }
+            ue::UObject* asset = nullptr;
+            ue::Get<ue::UObject*>(c, "Dialogue", asset);
+            std::string ps;
+            ObjArr parts;
+            if (ReadArr(c, "SerializedParticipants", 0x40, &parts)) {
+                for (int k = 0; k < std::min((int)parts.num, 6); ++k) {
+                    ue::UObject* o = nullptr;
+                    ue::ReadMem(reinterpret_cast<const std::uint8_t*>(parts.data) + k * 8, &o, sizeof(o));
+                    if (!Valid(o)) continue;
+                    ps += " " + net::NameOf(o);
+                    ue::UObject* inst = nullptr;
+                    if (ue::Get<ue::UObject*>(o, "Dialogue Instigator Component", inst) && Valid(inst)) {
+                        ue::UObject* cur = nullptr;
+                        bool dis = false, trig = false;
+                        ue::Get<ue::UObject*>(inst, "DlgDialogue", cur);
+                        ue::Get<bool>(inst, "bDisablePlayerInput", dis);
+                        ue::Get<bool>(inst, "WasTriggered", trig);
+                        ps += "{instDlg=" + (Valid(cur) ? net::NameOf(cur) : std::string("-")) +
+                              " disInput=" + (dis ? "1" : "0") + " trig=" + (trig ? "1" : "0") + "}";
+                    }
+                }
+            }
+            if (Valid(asset)) {
+                // UDlgDialogue::DialogueTags @0x28, CancelDialogueTags @0x48 (TArray<FGameplayTag>)
+                for (int which = 0; which < 2; ++which) {
+                    ObjArr tg;
+                    const char* pn = which == 0 ? "DialogueTags" : "CancelDialogueTags";
+                    i32 off = ue::PropOffset(asset, pn);
+                    if (off < 0) off = which == 0 ? 0x28 : 0x48;
+                    if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(asset) + off, &tg, sizeof(tg))) continue;
+                    std::string ts;
+                    for (int k = 0; k < std::min((int)tg.num, 8) && tg.data; ++k) {
+                        ue::FName n{};
+                        ue::ReadMem(reinterpret_cast<const std::uint8_t*>(tg.data) + k * sizeof(ue::FName), &n, sizeof(n));
+                        ts += " " + ue::ToString(n);
+                    }
+                    net::Log("dlgdump:   %s %s n=%d [%s ]", net::NameOf(asset).c_str(), pn, (int)tg.num, ts.c_str());
+                }
+            }
+            net::Log("dlgdump: DlgContext %s outer=%s ended=%d node=%d opts=%d asset=%s parts=[%s ]",
+                     net::NameOf(c).c_str(), net::NameOf(ue::GetOuter(c)).c_str(), ended, node, opts,
+                     Valid(asset) ? net::NameOf(asset).c_str() : "-", ps.c_str());
+        }
+        net::Log("dlgdump: DlgContext objects=%d", nctx);
+    }
 }
 
 // dlgstart [class] -- the GAME's own conversation start on the nearest dialogue

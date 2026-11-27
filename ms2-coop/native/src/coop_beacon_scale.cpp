@@ -48,6 +48,17 @@ int g_cinSkipVote = 0;
 int g_lastPeerCinSeq = 0;
 int g_cinReplayed = 0;
 int g_cinSkipped = 0;
+// [R10-SKIPVOTE] a skip vote is the player PRESSING skip (WBP_SkipInput.bIsPressed), latched
+// for the rest of that cinematic -- never the prompt merely being visible.  The prompt is
+// visible from the first frame on both clients, so the old rule skipped every shared
+// cinematic at once (rig 2026-11-27: CIN_DwarfBoss_01 skipped at t=0, the boss intro broke).
+// coop\SKIPVOTE_OFF.txt: no co-op skip vote at all (each player's own skip stays local).
+std::string g_cinVoteTail;      // the cinematic our latched vote belongs to
+int g_peerCinActive = 0;        // the peer's last "cin" (re-checked every tick, not only on receipt)
+int g_peerCinSkip = 0;
+std::string g_peerCinTail;
+std::string g_cinSkippedTail;   // skip only once per cinematic
+int g_skipVoteOff = -1;
 
 // --- Difficulty scaling state ---
 struct ScaledEnemy {
@@ -128,33 +139,51 @@ void SampleLocalBeacon() {
 }
 
 void SampleLocalCutscene() {
+    if (g_skipVoteOff < 0) {
+        g_skipVoteOff = net::FileExists("SKIPVOTE_OFF.txt") ? 1 : 0;
+        if (g_skipVoteOff) net::Log("cutscene: SKIPVOTE_OFF.txt present -- no co-op skip vote");
+    }
     UObject* activeCin = nullptr;
-    int skipVote = 0;
+    bool pressed = false;
     for (UObject* c : ue::FindAllOf("BP_CinematicPlayer_C")) {
         if (!Live(c)) continue;
         UObject* seqActor = nullptr;
         if (ue::Get<UObject*>(c, "CutsceneActor", seqActor) && Live(seqActor)) {
             activeCin = c;
-            // Check if local skip input widget is visible / active
             UObject* skipW = nullptr;
             if (ue::Get<UObject*>(c, "WBP_SkipInput", skipW) && Live(skipW)) {
-                if (UFunction* fnVis = ue::FindFunction(skipW, "IsVisible")) {
-                    ue::Params p(fnVis);
-                    if (ue::Call(skipW, fnVis, p.data()) && p.Get<bool>("ReturnValue")) {
-                        skipVote = 1;
-                    }
-                }
+                pressed = ue::GetBool(skipW, "bIsPressed");
             }
             break;
         }
     }
     const std::string tail = activeCin ? net::Tail(activeCin) : "";
     const int active = activeCin ? 1 : 0;
+    // [R10-SKIPVOTE] latch: once pressed during this cinematic, the vote stays
+    if (tail != g_cinVoteTail) g_cinVoteTail.clear();
+    if (pressed && !tail.empty() && !g_skipVoteOff) {
+        if (g_cinVoteTail != tail) net::Log("cutscene: local skip vote (skip pressed) on %s", tail.c_str());
+        g_cinVoteTail = tail;
+    }
+    const int skipVote = (!tail.empty() && g_cinVoteTail == tail) ? 1 : 0;
     if (tail != g_cinTail || active != g_cinActive || skipVote != g_cinSkipVote) {
         g_cinTail = tail;
         g_cinActive = active;
         g_cinSkipVote = skipVote;
         ++g_cinSeq;
+    }
+    if (tail.empty()) g_cinSkippedTail.clear();
+
+    // both votes in, same cinematic, not yet skipped -> skip together, once
+    if (!g_skipVoteOff && skipVote == 1 && g_peerCinActive == 1 && g_peerCinSkip == 1 &&
+        g_peerCinTail == tail && g_cinSkippedTail != tail) {
+        if (UFunction* fn = ue::FindFunction(activeCin, "EndCutsceneBySkip")) {
+            ue::Params p(fn);
+            ue::Call(activeCin, fn, p.data());
+            ++g_cinSkipped;
+            g_cinSkippedTail = tail;
+            net::Log("cutscene: both players pressed skip -> EndCutsceneBySkip() on %s", tail.c_str());
+        }
     }
 }
 
@@ -200,21 +229,11 @@ void ApplyPeerBeacon(int seq, const std::string& tail, int st) {
 void ApplyPeerCutscene(int seq, const std::string& tail, int active, int peerSkip) {
     if (seq <= g_lastPeerCinSeq) return;
     g_lastPeerCinSeq = seq;
-    if (tail.empty()) return;
-
-    UObject* c = FindCinematicByTail(tail);
-    if (!Live(c)) return;
-
-    // Cutscene playback start/stop is owned by coop_dialog.cpp ("ci"); this module
-    // only coordinates mutual skip-voting so both players skip together cleanly.
-    if (active == 1 && peerSkip == 1 && g_cinSkipVote == 1) {
-        if (UFunction* fn = ue::FindFunction(c, "EndCutsceneBySkip")) {
-            ue::Params p(fn);
-            ue::Call(c, fn, p.data());
-            ++g_cinSkipped;
-            net::Log("cutscene: both players voted skip -> EndCutsceneBySkip() on %s", tail.c_str());
-        }
-    }
+    // Cutscene playback start/stop is owned by coop_dialog.cpp ("ci"); this module only
+    // keeps the peer's skip vote -- SampleLocalCutscene decides at 2 Hz [R10-SKIPVOTE].
+    g_peerCinTail = tail;
+    g_peerCinActive = active;
+    g_peerCinSkip = peerSkip;
 }
 
 // Scale enemy MaxHealth/Health by kCoopHpScale when peer is present; restore when solo
@@ -310,6 +329,11 @@ void Reset() {
     g_cinActive = 0;
     g_cinSkipVote = 0;
     g_lastPeerCinSeq = 0;
+    g_cinVoteTail.clear();
+    g_peerCinTail.clear();
+    g_peerCinActive = 0;
+    g_peerCinSkip = 0;
+    g_cinSkippedTail.clear();
     g_scaled.clear();
     g_ticketsBoosted = false;
 }

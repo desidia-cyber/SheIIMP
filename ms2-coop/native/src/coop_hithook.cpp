@@ -23,6 +23,11 @@
 #include <windows.h>
 #include "MinHook.h"
 
+#include <atomic>
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -103,6 +108,7 @@ struct OutHit {
     double      hx = 0.0, hy = 0.0, hz = 0.0;
     int         flags = 0;
     double      at = 0.0;
+    std::string pcls;   // payload class name (wire field 12, optional)
 };
 
 std::deque<OutHit> g_outQueue;
@@ -116,6 +122,7 @@ int g_appliedCount = 0;
 int g_vetoCount = 0;
 int g_parryCount = 0;
 int g_failCount = 0;
+std::atomic<int> g_callCount{0};   // [R10-HOOKFIX] every entry into the detour (diagnostic)
 
 std::string EscapeStr(const std::string& s) {
     std::string out;
@@ -251,7 +258,8 @@ bool IsLocalPlayerInstigator(UObject* damageCauser, UObject* instigatingASC) {
 }
 
 void EnqueueHit(const std::string& targetKey, double dmg, double poise, double brk,
-                const std::string& react, int dir, const Vec3& hitLoc, int flags) {
+                const std::string& react, int dir, const Vec3& hitLoc, int flags,
+                const std::string& pcls = std::string()) {
     if (targetKey.empty()) return;
     OutHit h;
     h.seq = g_nextSeq++;
@@ -265,6 +273,7 @@ void EnqueueHit(const std::string& targetKey, double dmg, double poise, double b
     h.hy = hitLoc.Y;
     h.hz = hitLoc.Z;
     h.flags = flags;
+    h.pcls = pcls;
     h.at = Mono();
     g_outQueue.push_back(std::move(h));
     while ((int)g_outQueue.size() > kMaxQueuedHits) g_outQueue.pop_front();
@@ -272,12 +281,16 @@ void EnqueueHit(const std::string& targetKey, double dmg, double poise, double b
     if (flags & kFlagParried) ++g_parryCount;
 }
 
+void QueueLook(UObject* target, const std::string& key, const char* tag, int mode);
+extern int g_localLogged;
+
 // ---------------------------------------------------------------------------
 // Native detour on USpartaHitPayload::ApplyPayloadInstigator
 // ---------------------------------------------------------------------------
 void DetourApplyPayloadInstigator(void* self, void* targetRaw, void* instigatingASCRaw,
                                   const void* hitResult, void* damageCauserRaw,
                                   const void* effectContext) {
+    g_callCount.fetch_add(1, std::memory_order_relaxed);
     if (tl_inRemoteApply || !state().toggles.hitHook || !self || !targetRaw) {
         if (g_origApply) g_origApply(self, targetRaw, instigatingASCRaw, hitResult, damageCauserRaw, effectContext);
         return;
@@ -295,6 +308,12 @@ void DetourApplyPayloadInstigator(void* self, void* targetRaw, void* instigating
 
     UObject* pawn = net::Pawn();
     UObject* pup = puppet::Actor();
+
+    // [R10-LABGOD] lab only: no damage to our own pawn while `labgod 1` is on
+    if (pawn && target == pawn && area::LabGodOn()) {
+        ++g_vetoCount;
+        return;
+    }
 
     // 1. DodgeVeto on enemy -> puppet hits: suppress phantom hits while peer is dodging
     //    or has already moved away from the impact point.
@@ -360,7 +379,16 @@ void DetourApplyPayloadInstigator(void* self, void* targetRaw, void* instigating
     if (key.empty()) return;
 
     const Vec3 loc = net::Loc(target);
-    EnqueueHit(key, (double)dmg, (double)poise, (double)brk, react, (int)dir, loc, flags);
+    const std::string pcls = ue::GetClassName(payload);
+    if (localToEnemy && g_localLogged < 40) {
+        ++g_localLogged;
+        std::string reactTag = ReadTagName(payload, "ReactionTag", kOffReactionTag);
+        net::Log("hithook: local hit %s cls=%s pcls=%s chosen=%s react=%s dmg=%.1f poise=%.1f brk=%.1f dir=%d owned=%d",
+                 key.c_str(), ue::GetClassName(target).c_str(), pcls.c_str(), react.c_str(), reactTag.c_str(),
+                 dmg, poise, brk, (int)dir, state().combat.ownedTails.Has(key) ? 1 : 0);
+        QueueLook(target, key, "local", 0);
+    }
+    EnqueueHit(key, (double)dmg, (double)poise, (double)brk, react, (int)dir, loc, flags, pcls);
 }
 
 // ---------------------------------------------------------------------------
@@ -402,10 +430,60 @@ bool ResolveAndHook() {
     ue::ReadMem(cdo, &vtable, sizeof(vtable));
     const uintptr_t base = ue::GetResolved().imageBase;
 
-    uint8_t code[320] = {};
+    // [R10-HOOKFIX] The exec thunk on this build is ~0x260 bytes: six FFrame::Step
+    // calls (E8 -> rva 0x1620970) and THEN `mov rax,[r14]; mov rdi,[rax+2D0h]; ...;
+    // call rdi`.  The old 320-byte window with an E8 fallback hooked FFrame::Step --
+    // the Blueprint VM's hottest function -- so no hit was ever seen (round 10 run 9).
+    // Read the whole thunk, accept only a vtable slot that is later called through a
+    // register (or FF 90/FF 50), and never fall back to a direct E8 call.
+    uint8_t code[1536] = {};
     if (!ue::ReadMem(reinterpret_cast<const void*>(execAddr), code, sizeof(code))) {
         net::Log("hithook: could not read execApplyPayloadInstigator bytes");
         return false;
+    }
+    {
+        int32_t slotDisp = -1;
+        int slotAt = -1;
+        uint8_t slotReg = 0xFF;
+        for (int i = 0; i + 8 < (int)sizeof(code); ++i) {
+            // mov r64, [rax + disp32]  ->  REX.W(48|4C) 8B modrm(mod=10, rm=000)
+            if ((code[i] == 0x48 || code[i] == 0x4C) && code[i + 1] == 0x8B && (code[i + 2] & 0xC7) == 0x80) {
+                int32_t disp = 0;
+                std::memcpy(&disp, code + i + 3, 4);
+                if (disp >= 0x100 && disp < 0x1000 && (disp & 7) == 0) {
+                    slotDisp = disp;
+                    slotAt = i;
+                    slotReg = (uint8_t)(((code[i + 2] >> 3) & 7) | (code[i] == 0x4C ? 8 : 0));
+                }
+            }
+            // call reg  ->  FF D0+r   or  41 FF D0+r
+            if (slotAt >= 0 && i > slotAt) {
+                uint8_t r = 0xFF;
+                if (code[i] == 0xFF && (code[i + 1] & 0xF8) == 0xD0 && (i == 0 || code[i - 1] != 0x41)) r = code[i + 1] & 7;
+                else if (code[i] == 0x41 && code[i + 1] == 0xFF && (code[i + 2] & 0xF8) == 0xD0) r = (uint8_t)(8 | (code[i + 2] & 7));
+                if (r == slotReg && vtable) {
+                    uintptr_t fnPtr = 0;
+                    if (ue::ReadMem(reinterpret_cast<const void*>(vtable + (uintptr_t)slotDisp), &fnPtr, sizeof(fnPtr)) &&
+                        fnPtr > base && fnPtr < base + 0x0C000000ULL) {
+                        if (MH_CreateHook(reinterpret_cast<LPVOID>(fnPtr),
+                                          reinterpret_cast<LPVOID>(&DetourApplyPayloadInstigator),
+                                          reinterpret_cast<LPVOID*>(&g_origApply)) != MH_OK ||
+                            MH_EnableHook(reinterpret_cast<LPVOID>(fnPtr)) != MH_OK) {
+                            net::Log("hithook: MinHook failed at rva 0x%llX", (unsigned long long)(fnPtr - base));
+                            g_origApply = nullptr;
+                            return false;
+                        }
+                        g_hookTarget = reinterpret_cast<void*>(fnPtr);
+                        g_hookRva = fnPtr - base;
+                        g_vtableRva = (vtable > base) ? (vtable - base) : 0;
+                        net::Log("hithook: hooked ApplyPayloadInstigator rva=0x%llX (vtable rva=0x%llX slot 0x%X via reg call, exec rva=0x%llX)",
+                                 (unsigned long long)g_hookRva, (unsigned long long)g_vtableRva,
+                                 (unsigned)slotDisp, (unsigned long long)(execAddr - base));
+                        return true;
+                    }
+                }
+            }
+        }
     }
 
     uintptr_t targetAddr = 0;
@@ -449,7 +527,9 @@ bool ResolveAndHook() {
         }
     }
 
-    targetAddr = lastVCallTarget ? lastVCallTarget : lastDirectCall;
+    // [R10-HOOKFIX] a direct E8 call in the thunk is FFrame::Step, never the method
+    (void)lastDirectCall;
+    targetAddr = lastVCallTarget;
     if (!targetAddr) {
         net::Log("hithook: could not locate ApplyPayloadInstigator target from exec=0x%llX",
                  (unsigned long long)(execAddr - base));
@@ -509,118 +589,264 @@ void SendGameplayEventTag(UObject* target, const char* tagName, UObject* instiga
     (void)instigator;
 }
 
+// ---------------------------------------------------------------------------
+// [R10-HITSTUN] Remote hit = reaction only.
+//
+// Health already travels on the proven "nhp" lane (lowest copy wins), so a
+// remote hit must NOT deal damage again.  What the receiver lacks is the hit
+// REACTION: the enemy's AI runs here, and a health write raises no stagger.
+// R10's first version called the native ApplyPayloadInstigator unguarded with a
+// zeroed HitResult and the puppet's (uninitialised) ASC: it faulted on every
+// received hit (B log 12:21:52 "tick callback faulted"), left tl_inRemoteApply
+// stuck true (the hook went passive for good) and never played a reaction.
+//
+// Reaction methods (g_reactMode, lab verb `hitmode N`):
+//   1  SendGameplayEventToActor(target, reactTag)
+//   2  HitReactionAnimSet->GetHitReactionAnimation + PlayAnimMontage (pure anim)
+//   3  ApplyPayloadInstigator through ProcessEvent (SEH-guarded) with the LOCAL
+//      pawn's ASC and a duplicate of the sender's payload class, zero health dmg
+//   0  off
+// ---------------------------------------------------------------------------
+int g_reactMode = 3;
+int g_skipMirror = 0;
+int g_reactOk = 0;
+
+struct PendingLook {
+    UObject*    target = nullptr;
+    std::string key;
+    std::string before;
+    std::string tag;     // "local" real local hit, "rx" remote, "lab" hitreact verb
+    int         mode = 0;
+    double      at = 0.0;
+    int         stage = 0;
+};
+std::vector<PendingLook> g_looks;
+int g_localLogged = 0;
+
+std::string MontageOf(UObject* a) {
+    if (!Live(a)) return "";
+    UFunction* fn = ue::FindFunction(a, "GetCurrentMontage");
+    if (!fn) return "";
+    ue::Params p(fn);
+    if (!ue::Call(a, fn, p.data())) return "";
+    UObject* m = p.Get<UObject*>("ReturnValue");
+    if (!Live(m)) return "-";
+    return net::Tail(m);
+}
+
+void QueueLook(UObject* target, const std::string& key, const char* tag, int mode) {
+    if (g_looks.size() > 24) return;
+    PendingLook l;
+    l.target = target;
+    l.key = key;
+    l.before = MontageOf(target);
+    l.tag = tag;
+    l.mode = mode;
+    l.at = Mono();
+    g_looks.push_back(l);
+}
+
+void TickLooks() {
+    const double now = Mono();
+    for (size_t i = 0; i < g_looks.size();) {
+        PendingLook& l = g_looks[i];
+        const double wait = (l.stage == 0) ? 0.12 : 0.6;
+        if (now - l.at < wait) { ++i; continue; }
+        const std::string m = Live(l.target) ? MontageOf(l.target) : "<gone>";
+        const bool reacted = (m != l.before && m != "-" && !m.empty() && m != "<gone>");
+        net::Log("hitlook %s mode=%d %s +%.2fs montage %s -> %s%s", l.tag.c_str(), l.mode,
+                 l.key.c_str(), now - l.at, l.before.c_str(), m.c_str(), reacted ? "  [REACTED]" : "");
+        if (l.stage == 0) { l.stage = 1; ++i; continue; }
+        g_looks.erase(g_looks.begin() + (std::ptrdiff_t)i);
+    }
+}
+
+struct EvData {   // FGameplayEventData, 0xB0
+    ue::FName tag;
+    UObject*  instigator;
+    UObject*  target;
+    UObject*  opt1;
+    UObject*  opt2;
+    uint8_t   rest[0xB0 - 0x28];
+};
+static_assert(sizeof(EvData) == 0xB0, "FGameplayEventData size");
+
+bool ReactByEvent(UObject* target, const std::string& react) {
+    if (react.empty()) return false;
+    UClass* libCls = ue::FindClass("AbilitySystemBlueprintLibrary");
+    UObject* libCdo = libCls ? ue::GetCDO(libCls) : nullptr;
+    if (!Live(libCdo)) return false;
+    UFunction* fn = ue::FindFunction(libCdo, "SendGameplayEventToActor");
+    if (!fn) return false;
+    ue::FName tag = ue::MakeName(react.c_str());
+    if (tag.ComparisonIndex == 0) return false;
+    EvData ev{};
+    ev.tag = tag;
+    ev.instigator = net::Pawn();
+    ev.target = target;
+    ue::Params p(fn);
+    p.Set<UObject*>("Actor", target);
+    p.Set<ue::FName>("EventTag", tag);
+    p.Set<EvData>("Payload", ev);
+    return ue::Call(libCdo, fn, p.data());
+}
+
+bool ReactByAnimSet(UObject* target, const std::string& react, int dir) {
+    if (react.empty()) return false;
+    UObject* set = nullptr;
+    if (!ue::Get<UObject*>(target, "HitReactionAnimSet", set) || !Live(set)) return false;
+    UFunction* fn = ue::FindFunction(set, "GetHitReactionAnimation");
+    if (!fn) return false;
+    ue::Params p(fn);
+    p.Set<ue::FName>("ReactionType", ue::MakeName(react.c_str()));
+    p.Set<uint8_t>("Direction", (uint8_t)dir);
+    p.Set<UObject*>("ASC", GetASC(target));
+    if (!ue::Call(set, fn, p.data())) return false;
+    UObject* mont = p.Get<UObject*>("ReturnValue");
+    if (!Live(mont)) return false;
+    UFunction* play = ue::FindFunction(target, "PlayAnimMontage");
+    if (!play) return false;
+    ue::Params pp(play);
+    pp.Set<UObject*>("AnimMontage", mont);
+    pp.Set<float>("InPlayRate", 1.0f);
+    return ue::Call(target, play, pp.data());
+}
+
+bool ReactByPayload(UObject* target, const OutHit& h) {
+    UClass* pCls = nullptr;
+    if (!h.pcls.empty()) pCls = ue::FindClass(h.pcls.c_str());
+    if (!pCls) pCls = ue::FindClass("SpartaHitPayload");
+    UObject* pCdo = pCls ? ue::GetCDO(pCls) : nullptr;
+    if (!Live(pCdo)) return false;
+    UFunction* fnDup = ue::FindFunction(pCdo, "GetDuplicate");
+    if (!fnDup) return false;
+    UObject* dup = nullptr;
+    {
+        ue::Params p(fnDup);
+        p.Set<UObject*>("Outer_0", target);
+        p.Set<UObject*>("Outer", target);
+        if (!ue::Call(pCdo, fnDup, p.data())) return false;
+        dup = p.Get<UObject*>("ReturnValue");
+    }
+    if (!Live(dup)) return false;
+    // zero health damage: health stays on the nhp lane
+    struct { uint8_t type; uint8_t pad[3]; float val; float mult; } opt = {0, {0, 0, 0}, 0.0f, 0.0f};
+    int32_t hdOff = ue::PropOffset(dup, "HealthDamage");
+    if (hdOff < 0) hdOff = kOffHealthDamageOption;
+    ue::WriteMem(reinterpret_cast<uint8_t*>(dup) + hdOff, &opt, sizeof(opt));
+    float poiseF = (float)h.poise;
+    int32_t pOff = ue::PropOffset(dup, "PoiseDamage");
+    if (pOff < 0) pOff = kOffPoiseDamage;
+    ue::WriteMem(reinterpret_cast<uint8_t*>(dup) + pOff, &poiseF, sizeof(poiseF));
+    if (!h.react.empty()) {
+        ue::FName rn = ue::MakeName(h.react.c_str());
+        int32_t rOff = ue::PropOffset(dup, "ReactionTag");
+        if (rOff < 0) rOff = kOffReactionTag;
+        ue::WriteMem(reinterpret_cast<uint8_t*>(dup) + rOff, &rn, sizeof(rn));
+    }
+    uint8_t dirB = (uint8_t)h.dir;
+    int32_t dOff = ue::PropOffset(dup, "StrikeDirection");
+    if (dOff < 0) dOff = kOffStrikeDirection;
+    ue::WriteMem(reinterpret_cast<uint8_t*>(dup) + dOff, &dirB, 1);
+
+    UObject* pawn = net::Pawn();
+    UObject* asc = GetASC(pawn);
+    if (!Live(asc)) return false;
+    UFunction* fn = ue::FindFunction(dup, "ApplyPayloadInstigator");
+    if (!fn) return false;
+    ue::Params p(fn);   // zeroed HitResult and EffectContext
+    p.Set<UObject*>("Target", target);
+    p.Set<UObject*>("InstigatingASC", asc);
+    p.Set<UObject*>("DamageCauser", pawn);
+    return ue::Call(dup, fn, p.data());   // ProcessEvent is SEH-guarded
+}
+
+struct RemoteApplyScope {
+    RemoteApplyScope() { tl_inRemoteApply = true; }
+    ~RemoteApplyScope() { tl_inRemoteApply = false; }
+};
+
+bool React(UObject* target, const OutHit& h, int mode) {
+    RemoteApplyScope scope;
+    switch (mode) {
+        case 1: return ReactByEvent(target, h.react);
+        case 2: return ReactByAnimSet(target, h.react, h.dir);
+        case 3: return ReactByPayload(target, h);
+        default: return false;
+    }
+}
+
+// [R10-BOSSDMG] the actor carries a BPC_BossAI_C component (its outer is the actor)
+bool IsBossActor(UObject* target) {
+    for (UObject* c : ue::FindAllOf("BPC_BossAI_C")) {
+        if (Live(c) && ue::GetOuter(c) == target) return true;
+    }
+    return false;
+}
+
 bool ApplyRemoteHit(const OutHit& h) {
+    if (h.flags & kFlagPeerHit) return true;   // player hits stay on the puppetDamage lane
     UObject* target = FindTargetByKey(h.targetKey);
     if (!Live(target)) {
         ++g_failCount;
         return false;
     }
-
-    // Measure health before so we know if the payload call actually dealt damage
-    bool deadBefore = false;
-    const double hpBefore = combat::HealthNorm(target, &deadBefore);
-    if (deadBefore) return true;
-
-    tl_inRemoteApply = true;
-    bool appliedViaPayload = false;
-
-    // 1. Try native USpartaHitPayload::ApplyPayloadInstigator via duplicated CDO payload
-    if (g_origApply) {
-        UClass* pCls = ue::FindClass("SpartaHitPayload");
-        UObject* pCdo = pCls ? ue::GetCDO(pCls) : nullptr;
-        UObject* dupPayload = nullptr;
-        if (Live(pCdo)) {
-            if (UFunction* fnDup = ue::FindFunction(pCdo, "GetDuplicate")) {
-                ue::Params p(fnDup);
-                p.Set<UObject*>("Outer", target);
-                if (ue::Call(pCdo, fnDup, p.data())) {
-                    dupPayload = p.Get<UObject*>("ReturnValue");
-                }
-            }
-        }
-        if (Live(dupPayload)) {
-            // Set flat HealthDamageOption { Type=0 (Flat), FloatValue=dmg, Multiplier=1.0 }
-            struct { uint8_t type; uint8_t pad[3]; float val; float mult; } opt = {0, {0,0,0}, (float)h.dmg, 1.0f};
-            int32_t hdOff = ue::PropOffset(dupPayload, "HealthDamage");
-            if (hdOff < 0) hdOff = kOffHealthDamageOption;
-            ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + hdOff, &opt, sizeof(opt));
-
-            float poiseF = (float)h.poise;
-            float brkF = (float)h.brk;
-            int32_t pOff = ue::PropOffset(dupPayload, "PoiseDamage");
-            if (pOff < 0) pOff = kOffPoiseDamage;
-            ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + pOff, &poiseF, sizeof(poiseF));
-
-            int32_t bOff = ue::PropOffset(dupPayload, "BreakDamage");
-            if (bOff < 0) bOff = kOffBreakDamage;
-            ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + bOff, &brkF, sizeof(brkF));
-
-            if (!h.react.empty()) {
-                ue::FName rn = ue::MakeName(h.react.c_str());
-                if (rn.ComparisonIndex != 0) {
-                    int32_t rOff = ue::PropOffset(dupPayload, "ReactionTag");
-                    if (rOff < 0) rOff = kOffReactionTag;
-                    ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + rOff, &rn, sizeof(rn));
-                    int32_t crOff = ue::PropOffset(dupPayload, "ChosenReactionTag");
-                    if (crOff < 0) crOff = kOffChosenReactionTag;
-                    ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + crOff, &rn, sizeof(rn));
-                }
-            }
-            uint8_t dirB = (uint8_t)h.dir;
-            int32_t dOff = ue::PropOffset(dupPayload, "StrikeDirection");
-            if (dOff < 0) dOff = kOffStrikeDirection;
-            ue::WriteMem(reinterpret_cast<uint8_t*>(dupPayload) + dOff, &dirB, 1);
-
-            UObject* causer = (h.flags & kFlagPeerHit) ? nullptr : puppet::Actor();
-            UObject* asc = GetASC(causer ? causer : net::Pawn());
-
-            alignas(16) uint8_t fakeHitResult[0x100] = {};
-            alignas(16) uint8_t fakeCtx[0x18] = {};
-            g_origApply(dupPayload, target, asc, fakeHitResult, causer, fakeCtx);
-            appliedViaPayload = true;
-        }
+    bool dead = false;
+    combat::HealthNorm(target, &dead);
+    if (dead) return true;
+    // the peer drives this enemy here (mirror): its copy already reacted and the
+    // montage stream carries that; replaying would fight the mirror
+    if (!state().combat.ownedTails.Has(h.targetKey)) {
+        ++g_skipMirror;
+        if (g_skipMirror <= 5)
+            net::Log("hithook: remote hit seq=%d on %s skipped: the peer drives it here",
+                     h.seq, h.targetKey.c_str());
+        return true;
     }
-
-    // 2. If parry flag set, trigger Event.Hit.Parried on the enemy so it enters parried stagger
+    bool ok = false;
+    const std::string montBefore = MontageOf(target);   // hitlook: sample BEFORE the reaction
     if (h.flags & kFlagParried) {
-        SendGameplayEventTag(target, "Event.Hit.Parried", puppet::Actor());
+        RemoteApplyScope scope;
+        SendGameplayEventTag(target, "Event.Hit.Parried", net::Pawn());
+        ok = true;
     } else if (h.flags & kFlagFlyback) {
-        SendGameplayEventTag(target, "Event.Reaction.Hit.Flyback", puppet::Actor());
+        RemoteApplyScope scope;
+        SendGameplayEventTag(target, "Event.Reaction.Hit.Flyback", net::Pawn());
+        ok = true;
+    } else if (g_reactMode > 0) {
+        ok = React(target, h, g_reactMode);
     }
-
-    tl_inRemoteApply = false;
-
-    // 3. Verify health moved; if CDO payload had no DamageEffect, apply exact delta via health comp
-    bool deadAfter = false;
-    const double hpAfter = combat::HealthNorm(target, &deadAfter);
-    if ((!appliedViaPayload || std::fabs(hpBefore - hpAfter) < 1e-4) && h.dmg > 0.01) {
-        UObject* hc = nullptr;
-        if (ue::Get<UObject*>(target, "HealthComponent", hc) && Live(hc)) {
-            UFunction* fMax = ue::FindFunction(hc, "GetMaxHealth");
-            double maxHp = 100.0;
-            if (fMax) {
-                ue::Params p(fMax);
-                if (ue::Call(hc, fMax, p.data())) {
-                    const float m = p.Get<float>("ReturnValue");
-                    if (m > 1.0f) maxHp = (double)m;
-                }
-            }
-            const double newNorm = std::max(0.0, hpBefore - (h.dmg / maxHp));
-            if (newNorm <= 0.001) {
-                if (UFunction* fDie = ue::FindFunction(hc, "StartDeath")) {
-                    ue::Params p(fDie);
-                    ue::Call(hc, fDie, p.data());
-                }
-            } else {
-                combat::SetHealthNorm(target, newNorm);
+    // [R10-BOSSDMG] measured (r10_boss5): a boss copy on the GUEST stays in its pre-intro
+    // state (the intro's world event is suppressed there) and takes no damage, so the
+    // guest's hits never reached the "nhp" lane and the host's boss kept its health.
+    // For a host-owned BOSS the owner applies the hit's raw damage itself.  A copy that
+    // did take the damage reports the same value on nhp (lowest wins: no double count).
+    // coop\BOSSDMG_OFF.txt disables.
+    if (h.dmg > 0.0 && !(h.flags & kFlagParried) && IsBossActor(target)) {
+        static int off = -1;
+        if (off < 0) off = net::FileExists("BOSSDMG_OFF.txt") ? 1 : 0;
+        if (!off) {
+            const double next = combat::DamageRaw(target, h.dmg);
+            if (next > 0.01) boss::CheckPhaseAfterDamage(target);   // [R10-BOSSFIGHT]
+            static int logs = 0;
+            if (logs++ < 30)
+                net::Log("hithook: [R10-BOSSDMG] peer hit seq=%d on boss %s dmg=%.1f -> hp %.4f",
+                         h.seq, h.targetKey.c_str(), h.dmg, next);
+            if (next >= 0.0 && next <= 0.01) {
+                const bool dk = combat::StartDeath(target);
+                net::Log("hithook: [R10-BOSSDMG] the peer's hit killed boss %s: startDeath ok=%d",
+                         h.targetKey.c_str(), dk ? 1 : 0);
             }
         }
     }
-
+    if (ok) ++g_reactOk;
     ++g_appliedCount;
-    if (g_appliedCount <= 5) {
-        net::Log("hithook: applied remote hit seq=%d target=%s dmg=%.1f poise=%.1f react=%s hp=%.3f->%.3f",
-                 h.seq, h.targetKey.c_str(), h.dmg, h.poise, h.react.c_str(), hpBefore, combat::HealthNorm(target, nullptr));
+    if (g_appliedCount <= 40) {
+        net::Log("hithook: remote hit seq=%d target=%s react=%s pcls=%s poise=%.1f dir=%d mode=%d ok=%d",
+                 h.seq, h.targetKey.c_str(), h.react.c_str(), h.pcls.c_str(), h.poise, h.dir,
+                 g_reactMode, ok ? 1 : 0);
+        QueueLook(target, h.targetKey, "rx", g_reactMode);
+        if (!g_looks.empty() && g_looks.back().target == target) g_looks.back().before = montBefore;
     }
     return true;
 }
@@ -651,6 +877,7 @@ bool ParseHitTuple(const std::string& s, OutHit* out) {
     out->hy = std::strtod(tok[8].c_str(), nullptr);
     out->hz = std::strtod(tok[9].c_str(), nullptr);
     out->flags = std::atoi(tok[10].c_str());
+    if (tok.size() >= 12) out->pcls = tok[11];
     return out->seq > 0 && !out->targetKey.empty();
 }
 
@@ -659,6 +886,7 @@ bool ParseHitTuple(const std::string& s, OutHit* out) {
 void Tick2() {
     if (!state().toggles.hitHook) return;
     if (!g_hookTarget) ResolveAndHook();
+    TickLooks();
     // Expire old re-transmit entries
     const double now = Mono();
     while (!g_outQueue.empty() && now - g_outQueue.front().at > kTxRepeatSecs) {
@@ -669,6 +897,7 @@ void Tick2() {
 void Reset() {
     g_outQueue.clear();
     g_lastRxSeq = 0;
+    g_looks.clear();
 }
 
 void Serialize(std::string* out) {
@@ -678,9 +907,10 @@ void Serialize(std::string* out) {
     for (const OutHit& h : g_outQueue) {
         if (!first) *out += ',';
         first = false;
-        *out += net::Fmt("[%d,\"%s\",%.1f,%.1f,%.1f,\"%s\",%d,%.0f,%.0f,%.0f,%d]",
+        *out += net::Fmt("[%d,\"%s\",%.1f,%.1f,%.1f,\"%s\",%d,%.0f,%.0f,%.0f,%d,\"%s\"]",
                          h.seq, EscapeStr(h.targetKey).c_str(), h.dmg, h.poise, h.brk,
-                         EscapeStr(h.react).c_str(), h.dir, h.hx, h.hy, h.hz, h.flags);
+                         EscapeStr(h.react).c_str(), h.dir, h.hx, h.hy, h.hz, h.flags,
+                         EscapeStr(h.pcls).c_str());
     }
     *out += "]";
 }
@@ -709,11 +939,13 @@ void OnPeerLine(const std::string& line) {
 }
 
 std::string Status() {
-    return net::Fmt("hithook=%s hooked:%d rva:0x%llx tx:%d rx:%d applied:%d veto:%d parries:%d fail:%d\n",
+    return net::Fmt("hithook=%s hooked:%d rva:0x%llx calls:%d tx:%d rx:%d applied:%d react:%d mode:%d skipmir:%d veto:%d parries:%d fail:%d\n",
                     state().toggles.hitHook ? "on" : "off",
                     g_hookTarget ? 1 : 0,
                     (unsigned long long)g_hookRva,
-                    g_txCount, g_rxCount, g_appliedCount, g_vetoCount, g_parryCount, g_failCount);
+                    g_callCount.load(std::memory_order_relaxed),
+                    g_txCount, g_rxCount, g_appliedCount, g_reactOk, g_reactMode, g_skipMirror,
+                    g_vetoCount, g_parryCount, g_failCount);
 }
 
 bool OnCommand(const std::string& cmd, const std::string& rest) {
@@ -723,6 +955,35 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
                  state().toggles.hitHook ? 1 : 0, g_hookTarget ? 1 : 0,
                  (unsigned long long)g_hookRva, (unsigned long long)g_vtableRva,
                  g_txCount, g_rxCount, g_appliedCount, g_vetoCount, g_parryCount, g_failCount);
+        return true;
+    }
+    if (cmd == "hitmode") {
+        g_reactMode = std::atoi(rest.c_str());
+        net::Log("hitmode: remote hit reaction mode = %d", g_reactMode);
+        return true;
+    }
+    if (cmd == "hitreact") {
+        // hitreact <mode> [reactTag] -- play a reaction on the nearest enemy HERE
+        // through one method, and log its montage before/after (hitlook lab ...)
+        int mode = std::atoi(rest.c_str());
+        std::string tag = "Event.Reaction.Hit.Light";
+        const size_t sp = rest.find(' ');
+        if (sp != std::string::npos && sp + 1 < rest.size()) tag = rest.substr(sp + 1);
+        UObject* best = nullptr;
+        double bestD = 1e9;
+        for (const NpcEntry& e : state().combat.npcLast) {
+            if (Live(e.actor) && e.distSelf < bestD) { best = e.actor; bestD = e.distSelf; }
+        }
+        if (!best) { net::Log("hitreact: no nearby enemy"); return true; }
+        OutHit h;
+        h.targetKey = KeyForTarget(best);
+        h.react = tag;
+        h.poise = 20.0;
+        const std::string before = MontageOf(best);
+        const bool ok = React(best, h, mode);
+        net::Log("hitreact: mode=%d tag=%s on %s d=%.0f ok=%d montage-before=%s", mode, tag.c_str(),
+                 h.targetKey.c_str(), bestD, ok ? 1 : 0, before.c_str());
+        QueueLook(best, h.targetKey, "lab", mode);
         return true;
     }
     if (cmd == "hittest") {
