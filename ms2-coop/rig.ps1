@@ -572,14 +572,110 @@ function Run-Suite-BossTour($sess) {
 }
 
 function Run-Suite-Quests($sess) {
-    Write-Host "`n================ SUITE: REAL QUESTS & NARRATIVE SYNC ================"
-    $offA = LogLen $GameA; $offB = LogLen $GameB
-    Send-Cmd $CoopA "qlist" 1
-    Send-Cmd $CoopA "qlog" 1
-    Send-Cmd $CoopB "qlog" 1
-    Write-Host ("  wp: A={0} | B={1}" -f (SyncVal $CoopA 'wp'), (SyncVal $CoopB 'wp'))
-    GrabSince $GameA $offA 'qlist:|qlog:' | Select-Object -Last 6 | ForEach-Object { Write-Host "    A: $_" }
-    GrabSince $GameB $offB 'qlog:' | Select-Object -Last 4 | ForEach-Object { Write-Host "    B: $_" }
+    Write-Host "`n================ SUITE: ALL 6 DT_QuestData1 QUESTS SYNC GAUNTLET ================"
+    $quests = @('TestQuest', 'LocationQuest', 'AutoQuest', 'VlasQuest', 'GorfQuest', 'TielsQuest')
+    $pass = 0; $fail = 0
+    foreach ($q in $quests) {
+        $offA = LogLen $GameA; $offB = LogLen $GameB
+        Send-Cmd $CoopA "qsid $q" 2
+        Send-Cmd $CoopA "qnext $q" 3
+        $oQA = LogLen $GameA; $oQB = LogLen $GameB
+        Send-Cmd $CoopA "qstage $q" 1
+        Send-Cmd $CoopB "qstage $q" 1
+        $sA = (GrabSince $GameA $oQA "qstage $q ") -join ' | '
+        $sB = (GrabSince $GameB $oQB "qstage $q ") -join ' | '
+        $stA = if ($sA -match 'stage=(\d+/\d+)') { $Matches[1] } else { '?' }
+        $stB = if ($sB -match 'stage=(\d+/\d+)') { $Matches[1] } else { '?' }
+        $ok = ($stA -ne '?' -and $stA -eq $stB)
+        if ($ok) { ++$pass } else { ++$fail }
+        Write-Host ("  [{0}] {1,-14} | stage A={2} B={3}" -f $(if($ok){'PASS'}else{'FAIL'}), $q, $stA, $stB)
+    }
+    Write-Host ("  Quests summary: {0}/{1} PASS | wp A={2} | B={3}" -f $pass, $quests.Count, (SyncVal $CoopA 'wp'), (SyncVal $CoopB 'wp'))
+}
+
+function Run-Suite-BossGauntlet($sess) {
+    Write-Host "`n================ SUITE: 34-BOSS REAL SPAWN / PHASE / KILL GAUNTLET ================"
+    $bossPaths = @(
+        "/Game/Sparta/Characters/Bosses/Dwarf/BP_DwarfBoss.BP_DwarfBoss_C",
+        "/Game/Sparta/Characters/Bosses/FinalBoss/BP_FinalBoss.BP_FinalBoss_C",
+        "/Game/Sparta/Characters/Bosses/HeadBoss/BP_HeadBoss.BP_HeadBoss_C",
+        "/Game/Sparta/Characters/Bosses/Hexapod/BP_Hexapod.BP_Hexapod_C",
+        "/Game/Sparta/Characters/Bosses/LadyOfTheWoods/BP_LadyOfTheWoods.BP_LadyOfTheWoods_C",
+        "/Game/Sparta/Characters/Bosses/Monolith/AI/BP_Monolith.BP_Monolith_C",
+        "/Game/Sparta/Characters/Bosses/MothKnight/AI/BP_MothKnight.BP_MothKnight_C",
+        "/Game/Sparta/Characters/Bosses/Offspring/BP_Offspring.BP_Offspring_C",
+        "/Game/Sparta/Characters/Bosses/ParasiteGolem/BP_ParasiteGolem.BP_ParasiteGolem_C",
+        "/Game/Sparta/Characters/Bosses/Swordman/BP_Swordman.BP_Swordman_C",
+        "/Game/Sparta/Characters/Bosses/TarGolem/BP_TarGolem.BP_TarGolem_C",
+        "/Game/Sparta/Characters/Bosses/TarGolem/BP_TarGolem_Headless.BP_TarGolem_Headless_C",
+        "/Game/Sparta/Characters/Bosses/BigBottle/BP_BigBottle_Ghost.BP_BigBottle_Ghost_C",
+        "/Game/Sparta/Characters/Enemies/Aristocrat/BP_LordVellen_MB.BP_LordVellen_MB_C",
+        "/Game/Sparta/Characters/Enemies/Aristocrat/BP_SicarioTheKeeper.BP_SicarioTheKeeper_C",
+        "/Game/Sparta/Characters/Enemies/BallistaHead/BP_BallistaHead_Miniboss.BP_BallistaHead_Miniboss_C",
+        "/Game/Sparta/Characters/Enemies/Batushka/BP_Batushka_MiniBoss.BP_Batushka_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/Brigands/BrigElite/BrigElite_Fire/BP_Brigand_Elite_Fire_MiniBoss.BP_Brigand_Elite_Fire_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/Brigands/BrigElite/BrigElite_Winter/BP_Brigand_Elite_Winter_MiniBoss.BP_Brigand_Elite_Winter_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/CannibalKnight/BP_Cannibal_Knight_MiniBoss.BP_Cannibal_Knight_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/HeadTree/BP_HeadTree.BP_HeadTree_C",
+        "/Game/Sparta/Characters/Enemies/HutchbackCarrier/BP_Hutchback_Miniboss.BP_Hutchback_Miniboss_C",
+        "/Game/Sparta/Characters/Enemies/Miner/BP_MinerKing.BP_MinerKing_C",
+        "/Game/Sparta/Characters/Enemies/MS1_HeavyCultist/BP_HeavyCultist_MiniBoss.BP_HeavyCultist_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/MS1_TwinSisters/SpearDagger/BP_TwinSister_SpearDagger_Miniboss.BP_TwinSister_SpearDagger_Miniboss_C",
+        "/Game/Sparta/Characters/Enemies/Shepherd/BP_Shepherd.BP_Shepherd_C",
+        "/Game/Sparta/Characters/Enemies/Sicario/BP_Sicario_MiniBoss.BP_Sicario_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/StoneCrab/BP_StoneCrab_MB.BP_StoneCrab_MB_C",
+        "/Game/Sparta/Characters/Enemies/TarredCorpse/BP_TarredCorpse_MinibossNecromancer.BP_TarredCorpse_MinibossNecromancer_C",
+        "/Game/Sparta/Characters/Enemies/TarredVestige/BP_TarredVestige_MiniBoss.BP_TarredVestige_MiniBoss_C",
+        "/Game/Sparta/Characters/Enemies/TheHead/BP_TheHeadKing.BP_TheHeadKing_C",
+        "/Game/Sparta/Characters/Enemies/Vampire/BP_VampireKnight.BP_VampireKnight_C",
+        "/Game/Sparta/Characters/Enemies/Vampire/BP_VampireKnight_Part2.BP_VampireKnight_Part2_C",
+        "/Game/Sparta/Characters/Enemies/Wraith/BP_Wraith_MiniBoss.BP_Wraith_MiniBoss_C"
+    )
+    $passed = 0; $failed = 0; $results = @()
+    # Move both players to a wide-open flat courtyard so even giant bosses (FinalBoss/HeadBoss/Offspring)
+    # pass UE5 summon capsule checks on BOTH Host A and Guest B.
+    Write-Host "  Moving both players to open arena courtyard (246900 -537918 -61918)..."
+    Send-Both "tp 246900 -537918 -61918" 28
+    Send-Both "bossdespawn" 2
+    foreach ($bp in $bossPaths) {
+        if (-not (Clients-Alive $sess)) { throw "Client died during boss gauntlet at $bp" }
+        $short = ($bp -split '\.')[-1]
+        $offA = LogLen $GameA; $offB = LogLen $GameB
+        Send-Both "bossspawn $bp" 4
+        $spawnA = (GrabSince $GameA $offA 'bossphase spawn: live') -join ' '
+        $spawnB = (GrabSince $GameB $offB 'bossphase spawn: live') -join ' '
+        $hasBossComp = ($spawnA -match 'live BP_' -and $spawnA -notmatch 'live-nonboss')
+        $p2Ok = $true; $p3Ok = $true
+        $t2 = 0.0; $t3 = 0.0
+        if ($spawnA -match 't2=([0-9.]+)') { $t2 = [double]$Matches[1] }
+        if ($spawnA -match 't3=([0-9.]+)') { $t3 = [double]$Matches[1] }
+        if ($hasBossComp) {
+            if ($t2 -gt 0.01) {
+                $oP = LogLen $GameB
+                Send-Cmd $CoopA "bossphase force 2" 2
+                $p2Ok = ((GrabSince $GameB $oP 'APPLIED phase 2').Count -gt 0)
+            }
+            if ($t3 -gt 0.01) {
+                $oP3 = LogLen $GameB
+                Send-Cmd $CoopA "bossphase force 3" 2
+                $p3Ok = ((GrabSince $GameB $oP3 'APPLIED phase 3').Count -gt 0)
+            }
+        }
+        # Kill boss on Host A -> verify Event.Death / StartDeath / drops sync on Guest B
+        $killB = $false
+        if ($spawnA -match 'live') {
+            $oK = LogLen $GameB
+            Send-Cmd $CoopA "kill $short" 3
+            $killB = ((GrabSince $GameB $oK 'StartDeath:|Event\.Death|killTail .*ok=true|drops: granted').Count -gt 0)
+        }
+        Send-Both "bossdespawn" 2
+        $ok = ($spawnA -match 'live' -and $spawnB -match 'live' -and $p2Ok -and $p3Ok)
+        if ($ok) { ++$passed } else { ++$failed }
+        $line = ("  [{0}] {1,-38} | boss={2} t2={3:F2}({4}) t3={5:F2}({6}) killSync={7}" -f $(if($ok){'PASS'}else{'FAIL'}), $short, $(if($hasBossComp){1}else{0}), $t2, $p2Ok, $t3, $p3Ok, $killB)
+        Write-Host $line
+        $results += $line
+    }
+    Write-Host ("  BOSS GAUNTLET SUMMARY: {0}/{1} PASS, {2} FAIL" -f $passed, $bossPaths.Count, $failed)
 }
 
 # ============================================================================
@@ -613,6 +709,7 @@ switch ($Action) {
                     'dungeon'        { Run-Suite-Dungeon $sess }
                     'harden_ngp'     { Run-Suite-HardenNgp $sess }
                     'boss_tour'      { Run-Suite-BossTour $sess }
+                    'boss_gauntlet'  { Run-Suite-BossGauntlet $sess }
                     'quests'         { Run-Suite-Quests $sess }
                     default          { Write-Host "Unknown suite: $s" }
                 }

@@ -667,6 +667,53 @@ const char* const kBossSpawnList[] = {
 
 double g_spawnScanAt = -1.0e9;   // the delayed re-scan after a summon
 std::string g_spawnTried;
+std::string g_spawnShortCls;
+std::vector<ue::UObject*> g_rigSpawned;
+
+std::string ShortClassFromPath(const std::string& path) {
+    const size_t dot = path.rfind('.');
+    return (dot != std::string::npos) ? path.substr(dot + 1) : path;
+}
+
+void RegisterRigAliases() {
+    if (g_spawnShortCls.empty()) return;
+    const std::string alias = "RIGBOSS_" + g_spawnShortCls;
+    for (ue::UObject* a : ue::FindAllOf(g_spawnShortCls.c_str())) {
+        if (!Valid(a)) continue;
+        const std::string tail = net::Tail(a);
+        if (tail.empty()) continue;
+        state().combat.spawnAlias.Set(tail, alias);
+        bool seen = false;
+        for (ue::UObject* x : g_rigSpawned) if (x == a) { seen = true; break; }
+        if (!seen) g_rigSpawned.push_back(a);
+    }
+}
+
+void CmdDespawn() {
+    int n = 0;
+    Scan();
+    for (const BossEntry& e : BS().bosses) {
+        if (Valid(e.actor)) {
+            bool seen = false;
+            for (ue::UObject* x : g_rigSpawned) if (x == e.actor) { seen = true; break; }
+            if (!seen) g_rigSpawned.push_back(e.actor);
+        }
+    }
+    for (ue::UObject* a : g_rigSpawned) {
+        if (!Valid(a)) continue;
+        if (ue::UFunction* fn = ue::FindFunction(a, "K2_DestroyActor")) {
+            ue::Params p(fn);
+            ue::Call(a, fn, p.data());
+            ++n;
+        }
+    }
+    g_rigSpawned.clear();
+    g_spawnShortCls.clear();
+    BS().bosses.clear();
+    BS().pending.clear();
+    BS().retries.clear();
+    net::Log("bossdespawn: destroyed %d rig-spawned boss(es), live bosses=%d", n, (int)BS().bosses.size());
+}
 
 void CmdSpawn(const std::string& arg) {
     std::string cls = TrimArg(arg);
@@ -683,22 +730,22 @@ void CmdSpawn(const std::string& arg) {
              (int)before, (int)tryList.size());
 
     for (const std::string& path : tryList) {
-        // Does the CLASS object already exist?  ue::FindObject is a full-path
-        // compare over the object array, and it does not load anything.
         ue::UObject* pre = ue::FindObject(path.c_str());
+        if (!Valid(pre)) {
+            pre = load::Asset(path);
+        }
         const bool preOk = Valid(pre);
-        net::Log("bossphase spawn: %s -- class in memory before: %s", path.c_str(),
+        net::Log("bossphase spawn: %s -- class loaded: %s", path.c_str(),
                  preOk ? "yes" : "no");
         net::Console(std::string("summon ") + path);
-        ue::UObject* post = ue::FindObject(path.c_str());
-        net::Log("bossphase spawn: %s -- class in memory after: %s", path.c_str(),
-                 Valid(post) ? "yes" : "no");
-        if (Valid(post)) g_spawnTried = path;
-        if (Valid(post)) break;         // loaded: the actor (if any) shows on the rescan
+        if (preOk) {
+            g_spawnTried = path;
+            g_spawnShortCls = ShortClassFromPath(path);
+            RegisterRigAliases();
+            break;
+        }
     }
 
-    // The summon is one world tick behind us at best; re-scan soon so the log says
-    // what actually happened instead of "may need another tick".
     g_spawnScanAt = net::Now() + 1.5;
     Scan();
     net::Log("bossphase spawn: bosses after (same tick) %d%s", (int)BS().bosses.size(),
@@ -710,6 +757,7 @@ void TickSpawnScan() {
     if (g_spawnScanAt < 0.0) return;
     if (net::Now() < g_spawnScanAt) return;
     g_spawnScanAt = -1.0e9;
+    RegisterRigAliases();
     Scan();
     BossState& B = BS();
     net::Log("bossphase spawn: after 1.5 s bosses=%d (ai characters=%d) tried=%s",
@@ -717,8 +765,17 @@ void TickSpawnScan() {
              g_spawnTried.empty() ? "-" : g_spawnTried.c_str());
     for (const BossEntry& e : B.bosses) {
         const Vec3 p = net::Loc(e.actor);
-        net::Log("bossphase spawn: live %s cls=%s phase=%d hp=%.2f pos=%.0f %.0f %.0f", e.key.c_str(),
-                 e.cls.c_str(), e.phase, e.hp, p.X, p.Y, p.Z);
+        net::Log("bossphase spawn: live %s cls=%s phase=%d hp=%.2f t2=%.2f t3=%.2f pos=%.0f %.0f %.0f", e.key.c_str(),
+                 e.cls.c_str(), e.phase, e.hp, e.t2, e.t3, p.X, p.Y, p.Z);
+    }
+    if (!g_spawnShortCls.empty() && B.bosses.empty()) {
+        for (ue::UObject* a : ue::FindAllOf(g_spawnShortCls.c_str())) {
+            if (!Valid(a)) continue;
+            bool dead = false;
+            const double hp = combat::HealthNorm(a, &dead);
+            net::Log("bossphase spawn: live-nonboss %s cls=%s hp=%.2f dead=%d",
+                     net::Tail(a).c_str(), g_spawnShortCls.c_str(), hp, dead ? 1 : 0);
+        }
     }
 }
 
@@ -1049,6 +1106,7 @@ void CmdHp(const std::string& arg) {
 
 bool OnCommand(const std::string& cmd, const std::string& rest) {
     if (cmd == "bosshp") { CmdHp(rest); return true; }
+    if (cmd == "bossdespawn") { CmdDespawn(); return true; }
     if (cmd != "bossphase" && cmd != "bossdump" && cmd != "bossspawn") return false;
 
     if (cmd == "bossdump") {
