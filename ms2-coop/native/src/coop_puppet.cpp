@@ -1077,8 +1077,25 @@ void UpdateAnimation(double vx, double vy, double yaw, double now) {
     }
     // [R7-DIALOG] end
 
+    // [R10-XFORM] Object transformations (Bush / Mango) hide the humanoid body mesh
+    // and attach a StaticMeshComponent in coop_fx_grabs; skip locomotion clips.
+    if (coop::fx_grabs::PeerTransformHideBody()) return;
+
     if (PEER().hasMontage && PEER().montage.path.size() > 4) {
         if (PlayMontage(PEER().montage, now)) return;
+    }
+
+    // [R10-XFORM] Non-humanoid animal transformations (e.g. Sheep): never play humanoid
+    // AS_Shell_* locomotion clips onto the animal skeleton (skeleton mismatch -> T-pose).
+    if (coop::fx_grabs::PeerTransformNonHumanoid()) {
+        if (PEER().hasMontage && PEER().montage.path.size() > 4) {
+            if (ue::UObject* seq = FindAsset(PEER().montage.path, true)) {
+                const std::string key = "xfm:" + PEER().montage.path;
+                if (P().animState != key) PlaySeq(key, seq, false);
+                SetRate(std::max(kMontageRateMin, PEER().montage.rate));
+            }
+        }
+        return;
     }
 
     // [R8-WALL] begin -- the friend is going through a gap (squeeze / traversal).

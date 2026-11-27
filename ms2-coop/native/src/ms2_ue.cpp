@@ -174,11 +174,69 @@ bool Read(const void* p, T& out) { return SafeRead(p, &out, sizeof(T)); }
 typedef void (*ProcessEventFn)(UObject* self, UFunction* fn, void* parms);
 typedef void (*EngineTickFn)(void* self, float dt, bool idle);
 
+// [R10-TICKFAULT] What a swallowed fault was: the filter runs on the faulting
+// stack (before unwind), so it records the code, the faulting address, the
+// accessed address and a raw back-trace.  Turned into module+rva text later,
+// outside the filter (DescribeLastFault).
+struct FaultInfo {
+    DWORD     code = 0;
+    uintptr_t addr = 0;
+    uintptr_t access = 0;
+    ULONG_PTR rw = 0;
+    USHORT    frames = 0;
+    void*     stack[24] = {};
+};
+FaultInfo g_lastFault;
+
+int CaptureFault(EXCEPTION_POINTERS* ep) {
+    if (ep && ep->ExceptionRecord) {
+        g_lastFault.code = ep->ExceptionRecord->ExceptionCode;
+        g_lastFault.addr = (uintptr_t)ep->ExceptionRecord->ExceptionAddress;
+        g_lastFault.rw = ep->ExceptionRecord->NumberParameters >= 2 ? ep->ExceptionRecord->ExceptionInformation[0] : 0;
+        g_lastFault.access = ep->ExceptionRecord->NumberParameters >= 2 ? (uintptr_t)ep->ExceptionRecord->ExceptionInformation[1] : 0;
+        g_lastFault.frames = RtlCaptureStackBackTrace(0, 24, g_lastFault.stack, nullptr);
+    }
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+
+std::string ModRva(uintptr_t a) {
+    HMODULE m = nullptr;
+    char buf[64];
+    if (a && GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                (LPCWSTR)a, &m) && m) {
+        wchar_t path[MAX_PATH] = L"";
+        GetModuleFileNameW(m, path, MAX_PATH);
+        const wchar_t* base = wcsrchr(path, L'\\');
+        base = base ? base + 1 : path;
+        char nm[MAX_PATH] = "";
+        WideCharToMultiByte(CP_UTF8, 0, base, -1, nm, MAX_PATH, nullptr, nullptr);
+        snprintf(buf, sizeof(buf), "%s+0x%llx", nm, (unsigned long long)(a - (uintptr_t)m));
+        return buf;
+    }
+    snprintf(buf, sizeof(buf), "0x%llx", (unsigned long long)a);
+    return buf;
+}
+
+std::string DescribeLastFault() {
+    const FaultInfo f = g_lastFault;
+    char head[160];
+    snprintf(head, sizeof(head), "code=0x%08lx %s at ", (unsigned long)f.code,
+             f.code == 0xC0000005 ? (f.rw == 0 ? "read" : (f.rw == 1 ? "write" : "exec")) : "");
+    std::string s = head + ModRva(f.addr);
+    if (f.code == 0xC0000005) {
+        snprintf(head, sizeof(head), " addr=0x%llx", (unsigned long long)f.access);
+        s += head;
+    }
+    s += " stack:";
+    for (USHORT i = 0; i < f.frames; ++i) s += " " + ModRva((uintptr_t)f.stack[i]);
+    return s;
+}
+
 bool CallProcessEventAt(uintptr_t addr, UObject* self, UFunction* fn, void* parms) {
     __try {
         ((ProcessEventFn)addr)(self, fn, parms);
         return true;
-    } __except (EXCEPTION_EXECUTE_HANDLER) {
+    } __except (CaptureFault(GetExceptionInformation())) {
         return false;
     }
 }
@@ -187,7 +245,7 @@ bool CallEngineTickAt(uintptr_t addr, void* self, float dt, bool idle) {
     __try {
         ((EngineTickFn)addr)(self, dt, idle);
         return true;
-    } __except (EXCEPTION_EXECUTE_HANDLER) {
+    } __except (CaptureFault(GetExceptionInformation())) {
         return false;
     }
 }
@@ -3322,7 +3380,7 @@ void DetourProcessEvent(UObject* self, UFunction* fn, void* parms) {
     // mod's only way to block a blueprint-authored reset (see HookPreSkip).
     if (!skipOriginal && g_peTrampoline) {
         if (!CallProcessEventAt((uintptr_t)g_peTrampoline, self, fn, parms))
-            ms2::Log("original ProcessEvent faulted -- swallowed");
+            ms2::Logf("original ProcessEvent faulted -- swallowed (%s)", DescribeLastFault().c_str());
     }
     const uint64 costB = ProfTicks();
     // [R5-DEATH] end
@@ -3353,7 +3411,7 @@ void DetourEngineTick(void* self, float dt, bool idle) {
     tl_inDetour = 1;
     if (g_tickTrampoline) {
         if (!CallEngineTickAt((uintptr_t)g_tickTrampoline, self, dt, idle))
-            ms2::Log("original UGameEngine::Tick faulted -- swallowed");
+            ms2::Logf("original UGameEngine::Tick faulted -- swallowed (%s)", DescribeLastFault().c_str());
     }
     const uint64 t1 = ProfTicks();
     tl_costEngine += t1 - t0;
@@ -3489,6 +3547,31 @@ bool RegisterSkipHook(UFunction* fn, HookSkipFn f, const char* label) {
 bool HookPreSkipFn(UFunction* fn, HookSkipFn f) {
     if (!fn || !f) return false;
     return RegisterSkipHook(fn, f, "by-function");
+}
+
+// [R10-VETONAME]
+bool HookPreSkipName(const char* functionName, HookSkipFn f) {
+    if (!f || !functionName || !*functionName) return false;
+    const FName name = MakeName(functionName);
+    if (name.ComparisonIndex == 0) return false;
+    std::lock_guard<std::mutex> lock(g_hookLock);
+    for (auto& h : g_hooks) {
+        if (h.fnName == name) {
+            if (h.preSkip == f) return true;
+            h.preSkip = f;
+            g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+            ms2::Logf("hook: skip hook replaced on name %s", functionName);
+            return true;
+        }
+    }
+    HookSlot slot;
+    slot.fnName = name;
+    slot.preSkip = f;
+    strncpy_s(slot.name, sizeof(slot.name), functionName, _TRUNCATE);
+    g_hooks.push_back(slot);
+    g_hookCount.store((int)g_hooks.size(), std::memory_order_release);
+    ms2::Logf("hook: skip hook on name %s (FName %u:%u)", functionName, name.ComparisonIndex, name.Number);
+    return true;
 }
 
 bool HookPreSkip(const char* spec, HookSkipFn f) {

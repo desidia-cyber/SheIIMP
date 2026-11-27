@@ -56,7 +56,7 @@ namespace {
 // How many different paths one session may try to load.  A peer swapping through
 // a menu of skins is the only way to reach this; past it the loader goes inert and
 // says so, so a pathological wire cannot turn into a load storm.
-constexpr int kMaxPaths = 48;
+constexpr int kMaxPaths = 160;
 // One load per this many wall seconds: a shell mesh is a ~10-40 ms synchronous
 // read, and three of them in one look apply is already a visible hitch.
 constexpr int64_t kMinSpacing = 1;

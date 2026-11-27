@@ -1148,6 +1148,11 @@ std::string Status();      // the "boss=" sync.txt line
 // Returns true when the verb was one of ours.
 bool OnCommand(const std::string& cmd, const std::string& rest);
 
+// [R10-BOSSFIGHT] the OWNER's boss health was lowered outside the game's damage event
+// (a peer hit applied with combat::DamageRaw): ask the game's own phase functions, the
+// same ones its damage event asks, so the phase still changes (and is published).
+void CheckPhaseAfterDamage(ue::UObject* actor);
+
 } // namespace boss
 // [R7-BOSS] end
 
@@ -1235,6 +1240,7 @@ double PeerAge();                          // seconds since the peer's last lock
 int  PeerKind();                           // 0 none, 1 dialogue, 2 cinematic
 void NoteSkip(int what);                   // 0 = AI retarget, 1 = puppet damage
 void NoteApplyAt();                        // ApplyPeer ran (PeerKeepAlive's throttle)
+bool CinematicRecent(double window);       // [R10-CINEDEATH] a cinematic ran here in `window` s
 void PeerKeepAlive();                      // 15 Hz, never skipped: apply the peer's state
 
 // Test hooks (cmd.txt).  dlgfake / cinefake are STATE INJECTORS in the same
@@ -1831,6 +1837,9 @@ void SerializeDead(std::string* out);   // ,"dead":["...",...]
 double HealthNorm(ue::UObject* actor, bool* dead);
 bool SetHealthNorm(ue::UObject* actor, double norm);   // main.lua:1227
 bool StartDeath(ue::UObject* actor);                   // main.lua:1243
+// [R10-BOSSDMG] lower `actor`'s health by `dmg` raw points (max-health relative);
+// returns the new normalized health, < 0 on failure.
+double DamageRaw(ue::UObject* actor, double dmg);
 bool IsDeadTail(const std::string& tail);
 void RefreshChars();       // main.lua:638 -- forwards to local::RefreshChars()
 void FillHealthCache();    // main.lua:1194
@@ -1887,6 +1896,14 @@ void NoteNearestEnemy(std::string* tail, double* hp, double* d);   // the watch'
 void EnemyTp(const std::string& arg);     // enemytp   -- stand next to the nearest live enemy
 void EnemyDump(const std::string& arg);   // enemydump -- closest live enemies, class/hp/distance
 void WeaponState(const std::string& arg); // weaponstate -- our weapon actors: EquipState + socket (read-only)
+void InputList(const std::string& arg);   // ialist [substr]          -- live InputAction assets
+void Inject(const std::string& arg);      // inject <substr> [secs]   -- Enhanced Input injection
+void InjectTick();
+void InjectReset();
+void LabGod(const std::string& arg);      // labgod 0|1 -- lab only: keep own health >= 90%
+bool LabGodOn();                          // [R10-LABGOD] hithook vetoes hits on our pawn
+void InterDump(const std::string& arg);   // [R10-INTERDUMP] interdump [owner] [go] [call <IA>]
+void Comp(const std::string& arg);        // [R10-INTERDUMP] areacomp <hit> <CompProp> [go]
 void Reset();                             // world change: drop the cache
 }
 // [R9-AREA] end
@@ -2253,6 +2270,10 @@ int Role();
 std::string StatusText();
 std::string PeerName();
 std::string Status();
+// [R10-STEAMGUARD] lab-only, opt-in via coop\STEAMGUARD.txt
+void GuardTick();
+bool GuardActive();
+uint64_t GuardSkipped();
 } // namespace steam
 
 namespace menu {
@@ -2277,6 +2298,10 @@ void Reset();
 void Serialize(std::string* out);
 void OnPeerLine(const std::string& line);
 std::string Status();
+bool OnCommand(const std::string& cmd, const std::string& rest);
+bool PeerTransformNonHumanoid();
+bool PeerTransformHideBody();
+bool IsPeerCloneMirror(ue::UObject* a);
 } // namespace fx_grabs
 
 namespace partb {
@@ -2285,6 +2310,7 @@ void Reset();
 void Serialize(std::string* out);
 void OnPeerLine(const std::string& line);
 std::string Status();
+bool OnCommand(const std::string& cmd, const std::string& rest);
 } // namespace partb
 
 // ===========================================================================

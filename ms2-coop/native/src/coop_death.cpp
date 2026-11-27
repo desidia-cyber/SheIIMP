@@ -464,9 +464,19 @@ VetoTarget g_vetoTargets[] = {
 };
 constexpr int kVetoCount = (int)(sizeof(g_vetoTargets) / sizeof(g_vetoTargets[0]));
 
-bool VetoHook(UObject* /*self*/, UFunction* fn, void* /*parms*/) {
+bool VetoHook(UObject* self, UFunction* fn, void* /*parms*/) {
     DeathState& D = state().death;
     if (D.off || !D.pending || D.selfAlive) return false;
+    // [R10-VETONAME] a name-keyed hook fires for every function of that name: only the
+    // death screen's and the data-layer subsystem's own copies are vetoed.
+    {
+        const std::string fname = ue::GetName((UObject*)fn);
+        const std::string cls = ue::IsValid(self) ? ue::GetClassName(self) : std::string();
+        if ((fname == "CreateLoadingScreen" || fname == "ResetWorld") &&
+            cls.find("DeathScreen") == std::string::npos)
+            return false;
+        if (fname == "SessionReset" && cls.find("DataLayer") == std::string::npos) return false;
+    }
     const int isHost = IsHost() ? 1 : 0;
     if (!CoopShouldSuppressRole(D.peerSeen, GateArmed(), 1, D.partyCase, isHost)) return false;
     ++D.suppressed;
@@ -487,9 +497,13 @@ bool VetoHook(UObject* /*self*/, UFunction* fn, void* /*parms*/) {
 // inside a ProcessEvent detour.
 void OnDeathDetected(UObject* pawn);   // defined below
 
+// [R10-CINEDEATH] the death ABILITY ran (GA_Death_Player_C.HandlePlayerDeath): always real
+bool g_sigAbility = false;
+
 void DeathEventHook(UObject* self, UFunction* fn, void* /*parms*/) {
     DeathState& D = state().death;
     if (D.off) return;
+    if (!D.pending && ue::GetName((UObject*)fn) == "HandlePlayerDeath") g_sigAbility = true;
     if (D.pending || D.pendingSignal) return;
     D.pendingSignal = 1;
     net::Log("death: the game's death event fired: %s on %s",
@@ -511,6 +525,27 @@ int g_vetoCount = -1;   // last logged value, so the retry does not spam the log
 
 void InstallVetoHooks() {
     g_hooksInstalled = true;
+    // [R10-VETONAME] measured (run r10_npcboss 3): the instance-anchored death-screen
+    // hooks resolve only once a WBP_DeathScreen_C exists, which is ~7 s after the death,
+    // and the 3 s retry lost the race with CreateLoadingScreen (the host's world reset
+    // under a boss hold).  The detour matches on the FName, so register the names up
+    // front; VetoHook checks the receiver's class.  coop\VETONAME_OFF.txt disables.
+    {
+        static int nameOff = -1;
+        static bool nameDone = false;
+        if (nameOff < 0) {
+            nameOff = net::FileExists("VETONAME_OFF.txt") ? 1 : 0;
+            if (nameOff) net::Log("death: VETONAME_OFF.txt present -- name-keyed reset vetoes are off");
+        }
+        if (!nameOff && !nameDone) {
+            int n = 0;
+            for (const char* nm : {"CreateLoadingScreen", "ResetWorld", "SessionReset"})
+                if (ue::HookPreSkipName(nm, &VetoHook)) ++n;
+            static int lastN = -1;
+            if (n == 3) nameDone = true;
+            if (n != lastN) lastN = n, net::Log("death: [R10-VETONAME] %d of 3 name-keyed reset veto(es) registered", n);
+        }
+    }
     int ok = 0;
     for (VetoTarget& t : g_vetoTargets) {
         if (t.done) {
@@ -2333,7 +2368,10 @@ void OnDeathDetected(UObject* pawn) {
     D.missReviveAt = 0.0;
     ++D.serial;
 
-    const int boss = BossLive();
+    // [R10-BOSSFIGHT] the host's fight counts too: a guest's copy of a host-owned boss
+    // never runs its intro (bIsAggroed stays false there), so the guest alone read
+    // "no boss" and counted down instead of being held.  ReDecide already uses both.
+    const int boss = (BossLive() || (!net::FileExists("BOSSFIGHT_OFF.txt") && PeerBossNow())) ? 1 : 0;
     D.partyCase = CoopPartyCase(0, PeerAliveNow(), boss);
     // THE HARNESS OVERRIDE, stated once: "a solo death is treated as case 2".  Without
     // this the case is 1 (no partner && myself dead == a party of one that wiped),
@@ -2632,6 +2670,41 @@ void LogState(const char* why) {
 
 }  // namespace
 
+// [R10-CINEDEATH] BP_PlayerController_C.ApplyDeathMix is not only the death: on the
+// two-client rig (2026-11-27) it fired during CIN_DwarfBoss_01 on BOTH players at full
+// health (hp=75/75, deadOrDying=0, deathState=0, no hit) -- two false deaths made a false
+// party wipe and the host's world reset took the boss away.  While a cinematic runs (ours,
+// a replay of the peer's, or the peer's) a death-mix signal counts only if the health says
+// dead too, or the death ability itself ran.  coop\CINEDEATH_OFF.txt restores the old rule.
+static int g_cineGuardOff = -1;
+static uint64_t g_cineGuarded = 0;
+static double g_cineGuardLogAt = -1.0e9;
+
+static bool g_mixGuarded = false;   // this death-mix episode was judged a cinematic's, keep it so
+
+static bool CineDeathGuard(UObject* pawn, bool mixOnly) {
+    if (g_cineGuardOff < 0) {
+        g_cineGuardOff = net::FileExists("CINEDEATH_OFF.txt") ? 1 : 0;
+        if (g_cineGuardOff) net::Log("death: CINEDEATH_OFF.txt present -- the cinematic death guard is off");
+    }
+    if (g_cineGuardOff) return false;
+    if (g_sigAbility) { g_mixGuarded = false; return false; }   // the death ability ran: real
+    bool dead = false;
+    const double hp = combat::HealthNorm(pawn, &dead);
+    if (dead || hp <= 0.0) { g_mixGuarded = false; return false; }   // unreadable (-1) or dead
+    // the same mix still on after the cinematic (nothing cleared it): still not a death
+    if (!(g_mixGuarded && mixOnly) && !dialog::CinematicRecent(3.0)) return false;
+    g_mixGuarded = true;
+    ++g_cineGuarded;
+    if (net::Now() - g_cineGuardLogAt >= 5.0) {
+        g_cineGuardLogAt = net::Now();
+        net::Log("death: [R10-CINEDEATH] death mix during a cinematic at hp=%.2f -- NOT a death "
+                 "(guarded %llu tick(s); CINEDEATH_OFF.txt disables)", hp,
+                 (unsigned long long)g_cineGuarded);
+    }
+    return true;
+}
+
 void Tick15() {
     DeathState& D = state().death;
     if (D.off) return;
@@ -2743,8 +2816,16 @@ void Tick15() {
         // The death itself is a game EVENT, not this enum (run 2).  Either the hook
         // raised the flag last frame or the controller's own death-mix flag is on; the
         // decision and every engine read happen here.
+        if (!mix && !D.pendingSignal) g_mixGuarded = false;
+        if ((D.pendingSignal || mix) && CineDeathGuard(D.pawn, mix && !D.pendingSignal)) {
+            D.pendingSignal = 0;
+            D.selfAlive = 1;
+            D.liveness = MyLiveness();
+            return;
+        }
         if (D.pendingSignal || mix) {
             D.pendingSignal = 0;
+            g_sigAbility = false;
             OnDeathDetected(pawn);
             D.liveness = MyLiveness();
             return;
@@ -2999,6 +3080,24 @@ std::string Status() {
 
 bool OnCommand(const std::string& cmd, const std::string& rest) {
     DeathState& D = state().death;
+
+    // [R10-LABHP] labhp <max> -- LAB ONLY: raise our own MaxHealth (and fill it) so a
+    // boss test pawn survives the hits that bypass the hit-payload veto (run
+    // r10_npcboss 3: the 75 HP test pawn died through `labgod 1`).  Never on a
+    // player's own build path: nothing calls it but the lab cmd file.
+    if (cmd == "labhp") {
+        const float v = (float)std::atof(rest.c_str());
+        UObject* hc = HealthCompOf(net::Pawn());
+        UObject* set = nullptr;
+        bool ok = false;
+        float before = 0.0f;
+        if (v > 1.0f && ue::IsValid(hc) && PropObj(hc, "HealthSet", &set)) {
+            ReadAttr(set, "MaxHealth", &before);
+            ok = WriteAttr(set, "MaxHealth", v) && WriteAttr(set, "Health", v);
+        }
+        net::Log("labhp: MaxHealth %.1f -> %.1f ok=%d", (double)before, (double)v, ok ? 1 : 0);
+        return true;
+    }
 
     if (cmd == "die") {
         // The game's own kill path: BP_PlayerController_C.S_KillMe().  The fallback

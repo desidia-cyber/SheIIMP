@@ -18,6 +18,7 @@
 
 #include "coop_state.h"
 #include "ms2_log.h"
+#include "MinHook.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -995,10 +996,71 @@ std::string PeerName() {
 }
 
 std::string Status() {
-    return net::Fmt("steam=st:%d role:%d app:%u peer:%s\n",
-                    State(), Role(), (unsigned)ActiveSteamAppId(),
-                    PeerName().empty() ? "-" : PeerName().c_str());
+    // [R10-STEAMHEAP] The status line is written every loop.  It used to ask
+    // steam_api64 (SteamUtils accessor + GetAppID) every time, even solo or on LAN;
+    // the test installs' steam_api64 then died with a heap double free on the game
+    // thread while a save loaded (13:41/13:44/13:46 dumps).  Ask Steam only while a
+    // Steam-transport session is live; otherwise report the env app id.
+    uint32_t app = 0;
+    if (State() != kStateIdle && GetConfig().network == 0) {
+        app = ActiveSteamAppId();
+    } else {
+        char env[32] = {};
+        if (GetEnvironmentVariableA("SteamAppId", env, sizeof(env)) > 0) app = (uint32_t)std::strtoul(env, nullptr, 10);
+    }
+    return net::Fmt("steam=st:%d role:%d app:%u peer:%s guard:%d skipped:%llu\n",
+                    State(), Role(), (unsigned)app,
+                    PeerName().empty() ? "-" : PeerName().c_str(),
+                    GuardActive() ? 1 : 0, (unsigned long long)GuardSkipped());
 }
+
+// [R10-STEAMGUARD] begin -- LAB ONLY, opt-in.
+// The test installs' Steam emulator (steam_api64.dll) double-frees inside its own
+// SteamAPI_RunCallbacks while the game's online thread dispatches callbacks
+// (dumps 38852 / 70904: only that thread is in steam_api64, ~55 s after boot, also
+// with the original R10 DLL and with the engine Steam subsystem disabled by -ini).
+// coop\STEAMGUARD.txt turns SteamAPI_RunCallbacks into a no-op so a lab run can
+// reach gameplay.  Off unless that file exists; STEAMGUARD_OFF.txt also forces it
+// off.  Never ship STEAMGUARD.txt: with it, Steam callbacks (and the Steam
+// transport) do not run.
+namespace {
+using RunCbFn = void (__cdecl*)();
+RunCbFn g_origRunCb = nullptr;
+std::atomic<bool> g_guardOn{false};
+std::atomic<uint64_t> g_guardSkipped{0};
+bool g_guardDone = false;
+void __cdecl GuardRunCallbacks() { g_guardSkipped.fetch_add(1, std::memory_order_relaxed); }
+bool CoopFileExists(const char* name) {
+    const std::string p = state().local.dir + name;
+    if (state().local.dir.empty()) return false;
+    const int n = MultiByteToWideChar(CP_UTF8, 0, p.c_str(), -1, nullptr, 0);
+    if (n <= 0) return false;
+    std::wstring w((size_t)n, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, p.c_str(), -1, &w[0], n);
+    return GetFileAttributesW(w.c_str()) != INVALID_FILE_ATTRIBUTES;
+}
+}  // namespace
+
+bool GuardActive() { return g_guardOn.load(std::memory_order_acquire); }
+uint64_t GuardSkipped() { return g_guardSkipped.load(std::memory_order_relaxed); }
+
+void GuardTick() {
+    if (g_guardDone || state().local.dir.empty()) return;
+    if (!CoopFileExists("STEAMGUARD.txt") || CoopFileExists("STEAMGUARD_OFF.txt")) { g_guardDone = true; return; }
+    HMODULE m = GetModuleHandleW(L"steam_api64.dll");
+    if (!m) return;                                   // not loaded yet -- next tick
+    g_guardDone = true;
+    void* target = (void*)GetProcAddress(m, "SteamAPI_RunCallbacks");
+    if (!target) { ms2::Log("steamguard: SteamAPI_RunCallbacks not exported -- guard off"); return; }
+    if (MH_CreateHook(target, (LPVOID)&GuardRunCallbacks, (LPVOID*)&g_origRunCb) != MH_OK ||
+        MH_EnableHook(target) != MH_OK) {
+        ms2::Log("steamguard: hook FAILED -- guard off");
+        return;
+    }
+    g_guardOn.store(true, std::memory_order_release);
+    ms2::Log("steamguard: LAB guard ON -- SteamAPI_RunCallbacks is a no-op (STEAMGUARD.txt)");
+}
+// [R10-STEAMGUARD] end
 
 }  // namespace steam
 }  // namespace coop

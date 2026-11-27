@@ -616,7 +616,7 @@ std::string MontagePath(UObject* o) {
 std::string HpString(const std::string& tail) {
     const double* v = state().combat.hpSeen.Find(tail);
     if (!v) return std::string("1.0");
-    return net::Fmt("%.3f", *v);
+    return net::Fmt("%.4f", *v);   // [R10-BOSSFIGHT] 1e-4 = ~1 HP on a boss
 }
 
 // ---------------------------------------------------------------------------
@@ -778,6 +778,21 @@ double HealthNorm(UObject* actor, bool* dead) {
 // attribute. GetHealth stayed 75 after "writing" 37.5, which is exactly what the
 // two-client DAMAGE verdict saw.  Writing +8/+12 needs no resolution at all, and it
 // is what the Lua did (ImportText set BaseValue and CurrentValue together).
+// [R10-BOSSDMG]
+double DamageRaw(UObject* actor, double dmg) {
+    UObject* hc = HealthCompOf(actor);
+    if (!hc || !(dmg > 0.0)) return -1.0;
+    float maxhp = 0.0f;
+    if (!CallFloat(hc, "GetMaxHealth", &maxhp) || !(maxhp > 0.0f)) return -1.0;
+    bool dead = false;
+    const double cur = HealthNorm(actor, &dead);
+    if (cur < 0.0 || dead) return -1.0;
+    double next = cur - dmg / (double)maxhp;
+    if (next < 0.0) next = 0.0;
+    if (!SetHealthNorm(actor, next)) return -1.0;
+    return next;
+}
+
 bool SetHealthNorm(UObject* actor, double norm) {
     UObject* hc = HealthCompOf(actor);
     if (!hc) return false;
@@ -838,10 +853,105 @@ bool SetHealthNorm(UObject* actor, double norm) {
     return ok;
 }
 
+// [R10-BOSSFIGHT] Read GA_Death_AI_C / GA_DeathBase_C's GameplayEvent trigger tag
+// from its CDO's AbilityTriggers array once, and send that event to the actor so the
+// real death ability (DisableAILogic, Deaggro, PlayDeathMontage, DropCurrency,
+// EndDeath) runs instead of leaving the AI alive and swinging after StartDeath().
+namespace {
+
+bool SendAiDeathEvent(UObject* actor) {
+    static int s_probed = 0;
+    static ue::FName s_tag{};
+    static ue::UClass* s_deathCls = nullptr;
+    if (!s_probed) {
+        s_probed = 1;
+        const char* names[] = {"GA_Death_AI_C", "GA_DeathBase_C"};
+        for (const char* cn : names) {
+            ue::UClass* cls = ue::FindClass(cn);
+            if (!cls) continue;
+            if (!s_deathCls) s_deathCls = cls;
+            UObject* cdo = ue::GetCDO(cls);
+            if (!Live(cdo)) continue;
+            const std::int32_t off = ue::PropOffset(cdo, "AbilityTriggers");
+            if (off < 0) continue;
+            struct RawArray { const std::uint8_t* data; std::int32_t num; std::int32_t max; };
+            RawArray arr{};
+            if (!ue::ReadMem(reinterpret_cast<const std::uint8_t*>(cdo) + off, &arr, sizeof(arr)))
+                continue;
+            if (!arr.data || arr.num <= 0 || arr.num > 32) continue;
+            // FAbilityTriggerData: FGameplayTag TriggerTag @0x00 (8B), uint8 TriggerSource @0x08, size 0x0C
+            for (std::int32_t i = 0; i < arr.num; ++i) {
+                const auto* elem = arr.data + (std::size_t)i * 0x0C;
+                ue::FName tag{};
+                std::uint8_t src = 255;
+                if (ue::ReadMem(elem, &tag, sizeof(tag)) &&
+                    ue::ReadMem(elem + 8, &src, sizeof(src)) &&
+                    tag.ComparisonIndex != 0 && src == 0) {
+                    s_tag = tag;
+                    net::Log("combat: [R10-BOSSFIGHT] %s AbilityTriggers[%d] tag=%s",
+                             cn, i, ue::ToString(tag).c_str());
+                    break;
+                }
+            }
+            if (s_tag.ComparisonIndex != 0) break;
+        }
+        if (s_tag.ComparisonIndex == 0)
+            net::Log("combat: [R10-BOSSFIGHT] no AbilityTriggers GameplayEvent tag on GA_Death_AI_C");
+    }
+
+    bool sent = false;
+    if (s_tag.ComparisonIndex != 0) {
+        if (ue::UClass* libCls = ue::FindClass("AbilitySystemBlueprintLibrary")) {
+            if (UObject* libCdo = ue::GetCDO(libCls); Live(libCdo)) {
+                if (UFunction* fn = ue::FindFunction(libCdo, "SendGameplayEventToActor")) {
+                    ue::Params p(fn);
+                    p.Set<UObject*>("Actor", actor);
+                    p.Set<ue::FName>("EventTag", s_tag);
+                    sent = ue::Call(libCdo, fn, p.data());
+                }
+            }
+        }
+    }
+    if (!sent && s_deathCls) {
+        UObject* asc = nullptr;
+        if (ue::Get<UObject*>(actor, "AbilitySystemComponent", asc) && Live(asc)) {
+            if (UFunction* fn = ue::FindFunction(asc, "TryActivateAbilityByClass")) {
+                ue::Params p(fn);
+                p.Set<UObject*>("InAbilityToActivate", reinterpret_cast<UObject*>(s_deathCls));
+                p.Set<bool>("bAllowRemoteActivation", false);
+                sent = ue::Call(asc, fn, p.data());
+            }
+        }
+    }
+    return sent;
+}
+
+}  // namespace
+
 // main.lua:1243-1248
 bool StartDeath(UObject* actor) {
     UObject* hc = HealthCompOf(actor);
     if (!hc) return false;
+
+    const bool isAi = Live(actor) && actor != net::Pawn() && actor != puppet::Actor();
+    if (isAi && !net::FileExists("BOSSFIGHT_OFF.txt")) {
+        // Zero health so the boss/enemy HP bar reads 0.000 (not 0.010) and cancel
+        // any in-flight attack montage before activating the death ability.
+        SetHealthNorm(actor, 0.0);
+        StopAnimMontage(actor);
+        const bool evOk = SendAiDeathEvent(actor);
+        if (UObject* ctrl = CallObject(actor, "GetController"); Live(ctrl)) {
+            if (UObject* bc = BrainComponentOf(ctrl)) StopLogic(bc, "coop death");
+            if (UFunction* fm = ue::FindFunction(ctrl, "StopMovement")) {
+                ue::Params pm(fm);
+                ue::Call(ctrl, fm, pm.data());
+            }
+        }
+        bool deadNow = false;
+        if (CallBool(hc, "IsDeadOrDying", &deadNow) && deadNow) return true;
+        (void)evOk;
+    }
+
     UFunction* f = ue::FindFunction(hc, "StartDeath");
     if (!f) return false;
     ue::Params p(f);
@@ -911,6 +1021,24 @@ std::vector<NpcRow> CollectNpcs() {
 
         const std::string cfn = ClassFullName(a);
         if (Contains(cfn, "BP_PlayerCharacter") || Contains(cfn, "BP_MainMenuCharacter")) continue;
+        // [R10-CLONE] Player-owned clones, decoys, Shell Summons, and Ally Summons are synced by coop_fx_grabs ("cln"), never as enemies
+        if (Contains(cfn, "BP_Shell_Tiel_ShadowClone") || Contains(cfn, "BP_Shell_Genessa_Astral") ||
+            Contains(cfn, "BP_Shell_Decoy") || Contains(cfn, "BP_Decoy_Bait") ||
+            Contains(cfn, "BP_Shell_Summon") || fx_grabs::IsPeerCloneMirror(a)) continue;
+        {
+            static ue::UClass* s_astralCls = nullptr;
+            if (!s_astralCls) s_astralCls = ue::FindClass("BPC_AstralAI_C");
+            if (s_astralCls) {
+                if (UFunction* fnComp = ue::FindFunction(a, "GetComponentByClass")) {
+                    ue::Params p(fnComp);
+                    p.Set<ue::UObject*>("ComponentClass", reinterpret_cast<ue::UObject*>(s_astralCls));
+                    if (ue::Call(a, fnComp, p.data())) {
+                        ue::UObject* comp = p.Get<ue::UObject*>("ReturnValue");
+                        if (Live(comp) && !ue::GetBool(comp, "bIsCached") && ue::GetBool(comp, "bCharacterEnabled")) continue;
+                    }
+                }
+            }
+        }
 
         Vec3 loc;
         if (!LocOf(a, &loc)) continue;
@@ -1377,6 +1505,28 @@ void ApplyNpcs(const std::string& line) {
     }
 }
 
+// [R10-BOSSFIGHT] measured (r10_boss6): the fixed epsilons are in NORMALISED health, so on
+// a ~10 000 HP boss a hit (35 HP = 0.0034) was below the local damage epsilon (0.004) and
+// the guest adopted only gaps over 0.02 (~200 HP): its boss bar ran >10 s behind.  The
+// epsilon is now the smaller of the old value and a fixed number of HP points.
+static bool BossFightOff() {
+    static int v = -1;
+    if (v < 0) {
+        v = net::FileExists("BOSSFIGHT_OFF.txt") ? 1 : 0;
+        if (v) net::Log("BOSSFIGHT_OFF.txt present -- the R10 boss-fight fixes are off");
+    }
+    return v != 0;
+}
+double ScaledEps(UObject* a, double base, double hpPoints) {
+    if (BossFightOff()) return base;
+    UObject* hc = HealthCompOf(a);
+    float mx = 0.0f;
+    if (!hc || !CallFloat(hc, "GetMaxHealth", &mx) || !(mx > 0.0f)) return base;
+    double e = hpPoints / (double)mx;
+    if (e < 0.001) e = 0.001;
+    return e < base ? e : base;
+}
+
 // main.lua:1895-1924
 void ApplyHealth(const std::string& line) {
     std::string sec;
@@ -1405,7 +1555,8 @@ void ApplyHealth(const std::string& line) {
         bool dead = false;
         if (!HealthNormOf(a, &mine, &dead)) continue;
 
-        if (peerHp < mine - kHpAdoptEps) {
+        const double gap = mine - peerHp;
+        if (gap > kHpAdoptEps || (gap > 0.001 && gap > ScaledEps(a, kHpAdoptEps, 25.0))) {
             SetHealthNorm(a, peerHp);
             c.hpSeen.Set(tail, peerHp);
             if (peerHp <= kDeadHp && !c.deadTails.Has(tail)) {
@@ -2308,7 +2459,8 @@ void SampleCombat() {
             c.hpSeen.Set(e.tail, hp);
             c.deadTails.Erase(e.tail);
             net::Log("local respawn: %s (hp=%.2f)", e.tail.c_str(), hp);
-        } else if (hp < *prev - kHpLocalEps) {
+        } else if (hp < *prev - kHpLocalEps ||
+                   (hp < *prev - 0.001 && hp < *prev - ScaledEps(e.a, kHpLocalEps, 15.0))) {
             c.hpSeen.Set(e.tail, hp);
         }
         if (dead || hp <= kDeadHp) {
