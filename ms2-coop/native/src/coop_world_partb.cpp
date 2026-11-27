@@ -105,16 +105,33 @@ int g_ablActive = 0;
 std::string g_sealName;
 int g_lastPeerAblSeq = 0;
 int g_ablSynced = 0;
+bool g_hardenFrozen = false;
 
-// --- 5. NG+ / Send Ova safety notification (S61) ---
+// --- 5. NG+ / Send Ova safety guard (S61) ---
 int g_ngpSeq = 0;
 int g_lastPeerNgpSeq = 0;
 bool g_ngpHooked = false;
+int g_ngpVetoed = 0;
 
-void OnResetForNewGamePlus(UObject*, UFunction*, void*) {
-    if (!state().toggles.partB) return;
+// --- 6. Night Mode sync (S74: BP_DayNight_Interaction_Thestus_C) ---
+int g_nmSeq = 0;
+int g_nmState = -1; // -1=unknown, 0=day, 1=night
+int g_lastPeerNmSeq = 0;
+int g_nmSynced = 0;
+
+bool OnResetForNewGamePlusPre(UObject*, UFunction*, void*) {
+    if (!state().toggles.partB) return false;
+    if (net::FileExists("NGPLUS_GUARD_OFF.txt")) return false;
+    const bool peerFresh = state().peer.present && (net::Wall() - state().peer.wallAt <= 6);
+    if (peerFresh && state().puppet.phase == Phase::Sync) {
+        ++g_ngpVetoed;
+        ++g_ngpSeq;
+        net::Log("partb: VETOED S_ResetForNewGamePlus in active co-op (vetoed=%d) -- disconnect or create NGPLUS_GUARD_OFF.txt to advance to NG+", g_ngpVetoed);
+        return true; // skip/veto the unilateral NG+ reset
+    }
     ++g_ngpSeq;
-    net::Log("partb: S_ResetForNewGamePlus triggered locally (seq=%d) -- notifying partner", g_ngpSeq);
+    net::Log("partb: S_ResetForNewGamePlus allowed (solo, seq=%d)", g_ngpSeq);
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -246,7 +263,7 @@ void ApplyPeerDungeonVariant(const std::string& selTail, const std::string& evPa
         }
     }
 
-    UObject* evAsset = net::Find(evPath, false);
+    UObject* evAsset = net::Find(evPath, true);
     if (!Live(evAsset)) return;
 
     if (UFunction* fnLoad = ue::FindFunction(targetSel, "LoadLevel")) {
@@ -291,7 +308,7 @@ void SamplePuzzlesAndSpawners() {
         }
     }
 
-    // S33: Pressure plate doors (BP_PressurePlateOpenDoor_C.Opened)
+    // S33: Pressure plate doors (BP_PressurePlateOpenDoor_C.Opened -> RaiseWall / CloseWall)
     for (UObject* pp : ue::FindAllOf("BP_PressurePlateOpenDoor_C")) {
         if (!Live(pp) || Dist(myLoc, net::Loc(pp)) > 3500.0) continue;
         const std::string tail = net::Tail(pp);
@@ -300,10 +317,46 @@ void SamplePuzzlesAndSpawners() {
         auto it = g_pzlSeen.find(tail);
         if (it == g_pzlSeen.end()) {
             g_pzlSeen[tail] = val;
-        } else if (val == 1 && it->second == 0) {
-            it->second = 1;
-            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 1, 1, now});
+        } else if (val != it->second) {
+            it->second = val;
+            g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 1, val, now});
             ++g_pzlTx;
+        }
+    }
+
+    // S31: Moving objects / drawbridges / stone gates (TriggerMovingActor)
+    for (const char* mvCls : {"BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C"}) {
+        for (UObject* mv : ue::FindAllOf(mvCls)) {
+            if (!Live(mv) || Dist(myLoc, net::Loc(mv)) > 4500.0) continue;
+            const std::string tail = net::Tail(mv);
+            if (tail.empty()) continue;
+            int val = ue::GetBool(mv, "IsMoving") ? 1 : 0;
+            if (!val) {
+                UObject* so = nullptr;
+                if (ue::Get<UObject*>(mv, "As", so) && Live(so) && ue::GetBool(so, "MovedToEnd")) val = 2;
+            }
+            auto it = g_pzlSeen.find(tail);
+            if (it == g_pzlSeen.end()) {
+                g_pzlSeen[tail] = val;
+            } else if (val != 0 && val != it->second) {
+                it->second = val;
+                g_pzlQ.push_back(PzlEvent{g_nextPzlSeq++, tail, 4, val, now});
+                ++g_pzlTx;
+            }
+        }
+    }
+
+    // S74: Night Mode (Host authoritative via BP_DayNight_Interaction_Thestus_C.bInNightMode)
+    if (state().local.role == "host") {
+        for (UObject* th : ue::FindAllOf("BP_DayNight_Interaction_Thestus_C")) {
+            if (!Live(th)) continue;
+            int nm = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+            if (nm != g_nmState) {
+                g_nmState = nm;
+                ++g_nmSeq;
+                net::Log("partb: host NightMode=%d (seq=%d)", nm, g_nmSeq);
+            }
+            break;
         }
     }
 
@@ -312,27 +365,59 @@ void SamplePuzzlesAndSpawners() {
     while (g_pzlQ.size() > 12) g_pzlQ.pop_front();
 }
 
+void ApplyPeerNightMode(int seq, int wantNight) {
+    if (seq <= g_lastPeerNmSeq || state().local.role == "host") return;
+    g_lastPeerNmSeq = seq;
+    for (UObject* th : ue::FindAllOf("BP_DayNight_Interaction_Thestus_C")) {
+        if (!Live(th)) continue;
+        int cur = ue::GetBool(th, "bInNightMode") ? 1 : 0;
+        if (cur == wantNight) return;
+        if (UFunction* fn = ue::FindFunction(th, "togglenightmode")) {
+            ue::Params p(fn);
+            if (ue::Call(th, fn, p.data())) {
+                ++g_nmSynced;
+                net::Log("partb: synced NightMode -> %d via togglenightmode()", wantNight);
+            }
+        }
+        return;
+    }
+}
+
 void ApplyPeerPuzzle(int seq, const std::string& tail, int kind, int val) {
     if (seq <= g_lastRxPzlSeq || tail.empty()) return;
     g_lastRxPzlSeq = seq;
     g_pzlSeen[tail] = val;
 
-    if (kind == 1 && val == 1) {
-        // S33: Replay pressure plate door open
+    if (kind == 1) {
+        // S33: Replay pressure plate door open/close using the real UFunctions
         for (UObject* pp : ue::FindAllOf("BP_PressurePlateOpenDoor_C")) {
             if (!Live(pp) || net::Tail(pp) != tail) continue;
-            if (ue::GetBool(pp, "Opened")) return;
-            ue::SetBool(pp, "Opened", true);
-            for (const char* fnName : {"OpenDoor", "TriggerMovingActor", "OnPressurePlateActivated"}) {
-                if (UFunction* fn = ue::FindFunction(pp, fnName)) {
-                    ue::Params p(fn);
-                    ue::Call(pp, fn, p.data());
-                    break;
-                }
+            const bool wantOpen = (val != 0);
+            if (ue::GetBool(pp, "Opened") == wantOpen) return;
+            ue::SetBool(pp, "Opened", wantOpen);
+            const char* fnName = wantOpen ? "RaiseWall" : "CloseWall";
+            if (UFunction* fn = ue::FindFunction(pp, fnName)) {
+                ue::Params p(fn);
+                ue::Call(pp, fn, p.data());
             }
             ++g_pzlRx;
-            net::Log("partb: replayed BP_PressurePlateOpenDoor_C open on %s", tail.c_str());
+            net::Log("partb: replayed BP_PressurePlateOpenDoor_C::%s on %s", fnName, tail.c_str());
             return;
+        }
+    } else if (kind == 4) {
+        // S31: Replay moving object / drawbridge / stone gate via BPI_LiftCall::TriggerMovingActor
+        for (const char* mvCls : {"BP_Drawbridge_C", "BP_Electric_StoneGate_C", "BP_ProximaUnlockGate_C"}) {
+            for (UObject* mv : ue::FindAllOf(mvCls)) {
+                if (!Live(mv) || net::Tail(mv) != tail) continue;
+                if (UFunction* fn = ue::FindFunction(mv, "TriggerMovingActor")) {
+                    ue::Params p(fn);
+                    p.Set<bool>("TopLevelLever", val == 1);
+                    ue::Call(mv, fn, p.data());
+                    ++g_pzlRx;
+                    net::Log("partb: replayed %s::TriggerMovingActor on %s", mvCls, tail.c_str());
+                }
+                return;
+            }
         }
     } else if (kind == 3 && val == 1) {
         for (UObject* sp : ue::FindAllOf("BP_Spawner_C")) {
@@ -357,11 +442,11 @@ void SampleLocalAbilities() {
     UObject* pawn = net::Pawn();
     if (!Live(pawn)) return;
 
-    // Install NG+ safety hook once (S61)
+    // Install NG+ safety veto hook once (S61)
     if (!g_ngpHooked) {
-        if (ue::HookPost("BP_PlayerController_C.S_ResetForNewGamePlus", &OnResetForNewGamePlus)) {
+        if (ue::HookPreSkipName("S_ResetForNewGamePlus", &OnResetForNewGamePlusPre)) {
             g_ngpHooked = true;
-            net::Log("partb: hooked BP_PlayerController_C.S_ResetForNewGamePlus (NG+ guard)");
+            net::Log("partb: hooked S_ResetForNewGamePlus (NG+ co-op veto guard)");
         }
     }
 
@@ -416,15 +501,18 @@ void ApplyPeerAbility(int seq, const std::string& abl, int active) {
     UObject* pup = puppet::Actor();
     if (!Live(pup)) return;
 
-    // Harden: freeze puppet animation play rate while stone-hardened, restore when released
-    if (abl == "Seal.Harden") {
+    // Harden: freeze puppet animation play rate while stone-hardened, ALWAYS restore on release
+    const bool wantFreeze = (abl == "Seal.Harden" && active != 0);
+    if (wantFreeze != g_hardenFrozen) {
         UObject* mesh = puppet::Mesh();
         if (Live(mesh)) {
             if (UFunction* fn = ue::FindFunction(mesh, "SetPlayRate")) {
                 ue::Params p(fn);
-                p.Set<float>("Rate", active ? 0.0f : 1.0f);
+                p.Set<float>("Rate", wantFreeze ? 0.0f : 1.0f);
                 ue::Call(mesh, fn, p.data());
+                g_hardenFrozen = wantFreeze;
                 ++g_ablSynced;
+                net::Log("partb: puppet Harden %s (SetPlayRate=%.1f)", wantFreeze ? "FREEZE" : "UNFREEZE", wantFreeze ? 0.0f : 1.0f);
             }
         }
     } else if (active) {
@@ -454,6 +542,9 @@ void Reset() {
     g_ablName.clear();
     g_ablActive = 0;
     g_lastPeerAblSeq = 0;
+    g_hardenFrozen = false;
+    g_nmState = -1;
+    g_lastPeerNmSeq = 0;
 }
 
 void Serialize(std::string* out) {
@@ -487,6 +578,9 @@ void Serialize(std::string* out) {
     }
     if (g_ngpSeq > 0) {
         *out += net::Fmt(",\"ngp\":%d", g_ngpSeq);
+    }
+    if (g_nmSeq > 0 && g_nmState >= 0) {
+        *out += net::Fmt(",\"nm\":[%d,%d]", g_nmSeq, g_nmState);
     }
 }
 
@@ -539,15 +633,22 @@ void OnPeerLine(const std::string& line) {
             ApplyPeerAbility(std::atoi(t[0].c_str()), t[1], std::atoi(t[2].c_str()));
         }
     }
+    if (net::Section(line, "nm", &sec) && sec.size() > 2) {
+        auto t = SplitTuple(sec);
+        if (t.size() >= 2) {
+            ApplyPeerNightMode(std::atoi(t[0].c_str()), std::atoi(t[1].c_str()));
+        }
+    }
 }
 
 std::string Status() {
-    return net::Fmt("partb=%s pulls:%d quirks:%d dng:%d pzl:%d/%d abl:%d seal:%s ngp:%d/%d\n",
+    return net::Fmt("partb=%s pulls:%d quirks:%d dng:%d pzl:%d/%d abl:%d seal:%s ngp:%d/%d/%d nm:%d/%d\n",
                     state().toggles.partB ? "on" : "off",
                     g_bossPulls, g_bossQuirksSynced, g_dngSynced,
                     g_pzlTx, g_pzlRx, g_ablSynced,
                     g_sealName.empty() ? "-" : g_sealName.c_str(),
-                    g_ngpSeq, g_lastPeerNgpSeq);
+                    g_ngpSeq, g_lastPeerNgpSeq, g_ngpVetoed,
+                    g_nmState, g_nmSynced);
 }
 
 }  // namespace partb
