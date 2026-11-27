@@ -191,6 +191,8 @@ struct CloneEntry {
     double x = 0, y = 0, z = 0;
     double yaw = 0;
     std::string meshPath;
+    std::string monPath;
+    double monPos = 0.0;
 };
 
 struct PeerCloneMirror {
@@ -198,6 +200,7 @@ struct PeerCloneMirror {
     UObject* actor = nullptr;
     std::string clsPath;
     std::string appliedMesh;
+    std::string appliedMon;
     double lastSeen = 0.0;
 };
 
@@ -247,7 +250,7 @@ int g_projTx = 0, g_projRx = 0;
 int g_grabTx = 0, g_grabRx = 0;
 int g_vfxTx  = 0, g_vfxRx  = 0;
 int g_xformTx = 0, g_xformRx = 0;
-int g_cloneTx = 0, g_cloneRx = 0;
+int g_cloneTx = 0, g_cloneRx = 0, g_cloneAnimRx = 0;
 
 std::string KeyForActor(UObject* a) {
     if (!Live(a)) return "";
@@ -697,6 +700,32 @@ void ScanLocalClones() {
                 if (ue::Call(mesh, fn, p.data())) asset = p.Get<UObject*>("ReturnValue");
             }
             if (Live(asset)) ce.meshPath = StripClassPrefix(ue::GetFullName(asset));
+
+            // Sample active animation montage + playback position for full visual attack sync
+            if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+                ue::Params pa(fnAi);
+                if (ue::Call(mesh, fnAi, pa.data())) {
+                    UObject* ai = pa.Get<UObject*>("ReturnValue");
+                    if (Live(ai)) {
+                        if (UFunction* fnCur = ue::FindFunction(ai, "GetCurrentActiveMontage")) {
+                            ue::Params pc(fnCur);
+                            if (ue::Call(ai, fnCur, pc.data())) {
+                                UObject* mon = pc.Get<UObject*>("ReturnValue");
+                                if (Live(mon)) {
+                                    ce.monPath = StripClassPrefix(ue::GetFullName(mon));
+                                    if (UFunction* fnPos = ue::FindFunction(ai, "Montage_GetPosition")) {
+                                        ue::Params pp(fnPos);
+                                        pp.Set<UObject*>("Montage", mon);
+                                        if (ue::Call(ai, fnPos, pp.data())) {
+                                            ce.monPos = (double)pp.Get<float>("ReturnValue");
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         g_localClones.push_back(std::move(ce));
     };
@@ -789,9 +818,9 @@ void ApplyPeerClones(const std::vector<CloneEntry>& list) {
 
         if (Live(m.actor)) {
             SetActorLocRot(m.actor, ce.x, ce.y, ce.z, 0.0, ce.yaw, 0.0);
-            if (!ce.meshPath.empty() && m.appliedMesh != ce.meshPath) {
-                UObject* mesh = nullptr;
-                if (ue::Get<UObject*>(m.actor, "Mesh", mesh) && Live(mesh)) {
+            UObject* mesh = nullptr;
+            if (ue::Get<UObject*>(m.actor, "Mesh", mesh) && Live(mesh)) {
+                if (!ce.meshPath.empty() && m.appliedMesh != ce.meshPath) {
                     UObject* asset = net::Find(ce.meshPath, true);
                     if (Live(asset)) {
                         if (UFunction* fnSet = ue::FindFunction(mesh, "SetSkeletalMeshAsset")) {
@@ -800,6 +829,99 @@ void ApplyPeerClones(const std::vector<CloneEntry>& list) {
                             ue::Call(mesh, fnSet, p.data());
                             m.appliedMesh = ce.meshPath;
                         }
+                    }
+                }
+
+                // Full visual attack/ability montage sync on the clone/summon mirror
+                UObject* ai = nullptr;
+                if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+                    ue::Params pa(fnAi);
+                    if (ue::Call(mesh, fnAi, pa.data())) ai = pa.Get<UObject*>("ReturnValue");
+                }
+                if (!Live(ai) && !ce.monPath.empty()) {
+                    // Ensure mirror mesh has an AnimInstance (e.g. BP_Shell_Summon_C before InitDefaultMesh)
+                    if (UFunction* fnInit = ue::FindFunction(m.actor, "InitDefaultMesh")) {
+                        ue::Params pi(fnInit);
+                        ue::Call(m.actor, fnInit, pi.data());
+                    }
+                    if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+                        ue::Params pa(fnAi);
+                        if (ue::Call(mesh, fnAi, pa.data())) ai = pa.Get<UObject*>("ReturnValue");
+                    }
+                    if (!Live(ai)) {
+                        UObject* pm = puppet::Mesh();
+                        UObject* animCls = nullptr;
+                        if (Live(pm) && ue::Get<UObject*>(pm, "AnimClass", animCls) && Live(animCls)) {
+                            if (UFunction* fnMode = ue::FindFunction(mesh, "SetAnimationMode")) {
+                                ue::Params pm2(fnMode);
+                                pm2.Set<uint8_t>("InAnimationMode", 0); // UseAnimationBlueprint
+                                ue::Call(mesh, fnMode, pm2.data());
+                            }
+                            if (UFunction* fnSetAi = ue::FindFunction(mesh, "SetAnimInstanceClass")) {
+                                ue::Params ps(fnSetAi);
+                                ps.Set<UObject*>("NewClass", animCls);
+                                ue::Call(mesh, fnSetAi, ps.data());
+                            }
+                            if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+                                ue::Params pa(fnAi);
+                                if (ue::Call(mesh, fnAi, pa.data())) ai = pa.Get<UObject*>("ReturnValue");
+                            }
+                        }
+                    }
+                }
+                if (Live(ai)) {
+                    if (!ce.monPath.empty()) {
+                        UObject* mon = net::Find(ce.monPath, false);
+                        if (!Live(mon)) mon = net::Find(ce.monPath, true);
+                        if (Live(mon)) {
+                            bool playing = false;
+                            if (UFunction* fnIs = ue::FindFunction(ai, "Montage_IsPlaying")) {
+                                ue::Params pi(fnIs);
+                                pi.Set<UObject*>("Montage", mon);
+                                if (ue::Call(ai, fnIs, pi.data())) playing = pi.Get<bool>("ReturnValue");
+                            }
+                            if (m.appliedMon != ce.monPath || !playing) {
+                                if (UFunction* fnPlay = ue::FindFunction(ai, "Montage_Play")) {
+                                    ue::Params pp(fnPlay);
+                                    pp.Set<UObject*>("MontageToPlay", mon);
+                                    pp.Set<float>("InPlayRate", 1.0f);
+                                    pp.Set<uint8_t>("ReturnValueType", 0);
+                                    pp.Set<float>("InTimeToStartMontageAt", (float)ce.monPos);
+                                    pp.Set<bool>("bStopAllMontages", true);
+                                    if (ue::Call(ai, fnPlay, pp.data())) {
+                                        m.appliedMon = ce.monPath;
+                                        ++g_cloneAnimRx;
+                                        net::Log("fx_grabs: peer clone #%d montage %s @%.2fs",
+                                                 ce.id, ue::GetName(mon).c_str(), ce.monPos);
+                                    }
+                                }
+                            } else {
+                                // Phase-lock playback position if drifted > 0.25s
+                                if (UFunction* fnGet = ue::FindFunction(ai, "Montage_GetPosition")) {
+                                    ue::Params pg(fnGet);
+                                    pg.Set<UObject*>("Montage", mon);
+                                    if (ue::Call(ai, fnGet, pg.data())) {
+                                        float curPos = pg.Get<float>("ReturnValue");
+                                        if (std::fabs((double)curPos - ce.monPos) > 0.25) {
+                                            if (UFunction* fnSetP = ue::FindFunction(ai, "Montage_SetPosition")) {
+                                                ue::Params ps(fnSetP);
+                                                ps.Set<UObject*>("Montage", mon);
+                                                ps.Set<float>("NewPosition", (float)ce.monPos);
+                                                ue::Call(ai, fnSetP, ps.data());
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (!m.appliedMon.empty()) {
+                        if (UFunction* fnStop = ue::FindFunction(ai, "Montage_Stop")) {
+                            ue::Params ps(fnStop);
+                            ps.Set<float>("InBlendOutTime", 0.15f);
+                            ps.Set<UObject*>("Montage", static_cast<UObject*>(nullptr));
+                            ue::Call(ai, fnStop, ps.data());
+                        }
+                        m.appliedMon.clear();
                     }
                 }
             }
@@ -1073,9 +1195,9 @@ void Serialize(std::string* out) {
         bool first = true;
         for (const CloneEntry& c : g_localClones) {
             if (!first) *out += ','; first = false;
-            *out += net::Fmt("[%d,\"%s\",%.0f,%.0f,%.0f,%.1f,\"%s\"]",
+            *out += net::Fmt("[%d,\"%s\",%.0f,%.0f,%.0f,%.1f,\"%s\",\"%s\",%.2f]",
                              c.id, EscapeStr(c.clsPath).c_str(), c.x, c.y, c.z, c.yaw,
-                             EscapeStr(c.meshPath).c_str());
+                             EscapeStr(c.meshPath).c_str(), EscapeStr(c.monPath).c_str(), c.monPos);
         }
         *out += "]";
     }
@@ -1171,6 +1293,8 @@ void OnPeerLine(const std::string& line) {
                 ce.z = std::strtod(t[4].c_str(), nullptr);
                 ce.yaw = std::strtod(t[5].c_str(), nullptr);
                 if (t.size() >= 7) ce.meshPath = t[6];
+                if (t.size() >= 8) ce.monPath = t[7];
+                if (t.size() >= 9) ce.monPos = std::strtod(t[8].c_str(), nullptr);
                 if (ce.id > 0) parsed.push_back(std::move(ce));
             }
             pos = c + 1;
@@ -1192,11 +1316,11 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
     }
 
     if (sub.empty() || sub == "status") {
-        net::Log("fxtest: prj=%d/%d grb=%d/%d vfx=%d/%d xform=%d/%d(peerActive=%d,tag=%s,nonHum=%d,hideBody=%d,smComp=%d) cln=%d/%d(local=%d,peer=%d)",
+        net::Log("fxtest: prj=%d/%d grb=%d/%d vfx=%d/%d xform=%d/%d(peerActive=%d,tag=%s,nonHum=%d,hideBody=%d,smComp=%d) cln=%d/%d(local=%d,peer=%d,animRx=%d)",
                  g_projTx, g_projRx, g_grabTx, g_grabRx, g_vfxTx, g_vfxRx,
                  g_xformTx, g_xformRx, g_peerXform.active ? 1 : 0, g_peerXform.tag.c_str(),
                  g_peerNonHumanoid ? 1 : 0, g_peerHideBody ? 1 : 0, Live(g_peerXformStaticComp) ? 1 : 0,
-                 g_cloneTx, g_cloneRx, (int)g_localClones.size(), (int)g_peerClones.size());
+                 g_cloneTx, g_cloneRx, (int)g_localClones.size(), (int)g_peerClones.size(), g_cloneAnimRx);
         return true;
     }
 
@@ -1334,6 +1458,12 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
                 pf.Set<ue::FTransform>("SpawnTransform", xf);
                 ue::Call(gsCdo, fnFin, pf.data());
                 DisableActorCollisionAndAI(spawned);
+                if (sub == "clone_shell") {
+                    if (UFunction* fnInit = ue::FindFunction(spawned, "InitDefaultMesh")) {
+                        ue::Params pi(fnInit);
+                        ue::Call(spawned, fnInit, pi.data());
+                    }
+                }
                 g_testClones.push_back(spawned);
                 ScanLocalClones();
                 net::Log("fxtest: %s spawned %s localClones=%d",
@@ -1342,6 +1472,95 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
             }
         }
         net::Log("fxtest: %s spawn failed", sub.c_str());
+        return true;
+    }
+
+    if (sub == "clone_anim") {
+        if (g_testClones.empty() || !Live(g_testClones[0])) {
+            net::Log("fxtest: clone_anim failed (no active test clone)");
+            return true;
+        }
+        UObject* c = g_testClones[0];
+        UObject* mesh = nullptr;
+        if (!ue::Get<UObject*>(c, "Mesh", mesh) || !Live(mesh)) {
+            net::Log("fxtest: clone_anim failed (no Mesh)");
+            return true;
+        }
+        UObject* ai = nullptr;
+        if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+            ue::Params pa(fnAi);
+            if (ue::Call(mesh, fnAi, pa.data())) ai = pa.Get<UObject*>("ReturnValue");
+        }
+        if (!Live(ai)) {
+            UObject* pawn = net::Pawn();
+            UObject* pm = nullptr;
+            if (Live(pawn) && ue::Get<UObject*>(pawn, "Mesh", pm) && Live(pm)) {
+                // Ensure clone mesh has a SkeletalMeshAsset first (required before AnimInstance can initialize)
+                UObject* curSk = nullptr;
+                if (UFunction* fnGetSk = ue::FindFunction(mesh, "GetSkeletalMeshAsset")) {
+                    ue::Params pg(fnGetSk);
+                    if (ue::Call(mesh, fnGetSk, pg.data())) curSk = pg.Get<UObject*>("ReturnValue");
+                }
+                if (!Live(curSk)) {
+                    UObject* pawnSk = nullptr;
+                    if (UFunction* fnGetSk = ue::FindFunction(pm, "GetSkeletalMeshAsset")) {
+                        ue::Params pg(fnGetSk);
+                        if (ue::Call(pm, fnGetSk, pg.data())) pawnSk = pg.Get<UObject*>("ReturnValue");
+                    }
+                    if (Live(pawnSk)) {
+                        if (UFunction* fnSetSk = ue::FindFunction(mesh, "SetSkeletalMeshAsset")) {
+                            ue::Params ps(fnSetSk);
+                            ps.Set<UObject*>("NewMesh", pawnSk);
+                            ue::Call(mesh, fnSetSk, ps.data());
+                        }
+                    }
+                }
+                UObject* animCls = nullptr;
+                if (ue::Get<UObject*>(pm, "AnimClass", animCls) && Live(animCls)) {
+                    if (UFunction* fnMode = ue::FindFunction(mesh, "SetAnimationMode")) {
+                        ue::Params pm2(fnMode);
+                        pm2.Set<uint8_t>("InAnimationMode", 0); // UseAnimationBlueprint
+                        ue::Call(mesh, fnMode, pm2.data());
+                    }
+                    if (UFunction* fnSetAi = ue::FindFunction(mesh, "SetAnimInstanceClass")) {
+                        ue::Params ps(fnSetAi);
+                        ps.Set<UObject*>("NewClass", animCls);
+                        ue::Call(mesh, fnSetAi, ps.data());
+                    }
+                    if (UFunction* fnAi = ue::FindFunction(mesh, "GetAnimInstance")) {
+                        ue::Params pa(fnAi);
+                        if (ue::Call(mesh, fnAi, pa.data())) ai = pa.Get<UObject*>("ReturnValue");
+                    }
+                }
+            }
+        }
+        // Pick a real loaded humanoid AnimMontage (e.g. attack/dodge/shell montage)
+        UObject* mon = nullptr;
+        for (UObject* m : ue::FindAllOf("AnimMontage")) {
+            if (!Live(m)) continue;
+            std::string fn = ue::GetFullName(m);
+            if (fn.find("/Game/Sparta/") != std::string::npos &&
+                (ContainsCI(fn, "Attack") || ContainsCI(fn, "Dodge") || ContainsCI(fn, "Shell"))) {
+                mon = m;
+                break;
+            }
+        }
+        if (!Live(ai) || !Live(mon)) {
+            net::Log("fxtest: clone_anim failed (ai=%d mon=%d)", Live(ai) ? 1 : 0, Live(mon) ? 1 : 0);
+            return true;
+        }
+        bool ok = false;
+        if (UFunction* fnPlay = ue::FindFunction(ai, "Montage_Play")) {
+            ue::Params pp(fnPlay);
+            pp.Set<UObject*>("MontageToPlay", mon);
+            pp.Set<float>("InPlayRate", 1.0f);
+            pp.Set<uint8_t>("ReturnValueType", 0);
+            pp.Set<float>("InTimeToStartMontageAt", 0.0f);
+            pp.Set<bool>("bStopAllMontages", true);
+            ok = ue::Call(ai, fnPlay, pp.data());
+        }
+        ScanLocalClones();
+        net::Log("fxtest: clone_anim ok=%d mon=%s", ok ? 1 : 0, ue::GetName(mon).c_str());
         return true;
     }
 

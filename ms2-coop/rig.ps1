@@ -826,10 +826,11 @@ function Run-Suite-FinalGaps($sess) {
     (GrabSince $GameA $offA 'partbtest thestus|partb: host NightMode|partbtest dump:') | ForEach-Object { Write-Host "    A: $_" }
     (GrabSince $GameB $offB 'partbtest thestus|partb: synced NightMode|partbtest dump:') | ForEach-Object { Write-Host "    B: $_" }
 
-    # 2. Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Despawn
-    Write-Host "  [2/3] Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Clear..."
+    # 2. Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Montage Anim + Despawn
+    Write-Host "  [2/3] Shell Summon (BP_Shell_Summon_C) + Tiel ShadowClone + Montage Anim + Clear..."
     $offA = LogLen $GameA; $offB = LogLen $GameB
     Send-Cmd $CoopA "fxtest clone_shell" 2
+    Send-Cmd $CoopA "fxtest clone_anim" 2
     Send-Cmd $CoopA "fxtest clone_tiel" 2
     Send-Cmd $CoopA "fxtest status" 1
     Send-Cmd $CoopB "fxtest status" 1
