@@ -784,13 +784,11 @@ struct GlobalSpec {
 // tools/gen_patterns.py, whose output is quoted in README.md).
 const char* kSigProcessEvent =
     "40 55 56 57 41 54 41 55 41 56 41 57 48 81 EC 00 01 00 00 48 8D 6C 24 30";
-// FName::AppendString.  This one is EXACT rather than wildcarded on purpose: the
-// first attempt wildcarded the "cmp byte ptr [rip+X], 0" displacement and matched
-// 27 places in .text (tests/test_scan.cpp caught it, which is why that test
-// exists).  A wildcard that costs uniqueness is not worth having, and the RVA
-// fallback covers a moved build anyway.
+// FName::AppendString.  32-byte pattern wildcarding the 4-byte RIP-relative
+// displacement of `cmp byte ptr [rip+X], 0` so it matches uniquely (1 hit) on
+// both the Day1 CL92086 build (0x013F8FA0) and the Nov 2026 patch (0x013FC030).
 const char* kSigAppendString =
-    "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 80 3D 63 E1 B5 09 00 48 8B";
+    "48 89 5C 24 10 48 89 74 24 18 57 48 83 EC 20 80 3D ?? ?? ?? ?? 00 48 8B F2 8B 19 48 8B F9 74 09";
 const char* kSigEngineTick =
     "40 55 53 41 54 41 55 41 57 48 8D 6C 24 E0 48 81 EC 20 01 00 00 0F 29 B4";
 // The engine's own object-array accessor: mov rax,[GObjects] / mov rcx,[rax+rcx*8].
@@ -3689,10 +3687,10 @@ bool Init() {
     }
 
     GlobalSpec specs[] = {
-        {"ProcessEvent", kSigProcessEvent, -1, 0x01619320, &g_res.processEvent, &g_res.processEventSource},
-        {"AppendString", kSigAppendString, -1, 0x013F8FA0, &g_res.appendString, &g_res.appendStringSource},
-        {"EngineTick",   kSigEngineTick,   -1, 0x03DA7B30, &g_res.engineTick,   &g_res.engineTickSource},
-        {"GObjects",     kSigGObjects,      3, 0x0B03AEF0, &g_res.objects,      &g_res.objectsSource},
+        {"ProcessEvent", kSigProcessEvent, -1, 0x0161C420, &g_res.processEvent, &g_res.processEventSource},
+        {"AppendString", kSigAppendString, -1, 0x013FC030, &g_res.appendString, &g_res.appendStringSource},
+        {"EngineTick",   kSigEngineTick,   -1, 0x03DEDE40, &g_res.engineTick,   &g_res.engineTickSource},
+        {"GObjects",     kSigGObjects,      3, 0x0B25A5E0, &g_res.objects,      &g_res.objectsSource},
         // GWorld has no recovered signature, so it is RVA-only and validated on
         // every use (GetWorld).  Recorded rather than omitted so the log names it.
         {"GWorld",       nullptr,          -1, 0x0AD4E7F0, &g_res.gworld,       &g_res.gworldSource},
@@ -3719,9 +3717,9 @@ bool Init() {
     }
 
     bool arrayOk = false;
-    // 60 x 250 ms: the module can be mapped before the engine has populated the
-    // object array, and an empty array is not a failure -- it is "too early".
-    for (int attempt = 0; attempt < 60 && !arrayOk; ++attempt) {
+    // 360 x 250 ms (90 s): on a cold boot or HDD / first shader warm-up, the engine
+    // can take > 15 s before populating GUObjectArray.
+    for (int attempt = 0; attempt < 360 && !arrayOk; ++attempt) {
         arrayOk = ValidateArray();
         if (!arrayOk) Sleep(250);
     }
@@ -4489,5 +4487,13 @@ int RunPatternSelfCheck(const void* imageBase, ScanCheck* out, int max) {
 }
 
 }  // namespace detail
+
+uintptr_t ScanTextAob(const char* aob) {
+    if (!aob || !g_textLo || !g_textHi) return 0;
+    AobPattern p;
+    if (!ParseAob(aob, p)) return 0;
+    uint8_t* hit = nullptr;
+    return ScanAob(p, &hit) ? reinterpret_cast<uintptr_t>(hit) : 0;
+}
 
 }  // namespace ue

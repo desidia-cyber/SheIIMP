@@ -904,3 +904,47 @@ the reset behind it is vetoed, so a loading screen that got up stayed up for the
 - `windows.h` defines `near`/`far` — never name a variable that.
 - Crash 0xC0000374 (all dumps): a double free inside `steam_api64.dll` on the game's own thread, 47–62 s after launch,
   no `dxgi.dll` frame, also seen with UE4SS. Not mod code; most likely two copies of the game under one Steam account.
+
+## In-game co-op menu (src/coop_menu.cpp)
+
+The game ships a hidden "CO-OP (EXPERIMENTAL)" button on the main menu and a co-op
+dialog with host and join buttons. The UE4SS build's Lua made them work; this module
+does the same job natively:
+
+1. `WBP_MGT_MainScreen_C.HandleButtonVisibility` (post-hook): `WBP_NBMM_Coop` is made
+   visible and the navigation refreshed.
+2. `WBP_CoopMenu_C.HandleConfirmation(widget, index)` (pre-hook): index 0 starts a host
+   session, index 1 a join session. The game's own handler still runs.
+3. The co-op dialog is closed (`OnMenuClose`), and 200 ms later the load-game menu opens
+   (`WBP_MGT_MainScreen_C.HandleConfirmation(WBP_NBMM_Load)`).
+
+The hooks are installed by polling (once a second, up to 60 tries) because the widget
+classes load with the menu. The parameter of `HandleConfirmation` is found by reflection
+(`ue::ListOwnProperties`), not by a hard-coded offset.
+
+Sessions use the same relay as the test scripts, in steam mode:
+
+* **Host:** role `host`, player `A`. `relay/cooprelay.py --transport steam --role host`
+  is started hidden. When the relay logs `LobbyCreated result=1 lobby=<id>` (only lines
+  written after the click count), the id is published as the Steam rich presence key
+  `ms2coop_lobby`.
+* **Join:** role `guest`, player `B`. The Steam friends list is scanned for 10 s for a
+  friend with that rich presence, and the relay is started with `--lobby <id>`.
+* The relay is bound to a job object, so it exits with the game.
+
+Settings, read from `MS2Coop.ini` in the coop dir, section `[Menu]`:
+
+| key | default | meaning |
+|---|---|---|
+| `PythonExe` | `python` | interpreter that runs the relay |
+| `RelayScript` | (search) | path to `cooprelay.py`; otherwise `<coop>\cooprelay.py`, `<coop>\..\relay\cooprelay.py` |
+| `JoinLobby` | (scan) | lobby id to join without the friend scan (digits only) |
+
+`MENU_OFF.txt` in the coop dir disables the menu; the rest of the mod is unaffected.
+
+Requirements: Python 3 on the PATH (or `PythonExe`), and the game's `steam_api64.dll`
+(already loaded by the game). Without Steam the menu still opens, but hosts cannot be
+published and joins find nobody.
+
+Not verified here: the button and dialog in a live game. The pure parts are covered by
+`tests/test_menu_parse.cpp` (run by `build.bat test`).

@@ -434,6 +434,14 @@ struct Toggles {
     // watch/log lines stay on either way -- they are the instrument the verdict reads.
     bool farEnemy       = true;  // !FARENEMY_OFF.txt
     // [R8-FARENEMY] end
+    // [R10] Part A + Part B feature toggles (all default ON, each independently kill-switchable)
+    bool hitHook        = true;  // !HITHOOK_OFF.txt
+    bool puppetPlus     = true;  // !PUPPET_PLUS_OFF.txt
+    bool menuEnabled    = true;  // !MENU_OFF.txt
+    bool beaconScale    = true;  // !BEACON_SCALE_OFF.txt
+    bool fxGrabs        = true;  // !FX_GRABS_OFF.txt
+    bool partB          = true;  // !PARTB_OFF.txt
+    // [R10] end
 
     void Load(); // reads <dir>/<name>.txt for every row above, once
 };
@@ -2193,6 +2201,90 @@ void CmdUFunc(const std::string& rest);     // farufunc <loRva> [<hiRva>]: which
 void CmdHook(const std::string& rest);      // farhook [off|<rva>]: install/report the destroy veto
 
 } // namespace farenemy
+
+// ===========================================================================
+// 16c. [R10] Part A + Part B modules (HitHook, Puppet+, Steam P2P, Menu,
+//            Beacons/Cutscenes/Scaling, Projectiles/Grabs/VFX, Boss/Dungeon/Puzzles/Abilities)
+// ===========================================================================
+namespace hithook {
+void Tick2();
+void Reset();
+void Serialize(std::string* out);
+void OnPeerLine(const std::string& line);
+std::string Status();
+bool OnCommand(const std::string& cmd, const std::string& rest);
+} // namespace hithook
+
+namespace puppet_plus {
+void Tick2();
+void Reset();
+std::string Status();
+} // namespace puppet_plus
+
+namespace steam {
+constexpr int kStateIdle      = 0;
+constexpr int kStateStarting  = 1;
+constexpr int kStateWaiting   = 2;
+constexpr int kStateConnected = 3;
+constexpr int kStateError     = 4;
+
+struct Config {
+    int         mode          = 0;           // 0 = host, 1 = join
+    int         network       = 0;           // 0 = steam, 1 = lan
+    int         steamIdentity = 0;           // 0 = game, 1 = spacewar (480)
+    uint16_t    port          = 27050;
+    std::string password;
+    std::string server        = "127.0.0.1";
+};
+
+void LoadConfig();
+void SaveConfig(const Config& cfg);
+Config GetConfig();
+uint32_t ActiveSteamAppId();
+bool RestartWithAppId(uint32_t appId, std::string* err);
+bool StartSession(bool isHost, std::string* err);
+void StopSession();
+bool IsActive();
+void SendPacket(const std::string& text);
+bool PopPeerPacket(std::string* out);
+int State();
+int Role();
+std::string StatusText();
+std::string PeerName();
+std::string Status();
+} // namespace steam
+
+namespace menu {
+void Tick30();
+void Tick2();
+void Reset();
+bool IsOpen();
+} // namespace menu
+
+namespace beacon_scale {
+void Tick2();
+void Reset();
+void Serialize(std::string* out);
+void OnPeerLine(const std::string& line);
+std::string Status();
+} // namespace beacon_scale
+
+namespace fx_grabs {
+void Tick15();
+void Tick2();
+void Reset();
+void Serialize(std::string* out);
+void OnPeerLine(const std::string& line);
+std::string Status();
+} // namespace fx_grabs
+
+namespace partb {
+void Tick2();
+void Reset();
+void Serialize(std::string* out);
+void OnPeerLine(const std::string& line);
+std::string Status();
+} // namespace partb
 
 // ===========================================================================
 // 17. inline implementations of the containers
