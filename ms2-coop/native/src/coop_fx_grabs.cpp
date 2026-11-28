@@ -203,6 +203,19 @@ struct ScriptedRotState {
     double roll = 0.0;
 };
 
+struct StanceState {
+    int adsKind = 0;      // 0=none, 1=crossbow, 2=ballistazooka, 3=nailgun, 4=trebuchaxe, 5=cursedchild
+    bool blocking = false;
+    bool falling = false;
+    bool scythe = false;
+};
+
+struct ShellMemState {
+    bool active = false;
+    int seq = 0;
+    std::string clsPath;
+};
+
 struct OutVfx {
     int seq = 0;
     std::string sysPath;
@@ -320,6 +333,34 @@ bool             g_useSrotOverride = false;
 ScriptedRotState g_peerSrot;
 double g_srotClearUntil = 0.0;
 double g_peerSrotSeenAt = 0.0;
+
+// Stance & airborne state (ADS, ActiveBlock, Falling, Scythe stance)
+StanceState g_localStance;
+StanceState g_localStanceOverride;
+bool        g_useStanceOverride = false;
+StanceState g_peerStance;
+double g_stanceClearUntil = 0.0;
+double g_peerStanceSeenAt = 0.0;
+bool g_localBlockHeld = false;
+bool g_stanceHooksInstalled = false;
+int g_stTx = 0, g_stRx = 0;
+
+// Shell Memory sync state
+ShellMemState g_localMem;
+ShellMemState g_peerMem;
+int g_nextMemSeq = 1;
+int g_lastRxMemSeq = 0;
+double g_memClearUntil = 0.0;
+bool g_memHooksInstalled = false;
+int g_memTx = 0, g_memRx = 0;
+
+// First-Person Mushroom Dungeon party-pull state
+int g_localFpSeq = 0;
+std::string g_localFpTail;
+double g_localFpUntil = 0.0;
+int g_lastRxFpSeq = 0;
+bool g_fpHookInstalled = false;
+int g_fpTx = 0, g_fpRx = 0;
 
 std::string KeyForActor(UObject* a) {
     if (!Live(a)) return "";
@@ -795,7 +836,9 @@ void ScanLocalClones() {
         "BP_Shell_Genessa_AstralBase_C",
         "BP_Shell_Decoy_C",
         "BP_Decoy_Bait_C",
-        "BP_Shell_Summon_C"
+        "BP_Shell_Summon_C",
+        "BP_Shell_Spawnable_C",
+        "BP_Shell_Dummy_Grabbed_C"
     };
 
     std::unordered_set<UObject*> seenThisTick;
@@ -863,10 +906,19 @@ void ScanLocalClones() {
         g_localClones.push_back(std::move(ce));
     };
 
+    const Vec3 pawnLoc = net::Loc(pawn);
     for (const char* clsName : kCloneClasses) {
+        const bool isHuskClass = (std::strcmp(clsName, "BP_Shell_Spawnable_C") == 0 ||
+                                  std::strcmp(clsName, "BP_Shell_Dummy_Grabbed_C") == 0);
         for (UObject* c : ue::FindAllOf(clsName)) {
             if (!Live(c)) continue;
-            if (!IsOwnedByLocalPawn(c, pawn)) continue;
+            if (isHuskClass) {
+                // Knocked-out shell husks may not retain Owner==pawn after BeginPlay;
+                // match if owned OR within 2500 uu of local pawn (and not a peer mirror).
+                if (!IsOwnedByLocalPawn(c, pawn) && coop::Dist(pawnLoc, net::Loc(c)) > 2500.0) continue;
+            } else {
+                if (!IsOwnedByLocalPawn(c, pawn)) continue;
+            }
             pushLocalClone(c);
         }
     }
@@ -883,6 +935,16 @@ void ScanLocalClones() {
         UObject* ownerActor = ue::GetOuter(astral);
         if (!Live(ownerActor) || ownerActor == pawn || ownerActor == puppet::Actor()) continue;
         pushLocalClone(ownerActor);
+    }
+
+    // Also catch knocked-out-of-shell husks spawned by GA_ShellSeveredBase_C::SpawnedShell
+    for (UObject* sev : ue::FindAllOf("GA_ShellSeveredBase_C")) {
+        if (!Live(sev)) continue;
+        UObject* husk = nullptr;
+        if (ue::Get<UObject*>(sev, "SpawnedShell", husk) && Live(husk) &&
+            husk != pawn && husk != puppet::Actor()) {
+            pushLocalClone(husk);
+        }
     }
 
     if (hadClones && g_localClones.empty()) {
@@ -1613,6 +1675,200 @@ void SampleLocalScriptedMove() {
     g_localSrot = next;
 }
 
+// ===========================================================================
+// Stance & Airborne Sync (ADS Aiming, Active Block, Falling, Scythe Stance)
+// ===========================================================================
+void OnActiveBlockPress(UObject*, UFunction*, void*) { g_localBlockHeld = true; }
+void OnActiveBlockRelease(UObject*, UFunction*, void*) { g_localBlockHeld = false; }
+
+int ClassifySidearmAds() {
+    const std::string& w = state().local.wpns;
+    if (ContainsCI(w, "Ballistazooka")) return 2;
+    if (ContainsCI(w, "Nail") || ContainsCI(w, "Neil")) return 3;
+    if (ContainsCI(w, "Trebuch")) return 4;
+    if (ContainsCI(w, "CursedChild")) return 5;
+    if (ContainsCI(w, "Crossbow") || ContainsCI(w, "Repeater") || ContainsCI(w, "Parasite")) return 1;
+    return 1; // generic ADS crossbow pose fallback
+}
+
+void SampleLocalStance() {
+    StanceState next{};
+    if (g_useStanceOverride) {
+        next = g_localStanceOverride;
+    } else {
+        UObject* pawn = net::Pawn();
+        if (Live(pawn)) {
+            // 1. ADS Aiming via BPC_AimComponent->bIsAiming
+            UObject* aimComp = nullptr;
+            if (ue::Get<UObject*>(pawn, "BPC_AimComponent", aimComp) && Live(aimComp)) {
+                if (ue::GetBool(aimComp, "bIsAiming")) {
+                    // Don't override lute ADS (lute has its own dedicated sync lane)
+                    if (!g_localLute.playing && !ContainsCI(state().local.wpns, "Lute")) {
+                        next.adsKind = ClassifySidearmAds();
+                    }
+                }
+            }
+            // 2. Falling / Airborne via CharacterMovement->MovementMode == 3 (MOVE_Falling)
+            UObject* mc = nullptr;
+            if (ue::Get<UObject*>(pawn, "CharacterMovement", mc) && Live(mc)) {
+                uint8_t mm = 0;
+                if (ue::Get<uint8_t>(mc, "MovementMode", mm) && mm == 3) {
+                    next.falling = true;
+                }
+            }
+            // 3. Active Block / Guard
+            next.blocking = g_localBlockHeld;
+            // 4. Clockwork Scythe Ability Stance (ABPL_Locomotion_ScytheAbility_C linked)
+            if (ContainsCI(state().local.wpns, "Scythe")) {
+                for (UObject* layer : ue::FindAllOf("ABPL_Locomotion_ScytheAbility_C")) {
+                    if (!Live(layer)) continue;
+                    UObject* outer = ue::GetOuter(layer);
+                    if (Live(outer) && ue::GetOuter(outer) == pawn) {
+                        next.scythe = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    const bool wasAny = (g_localStance.adsKind != 0 || g_localStance.blocking || g_localStance.falling || g_localStance.scythe);
+    const bool nowAny = (next.adsKind != 0 || next.blocking || next.falling || next.scythe);
+    if (wasAny && !nowAny) g_stanceClearUntil = Mono() + 2.0;
+
+    if (next.adsKind != g_localStance.adsKind || next.blocking != g_localStance.blocking ||
+        next.falling != g_localStance.falling || next.scythe != g_localStance.scythe) {
+        g_localStance = next;
+        ++g_stTx;
+        net::Log("fx_grabs: local stance -> ads=%d blk=%d fall=%d scy=%d",
+                 next.adsKind, next.blocking ? 1 : 0, next.falling ? 1 : 0, next.scythe ? 1 : 0);
+    }
+}
+
+// ===========================================================================
+// Shell Memory Sync (BP_ShellMemoryHandler_C)
+// ===========================================================================
+void RecordLocalShellMemory(bool active, const std::string& clsPath) {
+    if (tl_replaying) return;
+    if (active == g_localMem.active && clsPath == g_localMem.clsPath) return;
+    if (g_localMem.active && !active) g_memClearUntil = Mono() + 3.0;
+    g_localMem.active = active;
+    g_localMem.clsPath = clsPath;
+    g_localMem.seq = g_nextMemSeq++;
+    ++g_memTx;
+    net::Log("fx_grabs: local shell memory -> active=%d seq=%d cls=%s",
+             active ? 1 : 0, g_localMem.seq, clsPath.c_str());
+}
+
+void OnShellMemoryStart(UObject* self, UFunction*, void*) {
+    if (tl_replaying || !state().toggles.fxGrabs || !state().peer.present || !Live(self)) return;
+    std::string clsPath;
+    UObject* spawned = nullptr;
+    if (ue::Get<UObject*>(self, "SpawnedShellMemory", spawned) && Live(spawned)) {
+        if (ue::UClass* c = ue::GetClass(spawned)) {
+            clsPath = StripClassPrefix(ue::GetFullName(reinterpret_cast<UObject*>(c)));
+        }
+    }
+    if (clsPath.empty()) clsPath = ue::GetClassName(self);
+    RecordLocalShellMemory(true, clsPath);
+}
+
+void OnShellMemoryEnd(UObject*, UFunction*, void*) {
+    if (tl_replaying || !state().toggles.fxGrabs) return;
+    RecordLocalShellMemory(false, "");
+}
+
+void SampleLocalShellMemory() {
+    if (!state().peer.present) return;
+    bool found = false;
+    std::string clsPath;
+    for (UObject* h : ue::FindAllOf("BP_ShellMemoryHandler_C")) {
+        if (!Live(h)) continue;
+        UObject* mem = nullptr;
+        if (ue::Get<UObject*>(h, "SpawnedShellMemory", mem) && Live(mem)) {
+            found = true;
+            if (ue::UClass* c = ue::GetClass(mem)) {
+                clsPath = StripClassPrefix(ue::GetFullName(reinterpret_cast<UObject*>(c)));
+            }
+            break;
+        }
+    }
+    if (found && !g_localMem.active) RecordLocalShellMemory(true, clsPath);
+    else if (!found && g_localMem.active && g_localMem.clsPath.find("TEST_") != 0) RecordLocalShellMemory(false, "");
+}
+
+void ApplyPeerShellMemory(bool active, int seq, const std::string& clsPath) {
+    if (seq <= g_lastRxMemSeq) return;
+    g_lastRxMemSeq = seq;
+    g_peerMem.active = active;
+    g_peerMem.seq = seq;
+    g_peerMem.clsPath = clsPath;
+    ++g_memRx;
+    net::Log("fx_grabs: peer shell memory <- active=%d seq=%d cls=%s",
+             active ? 1 : 0, seq, clsPath.c_str());
+
+    if (active && !g_localMem.active && clsPath.find("TEST_") != 0) {
+        // Pull partner into the matching Shell Memory if a handler is loaded
+        for (UObject* h : ue::FindAllOf("BP_ShellMemoryHandler_C")) {
+            if (!Live(h)) continue;
+            UObject* cur = nullptr;
+            if (ue::Get<UObject*>(h, "SpawnedShellMemory", cur) && Live(cur)) break;
+            if (UFunction* fnStart = ue::FindFunction(h, "StartMemory")) {
+                tl_replaying = true;
+                ue::Params p(fnStart);
+                ue::Call(h, fnStart, p.data());
+                tl_replaying = false;
+                net::Log("fx_grabs: mirrored StartMemory on local BP_ShellMemoryHandler_C");
+            }
+            break;
+        }
+    }
+}
+
+// ===========================================================================
+// First-Person Mushroom Dungeon Party-Pull (BP_Interactable_Mushroom_FirstPersonEntrance_C)
+// ===========================================================================
+void RecordLocalFpDungeon(const std::string& tail) {
+    if (tl_replaying) return;
+    g_localFpSeq++;
+    g_localFpTail = tail;
+    g_localFpUntil = Mono() + 3.0;
+    ++g_fpTx;
+    net::Log("fx_grabs: local fp dungeon enter -> seq=%d tail=%s", g_localFpSeq, tail.c_str());
+}
+
+void OnFpMushroomTeleport(UObject* self, UFunction*, void*) {
+    if (tl_replaying || !state().toggles.fxGrabs || !state().peer.present || !Live(self)) return;
+    RecordLocalFpDungeon(net::Tail(self));
+}
+
+void ApplyPeerFpDungeon(int seq, const std::string& tail) {
+    if (seq <= g_lastRxFpSeq) return;
+    g_lastRxFpSeq = seq;
+    ++g_fpRx;
+    net::Log("fx_grabs: peer fp dungeon enter <- seq=%d tail=%s", seq, tail.c_str());
+    if (tail.find("TEST_") == 0) return;
+
+    UObject* pawn = net::Pawn();
+    if (!Live(pawn)) return;
+    const Vec3 ploc = net::Loc(pawn);
+    UObject* target = nullptr;
+    for (UObject* m : ue::FindAllOf("BP_Interactable_Mushroom_FirstPersonEntrance_C")) {
+        if (!Live(m)) continue;
+        if (!tail.empty() && net::Tail(m) == tail) { target = m; break; }
+        if (!target && coop::Dist(ploc, net::Loc(m)) <= 3000.0) target = m;
+    }
+    if (!Live(target)) return;
+    if (coop::Dist(ploc, net::Loc(target)) > 3500.0) return; // only pull if partner is reasonably nearby
+    if (UFunction* fnTp = ue::FindFunction(target, "TeleportPlayerToMushroomDungeon")) {
+        tl_replaying = true;
+        ue::Params p(fnTp);
+        ue::Call(target, fnTp, p.data());
+        tl_replaying = false;
+        net::Log("fx_grabs: pulled local player into FP mushroom dungeon (%s)", net::Tail(target).c_str());
+    }
+}
+
 void ReplayVfx(const OutVfx& v) {
     UObject* sys = net::Find(v.sysPath, false);
     UObject* attachActor = ActorForKey(v.attachKey);
@@ -1767,6 +2023,18 @@ bool PeerHasFullRot(double* pitchOut, double* rollOut) {
 bool PeerInScriptedMove() {
     return g_peerSrot.scripted && (Mono() - g_peerSrotSeenAt) < 2.5;
 }
+int PeerAdsKind() {
+    return ((Mono() - g_peerStanceSeenAt) < 2.5) ? g_peerStance.adsKind : 0;
+}
+bool PeerBlocking() {
+    return g_peerStance.blocking && (Mono() - g_peerStanceSeenAt) < 2.5;
+}
+bool PeerFalling() {
+    return g_peerStance.falling && (Mono() - g_peerStanceSeenAt) < 2.5;
+}
+bool PeerScytheStance() {
+    return g_peerStance.scythe && (Mono() - g_peerStanceSeenAt) < 2.5;
+}
 
 void Tick15() {
     if (!state().toggles.fxGrabs) return;
@@ -1775,6 +2043,7 @@ void Tick15() {
     TickPairedLocks();
     SampleLocalScriptedMove();
     SampleLocalPhotoMode();
+    SampleLocalStance();
 
     const double now = Mono();
     while (!g_projQ.empty() && now - g_projQ.front().at > kTxRepeatSecs) g_projQ.pop_front();
@@ -1836,8 +2105,32 @@ void Tick2() {
             net::Log("fx_grabs: proj hooks installed (begin=%d rebegin=%d throw=%d)", p1 ? 1 : 0, p2 ? 1 : 0, p3 ? 1 : 0);
         }
     }
+    if (!g_stanceHooksInstalled) {
+        bool b1 = ue::HookPost("GA_Action_ActiveBlock_Press_C.SpartaAbilityCommitted", &OnActiveBlockPress);
+        bool b2 = ue::HookPost("GA_Action_ActiveBlock_Release_C.SpartaAbilityCommitted", &OnActiveBlockRelease);
+        if (b1 || b2) {
+            g_stanceHooksInstalled = true;
+            net::Log("fx_grabs: stance hooks installed (blkPress=%d blkRel=%d)", b1 ? 1 : 0, b2 ? 1 : 0);
+        }
+    }
+    if (!g_memHooksInstalled) {
+        bool m1 = ue::HookPost("BP_ShellMemoryHandler_C.StartMemory", &OnShellMemoryStart);
+        bool m2 = ue::HookPost("BP_ShellMemoryHandler_C.OnMemoryEnded", &OnShellMemoryEnd);
+        if (m1 || m2) {
+            g_memHooksInstalled = true;
+            net::Log("fx_grabs: shell memory hooks installed (start=%d end=%d)", m1 ? 1 : 0, m2 ? 1 : 0);
+        }
+    }
+    if (!g_fpHookInstalled) {
+        bool fp1 = ue::HookPost("BP_Interactable_Mushroom_FirstPersonEntrance_C.TeleportPlayerToMushroomDungeon", &OnFpMushroomTeleport);
+        if (fp1) {
+            g_fpHookInstalled = true;
+            net::Log("fx_grabs: fp mushroom dungeon hook installed");
+        }
+    }
     SampleLocalTransform();
     SampleLocalLute();
+    SampleLocalShellMemory();
 }
 
 void Reset() {
@@ -1859,6 +2152,7 @@ void Reset() {
 
     g_pairedLocks.clear();
     g_localLute = LuteState{};
+    g_useLuteOverride = false;
     g_peerLute = LuteState{};
     StopPeerLuteAudio();
     ClearPeerGroovingDetectors();
@@ -1868,7 +2162,21 @@ void Reset() {
     g_coopPhotoPausedUs = false;
 
     g_localSrot = ScriptedRotState{};
+    g_useSrotOverride = false;
     g_peerSrot = ScriptedRotState{};
+
+    g_localStance = StanceState{};
+    g_useStanceOverride = false;
+    g_peerStance = StanceState{};
+    g_localBlockHeld = false;
+
+    g_localMem = ShellMemState{};
+    g_peerMem = ShellMemState{};
+    g_lastRxMemSeq = 0;
+
+    g_localFpUntil = 0.0;
+    g_localFpTail.clear();
+    g_lastRxFpSeq = 0;
 }
 
 void Serialize(std::string* out) {
@@ -1942,6 +2250,20 @@ void Serialize(std::string* out) {
         now < g_srotClearUntil) {
         *out += net::Fmt(",\"srot\":[%d,%.1f,%.1f]",
                          g_localSrot.scripted ? 1 : 0, g_localSrot.pitch, g_localSrot.roll);
+    }
+    if (g_localStance.adsKind != 0 || g_localStance.blocking || g_localStance.falling || g_localStance.scythe ||
+        now < g_stanceClearUntil) {
+        *out += net::Fmt(",\"st\":[%d,%d,%d,%d]",
+                         g_localStance.adsKind, g_localStance.blocking ? 1 : 0,
+                         g_localStance.falling ? 1 : 0, g_localStance.scythe ? 1 : 0);
+    }
+    if (g_localMem.active || now < g_memClearUntil) {
+        *out += net::Fmt(",\"mem\":[%d,%d,\"%s\"]",
+                         g_localMem.active ? 1 : 0, g_localMem.seq,
+                         EscapeStr(g_localMem.clsPath).c_str());
+    }
+    if (now < g_localFpUntil && g_localFpSeq > 0) {
+        *out += net::Fmt(",\"fp\":[%d,\"%s\"]", g_localFpSeq, EscapeStr(g_localFpTail).c_str());
     }
 }
 
@@ -2092,6 +2414,38 @@ void OnPeerLine(const std::string& line) {
                 net::Log("fx_grabs: peer scripted/slide <- active=%d pitch=%.1f roll=%.1f",
                          g_peerSrot.scripted ? 1 : 0, g_peerSrot.pitch, g_peerSrot.roll);
             }
+        }
+    }
+    if (net::Section(line, "st", &sec) && sec.size() >= 4) {
+        auto t = SplitTuple(sec);
+        if (t.size() >= 4) {
+            StanceState ns;
+            ns.adsKind = std::atoi(t[0].c_str());
+            ns.blocking = (std::atoi(t[1].c_str()) != 0);
+            ns.falling = (std::atoi(t[2].c_str()) != 0);
+            ns.scythe = (std::atoi(t[3].c_str()) != 0);
+            const bool ch = (ns.adsKind != g_peerStance.adsKind || ns.blocking != g_peerStance.blocking ||
+                             ns.falling != g_peerStance.falling || ns.scythe != g_peerStance.scythe);
+            g_peerStance = ns;
+            g_peerStanceSeenAt = Mono();
+            if (ch) {
+                ++g_stRx;
+                net::Log("fx_grabs: peer stance <- ads=%d blk=%d fall=%d scy=%d",
+                         ns.adsKind, ns.blocking ? 1 : 0, ns.falling ? 1 : 0, ns.scythe ? 1 : 0);
+            }
+        }
+    }
+    if (net::Section(line, "mem", &sec) && sec.size() >= 4) {
+        auto t = SplitTuple(sec);
+        if (t.size() >= 2) {
+            ApplyPeerShellMemory(std::atoi(t[0].c_str()) != 0, std::atoi(t[1].c_str()),
+                                 (t.size() >= 3) ? t[2] : "");
+        }
+    }
+    if (net::Section(line, "fp", &sec) && sec.size() >= 3) {
+        auto t = SplitTuple(sec);
+        if (t.size() >= 1) {
+            ApplyPeerFpDungeon(std::atoi(t[0].c_str()), (t.size() >= 2) ? t[1] : "");
         }
     }
 }
@@ -2492,6 +2846,92 @@ bool OnCommand(const std::string& cmd, const std::string& rest) {
         SampleLocalScriptedMove();
         net::Log("fxtest: %s srotTx=%d scripted=%d pitch=%.1f roll=%.1f",
                  sub.c_str(), g_srotTx, g_localSrot.scripted ? 1 : 0, g_localSrot.pitch, g_localSrot.roll);
+        return true;
+    }
+
+    if (sub == "st_ads" || sub == "st_fall" || sub == "st_block" || sub == "st_scythe" || sub == "st_off") {
+        if (sub == "st_off") {
+            g_useStanceOverride = false;
+            g_localStanceOverride = StanceState{};
+        } else {
+            g_useStanceOverride = true;
+            g_localStanceOverride = StanceState{};
+            if (sub == "st_ads")    g_localStanceOverride.adsKind = arg.empty() ? 1 : std::atoi(arg.c_str());
+            if (sub == "st_fall")   g_localStanceOverride.falling = true;
+            if (sub == "st_block")  g_localStanceOverride.blocking = true;
+            if (sub == "st_scythe") g_localStanceOverride.scythe = true;
+        }
+        SampleLocalStance();
+        net::Log("fxtest: %s stTx=%d ads=%d blk=%d fall=%d scy=%d",
+                 sub.c_str(), g_stTx, g_localStance.adsKind, g_localStance.blocking ? 1 : 0,
+                 g_localStance.falling ? 1 : 0, g_localStance.scythe ? 1 : 0);
+        return true;
+    }
+
+    if (sub == "husk_spawn") {
+        // Spawn a real BP_Shell_Spawnable_C knocked-out shell husk owned by local pawn
+        UObject* pawn = net::Pawn();
+        UObject* world = net::World();
+        UObject* cls = net::Find("/Game/Sparta/Core/Characters/Player/Common/BP_Shell_Spawnable.BP_Shell_Spawnable_C", true);
+        if (!Live(cls)) cls = net::Find("/Game/Sparta/Core/Characters/Player/Common/BP_Shell_Summon.BP_Shell_Summon_C", true);
+        ue::UClass* gsCls = ue::FindClass("GameplayStatics");
+        UObject* gsCdo = gsCls ? ue::GetCDO(gsCls) : nullptr;
+        UFunction* fnBegin = Live(gsCdo) ? ue::FindFunction(gsCdo, "BeginDeferredActorSpawnFromClass") : nullptr;
+        UFunction* fnFin   = Live(gsCdo) ? ue::FindFunction(gsCdo, "FinishSpawningActor") : nullptr;
+        if (!Live(pawn) || !Live(world) || !Live(cls) || !fnBegin || !fnFin) {
+            net::Log("fxtest: husk_spawn failed (cls=%d)", Live(cls) ? 1 : 0);
+            return true;
+        }
+        Vec3 loc = net::Loc(pawn);
+        ue::FTransform xf{};
+        xf.Rotation.W = 1.0;
+        xf.Translation = ue::FVector{loc.X + 140.0, loc.Y, loc.Z};
+        xf.Scale3D = ue::FVector{1.0, 1.0, 1.0};
+        ue::Params pb(fnBegin);
+        pb.Set<UObject*>("WorldContextObject", world);
+        pb.Set<UObject*>("ActorClass", cls);
+        pb.Set<ue::FTransform>("SpawnTransform", xf);
+        pb.Set<uint8_t>("CollisionHandlingOverride", 1);
+        pb.Set<UObject*>("Owner", pawn);
+        if (ue::Call(gsCdo, fnBegin, pb.data())) {
+            UObject* spawned = pb.Get<UObject*>("ReturnValue");
+            if (Live(spawned)) {
+                ue::Set<UObject*>(spawned, "Instigator", pawn);
+                ue::Params pf(fnFin);
+                pf.Set<UObject*>("Actor", spawned);
+                pf.Set<ue::FTransform>("SpawnTransform", xf);
+                ue::Call(gsCdo, fnFin, pf.data());
+                DisableActorCollisionAndAI(spawned);
+                g_testClones.push_back(spawned);
+                ScanLocalClones();
+                net::Log("fxtest: husk_spawn ok cls=%s localClones=%d",
+                         ue::GetClassName(spawned).c_str(), (int)g_localClones.size());
+                return true;
+            }
+        }
+        net::Log("fxtest: husk_spawn call failed");
+        return true;
+    }
+
+    if (sub == "mem_on" || sub == "mem_off") {
+        RecordLocalShellMemory(sub == "mem_on", (sub == "mem_on") ? "TEST_BP_ShellMemory_Eredrim" : "");
+        net::Log("fxtest: %s memTx=%d active=%d seq=%d",
+                 sub.c_str(), g_memTx, g_localMem.active ? 1 : 0, g_localMem.seq);
+        return true;
+    }
+
+    if (sub == "fp_test") {
+        RecordLocalFpDungeon("TEST_BP_Mushroom_FP");
+        net::Log("fxtest: fp_test fpTx=%d seq=%d", g_fpTx, g_localFpSeq);
+        return true;
+    }
+
+    if (sub == "probe_gaps") {
+        net::Log("fxtest: probe_gaps st=%d/%d(ads=%d,blk=%d,fall=%d,scy=%d) cln=%d/%d(peer=%d) mem=%d/%d(peerAct=%d,cls=%s) fp=%d/%d pupAnim=%s",
+                 g_stTx, g_stRx, PeerAdsKind(), PeerBlocking() ? 1 : 0, PeerFalling() ? 1 : 0, PeerScytheStance() ? 1 : 0,
+                 g_cloneTx, g_cloneRx, (int)g_peerClones.size(),
+                 g_memTx, g_memRx, g_peerMem.active ? 1 : 0, g_peerMem.clsPath.c_str(),
+                 g_fpTx, g_fpRx, state().puppet.animState.c_str());
         return true;
     }
 

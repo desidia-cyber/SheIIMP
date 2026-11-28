@@ -2308,6 +2308,10 @@ bool LocalPhotoModeActive();
 bool IsActorInPairedAnim(ue::UObject* a);
 bool PeerHasFullRot(double* pitchOut, double* rollOut);
 bool PeerInScriptedMove();
+int  PeerAdsKind();         // 0=none, 1=crossbow, 2=ballistazooka, 3=nailgun, 4=trebuchaxe, 5=cursedchild
+bool PeerBlocking();
+bool PeerFalling();
+bool PeerScytheStance();
 } // namespace fx_grabs
 
 namespace partb {
