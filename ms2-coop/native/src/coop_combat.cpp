@@ -1323,6 +1323,12 @@ void MirrorDrive(MirrorEntry* m, double vx, double vy, double vz, double yaw, co
         if (bc) m->aiOff = StopLogic(bc, "coop mirror");
     }
 
+    // [R10-FX] Do not clobber an enemy's rotation or montage while a synced paired
+    // finisher/riposte/execution/grab is actively driving it.
+    if (fx_grabs::IsActorInPairedAnim(a)) {
+        return;
+    }
+
     SetActorRotationYaw(a, yaw);
     SetVelocity(CharacterMovementOf(a), vx, vy, vz);
 

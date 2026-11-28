@@ -2302,6 +2302,12 @@ bool OnCommand(const std::string& cmd, const std::string& rest);
 bool PeerTransformNonHumanoid();
 bool PeerTransformHideBody();
 bool IsPeerCloneMirror(ue::UObject* a);
+bool PeerLutePlaying();
+bool PeerLuteSitting();
+bool LocalPhotoModeActive();
+bool IsActorInPairedAnim(ue::UObject* a);
+bool PeerHasFullRot(double* pitchOut, double* rollOut);
+bool PeerInScriptedMove();
 } // namespace fx_grabs
 
 namespace partb {
