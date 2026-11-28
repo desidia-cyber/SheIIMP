@@ -1014,7 +1014,12 @@ bool IsLoopingMontageAsset(const std::string& path) {
            path.find("Slide_Loop") != std::string::npos ||
            path.find("Prep_Loop") != std::string::npos ||
            path.find("Lute_Play") != std::string::npos ||
-           path.find("Skydive") != std::string::npos;
+           path.find("Skydive") != std::string::npos ||
+           path.find("_Loop") != std::string::npos ||
+           path.find("Loop_") != std::string::npos ||
+           path.find("KneelLoop") != std::string::npos ||
+           path.find("Sleep") != std::string::npos ||
+           path.find("Cauldron") != std::string::npos;
 }
 
 // main.lua:431-450. The play head advances on the packet clock, not per packet;
@@ -1077,12 +1082,16 @@ void UpdateAnimation(double vx, double vy, double yaw, double now) {
     if (coop::body::PuppetDead()) return;
     // [R5-BODY] end
 
-    // [R7-DIALOG] begin -- the friend is in a conversation or a cutscene.
-    // Its own client has the input locked and is running whatever the game
-    // authored for that moment (facial anim, sequence-driven pose); the montage it
-    // last published is stale and a "frozen" body is exactly the artefact the
-    // round-7 brief forbids.  Hold the idle clip instead: a person standing still.
+    // [R7-DIALOG] + [R10-EMOTE] While in a conversation or cutscene, let active
+    // dialogue gesture/emote montages play through instead of forcing idle; for
+    // everything else (stale combat montage), hold the idle clip.
     if (coop::dialog::PeerLocked()) {
+        if (PEER().hasMontage && PEER().montage.path.size() > 4 &&
+            (PEER().montage.path.find("Emote") != std::string::npos ||
+             PEER().montage.path.find("Gesture") != std::string::npos ||
+             PEER().montage.path.find("gesture") != std::string::npos)) {
+            if (PlayMontage(PEER().montage, now)) return;
+        }
         if (ue::UObject* idle = Sequence("idle")) {
             if (P().animState != "idle") {
                 if (!PlaySeq("idle", idle, true)) return;
@@ -1136,6 +1145,81 @@ void UpdateAnimation(double vx, double vy, double yaw, double now) {
                     P().animKind = "montage";
                     net::Log("puppet lute -> %s", key.c_str());
                 }
+            }
+            SetRate(1.0);
+            return;
+        }
+    }
+
+    // [R10-STANCE] AnimBP-layer-driven states that have no AnimMontage:
+    //   1. Falling / airborne (MOVE_Falling)
+    //   2. Sidearm ADS aiming (Crossbow, Ballistazooka, NailShotgun, Trebuchaxe, CursedChild)
+    //   3. Active Block / Guard hold
+    //   4. Clockwork Scythe ability locomotion stance
+    if (coop::fx_grabs::PeerFalling()) {
+        static const char* const kFallPath =
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Attacks/Plunge/A_Shared_Attacks_Plunge_Fall_Loop.A_Shared_Attacks_Plunge_Fall_Loop";
+        if (ue::UObject* seq = FindAsset(kFallPath, true)) {
+            const std::string key = "st:fall";
+            if (P().animState != key && PlaySeq(key, seq, true)) {
+                P().animKind = "montage";
+                net::Log("puppet stance -> fall");
+            }
+            SetRate(1.0);
+            return;
+        }
+    }
+    if (int ads = coop::fx_grabs::PeerAdsKind(); ads > 0) {
+        static const char* const kAdsPaths[] = {
+            nullptr,
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Crossbow/A_Shells_Locomotion_Crossbow_Idle.A_Shells_Locomotion_Crossbow_Idle",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Ballistazooka/A_Shells_Locomotion_Ballistazooka_Idle_Stand.A_Shells_Locomotion_Ballistazooka_Idle_Stand",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/NeilGun/A_Shells_Locomotion_NailShotgun_Idle.A_Shells_Locomotion_NailShotgun_Idle",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/TrebuchAxe/Big/A_Shells_Locomotion_TrebuchAxe_Idle_Big.A_Shells_Locomotion_TrebuchAxe_Idle_Big",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/CursedChild/A_Shared_CursedChild_Idle.A_Shared_CursedChild_Idle"
+        };
+        const char* p = (ads >= 1 && ads <= 5) ? kAdsPaths[ads] : kAdsPaths[1];
+        ue::UObject* seq = FindAsset(p, true);
+        if (!seq && ads != 1) seq = FindAsset(kAdsPaths[1], true);
+        if (seq != nullptr) {
+            const std::string key = net::Fmt("st:ads:%d", ads);
+            if (P().animState != key && PlaySeq(key, seq, true)) {
+                P().animKind = "montage";
+                net::Log("puppet stance -> ads:%d", ads);
+            }
+            SetRate(1.0);
+            return;
+        }
+    }
+    if (coop::fx_grabs::PeerBlocking()) {
+        static const char* const kBlockPaths[] = {
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/Block/H2/A_Shared_Actions_BlockParry_H2_Block_Loop_01.A_Shared_Actions_BlockParry_H2_Block_Loop_01",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/Block/H1_01/A_Shared_Actions_ActiveBlock_Loop_H1_01.A_Shared_Actions_ActiveBlock_Loop_H1_01",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/Block/H_Sword/A_Shared_Actions_ActiveBlock_Loop_Sword_02.A_Shared_Actions_ActiveBlock_Loop_Sword_02",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/Block/Axeatana/A_Shared_Actions_BlockParry_Axeatana_Block_Loop.A_Shared_Actions_BlockParry_Axeatana_Block_Loop"
+        };
+        ue::UObject* seq = nullptr;
+        for (int i = 0; i < 4 && !seq; ++i) seq = FindAsset(kBlockPaths[i], i == 0);
+        if (seq != nullptr) {
+            const std::string key = "st:block";
+            if (P().animState != key && PlaySeq(key, seq, true)) {
+                P().animKind = "montage";
+                net::Log("puppet stance -> block");
+            }
+            SetRate(1.0);
+            return;
+        }
+    }
+    if (coop::fx_grabs::PeerScytheStance()) {
+        const double spd = std::sqrt(vx * vx + vy * vy);
+        const char* p = (spd >= kWalkSpeed)
+            ? "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/ClockworkScythe/A_Shared_Locomotion_Scythe_Ability_WAlk_Fwd.A_Shared_Locomotion_Scythe_Ability_WAlk_Fwd"
+            : "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/ClockworkScythe/A_Shared_Locomotion_Scythe_Ability_Idle.A_Shared_Locomotion_Scythe_Ability_Idle";
+        if (ue::UObject* seq = FindAsset(p, true)) {
+            const std::string key = (spd >= kWalkSpeed) ? "st:scythe_walk" : "st:scythe_idle";
+            if (P().animState != key && PlaySeq(key, seq, true)) {
+                P().animKind = "montage";
+                net::Log("puppet stance -> %s", key.c_str());
             }
             SetRate(1.0);
             return;
