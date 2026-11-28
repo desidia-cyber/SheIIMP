@@ -6,7 +6,7 @@ A native, drop-in **2-player co-op mod** (`dxgi.dll`) for **Mortal Shell II** (U
 
 ---
 
-## Current State (R10 / v1.0)
+## Current State (R10 / v1.1)
 
 ShellMP has migrated completely from its earlier UE4SS + Lua + Python relay prototype to a **single self-contained native C++20 proxy DLL** (`ms2-coop/native`) with its own UE 5.6 reflection layer, MinHook detours, in-DLL Steam P2P / LAN UDP networking, and DX12-safe HUD overlay.
 

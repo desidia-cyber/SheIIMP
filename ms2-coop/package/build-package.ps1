@@ -1,5 +1,5 @@
-# Build the standalone v1.0 friend-installable co-op package (drop-in dxgi.dll: no UE4SS, no Python relay).
-#   .\build-package.ps1                 -> dist\ms2-coop-v1.0-<date>.zip
+# Build the standalone v1.1 friend-installable co-op package (drop-in dxgi.dll: no UE4SS, no Python relay).
+#   .\build-package.ps1                 -> dist\ms2-coop-v1.1-<date>.zip
 # Assembling: native\build\dxgi.dll, Install.ps1, README.md.
 
 param(
@@ -17,7 +17,7 @@ if (-not (Test-Path $nativeDll)) {
 
 $dllHash = (Get-FileHash $nativeDll -Algorithm SHA256).Hash.ToLowerInvariant()
 
-$stage = Join-Path $env:TEMP ("ms2coop_v10_stage_" + (Get-Date -Format 'HHmmss'))
+$stage = Join-Path $env:TEMP ("ms2coop_v11_stage_" + (Get-Date -Format 'HHmmss'))
 $files = Join-Path $stage 'files'
 New-Item -ItemType Directory -Force -Path $files | Out-Null
 
@@ -30,7 +30,7 @@ Copy-Item (Join-Path $root 'Install.ps1') $stage
 if (Test-Path (Join-Path $root 'README.md')) { Copy-Item (Join-Path $root 'README.md') $stage }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-$zip = Join-Path $OutDir ("ms2-coop-v1.0-" + (Get-Date -Format 'yyyyMMdd-HHmm') + ".zip")
+$zip = Join-Path $OutDir ("ms2-coop-v1.1-" + (Get-Date -Format 'yyyyMMdd-HHmm') + ".zip")
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
 Remove-Item $stage -Recurse -Force
