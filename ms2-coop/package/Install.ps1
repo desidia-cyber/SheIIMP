@@ -1,4 +1,4 @@
-﻿# Mortal Shell II Co-op v1.0 — standalone drop-in installer (dxgi.dll only, no UE4SS, no Python)
+﻿# Mortal Shell II Co-op v1.1 — standalone drop-in installer (dxgi.dll only, no UE4SS, no Python)
 # Copies dxgi.dll next to MortalShell2-Win64-Shipping.exe and moves any conflicting UE4SS files
 # into _ue4ss_disabled\ (nothing is deleted).
 #
@@ -22,7 +22,7 @@ if (-not (Test-Path (Join-Path $w64 'MortalShell2-Win64-Shipping.exe'))) {
 }
 if (-not (Test-Path $files)) { throw "Package is incomplete: $files missing" }
 
-Write-Host "Mortal Shell II Co-op v1.0 Installer"
+Write-Host "Mortal Shell II Co-op v1.1 Installer"
 Write-Host "  game : $GameDir"
 
 # --- standalone native proxy DLL ---
