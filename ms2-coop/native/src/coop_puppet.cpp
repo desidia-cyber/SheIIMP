@@ -256,16 +256,20 @@ bool SetLoc(ue::UObject* a, const Vec3& v, bool teleport = true) {
     return c.Run();
 }
 
-bool SetYaw(ue::UObject* a, double yaw) {
+bool SetRot3(ue::UObject* a, double pitch, double yaw, double roll) {
     FnCall c(a, "K2_SetActorRotation");
     if (!c.ok()) return false;
     ue::FRotator r;
-    r.Pitch = 0.0;
+    r.Pitch = pitch;
     r.Yaw = yaw;
-    r.Roll = 0.0;
+    r.Roll = roll;
     c.Set<ue::FRotator>("NewRotation", r);
     c.Set<bool>("bTeleportPhysics", false);   // UE5 name (was bTeleportRotation: no-op)
     return c.Run();
+}
+
+bool SetYaw(ue::UObject* a, double yaw) {
+    return SetRot3(a, 0.0, yaw, 0.0);
 }
 
 // Returns false when the location cannot be read at all (Lua locOf -> nil).
@@ -1002,18 +1006,31 @@ bool SetMeshPosition(ue::UObject* mesh, double pos) {
     return c.Run();
 }
 
+bool IsLoopingMontageAsset(const std::string& path) {
+    return path.find("SitPlay") != std::string::npos ||
+           path.find("Sit_Play") != std::string::npos ||
+           path.find("Sitting_Idle") != std::string::npos ||
+           path.find("SitLoop") != std::string::npos ||
+           path.find("Slide_Loop") != std::string::npos ||
+           path.find("Prep_Loop") != std::string::npos ||
+           path.find("Lute_Play") != std::string::npos ||
+           path.find("Skydive") != std::string::npos;
+}
+
 // main.lua:431-450. The play head advances on the packet clock, not per packet;
 // re-seek only when the drift is > 0.12 s (NATIVE-PORT 4.11).
 bool PlayMontage(const MontageSig& m, double tnow) {
     ue::UObject* seq = FindAsset(m.path, false);
+    if (seq == nullptr) seq = FindAsset(m.path, true);
     if (seq == nullptr) return false;
     const double age = std::min(std::max(PeerAge(tnow), 0.0), kMontageLead);
     const double expected = m.pos + age * m.rate;
     const std::string key = net::Fmt("m:%d:%s", m.id, m.path.c_str());
     ue::UObject* mesh = Valid(P().mesh) ? P().mesh : nullptr;
     if (mesh == nullptr) return false;
+    const bool looping = IsLoopingMontageAsset(m.path);
     if (P().animState != key) {
-        if (!PlaySeq(key, seq, false)) return false;
+        if (!PlaySeq(key, seq, looping)) return false;
         SetMeshPosition(mesh, expected);
         if (P().animKind != "montage") {
             net::Log("puppet action -> %s @%.2f", Basename(m.path).c_str(), expected);
@@ -1083,6 +1100,46 @@ void UpdateAnimation(double vx, double vy, double yaw, double now) {
 
     if (PEER().hasMontage && PEER().montage.path.size() > 4) {
         if (PlayMontage(PEER().montage, now)) return;
+    }
+
+    // [R10-LUTE] Standing lute play / duet uses an AnimBP linked layer
+    // (ABPL_Locomotion_ADS_Lute_C) rather than an AnimMontage, so GetCurrentMontage()
+    // is null on the player. Drive the puppet's lute-play sequence directly while the
+    // peer's GA_SimpleLuteMusicHandler_C reports bIsPlaying (or SitState == 2).
+    if (coop::fx_grabs::PeerLutePlaying() || coop::fx_grabs::PeerLuteSitting()) {
+        const bool sitting = coop::fx_grabs::PeerLuteSitting();
+        static const char* const kLuteSitPaths[] = {
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Lute/A_Shells_Locomotion_Lute_SitPlay.A_Shells_Locomotion_Lute_SitPlay",
+            "/Game/Sparta/Characters/Shells/Necrophage/Animation/Locomotion/Lute/A_Necrophage_Locomotion_Lute_Sit_Play.A_Necrophage_Locomotion_Lute_Sit_Play",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Actions/A_Shared_Actions_Sitting_IdleUE4.A_Shared_Actions_Sitting_IdleUE4"
+        };
+        static const char* const kLuteStandPaths[] = {
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Lute/A_Shells_Locomotion_Lute_Lute_Play.A_Shells_Locomotion_Lute_Lute_Play",
+            "/Game/Sparta/Characters/Shells/Necrophage/Animation/Locomotion/Lute/A_Necrophage_Locomotion_Lute_Lute_Play.A_Necrophage_Locomotion_Lute_Lute_Play",
+            "/Game/Sparta/Characters/Shells/_Shared/Animation/Locomotion/Lute/A_Shells_Locomotion_Lute_Idle.A_Shells_Locomotion_Lute_Idle",
+            "/Game/MS1/Characters/Shells/Animations/Enemies/Fallgrim/Brigands/Light/Actions/A_MS1_Lute_playing_player.A_MS1_Lute_playing_player"
+        };
+        const char* const* list = sitting ? kLuteSitPaths : kLuteStandPaths;
+        const size_t count = sitting ? 3 : 4;
+        ue::UObject* seq = nullptr;
+        std::string key;
+        for (size_t i = 0; i < count; ++i) {
+            seq = FindAsset(list[i], i == 0);
+            if (seq != nullptr) {
+                key = std::string(sitting ? "lute_sit:" : "lute_play:") + Basename(list[i]);
+                break;
+            }
+        }
+        if (seq != nullptr) {
+            if (P().animState != key) {
+                if (PlaySeq(key, seq, true)) {
+                    P().animKind = "montage";
+                    net::Log("puppet lute -> %s", key.c_str());
+                }
+            }
+            SetRate(1.0);
+            return;
+        }
     }
 
     // [R10-XFORM] Non-humanoid animal transformations (e.g. Sheep): never play humanoid
@@ -1246,7 +1303,13 @@ void DriveTick() {
     } else {
         P().puppetYaw += dyaw * kYawEase;
     }
-    SetYaw(P().actor, P().puppetYaw);
+    double pitch = 0.0, roll = 0.0;
+    const bool fullRot = coop::fx_grabs::PeerHasFullRot(&pitch, &roll);
+    if (fullRot) {
+        SetRot3(P().actor, pitch, P().puppetYaw, roll);
+    } else {
+        SetYaw(P().actor, P().puppetYaw);
+    }
 
     const double age = std::min(std::max(peerAge, 0.0), kMaxExtrapAge);
     const double vx = PEER().vel.X;
@@ -1259,11 +1322,10 @@ void DriveTick() {
 
     const double d = coop::Dist(loc, target);
     Vec3 next;
-    // [R8-WALL] begin -- a traversal is a GUIDED move through a gap (the capsule is
-    // warped in the gap, the velocity does not carry it): the 400 uu snap would
-    // teleport the body through the wall instead of squeezing it, so the snap is off
-    // for the duration and the ease is stiffer, which is a straight-line follow.
-    const bool traversing = coop::wall::PeerTraversal();
+    // [R8-WALL] + [R10-SLIDE] A traversal, spline slide, or skydive is a GUIDED
+    // move: the 400 uu snap would teleport the body in chunks instead of gliding
+    // smoothly along the gap/slope/spline, so skip the snap and ease stiffly.
+    const bool traversing = coop::wall::PeerTraversal() || coop::fx_grabs::PeerInScriptedMove();
     if (d > kSnapDist && !traversing) {
         // far away (spawn, teleport, big lag): snap
         next = target;

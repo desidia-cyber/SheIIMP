@@ -730,6 +730,8 @@ bool IsExec(const void* p) {
 }
 
 void DrawFromPostRender(UObject* hud) {
+    // Keep Photomode screenshots completely clean unless the user explicitly opened F9 menu
+    if (!g_open && coop::fx_grabs::LocalPhotoModeActive()) return;
     if (g_open) {
         static int s_n = 0;
         if (s_n++ < 3) {

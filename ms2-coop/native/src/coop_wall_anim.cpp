@@ -220,13 +220,27 @@ double MontagePlayDirect(ue::UObject* mesh, ue::UObject* montage, double rate) {
     return static_cast<double>(p.Get<float>("ReturnValue"));
 }
 
-// Is this segment the traversal / squeeze one?  The capture resolves a montage to
-// the AnimSequence of its first slot track, so the test is on the asset path.
+// Is this segment a traversal, sliding, skydiving, sitting, or scripted movement?
+// The capture resolves a montage to the AnimSequence of its first slot track, so
+// matching on the asset path covers squeeze, vault, shell-throw, skydive, slide,
+// climb, sitting, and paired/finisher poses.
 bool IsTraversalAsset(const std::string& path) {
     if (path.empty()) return false;
     return path.find(kSqueezeToken) != std::string::npos ||
+           path.find(kTraversalToken) != std::string::npos ||
            path.find("Traversal/SqueezeThrough") != std::string::npos ||
-           path.find("Traversal/VaultOver") != std::string::npos;
+           path.find("Traversal/VaultOver") != std::string::npos ||
+           path.find("Shell_Throw") != std::string::npos ||
+           path.find("Skydive") != std::string::npos ||
+           path.find("SkyDive") != std::string::npos ||
+           path.find("Slide") != std::string::npos ||
+           path.find("Climb") != std::string::npos ||
+           path.find("Memory_Fall") != std::string::npos ||
+           path.find("Lute_Sit") != std::string::npos ||
+           path.find("Lute_Stand") != std::string::npos ||
+           path.find("Sitting") != std::string::npos ||
+           path.find("SitDown") != std::string::npos ||
+           path.find("StandUp") != std::string::npos;
 }
 
 // The montage an ability class plays: its first readable montage property.  The
